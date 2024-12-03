@@ -1,0 +1,166 @@
+<%
+  # app/views/clients/org_chart/_index.html.erb
+  #
+  # Example:
+  #   render partial: "clients/org_chart/index"
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  client_user = @client.users.find_by(id: current_user.id)
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Organizational Chart</span>
+      <span>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary',
+              id:    'org_chart_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-expansion m-3" id="org_accordion">
+      <div class="card card-expansion-item expanded" id="card_expansion_positions">
+        <div class="card-header border-0" id="org_structure_header">
+          <div class="d-flex justify-content-between w-100">
+            <button class="btn btn-reset" data-toggle="collapse" data-target="#org_structure_body" aria-expanded="true" aria-controls="org_structure_body"><span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+              <span>Organizational Structure</span>
+            </button>
+
+            <div class="btn-toolbar">
+              <%= link_to_if client_user, 'Create New Position',
+                             new_client_org_position_path(@client),
+                             {
+                               class:  'btn btn-light',
+                               id:     'button_create_new_position',
+                               remote: true,
+                               method: :get
+                             } %>
+            </div>
+          </div>
+
+          <div class="mt-3" id="edit_org_position">
+            <!-- NEW or EDIT ORGPOSITION -->
+          </div>
+        </div>
+
+        <div id="org_structure_body" class="collapse show" aria-labelledby="org_structure_header" data-parent="#org_accordion">
+          <div class="card-body pt-0">
+
+            <div id="index_org_positions">
+              <!-- INDEX ORGPOSITIONS -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-expansion-item" id="card_expansion_users">
+        <div class="card-header border-0" id="org_assignments_header">
+          <div class="d-flex justify-content-between w-100">
+            <button class="btn btn-reset collapsed" data-toggle="collapse" data-target="#org_assignments_body" aria-expanded="false" aria-controls="org_assignments_body"><span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+              <span>Organizational Assignments</span>
+            </button>
+
+            <div class="btn-toolbar">
+              <%= link_to 'Create New User', new_client_org_user_path(@client),
+                          {
+                            class:  'btn btn-light d-none',
+                            id:     'new_org_user_button',
+                            remote: true,
+                            method: :get,
+                            data:   {
+                              params: { commit: 'add_org_user' }.to_param
+                            }
+                          } %>
+              <%= link_to 'Create New Org Group', new_client_org_user_path(@client),
+                          {
+                            class:  'btn btn-light',
+                            id:     'new_group_button',
+                            remote: true,
+                            method: :get,
+                            data:   {
+                              params: { commit: 'add_org_group' }.to_param
+                            }
+                          } %>
+            </div>
+          </div>
+
+          <div class="mt-3" id="edit_org_user">
+            <!-- NEW or EDIT ORGUSER -->
+          </div>
+        </div>
+
+        <div id="org_assignments_body" class="collapse" aria-labelledby="org_assignments_header" data-parent="#org_accordion">
+          <div class="card-body pt-0">
+
+            <div class="row">
+              <div class="col-6" id="index_org_users">
+                <!-- INDEX ORGUSERS -->
+              </div>
+              <div class="col-6" id="show_org_group">
+                <!-- SHOW ORGGROUP -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_org_chart').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_org_chart').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $.ajax({
+      method: 'GET',
+      dataType: 'script',
+      url: '<%= client_org_positions_path(@client) -%>'
+    });
+
+    $.ajax({
+      method: 'GET',
+      dataType: 'script',
+      url: '<%= client_org_users_path(@client) -%>'
+    });
+
+    $('#org_chart_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li><%= I18n.t('tenant.name') -%> supports sending texts & reassigning Contacts "up & down the chain of command".</li>'
+      help_info += '<li>Defining an Organizational Structure provides the framework for assigning Users to each position.</li>'
+      help_info += '<li>After an Organizational Structure has been defined you may create multiple Organizational Groups using the structure.</li>'
+      help_info += '<li>When an Organizational Group is created drag your Available Organizational Members into the structure as desired.</li>'
+      help_info += '<li>Additional Organizational Members may be created and assigned as needed. These new members are NOT Users with log in capabilities but texts may be sent to them within a Campaign.</li>'
+      help_info += '<li>Campaign Actions and other integrations using the Organizational Structure are coming soon.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': 'Org Chart Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $(document).on('hide.bs.collapse', '#card_expansion_positions', function(e) {
+      $('#button_create_new_position').addClass('d-none');
+    })
+    $(document).on('show.bs.collapse', '#card_expansion_positions', function(e) {
+      $('#button_create_new_position').removeClass('d-none');
+    })
+  });
+</script>

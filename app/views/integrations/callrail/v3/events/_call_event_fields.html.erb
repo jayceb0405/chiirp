@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/callrail/v3/events/_call_event_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/events/call_event_fields', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+  presenter.account_and_company_id = presenter.event[:account_company_id]
+-%>
+
+<div class="p-2 my-2" style="border: 1px dotted gray">
+  <%= bootstrap_select_tag(
+        field:        'event[tracking_phone_numbers]',
+        label:        { title: 'Tracking Phone Number(s)' },
+        options:      { for_select: options_for_select(presenter.tracking_phone_numbers, presenter.event[:tracking_phone_numbers]) },
+        html_options: { multiple: true, id: 'tracking_phone_numbers' },
+        messages:     { note: "The business' tracking phone number for this call. Cannot be used with Source Names." }
+      ) %>
+  <div class="text-center my-2"><em>or</em></div>
+  <%= bootstrap_select_tag(
+        field:        'event[source_names]',
+        label:        { title: 'Source Name(s)' },
+        options:      { for_select: options_for_select(presenter.source_names, presenter.event[:source_names]) },
+        html_options: { multiple: true, id: 'source_names' },
+        messages:     { note: 'The name of the tracking number within CallRail. Cannot be used with Tracking Phone Numbers.' }
+      ) %>
+</div>
+<%= bootstrap_select_tag(
+      field:        'event[lead_statuses]',
+      label:        { title: 'Lead Status(es)' },
+      options:      { for_select: options_for_select(Integration::Callrail::V3::Base::LEAD_STATUSES, presenter.event[:lead_statuses]) },
+      html_options: { multiple: true },
+      messages:     { note: 'The lead status of this caller (as of the call).' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'event[include_tags]',
+      row:          { id: "row_include_tags_#{presenter.event[:event_id]}" },
+      label:        { title: 'CallRail Tags Included' },
+      html_options: { multiple: true },
+      options:      { for_select: options_for_select(presenter.available_tags, presenter.event[:include_tags]) },
+      messages:     { note: 'Event actions will trigger if any call tag matches any selected tag (MUST be exact match).' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'event[exclude_tags]',
+      row:          { id: "row_exclude_tags_#{presenter.event[:event_id]}" },
+      label:        { title: 'CallRail Tags Excluded' },
+      options:      { for_select: options_for_select(presenter.available_tags, presenter.event[:exclude_tags]) },
+      html_options: { multiple: true },
+      messages:     { note: 'Event actions will trigger if call tags do not match any selected tag (MUST be exact match).' }
+    ) %>
+<%= bootstrap_text_field(
+      field:    'event[keywords]',
+      value:    presenter.event_keywords,
+      label:    { title: 'Keywords' },
+      messages: { note: 'Enter keywords separated by commas ( , ). The keywords the visitor searched for, if available for calls placed to Website (Session) trackers. Keywords are only provided from paid ad sources.' }
+    ) %>

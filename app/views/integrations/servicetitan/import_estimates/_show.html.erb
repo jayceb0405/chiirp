@@ -1,0 +1,127 @@
+<%
+  # app/views/integrations/servicetitan/import_estimates/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicetitan/import_estimates/show", locals: { presenter: Integrations::Servicetitan::ImportEstimatesPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ImportEstimatesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ImportEstimatesPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Estimates from ServiceTitan</span>
+      <span class="my-auto text-success small" id="estimate_imports_remaining_count">~<%= presenter.estimates_count(current_user) -%> Estimates remaining to be imported</span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_servicetitan_import_estimates_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+
+        <%= bootstrap_switch_field(
+              field:    'import_estimate[orphaned_only]',
+              value:    false,
+              values:   %w[true false],
+              label:    { title: 'Orphaned Estimates Only', checked: 'Yes', unchecked: 'No' },
+              messages: { note: 'Only import orphaned estimates (estimates not already received from ServiceTitan).' }
+            ) %>
+        <%#= bootstrap_select_tag(
+              field:        'import_estimate[contact_id]',
+              label:        { title: 'Contact' },
+              html_options: { id: 'contact_select_new' },
+              options:      { array: [], selected: 0, blank: 'Search for a Contact', lookup: { url: integrations_servicetitan_contacts_search_path, client: presenter.client } },
+              messages:     { note: 'Import estimates for a selected Contact.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_estimate[active]',
+              value:    true,
+              values:   %w[true false],
+              label:    { title: 'Estimates Active/Inactive', checked: 'Act', unchecked: 'Inact' },
+              messages: { note: 'Import active or inactive estimates.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'import_estimate[status]',
+              label:    { title: 'Estimate Status' },
+              options:  { array: presenter.options_for_status, selected: '' },
+              messages: { note: 'Import estimates with the selected status.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_estimate[date_range_type]',
+              value:    true,
+              values:   %w[created updated],
+              label:    { title: 'Estimate Date Type (Created/Modified)', checked: 'Creat', unchecked: 'Mod' },
+              messages: { note: 'Import estimates based on created or modified date.' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:     'import_estimate[date_range]',
+              value:     '',
+              row:       { class: 'mb-0' },
+              label:     { title: 'Estimate Date Range' },
+              flatpickr: { include_time: true, mode: 'range' },
+              messages:  { note: 'Import estimates whose scheduled created or modified date (as selected) falls within the selected range.' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'import_estimate[range_max]',
+              value:        10_000,
+              label:        { title: 'Maximum Total Range' },
+              html_options: { id: 'estimate_range_max', min: 0, step: 1000 },
+              prepends:     [{ button: false, label: '$' }],
+              messages:     { note: 'Enter a maximum total for Total Range slider.' }
+            ) %>
+        <%= bootstrap_range_slider(
+              field:        'import_estimate[total]',
+              label:        { title: 'Total Range' },
+              range_slider: { id: 'estimate_range_slider_total', type: 'double', min: 0, max: 10_000, from: 0, to: 10_000, step: 100, grid: true, grid_num: 10, prefix: '$', separator: ',' },
+              messages:     { note: 'import estimates whose total falls within the selected range.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_estimate[process_events]',
+              value:    false,
+              values:   %w[true false],
+              label:    { title: 'Process Events', checked: 'Yes', unchecked: 'No' },
+              messages: { note: 'Process defined Events on imported estimates.' }
+            ) %>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-1"><h6>Estimate Actions</h6></legend>
+          <p>Perform the following actions on all imported estimates...</p>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client:                  presenter.client,
+                campaign_id_field:       'import_estimate[actions][campaign_id]',
+                stop_campaign_ids_field: 'import_estimate[actions][stop_campaign_ids]',
+                group_id_field:          'import_estimate[actions][group_id]',
+                tag_id_field:            'import_estimate[actions][tag_id]',
+                stage_id_field:          'import_estimate[actions][stage_id]',
+                first_trigger_types:     [115, 120, 125, 130, 135, 139, 140, 145, 147]
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons buttons: [{ title: 'Import Estimates', id: 'import_estimates_button', disable_with: 'Preparing to Import Estimates...', disabled: presenter.estimates_count(current_user).positive? }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_import_estimates').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('change keyup', '#estimate_range_max');
+    $(document).on('change keyup', '#estimate_range_max', function(e) {
+      eval(e.target.id.replace('estimate_range_max', 'estimate_range_slider_total')).update({max: e.target.value});
+    });
+
+    <% if presenter.estimates_count(current_user).zero? %>
+      $('#estimate_imports_remaining_count').hide();
+    <% end %>
+  });
+</script>

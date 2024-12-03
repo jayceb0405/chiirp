@@ -1,0 +1,15 @@
+<%
+# app/views/integrations/thumbtack/integrations/show.html.erb
+#
+# Example:
+#   render partial: 'integrations/thumbtack/integrations/show'
+#
+# Instance Variables:
+#   (req) @client_api_integration: (ClientApiIntegration)
+#   (req) @version:                 (Integer)
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: "integrations/thumbtack/v#{@version}/show" %>

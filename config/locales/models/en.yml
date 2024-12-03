@@ -1,0 +1,99 @@
+en:
+  activerecord:
+    models:
+      campaign:
+        one: "%{count} Campaign"
+        other: "%{count} Campaigns"
+      campaign_group:
+        one: "%{count} Group"
+        other: "%{count} Groups"
+      client:
+        one: "%{count} Client"
+        other: "%{count} Clients"
+      client_custom_field:
+        one: "%{count} Custom Field"
+        other: "%{count} Custom Fields"
+      clients/dlc10_brand:
+        one: "%{count} 10DLC Brand"
+        other: "%{count} 10DLC Brands"
+      clients/dlc10_campaign:
+        one: "%{count} 10DLC Campaign"
+        other: "%{count} 10DLC Campaigns"
+      clients/widget:
+        one: "%{count} SiteChat"
+        other: "%{count} SiteChats"
+      contact:
+        one: "%{count} Contact"
+        other: "%{count} Contacts"
+      contacttag:
+        one: "%{count} Tag"
+        other: "%{count} Tags"
+      folder:
+        title: "Message Folder"
+        one: "%{count} Message Folder"
+        other: "%{count} Message Folders"
+      package:
+        one: "%{count} Package"
+        other: "%{count} Packages"
+      package_page:
+        one: "%{count} Page"
+        other: "%{count} Pages"
+      stage:
+        title: "Stage"
+        one: "%{count} Stage"
+        other: "%{count} Stages"
+      stage_parent:
+        title: "Pipeline"
+        one: "%{count} Pipeline"
+        other: "%{count} Pipelines"
+      survey:
+        title: "Survey"
+        one: "%{count} Survey"
+        other: "%{count} Surveys"
+      survey_screen:
+        title: "Screen"
+        one: "%{count} Screen"
+        other: "%{count} Screens"
+      survey_result:
+        title: "Result"
+        one: "%{count} Result"
+        other: "%{count} Results"
+      trackable_link:
+        one: "%{count} Trackable Link"
+        other: "%{count} Trackable Links"
+      trigger:
+        one: "%{count} Trigger"
+        other: "%{count} Triggers"
+      triggeraction:
+        one: "%{count} Action"
+        other: "%{count} Actions"
+      twnumber:
+        one: "%{count} Company Phone Number"
+        other: "%{count} Company Phone Numbers"
+      user:
+        one: "%{count} User"
+        other: "%{count} Users"
+      user_contact_form:
+        one: "%{count} QuickPage"
+        other: "%{count} QuickPages"
+      voice_recording:
+        one: "%{count} Voice Recording"
+        other: "%{count} Voice Recordings"
+      webhook:
+        one: "%{count} Webhook"
+        other: "%{count} Webhooks"
+    errors:
+      messages:
+        record_invalid: "Validation failed: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "Cannot delete record because a dependent %{record} exists"
+          has_many: "Cannot delete record because dependent %{record} exist"
+      models:
+        user:
+          attributes:
+            email:
+              taken: "Email is in use by another User"
+        user_contact_form:
+          attributes:
+            form_name:
+              too_short: "too short"

@@ -1,0 +1,29 @@
+<%
+  # app/views/triggeractions/forms/_615.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/615", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # save Contacts::Note to a Contact
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[user_id]',
+      label:        { title: 'User Adding Note' },
+      html_options: { id: "users_include_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled?, multiple: false },
+      options:      { array: presenter.triggeraction_options_for_users_615, selected: presenter.triggeraction.user_id }
+    ) %>
+<%= bootstrap_text_area(
+      field:        'triggeraction[note]',
+      value:        presenter.triggeraction.note,
+      label:        { title: "Note" },
+      html_options: { id: "text_area_note_#{presenter.triggeraction.id}", placeholder: 'Enter your note...', disabled: presenter.campaign_disabled?, typeahead_client: presenter.client },
+      messages:     { note: 'Enter the note. This field is hashtag aware.' }
+    ) %>

@@ -1,0 +1,16 @@
+<%
+  # app/views/triggeractions/_analyze_icon_with_name.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/analyze_icon_with_name', locals: { triggeraction: Triggeraction }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) triggeraction: (Triggeraction)
+  #
+  return unless local_assigns.dig(:triggeraction).is_a?(Triggeraction)
+-%>
+<%= render partial: 'triggeractions/analyze_icon', locals: { triggeraction: } %>
+<%= triggeraction.new_record? ? 'New Action' : triggeraction.type_name -%>

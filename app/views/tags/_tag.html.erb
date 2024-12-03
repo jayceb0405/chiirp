@@ -1,0 +1,114 @@
+<%
+  # /app/views/tags/_tag.html.erb
+  # 
+  # Example:
+  #   render partial: "tags/tag", collection: @tags.order( :name )
+  # 
+  # Required Local Variables:
+  #   tag: (Tag)
+  # 
+  # Required Local Variables:
+  #   select_or_add_field_name: (String)
+  #   select_or_add_div_id:     (String)
+  #   exclude_groups:           (Array)
+  # 
+  select_or_add_field_name = (local_assigns.dig(:select_or_add_field_name) || 'tag_id').to_s
+  select_or_add_div_id     = (local_assigns.dig(:select_or_add_div_id) || 'client_tag').to_s
+  exclude_tags             = local_assigns.dig(:exclude_tags) || []
+-%>
+<% unless tag.new_record? %>
+  <tr>
+    <td class="text-left p-2">
+      <%= link_to '', tag_path(tag),
+        method: :delete,
+        class: 'fa fa-trash-alt text-dark pr-0 mr-0',
+        title: 'Delete',
+        remote: true,
+        style: 'text-decoration: none;',
+        data: { 
+          toggle: 'tooltip',
+          confirm_swal: "Delete #{tag.name}?",
+          text_swal: 'Are you sure?',
+          icon_swal: 'question',
+          params: {
+            'select_or_add_field_name' => select_or_add_field_name,
+            'select_or_add_div_id'     => select_or_add_div_id,
+            'exclude_tags'             => exclude_tags,
+            'autofocus'                => 'true'
+          }.to_param
+        }
+      %>
+      <%= link_to '', edit_tag_path(tag),
+        method: :get,
+        class: 'fa fa-pencil-alt text-dark pr-0 mr-0',
+        title: 'Edit',
+        remote: true,
+        style: 'text-decoration: none;',
+        data: { 
+          toggle: 'tooltip',
+          params: {
+            'select_or_add_field_name' => select_or_add_field_name,
+            'select_or_add_div_id'     => select_or_add_div_id,
+            'exclude_tags'             => exclude_tags,
+            'autofocus'                => 'true'
+          }.to_param
+        }
+      %>
+      <%= link_to ' ', edit_tag_path(tag),
+        method: :get,
+        class: 'btn btn-app rounded-pill',
+        remote: true,
+        style: "background-color:#{tag.color};border-color:#{tag.color};",
+        data: { 
+          params: {
+            'select_or_add_field_name' => select_or_add_field_name,
+            'select_or_add_div_id'     => select_or_add_div_id,
+            'exclude_tags'             => exclude_tags,
+            'autofocus'                => 'true'
+          }.to_param
+        }
+      %>
+      <%= link_to tag.name, edit_tag_path(tag),
+        method: :get,
+        remote: true,
+        style: 'text-decoration: none;',
+        data: { 
+          params: {
+            'select_or_add_field_name' => select_or_add_field_name,
+            'select_or_add_div_id'     => select_or_add_div_id,
+            'exclude_tags'             => exclude_tags,
+            'autofocus'                => 'true'
+          }.to_param
+        }
+      %>
+    </td>
+
+    <% if @tag.client.campaigns_count.positive? %>
+      <td class="text-center">
+        <%= (@triggeraction_tags.include?(tag.id) ? '<i class=\'fa fa-check text-success\'></i>' : '<i class=\'fa fa-times text-danger\'></i>' ).html_safe %>
+      </td>
+    <% end %>
+
+    <% if @tag.client.quick_leads_count.positive? %>
+      <td class="text-center">
+        <%= (@user_contact_form_tags.include?(tag.id) ? '<i class=\'fa fa-check text-success\'></i>' : '<i class=\'fa fa-times text-danger\'></i>' ).html_safe %>
+      </td>
+    <% end %>
+
+    <% if @tag.client.widgets_count.positive? %>
+      <td class="text-center">
+        <%= (@client_widget_tags.include?(tag.id) ? '<i class=\'fa fa-check text-success\'></i>' : '<i class=\'fa fa-times text-danger\'></i>' ).html_safe %>
+      </td>
+    <% end %>
+
+    <% if @tag.client.trackable_links_count.positive? %>
+      <td class="text-center">
+        <%= (@trackable_link_tags.include?(tag.id) ? '<i class=\'fa fa-check text-success\'></i>' : '<i class=\'fa fa-times text-danger\'></i>' ).html_safe %>
+      </td>
+    <% end %>
+
+    <td class="text-center">
+      <%= tag.contact_count %>
+    </td>
+  </tr>
+<% end %>

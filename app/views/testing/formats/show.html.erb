@@ -1,0 +1,21 @@
+<div id="turbo_frame_test">
+  <h1>Turbo Frame</h1>
+  <%= turbo_frame_tag :test do %>
+    <%= link_to 'turbo frame test', test_testing_format_path %>
+  <% end %>
+</div>
+
+<div id="turbo_stream_test">
+  <h1>Turbo Stream</h1>
+  <%= link_to 'turbo stream test', test_testing_format_path, data: { turbo: true, turbo_stream: true } %>
+</div>
+
+<div id="js_test">
+  <h1>Link to JS</h1>
+  <%= link_to 'js test', test_testing_format_path, remote: true %>
+</div>
+
+<div id="html_test">
+  <h1>Link to HTML</h1>
+  <%= link_to 'html test', test_testing_format_path %>
+</div>

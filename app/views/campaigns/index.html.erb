@@ -1,0 +1,93 @@
+<%
+  # app/views/campaigns/index.html.erb
+  #
+  # Example:
+  #   render "campaigns/index"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Campaigns::Presenter.new(current_user)
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar">
+      <div class="d-flex justify-content-between">
+        <h1 class="page-title"><i class="fa fa-filter mr-2"></i>Campaign Builder</h1>
+
+        <div class="btn-toolbar">
+          <%= if presenter.campaigns.length < presenter.client.campaigns_count
+                link_to '<i class="fa fa-plus mr-2"></i>New Campaign'.html_safe, new_campaign_path, {
+                  class:  'btn btn-light',
+                  id:     'button_new_campaign',
+                  remote: true,
+                  method: :get
+                }
+              end %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit Campaign</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_campaign_dropdown">
+              <%= render partial: 'campaigns/select_campaign_dropdown', locals: { presenter: } %>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <span>More</span>
+              <span class="fa fa-caret-down"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-arrow"></div>
+              <%= link_to '<i class="fa fa-object-group mr-2"></i>Campaign Groups'.html_safe,
+                          campaign_groups_path,
+                          class:  'dropdown-item',
+                          remote: true,
+                          method: :get %>
+              <%= if presenter.campaigns.length < presenter.client.campaigns_count && presenter.client.share_funnels_allowed
+                    link_to('<i class="fa fa-cloud-download-alt mr-2"></i>Import Shared Campaign'.html_safe,
+                            index_import_campaign_path,
+                            class:  'dropdown-item',
+                            id:     'button_import_shared_campaign',
+                            remote: true,
+                            method: :get)
+                  end %>
+              <%= if presenter.campaigns.length < presenter.client.campaigns_count && presenter.client.share_funnels_allowed
+                    link_to('<i class="fa fa-funnel-dollar mr-2"></i>Campaign Marketplace'.html_safe,
+                            campaign_marketplaces_path,
+                            class: 'dropdown-item',
+                            id:    'button_campaign_marketplace')
+                  end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="campaigns_body">
+      <%= render partial: 'campaigns/index/list', locals: { presenter: } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_campaigns').addClass('has-active');
+
+    $(document).on('click', '.option_campaign', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/campaigns/' + $(this).attr('id').replace('campaign_analyzed_', '')
+      });
+    });
+  });
+</script>

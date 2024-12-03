@@ -1,0 +1,69 @@
+<%
+  # app/views/integrations/successware/v202311/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/successware/v202311/overview', locals: { presenter: Integrations::Successware::V202311::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Successware::V202311::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Successware::V202311::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'successware' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_successware_v202311_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_connections', remote: true }) do %>
+            <h2 class="metric-label">Successware Connection</h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if presenter.valid_credentials? %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+
+    $('#employees').circleProgress({
+      value: <%= presenter.successware_employees_linked -%>,
+      size: 60,
+      thickness: 8,
+      startAngle: 1.5 * Math.PI,
+      lineCap: 'round',
+      emptyFill: '#e8ebef',
+      fill: {
+        gradient: ['#ff9100', '#ffffff']
+      }
+    }).on('circle-animation-progress', function(event, progress, stepValue) {
+      if (progress >= <%= presenter.successware_employees_linked -%>) {
+        progress = <%= presenter.successware_employees_linked -%>;
+        $(this).find('.dash-button-statistic-g__chart-text').text(Math.round(100 * progress) + '%');
+      }
+    });
+  });
+</script>

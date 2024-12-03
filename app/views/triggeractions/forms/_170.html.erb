@@ -1,0 +1,66 @@
+<%
+  # app/views/triggeractions/forms/_170.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/170", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # send an email
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+%>
+<%= bootstrap_email_field(
+      field:        'triggeraction[to_email]',
+      value:        presenter.triggeraction.to_email,
+      label:        { title: 'To' },
+      html_options: { placeholder: 'To', disabled: presenter.campaign_disabled?, multiple: true },
+      messages:     { note: "Enter an email address to send to (blank for Contact's email)." }
+    ) %>
+<%= bootstrap_email_field(
+      field:        'triggeraction[cc_email]',
+      value:        presenter.triggeraction.cc_email,
+      label:        { title: 'Copy (CC) To' },
+      html_options: { placeholder: 'CC', disabled: presenter.campaign_disabled?, multiple: true },
+      messages:     { note: "Separate multiple email addresses with a ',' (comma)." }
+    ) %>
+<%= bootstrap_email_field(
+      field:        'triggeraction[bcc_email]',
+      value:        presenter.triggeraction.bcc_email,
+      label:        { title: 'Blind Copy (BCC) To' },
+      html_options: { placeholder: 'BCC', disabled: presenter.campaign_disabled?, multiple: true },
+      messages:     { note: "Separate multiple email addresses with a ',' (comma)." }
+    ) %>
+<%= bootstrap_email_field(
+      field:        'triggeraction[reply_email]',
+      value:        presenter.triggeraction.reply_email,
+      label:        { title: 'Reply To' },
+      html_options: { placeholder: 'Reply To', disabled: presenter.campaign_disabled? },
+      messages:     { note: 'Enter an email address to reply to (blank for From email).' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'triggeraction[from_name]',
+      value:        presenter.triggeraction.from_name,
+      label:        { title: 'From Name' },
+      html_options: { placeholder: 'From Name', disabled: presenter.campaign_disabled? },
+      messages:     { note: "Enter a name to send from (blank for User's name)." }
+    ) %>
+<%= bootstrap_email_field(
+      field:        'triggeraction[from_email]',
+      value:        presenter.triggeraction.from_email,
+      label:        { title: 'From Email' },
+      html_options: { placeholder: 'From Email', disabled: presenter.campaign_disabled? },
+      messages:     { note: "Enter an email address to send from (blank for User's email)." }
+    ) %>
+<%= render partial: 'email_templates/shared/email_template_select_field', locals: {
+      client:                 presenter.client,
+      field_prefix:           'triggeraction',
+      id:                     presenter.triggeraction.id,
+      email_template_id:      presenter.triggeraction.email_template_id,
+      email_template_subject: presenter.triggeraction.email_template_subject,
+      email_template_yield:   presenter.triggeraction.email_template_yield
+    } %>

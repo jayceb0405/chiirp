@@ -1,0 +1,33 @@
+<%
+  # app/views/integrations/servicetitan/reports/results/_result.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/results/result', collection: presenter.report_data, as: :result_row, locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) result_field: (Hash)
+  #   (req) presenter:    (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<tr>
+  <% result_row.each_with_index do |field, index| %>
+    <% case presenter.result_field_type(index).to_s.downcase %>
+    <% when 'boolean' %>
+      <td class="text-center"><%= field.to_bool.to_s -%></td>
+    <% when 'date' %>
+      <td class="text-left"><%= field.to_s -%></td>
+    <% when 'number' %>
+      <td class="text-right"><%= field.respond_to?(:to_d) ? field.to_d : field.to_s -%></td>
+    <% when 'string' %>
+      <td class="text-left"><%= field.to_s -%></td>
+    <% when 'time' %>
+      <td class="text-left"><%= field.to_s -%></td>
+    <% else %>
+      <td class="text-left">Unknown</td>
+    <% end %>
+  <% end %>
+</tr>

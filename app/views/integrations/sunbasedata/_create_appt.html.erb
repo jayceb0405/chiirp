@@ -1,0 +1,61 @@
+<%
+  # app/views/integrations/sunbasedata/_create_appt.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/sunbasedata/create_appt"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #   @contact:                (Contact)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<!-- integrations.sunbasedata.create_appt -->
+<%= render partial: "layouts/shared/section_header", locals: { 
+    heading: image_tag( "integrations/sunbasedata.png", { style: "height:40px;" }) + " Appointment Scheduler",
+    options: ""
+  }
+%>
+<div class="container-body">
+  <%= form_tag integrations_sunbasedata_integration_send_appt_path( @contact.id ), { builder: LooperFormBuilder, method: :put, remote: true } do %>
+
+    <div class="imput-group">
+      <%= label_tag "", "Appointment Date", { class: "form-group-label" } %><br />
+      <%= text_field_tag "appointment_date", "", { type: "text", class: "form-control mb-3", id: "appointment_date" } %>
+    </div>
+
+    <%= render partial: 'campaigns/action_fields', locals: { 
+          client: current_user.client,
+          campaign_id_field: 'job_arrival_actions[technician][campaign_id]',
+          group_id_field: 'group_id',
+          tag_id_field: 'tag_id',
+          stage_id_field: 'job_arrival_actions[technician][stage_id]',
+          stop_campaign_ids_field: 'stop_campaign_ids',
+        } %>
+
+    <%= submit_tag 'Save', data: { "disable-with": "Saving..." }, class: 'user_action_option btn btn-app mt-0 ml-2 mb-2' %>
+  <% end %>
+
+</div>
+
+<script>
+  $(function () {
+    $("#appointment_date").flatpickr({
+      nextArrow: '>',
+      prevArrow: '<',
+      dateFormat: 'm/d/Y G:i K',
+      enableTime: 'true',
+      defaultDate: null,
+      minuteIncrement: 1,
+      static: true,
+      allowInput: 'false',
+      mode: 'single',
+      plugins: [
+        new confirmDatePlugin({}),
+      ]
+    });
+  });
+</script>
+<!-- /.integrations.sunbasedata.create_appt -->

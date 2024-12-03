@@ -1,0 +1,98 @@
+<%
+  # app/views/my_contacts/search/_text_messages.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/search/text_messages', locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_setting: (Users::Setting)
+  #
+  # Local Variables:
+  #   (opt) collapsed: (Boolean)
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#search_text_messages">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="font-weight-bold">
+    <i class="fa fa-comments mr-2"></i>Text Messages
+
+    <% unless local_assigns.dig(:collapsed).to_bool %>
+      <span class="badge badge-warning">Filters Applied</span>
+    <% end %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="search_text_messages">
+  <td colspan="2" class="ml-0 mr-0 search_td">
+
+    <%= render partial: 'snippets/radio_field', locals: {
+          field:   'data[last_msg_absolute]',
+          row:     { class: 'mb-1', columns: [0, 12] },
+          col:     { class: 'mb-0' },
+          label:   { class: 'mb-0', title: 'Messages' },
+          buttons: [
+            { label: 'All Messages', value: 'all', id: 'all_messages', checked: ['', 'all'].include?(@user_setting.data.dig(:last_msg_absolute)) },
+            { label: 'Last Message', value: 'last', id: 'last_messages', checked: @user_setting.data.dig(:last_msg_absolute) == 'last' }
+          ]
+        } %>
+    <%= render partial: 'snippets/radio_field', locals: {
+          field:   'data[last_msg_direction]',
+          row:     { class: 'mb-1', columns: [0, 12] },
+          col:     { class: 'mb-0' },
+          label:   { class: 'mb-0', title: 'Direction' },
+          buttons: [
+            { label: 'Delivered', value: 'sent', id: 'sent_messages', checked: @user_setting.data.dig(:last_msg_direction) == 'sent' },
+            { label: 'Received', value: 'rcvd', id: 'rcvd_messages', checked: @user_setting.data.dig(:last_msg_direction) == 'rcvd' },
+            { label: 'Delivered or Received', value: 'both', id: 'both_messages', checked: @user_setting.data.dig(:last_msg_direction) == 'both' }
+          ]
+        } %>
+    <%= bootstrap_text_field(
+          field:        'data[last_msg_string]',
+          value:        @user_setting.data.dig(:last_msg_string).to_s,
+          row:          { class: 'mb-1', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Contains' },
+          html_options: { class: 'mb-0', placeholder: 'Enter Text to Search For' }
+        ) %>
+    <%= bootstrap_select_tag(
+          field:        'data[last_msg_dynamic]',
+          row:          { class: 'mb-1', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Date Delivered/Received' },
+          html_options: { id: 'last_msg_dynamic' },
+          options:      { array: options_for_dynamic_dates(@user_setting.data.dig(:last_msg_dynamic).to_s), blank: 'Select a Time Period' }
+        ) %>
+    <%= bootstrap_calendar_field(
+          field:        'data[last_msg]',
+          value:        presenter.user_setting_last_msg_to_from_string,
+          row:          { id: 'last_msg_row', display: !@user_setting.data.dig(:last_msg_dynamic).to_s.empty?, columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0' },
+          html_options: { id: 'last_msg', placeholder: 'Custom Time Period' },
+          flatpickr:    { include_time: true, mode: 'range' }
+        ) %>
+  </td>
+</tr>
+
+<script>
+  $(function () {
+    $('#last_msg_dynamic').on('change', function() {
+
+      if ($('#last_msg_dynamic').val() == '') {
+        $('#last_msg_row').show();
+      } else {
+        $('#last_msg').val('');
+        $('#last_msg_row').hide();
+      }
+    });
+  });
+</script>

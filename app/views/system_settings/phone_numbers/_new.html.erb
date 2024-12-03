@@ -1,0 +1,74 @@
+<%
+  # app/views/system_settings/phone_numbers/_new.html.erb
+  #
+  # Example:
+  #   render partial: 'system_settings/phone_numbers/new'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:phone_numbers_presenter) || SystemSettings::PhoneNumbersPresenter.new
+-%>
+<div class="card card-fluid">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-hashtag mr-2"></i>New Phone Numbers</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with url: system_settings_phone_numbers_path, builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+      <%= bootstrap_text_field(
+            field:        'phone_number[phonenumber]',
+            value:        '',
+            label:        { title: 'Phone Number' },
+            html_options: { placeholder: 'Enter a Phone Number', required: true, autofocus: true },
+            messages:     { note: 'Enter the new phone number.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'phone_number[client_id]',
+            label:        { title: 'Client' },
+            html_options: { required: true },
+            options:      { array: presenter.client_array, blank: 'Select a Client' },
+            messages:     { note: 'Select the Client to assign to this new phone number.' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'phone_number[name]',
+            value:        '',
+            label:        { title: 'Phone Number Label' },
+            html_options: { placeholder: 'Enter a Phone Number Label', required: true },
+            messages:     { note: 'Enter a label for the new phone number.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'phone_number[phone_vendor]',
+            value:        'bandwidth',
+            label:        { title: 'Vendor' },
+            html_options: { required: true },
+            options:      { array: presenter.vendor_array, blank: 'Select a Vendor' },
+            messages:     { note: 'Select the Vendor who issued the phone number.' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'phone_number[vendor_id]',
+            value:        '',
+            label:        { title: 'Vendor\'s Order ID' },
+            html_options: { placeholder: 'Vendor\'s Order ID', required: true },
+            messages:     { note: "Enter the vendor's order ID." }
+          ) %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Phone Number', disable_with: 'Saving Phone Number...' }] %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_phone_numbers').addClass('active');
+  });
+</script>

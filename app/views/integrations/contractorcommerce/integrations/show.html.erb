@@ -1,0 +1,15 @@
+<%
+# app/views/integrations/contractorcommerce/integrations/show.html.erb
+#
+# Example:
+#   render partial: 'integrations/contractorcommerce/integrations/show'
+#
+# Instance Variables:
+#   (req) @client_api_integration: (ClientApiIntegration)
+#   (req) @version:                 (Integer)
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: "integrations/contractorcommerce/v#{@version}/show" %>

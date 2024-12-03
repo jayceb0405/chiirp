@@ -1,0 +1,25 @@
+<%
+  # app/views/clients/companies/rows/_contacts.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/rows/contacts', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+-%>
+<tr>
+  <%= presenter.company_cell(client) %>
+  <td class="align-middle"><%= Friendly.new.date(client.created_at, client.time_zone, false) -%></td>
+  <td class="align-middle text-center"><%= client.message_central_allowed ? presenter.success_html : presenter.fail_html -%></td>
+  <td class="align-middle text-center"><%= client.my_contacts_allowed ? presenter.success_html : presenter.fail_html -%></td>
+  <td class="align-middle text-center"><%= client.my_contacts_group_actions_all_allowed ? presenter.success_html : presenter.fail_html -%></td>
+  <td class="align-middle text-center"><%= client.contacts.count -%> / <%= client.max_contacts_count == -1 ? '∞' : client.max_contacts_count -%></td>
+  <td class="align-middle text-center"><%= client.import_contacts_count -%></td>
+  <td class="align-middle text-center"><%= client.client_custom_fields.count -%> / <%= client.custom_fields_count -%></td>
+  <%= render partial: 'clients/companies/rows/action_buttons', locals: { client: } %>
+</tr>

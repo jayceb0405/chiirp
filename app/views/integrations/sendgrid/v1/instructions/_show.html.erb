@@ -1,0 +1,89 @@
+<%
+# app/views/integrations/sendgrid/v1/instructions/_show.html.erb
+#
+# Example:
+#   render partial: 'integrations/sendgrid/v1/instructions/show'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SendGrid Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>SendGrid integration provides 2-way email messaging capabilities using your SendGrid API Key.</li>
+      <li>A SendGrid API Key is required.</li>
+      <li><%= I18n.t('tenant.name') -%> supports sending & receiving emails.</li>
+    </ul>
+
+    <h6>API Key:</h6>
+    <ul>
+      <li>To send or receive emails through SendGrid you must first create a SendGrid API Key.</li>
+      <li>Log into your SendGrid account and click "Settings" > "API Keys" from the left menu.</li>
+      <li>Click on the "Create API Key" button.</li>
+        <ul>
+          <li>Enter an API Key Name (this is only so you can remember what you created the key for).</li>
+          <li>Select "Full Access" API Key Permissions.</li>
+          <li>Click "Create & View" button.</li>
+        </ul>
+      <li>After landing on the "API Key Created" screen click the key to copy it then click the "Done" button. THIS IS THE ONLY OPPORTUNITY YOU WILL HAVE!</li>
+      <li>After copying the API Key in SendGrid paste and save that key in the SendGrid API Key field in <%= I18n.t('tenant.name') -%>.</li>
+    </ul>
+
+    <h6>Receive Emails:</h6>
+    <ul>
+      <li><%= I18n.t('tenant.name') -%> can also receive emails from your Contacts.</li>
+      <li>This requires a little knowledge about DNS for your domain name (or knowing someone who does).</li>
+      <li>Your personal/business emails are routed to your email service provider. To route emails to <%= I18n.t('tenant.name') -%> you will either want to use a different domain (ex: new_domain.com) or a subdomain of your current domain (ex: subdomain.your_domain.com).</li>
+      <li class="pt-1" style="list-style-type:none;"><strong>DNS Configuration:</strong></li>
+      <ul>
+        <li class="pt-1" style="list-style-type:none;"><strong>Different Domain:</strong></li>
+        <ol type="1">
+          <li>Buy a new domain from your domain name provider or use an existing domain not currently used for emails.</li>
+          <li>Create an MX record in your DNS with name of your domain name.</li>
+          <li>Set the MX record content to "mx.sendgrid.net" and the priority to "10".</li>
+        </ol>
+        <li class="pt-1" style="list-style-type:none;"><strong>Subdomain of Your Domain:</strong></li>
+        <ol type="1">
+          <li>Decide on a subdomain name that you want to use. This will be added to your current domain. We suggest "inbox" (ex: inbox.<%= I18n.t('tenant.domain') -%>).</li>
+          <li>Create an MX record in your DNS with a name of your subdomain.</li>
+          <li>Set the MX record content to "mx.sendgrid.net" and the priority to "10".</li>
+        </ol>
+      </ul>
+      <li class="pt-1" style="list-style-type:none;"><strong>SendGrid Configuration:</strong></li>
+      <ol type="1">
+        <li>Log into your SendGrid account and click "Settings" > "Inbound Parse" from the left menu.</li>
+        <li>Click "Add Host & URL" button.</li>
+        <li>Under "Receiving Domain" choose your domain. (if you are setting up a subdomain enter the subdomain as well).</li>
+        <li>Under "Destination URL" enter "https://<%= I18n.t("tenant.#{Rails.env}.app_host") -%>/integrations/sendgrid/endpoint".</li>
+        <li>Check the box next to "Check incoming emails for spam" (DO NOT check the box next to "POST the raw, full MIME message").</li>
+        <li>Click "Add" button.</li>
+      </ol>
+      <li class="pt-1" style="list-style-type:none;"><strong><%= I18n.t('tenant.name') -%> Configuration:</strong></li>
+      <ol type="1">
+        <li>Click "Email Addresses" tab above.</li>
+        <li>Add the email addresses you want to receive emails addressed to.</li>
+        <ul>
+          <li>When using a different domain enter email addresses (ex: name@new_domain.com).</li>
+          <li>When using a subdomain enter email addresses (ex: name@subdomain.your_domain.com).</li>
+          <li>".com" could be any top-level domain (ex: .net, .org, etc.).</li>
+          <li>"new_domain" and "your_domain" is the domain name you are using.</li>
+          <li>"subdomain" is the subdomain you selected and set up at SendGrid and in your MX record (ex: "inbox").</li>
+          <li>"name" is the email box name (you may define as many email box names as you like).</li>
+        </ul>
+      </ol>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

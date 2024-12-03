@@ -1,0 +1,21 @@
+<%
+	# app/views/user_contact_forms/v2/_body.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_contact_forms/v2/body"
+	# 
+	# Required Instance Variables:
+	# 	@user_contact_form: (UserContactForm)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="container" id="tenant-quicklead-body" style="max-width:none;">
+
+	<div class="row mt-5">
+		<div class="col-10 col-sm-6 col-lg-4 offset-1 offset-sm-3 offset-lg-4 border p-5 rounded" style="background-color:<%= @user_contact_form.form_bg_color.to_s -%>;border-color:<%= @user_contact_form.form_bg_color.to_s -%>;">
+			<%= render partial: "user_contact_forms/v2/shared/form" %>
+		</div>
+	</div>
+</div>

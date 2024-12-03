@@ -1,0 +1,60 @@
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th style="min-width: 200px">ID</th>
+              <%= content_tag(:th, class: 'text-left') { 'Ext Source' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Ext ID' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Created At' } %>
+            </tr>
+          </thead>
+
+          <tbody id="events_body">
+
+            <% if @raw_posts.any? %>
+              <%= render partial: 'raw_post', collection: @raw_posts %>
+            <% else %>
+              <tr id="no_raw_posts">
+                <td colspan="8" class="text-center p-5">
+                  No Raw Posts found.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).off('show.bs.collapse', '.detail_event');
+  $(document).on('show.bs.collapse', '.detail_event', function (e) {
+
+    if (e.target.id.replace('show_raw_post_', '')) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '/contacts/raw_posts/' + e.target.id.replace('show_raw_post_', '')
+      });
+      // .fail(function(){
+      //   ChiirpAlert({
+      //     'body':'Sorry there a',
+      //     'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_event' }].to_json) -%>,
+      //     'type':'danger',
+      //     'persistent':true
+      //   });
+    }
+  });
+
+  $(document).off('hidden.bs.collapse', '.detail_event');
+  $(document).on('hidden.bs.collapse', '.detail_event', function (e) {
+    $('#' + e.target.id.replace('detail_event', '')).html('<td colspan="4" class="mt-3 text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Details' } %></td>');
+  });
+</script>

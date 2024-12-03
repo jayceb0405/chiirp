@@ -1,0 +1,46 @@
+<%
+  # app/views/integrations/salesrabbit/_status_list.html.erb
+  # 
+  # Example:
+  #   render partial: 'integrations/salesrabbit/status_list'
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SalesRabbit Status Processes</h6>
+  <div class="card-body">
+
+    <% if @client_api_integration.api_key.present? && @client_api_integration.statuses.present? %>
+      <%= form_with model: @client_api_integration, url: integrations_salesrabbit_status_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+
+        <table class="table table-no-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= render partial: 'integrations/salesrabbit/status', collection: @client_api_integration.statuses %>
+          </tbody>
+        </table>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Statuses', disable_with: 'Saving Statuses' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_statuses').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

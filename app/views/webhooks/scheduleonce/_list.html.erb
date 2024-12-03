@@ -1,0 +1,194 @@
+<%
+  # app/views/webhooks/scheduleonce/_list.html.erb
+  #
+  # Example:
+  # 	render partial: "webhooks/scheduleonce/list", locals: { collapsed: false }
+  #
+  # Instance Variables:
+  # 	(req) @client = (Object) Client
+  #
+  # Local Variables:
+  #   (req) collapsed = (Boolean)
+  #
+  collapsed = true if local_assigns[:collapsed].nil?
+-%>
+<div class="app_collapse">
+  <a class="app_collapse__header<%= collapsed ? ' collapsed' : '' -%>" data-toggle="collapse" href="#scheduleonce-webhooks-list-collapse">
+    <h4><%= @client.name -%> <%= image_tag('integrations/scheduleonce_logo.png', { class: 'img-fluid', style: 'max-height:18px;' }) -%> Webhooks</h4>
+    <span class="collapse-icon fa fa-arrow-circle-down"></span>
+  </a>
+
+  <div class="collapse app_collapse-inner<%= collapsed ? '' : ' show' -%> js-scrollable" id="scheduleonce-webhooks-list-collapse">
+    <h5 class="p-2 m-0">
+      <%= link_to "Access your #{image_tag('integrations/scheduleonce_logo.png', { class: 'img-fluid', style: 'max-height:13px;' })} account".html_safe, 'https://www.scheduleonce.com', target: '_blank', rel: 'noopener' %>
+    </h5>
+    <table class="table table-no-border table-striped">
+      <thead>
+        <tr>
+          <th>Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'api_key'
+                          }.to_param
+                        } %>
+            API Key:
+          </td>
+          <td>
+            <%= @client.scheduleonce_api_key.present? ? 'Saved' : '<span class="text-danger">Not Saved</span>'.html_safe %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_scheduled'
+                          }.to_param
+                        } %>
+            Booking Scheduled:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_scheduled.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_scheduled) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_rescheduled'
+                          }.to_param
+                        } %>
+            Booking Rescheduled:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_rescheduled.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_rescheduled) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_canceled_then_rescheduled'
+                          }.to_param
+                        } %>
+            Booking Canceled & Rescheduled:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_canceled_then_rescheduled.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_canceled_then_rescheduled) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_canceled_reschedule_requested'
+                          }.to_param
+                        } %>
+            Booking Canceled / Reschedule Requested:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_canceled_reschedule_requested.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_canceled_reschedule_requested) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_canceled'
+                          }.to_param
+                        } %>
+            Booking Canceled:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_canceled.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_canceled) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_completed'
+                          }.to_param
+                        } %>
+            Booking Completed:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_completed.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_completed) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+        <tr>
+          <td class="text-left">
+            <%= link_to '', client_webhooks_path(@client.id),
+                        remote: true,
+                        method: :post,
+                        class:  'fa fa-pencil-alt text-dark pr-0',
+                        style:  'text-decoration: none;',
+                        data:   {
+                          params: {
+                            integration:   'scheduleonce',
+                            webhook_event: 'booking_no_show'
+                          }.to_param
+                        } %>
+            Booking No Show:
+          </td>
+          <td>
+            <% campaign = @client.scheduleonce_booking_no_show.positive? ? @client.campaigns.find_by(id: @client.scheduleonce_booking_no_show) : nil %>
+            <%= campaign.nil? ? '<span class="text-danger">Not Selected</span>'.html_safe : campaign.name %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

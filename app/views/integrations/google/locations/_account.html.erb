@@ -1,0 +1,61 @@
+<%
+  # app/views/integrations/google/locations/_account.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/locations/_account.html.erb', collection: presenter.google_accounts, as: :account, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) account:   (Hash)
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<div class="row">
+  <div class="col-2 font-weight-bold pt-3">
+    <%= account.dig(:accountName) %>
+  </div>
+  <div class="col-10">
+    <div class="row">
+      <div class="col-6">
+        <% if current_user.access_controller?('integrations', 'google_messages', session) %>
+          <%= bootstrap_select_tag(
+                field:        "messages[locations][#{account.dig(:name)}]",
+                row:          { class: 'mb-0', columns: [0, 12] },
+                html_options: { multiple: true },
+                options:      { array: presenter.options_for_locations(account.dig(:name)), selected: presenter.options_for_selected_locations_messages(account.dig(:name)) },
+                messages:     { note: 'Select your Google account locations to manage Messages.' }
+              ) %>
+          <% end %>
+      </div>
+      <div class="col-6">
+        <% if Integration::Google.user_authorized_for_accounts_locations_config?(current_user, @client_api_integration) %>
+          <%= bootstrap_select_tag(
+                field:        "reviews[locations][#{account.dig(:name)}]",
+                row:          { class: 'mb-0', columns: [0, 12] },
+                html_options: { multiple: true },
+                options:      { array: presenter.options_for_locations(account.dig(:name)), selected: presenter.client_api_integration.active_locations_reviews.dig(account.dig(:name)) },
+                messages:     { note: 'Select your Google account locations to manage Reviews.' }
+              ) %>
+        <% end %>
+      </div>
+    </div>
+    <div class="row pt-3">
+      <div class="col-12 font-weight-bold">
+        Location Nicknames
+      </div>
+    </div>
+    <% presenter.options_for_locations(account.dig(:name)).each do |name, location_id| %>
+      <%= bootstrap_text_field(
+            field:        "locations_names[#{location_id}]",
+            value:        presenter.client_api_integration.active_locations_names&.dig(location_id),
+            row:          { columns: [5, 7] },
+            label:        { title: name },
+            html_options: { placeholder: 'Location Nickname' },
+            messages:     { note: 'Enter a shortened nickname for this Google Location.' }
+          ) %>
+    <% end %>
+  </div>
+</div>

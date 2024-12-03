@@ -1,0 +1,194 @@
+<%
+  # app/views/clients/phone_numbers/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/phone_numbers/index'
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Clients::PhoneNumbers::Presenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-hashtag mr-2"></i>Phone Numbers <span class="badge"><%= presenter.client.twnumbers.count -%> / <%= presenter.client.current_max_phone_numbers -%></span></span>
+      <span>
+        <%= if presenter.ok_to_purchase_new_number?
+              link_to '<i class="fa fa-plus mr-2"></i>Order New Phone Number'.html_safe, client_twnumbers_path(presenter.client, referer: 'phone_numbers'), {
+                class:  'btn btn-light',
+                remote: true,
+                method: :post
+              }
+            end %>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary ml-2',
+              id:    'phone_numbers_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px"> Label </th>
+              <th> Number </th>
+              <th> Default User </th>
+              <th> Purchased </th>
+              <th style="width:100px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <%= render partial: 'clients/phone_numbers/twnumber', collection: presenter.twnumbers, as: :twnumber, locals: { presenter: } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if presenter.client.errors.any? %>
+      ChiirpAlert({
+        'body':triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    $('#phone_numbers_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li>The number of Phone Numbers is determined by the Package selected.</li>'
+      help_info += '<li>You have been assigned a maximum of <%= @client.current_max_phone_numbers -%> Phone Numbers.</li>'
+      help_info += '<li>Select from created Voice Recordings to use as a greeting for each number.</li>'
+      help_info += '<li>Select Users who may use this number to communicate with Contacts.</li>'
+      help_info += '<li>Assign one User to be the default User assigned to new Contacts on incoming texts or phone calls from unknown phone numbers.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': 'Phone Numbers Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_phone_numbers').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_phone_numbers').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+
+  function updateSelDefUsers(client_users, users_selected, previous_selection, twnumberId) {
+    $('#select_def_user_' + twnumberId).find('option').remove().end();
+    $('#select_def_user_' + twnumberId).append('<option value="0">Select User</option>');
+
+    $.each(client_users, function(key, value) {
+
+      if ($.inArray(key.toString(), users_selected) >= 0) {
+        $('#select_def_user_' + twnumberId).append('<option value="'+key+'">'+value+'</option>');
+      }
+    });
+
+    $('#select_def_user_' + twnumberId).val(previous_selection);
+    $('#select_def_user_' + twnumberId).selectpicker('refresh');
+  }
+
+  function displayIncomingCallRouting(twnumberId) {
+
+    if ($('#incoming_call_routing_play_vm_' + twnumberId).is(':checked') || $('#incoming_call_routing_play_' + twnumberId).is(':checked')) {
+      $('#vm_greeting_recording_row_' + twnumberId).hide();
+      $('#announcement_recording_row_' + twnumberId).show();
+    } else if ($('#incoming_call_routing_play_pass_' + twnumberId).is(':checked')) {
+      $('#vm_greeting_recording_row_' + twnumberId).show();
+      $('#announcement_recording_row_' + twnumberId).show();
+    } else if ($('#incoming_call_routing_pass_' + twnumberId).is(':checked')) {
+      $('#vm_greeting_recording_row_' + twnumberId).show();
+      $('#announcement_recording_row_' + twnumberId).hide();
+    }
+
+    displayPassRouting(twnumberId);
+    displayPassRoutingMethod(twnumberId);
+    displaySortedRouting(twnumberId);
+    displayPassRoutingPhoneNumber(twnumberId);
+    displayPassRoutingRingDuration(twnumberId);
+  }
+
+  function displayPassRouting(twnumberId) {
+
+    if ($('#incoming_call_routing_play_vm_' + twnumberId).is(':checked') || $('#incoming_call_routing_play_' + twnumberId).is(':checked')) {
+      $('#pass_routing_row_' + twnumberId).hide();
+    } else {
+      $('#pass_routing_row_' + twnumberId).show();
+    }
+  }
+
+  function displayPassRoutingMethod(twnumberId) {
+
+    if ($('#incoming_call_routing_play_vm_' + twnumberId).is(':checked') || $('#incoming_call_routing_play_' + twnumberId).is(':checked')) {
+      $('#pass_routing_method_row_' + twnumberId).hide();
+    } else if ($('#select_pass_routing_' + twnumberId).val().length > 1) {
+      $('#pass_routing_method_row_' + twnumberId).show();
+    } else {
+      $('#pass_routing_method_row_' + twnumberId).hide();
+    }
+  }
+
+  function displayPassRoutingRingDuration(twnumberId) {
+
+    if ($('#incoming_call_routing_play_vm_' + twnumberId).is(':checked') || $('#incoming_call_routing_play_' + twnumberId).is(':checked')) {
+      $('#pass_routing_ring_duration_row_' + twnumberId).hide();
+    } else {
+      $('#pass_routing_ring_duration_row_' + twnumberId).show();
+    }
+  }
+
+  function displayPassRoutingPhoneNumber(twnumberId) {
+
+    if ($('#incoming_call_routing_play_vm_' + twnumberId).is(':checked') || $('#incoming_call_routing_play_' + twnumberId).is(':checked')) {
+      $('#pass_routing_phone_number_row_' + twnumberId).hide();
+    } else if ($.inArray('phone_number', $('#select_pass_routing_' + twnumberId).val()) >= 0) {
+      $('#pass_routing_phone_number_row_' + twnumberId).show();
+    } else {
+      $('#pass_routing_phone_number_row_' + twnumberId).hide();
+    }
+  }
+
+  function displaySortedRouting(twnumberId) {
+
+    if ($('#incoming_call_routing_play_vm_' + twnumberId).is(':checked') || $('#incoming_call_routing_play_' + twnumberId).is(':checked')) {
+      $('#sorted_routing_row_' + twnumberId).hide();
+    } else if ($('#pass_routing_method_chained_' + twnumberId).is(':checked') && $('#select_pass_routing_' + twnumberId).val().length > 1) {
+      $('#sorted_routing_row_' + twnumberId).show();
+    } else {
+      $('#sorted_routing_row_' + twnumberId).hide();
+    }
+  }
+
+  function updateSortedRouting(twnumberId) {
+    $('#data_table_' + twnumberId).html('');
+
+    $.each($('#select_pass_routing_' + twnumberId).val(), function(index, value) {
+      $('#data_table_' + twnumberId).append(
+        '<li class="list-group-item align-items-center drag-handle" data-id="' + value + '">' +
+          '<div class="row w-100">' +
+            '<input type="hidden" name="twnumber[sorted_routing][' + value + ']" id="twnumber_routing_order_' + twnumberId + '_' + value + '" value="1" autocomplete="off">' +
+            '<span class="drag-indicator"></span>' + $('#select_pass_routing_' + twnumberId + ' option[value="' + value + '"]').text().substr(9) +
+          '</div>' +
+        '</li>'
+      )
+    });
+  }
+</script>

@@ -1,0 +1,66 @@
+<%
+  # app/views/users/phone/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'users/phone/edit', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user: (User)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Users::Presenter.new(user: @user)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Phone Processing</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if presenter.client.phone_calls_allowed && presenter.client.current_max_phone_numbers.positive? %>
+        <%= form_with(model: presenter.user, url: users_phone_path(presenter.user.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'phone_form', novalidate: true }) do |f| %>
+          <%= f.telephone_field :phone_in, {
+                label:        { title: 'Incoming Phone Number' },
+                html_options: { value: number_to_phone(presenter.user.phone_in), id: 'user_phone_number_in', placeholder: 'Phone Number', required: true },
+                messages:     { note: "#{I18n.t('tenant.name')} connects incoming phone calls to this number. Must be 10 characters." }
+              } %>
+          <%= f.number_field :ring_duration, {
+                label:        { title: 'Ring Duration' },
+                html_options: { min: 10, max: 60, step: 1, required: true },
+                prepends:     [{ button: false, label: '<i class="fas fa-stopwatch"></i>' }],
+                messages:     { note: 'Number of seconds (10-60, 20 recommended) to ring my phone on incoming calls. Longer durations allow for phone\'s voicemail to answer.' }
+              } %>
+          <%= bootstrap_check_box(
+                label:      { title: 'Incoming Calls' },
+                checkboxes: [{ field: 'user[phone_in_with_action]', label: 'Require "Press Any Key" To Accept Incoming Calls', id: 'phone_in_with_action_id', value: presenter.user.phone_in_with_action, values: [true, false] }]
+              ) %>
+          <%= f.telephone_field :phone_out, {
+                label:        { title: 'Outgoing Phone Number' },
+                html_options: { value: number_to_phone(presenter.user.phone_out), id: 'user_phone_number_out', placeholder: 'Phone Number', required: true },
+                messages:     { note: "#{I18n.t('tenant.name')} connects outgoing phone calls to this number. Must be 10 characters." }
+              } %>
+          <%= f.submit_buttons buttons: [{ title: 'Save Phone Processing', disable_with: 'Saving Phone Processing' }] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_phone').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_phone').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

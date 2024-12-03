@@ -1,0 +1,39 @@
+<%
+  # app/views/integrations/webhooks/apis/edit/_form_keyresponse.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/edit/form_keyresponse', locals: { key: String, response: String, actions: String, response_counter: Integer, presenter: Integrations::Webhooks::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) actions:          (String)
+  #   (req) key:              (String)
+  #   (req) presenter:        (Integrations::Webhooks::Presenter)
+  #   (req) response:         (String)
+  #   (req) response_counter: (Integer)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+
+  actions       = local_assigns.dig(:actions).present? ? actions.split(',') : ['', '']
+  actions[0]  ||= ''
+  actions[1]  ||= ''
+-%>
+<tr>
+  <td class="p-1">
+    <%= text_field_tag "keyresponses[#{key}][#{response_counter}][response]", response, { class: 'form-control', placeholder: 'Response', autocomplete: false } %>
+  </td>
+  <td class="p-1">
+    <%= select_tag("keyresponses[#{key}][#{response_counter}][campaign_id]",
+                   options_for_campaign(client: presenter.client, selected_campaign_id: actions[0], grouped: true),
+                   { include_blank: 'Select a Campaign',
+                     class:         'form-control',
+                     style:         'width: 100%;' }) %>
+    <%= select_tag("keyresponses[#{key}][#{response_counter}][tag_id]",
+                   options_for_tag(presenter.client, actions[1], [], false),
+                   { include_blank: 'Select a Tag',
+                     class:         'form-control',
+                     style:         'width: 100%;' }) %>
+  </td>
+</tr>

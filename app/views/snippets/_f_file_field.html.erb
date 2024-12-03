@@ -1,0 +1,106 @@
+<%
+  # app/views/snippets/_f_file_field.html.erb
+  # <%= render partial: 'snippets/f_file_field', locals: {
+  #   form: f,
+  #   file_field: { field: 'string', id: 'string', name: 'string', url: 'string', disabled: boolean },
+  #   row: { class: 'string', id: 'string', display: boolean, columns: [l, r] },
+  #   col: { class: 'string', id: 'string', display: boolean },
+  #   label: { class: 'string', id: 'string', title: 'string' },
+  #   image_container: { class: 'string', id: 'string' },
+  #   image: { key: 'string', width: integer, height: integer, class: 'string', crop: 'fit', format: 'png' }
+  # } % >
+  transformations = {}
+  transformations[:width]  = local_assigns[:image][:width].to_i if local_assigns.dig(:image, :width)
+  transformations[:height] = local_assigns[:image][:height].to_i if local_assigns.dig(:image, :height)
+  transformations[:crop]   = local_assigns[:image][:crop].to_s if local_assigns.dig(:image, :crop)
+  figure_style             = transformations.dig(:width).to_i.positive? || transformations.dig(:height).to_i.positive? ? "#{transformations.dig(:width).to_i.positive? ? "width:#{transformations.dig(:width).to_i}px;" : ''}#{transformations.dig(:height).to_i.positive? ? "height:#{transformations.dig(:height).to_i}px;" : ''}" : ''
+  drop_zone_id             = (local_assigns.dig(:col, :id) || "drop_zone_#{rand(1000)}").to_s
+  file_field_id            = (local_assigns.dig(:file_field, :id) || "file_field_#{rand(1000)}").to_s
+  image_container_id       = (local_assigns.dig(:image_container, :id) || "image_container_#{rand(1000)}").to_s
+  columns                  = [local_assigns.dig(:row, :columns) || [3, 9]].flatten
+  columns                  = columns.length == 2 ? columns : columns.length == 1 ? [columns[0], (12 - columns[0])] : [3, 9]
+  col_class                = ["col-md-#{columns[1]}", local_assigns.dig(:file_field, :disabled).to_bool ? '' : ' fileinput-dropzone', local_assigns.dig(:col, :class).to_s, local_assigns.dig(:col, :class).to_s.split(' ').grep(/^m-/).any? || local_assigns.dig(:col, :class).to_s.split(' ').grep(/^mb-/).any? ? '' : 'mb-3'].reject(&:empty?)
+  label_class              = ["col-md-#{columns[0]}", local_assigns.dig(:label, :class).to_s, local_assigns.dig(:label, :class).to_s.split(' ').grep(/^m-/).any? || local_assigns.dig(:label, :class).to_s.split(' ').grep(/^mt-/).any? ? '' : 'mt-2'].reject(&:empty?)
+%>
+<div class="form-row <%= local_assigns.dig(:row, :class).to_s -%>" id="<%= local_assigns.dig(:row, :id).to_s -%>" style="<%= local_assigns.dig(:row, :display).nil? || local_assigns[:row][:display].to_bool ? '' : 'display:none;' -%>">
+  <%= local_assigns[:form].label file_field_id, local_assigns.dig(:label, :title).to_s, { class: label_class.join(' '), id: local_assigns.dig(:label, :id).to_s } %>
+  <%= local_assigns[:form].file_field local_assigns.dig(:file_field, :field).to_sym, { name: local_assigns.dig(:file_field, :name).to_s, class: 'image-url form-control', id: file_field_id, direct_upload: true, accept: 'image/*', style: 'display:none;' } %>
+  <div class="<%= col_class.join(' ') -%>" id="<%= drop_zone_id -%>" style="<%= local_assigns.dig(:col, :display).nil? || local_assigns.dig(:col, :display).to_bool ? '' : 'display:none;' -%>">
+    <div class="text-center <%= local_assigns.dig(:image_container, :class).to_s -%>" id="<%= image_container_id -%>">
+      <% if local_assigns.dig(:image).present? %>
+        <figure class="user-avatar user-avatar-xxl" style="<%= figure_style -%>">
+          <%= cl_image_tag(local_assigns.dig(:image, :key).to_s, { class: local_assigns.dig(:image, :class).to_s, secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: transformations, format: (local_assigns.dig(:image, :format) || 'fit').to_s }) -%>
+          <a href="#" class="avatar-badge has-indicator busy" style="height:20px;width:20px;border-radius:10px;line-height:21px;font-size:15px;color:white;" id="button_image_delete"><i class="fa fa-times"></i></a>
+        </figure>
+      <% else %>
+        <% unless local_assigns.dig(:file_field, :disabled).to_bool %>
+          <i class="fa fa-cloud-upload-alt text-primary display-3"></i>
+        <% end %>
+      <% end %>
+    </div>
+    <div class="spinner-border text-primary d-none" id="<%= "spinner_#{image_container_id}" -%>" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+    <% unless local_assigns.dig(:file_field, :disabled).to_bool %>
+      <span class="text-muted">Drag and drop or Click to Upload</span>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    <% unless local_assigns.dig(:file_field, :disabled).to_bool %>
+      Dropzone.autoDiscover = false;
+
+      $('#<%= drop_zone_id -%>').dropzone( {
+        url: ' ',
+        autoQueue: false,
+        maxFilesize: 150,
+        addRemoveLinks: false,
+        acceptedFiles: 'image/jpg,image/jpeg,image/gif,image/png',
+        clickable: '#<%= drop_zone_id -%>, #<%= image_container_id -%>',
+        dragover: function() {
+          $('#<%= drop_zone_id -%>').addClass('hover');
+        },
+        dragleave: function() {
+          $('#<%= drop_zone_id -%>').removeClass('hover');
+        },
+        drop: function() {
+          $('#<%= image_container_id -%>').hide();
+          $('#<%= "spinner_#{image_container_id}" -%>').show();
+        },
+        addedfile: function(file, response) {
+          // a file input with direct upload must be somewhere on the page...
+          $('#<%= image_container_id -%>').hide();
+          $('#<%= "spinner_#{image_container_id}" -%>').show();
+
+          const input  = document.querySelector('#<%= file_field_id -%>');
+          const url    = input.dataset.directUploadUrl;
+          const upload = new ActiveStorage.DirectUpload(file, url);
+
+          // Upload the file
+          upload.create((error, blob) => {
+            $.ajax({
+              method: 'PATCH',
+              dataType: 'script',
+              url: '<%= local_assigns.dig(:file_field, :url).to_s -%>',
+              data: { '<%= local_assigns.dig(:file_field, :name).to_s -%>': blob.signed_id }
+            });
+          });
+        }
+      });
+
+      $('#button_image_delete').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $.ajax({
+          type: 'PATCH',
+          dataType: 'script',
+          url: '<%= local_assigns.dig(:file_field, :url).to_s -%>',
+          data: { image_delete: 'true' }
+        });
+      });
+    <% end %>
+  });
+</script>

@@ -1,0 +1,57 @@
+<%
+  # app/views/user_contact_form_marketplaces/_user_contact_form.html.erb
+  #
+  # Example:
+  # 	render partial: "user_contact_form_marketplaces/user_contact_form", collection: @user_contact_forms
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  image_tag = if user_contact_form.marketplace_image.attached?
+                cl_image_tag(user_contact_form.marketplace_image.key, { class: 'img-fluid', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 60, height: 60, crop: 'fit'], format: 'png' })
+              else
+                image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'img-fluid', style: 'max-height:60px;' })
+              end
+-%>
+<div class="col-12 col-md-6 col-lg-4 m-0 p-1">
+  <div class="h-100 p-3 bg-light text-center border border-primary rounded">
+    <div class="h-100 mb-0" style="padding-bottom:35px;">
+      <%= image_tag %>
+      <h2><%= user_contact_form.form_name -%></h2>
+      <p><%= user_contact_form.price.zero? ? 'Free' : number_to_currency(user_contact_form.price.to_d) %></p>
+      <span><%= user_contact_form.description -%></span>
+    </div>
+    <div class="p-2 m-0 text-center" style="position:relative;top:-35px;">
+      <%= link_to (user_contact_form.marketplace_ok && user_contact_form.price.positive? ? 'Buy' : 'Get').to_s,
+                  '',
+                  remote: true,
+                  method: :get,
+                  class:  'btn btn-info',
+                  id:     "get_user_contact_form_button_#{user_contact_form.id}" %>
+      <% if current_user.team_member? %>
+        <%= link_to (user_contact_form.marketplace_ok ? 'Revoke' : 'Approve').to_s,
+                    approve_user_contact_form_path(user_contact_form.id),
+                    method: :post,
+                    remote: true,
+                    class:  'btn btn-info' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+<script>
+  $(function () {
+    $('#get_user_contact_form_button_<%= user_contact_form.id -%>').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= user_contact_form_marketplace_path(user_contact_form.id) -%>'
+      })
+    });
+  });
+</script>

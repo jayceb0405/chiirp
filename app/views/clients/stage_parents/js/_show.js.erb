@@ -1,0 +1,60 @@
+<%
+  # app/views/clients/stage_parents/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'clients/stage_parents/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @client:       (Client)
+  #   (opt) @stage_parent: (StageParent)
+  #
+  # local Variables:
+  #   (req) cards:         (Array)
+  #
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  presenter = Clients::StageParents::Presenter.new(client: local_assigns.dig(:client), stage_parent: @stage_parent) if @stage_parent.present?
+-%>
+// StageParents
+<% if cards.include?('stage_parent_index') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/stage_parents/index' -%>');
+<% end %>
+<% if cards.include?('stage_parent_edit') %>
+  $('#stage_parent_<%= @stage_parent.id -%>').html('<%= j render partial: 'clients/stage_parents/edit', locals: { client_stage_parents_presenter: presenter } -%>');
+<% end %>
+<% if cards.include?('stage_parent_name') %>
+  $('#td_stage_parent_name_<%= @stage_parent.id -%>').html('<%= @stage_parent.name -%>');
+<% end %>
+<% if cards.include?('stage_parent_edit_show') %>
+  window.setTimeout(function() {
+    $('#stage_parent_<%= @stage_parent.id -%>').collapse('show');
+  }, 2000);
+<% end %>
+
+// Stages
+<% if cards.include?('stage_index') %>
+  $('#stages_<%= local_assigns.dig(:stage_parent).id -%>').html('<%= j render partial: 'clients/stage_parents/stages/index', locals: { stage_parent: local_assigns.dig(:stage_parent), stage: local_assigns.dig(:stage) } -%>');
+<% end %>
+<% if cards.include?('stage_edit') %>
+  <% csp = ClientStagesPresenter.new(stage_parent: local_assigns.dig(:stage_parent), stage: local_assigns.dig(:stage)) %>
+  $('#stage_<%= local_assigns.dig(:stage_parent).id -%>_<%= local_assigns.dig(:stage).id -%>').html('<%= j render partial: 'clients/stage_parents/stages/edit', locals: { client_stages_presenter: csp } -%>');
+<% end %>
+<% if cards.include?('stage_name') %>
+  $('#td_stage_name_<%= local_assigns.dig(:stage_parent).id -%>_<%= local_assigns.dig(:stage).id -%>').html('<span class="drag-indicator"></span><%= local_assigns.dig(:stage).name -%>');
+<% end %>
+
+// Import StageParent
+<% if cards.include?('import') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-cloud-download-alt"></i> Import <%= StageParent.title -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'clients/stage_parents/import/show' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('import_close') %>
+  $('#dash_modal').modal('hide');
+<% end %>
+
+$('.tooltip').tooltip('hide');
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

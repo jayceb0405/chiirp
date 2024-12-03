@@ -1,0 +1,22 @@
+<%
+# app/views/clients/org_chart/org_position/_edit.html.erb
+#
+# Example:
+#   render partial: "clients/org_chart/org_position/edit"
+#
+# Required Instance Variables:
+#   @client:       (Client)
+#   @org_position: (OrgPosition)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-2">
+  <legend class="w-auto mb-0"><h6>Edit a Position</h6></legend>
+  <%= form_with model: @org_position, url: client_org_position_path(@client.id, @org_position.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+    <%= render partial: 'clients/org_chart/org_position/form', locals: { form: f } %>
+
+  <% end %>
+</fieldset>

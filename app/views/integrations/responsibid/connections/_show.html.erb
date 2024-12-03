@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/responsibid/connections/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/responsibid/connections/show"
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Responsibid::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">ResponsiBid Connection</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_xencall_api_key_update_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+      <% if presenter.client_api_integration.api_key.present? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'Connection Endpoint' },
+              html_options: { value: integrations_responsibid_endpoint_url(presenter.client_api_integration.api_key) }
+            } %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

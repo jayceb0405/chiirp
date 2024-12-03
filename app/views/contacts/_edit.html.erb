@@ -1,0 +1,259 @@
+<%
+  # app/views/contacts/_edit.html.erb
+  #
+  # Example:
+  # 	render partial: 'contacts/edit'
+  #
+  # Instance Variables:
+  # 	(req) @contact: (Contact)
+  #
+  # Local Variables:
+  #   (opt) return_to: (String)
+  #
+  presenter = Contacts::Presenter.new(contact: @contact)
+  turbo = false unless local_assigns.include?(:turbo)
+-%>
+<%= form_with(model: presenter.contact, builder: LooperFormBuilder, class: 'needs-validation', id: 'contact_form', novalidate: true, data: turbo ? { turbo: true, turbo_stream: true } : {}) do |f| %>
+  <%= hidden_field_tag 'return_to', local_assigns.dig(:return_to).to_s %>
+
+  <%= f.text_field :companyname, {
+        label:        { title: 'Company Name' },
+        html_options: { id: 'input_companyname', placeholder: 'Company Name' }
+      } %>
+  <%= f.text_field :firstname, {
+        label:        { title: 'First Name' },
+        html_options: { id: 'input_firstname', placeholder: 'First Name' }
+      } %>
+  <%= f.text_field :lastname, {
+        label:        { title: 'Last Name' },
+        html_options: { id: 'input_lastname', placeholder: 'Last Name' }
+      } %>
+  <%= f.text_field :address1, {
+        label:        { title: 'Address Line 1' },
+        html_options: { id: 'input_address1', placeholder: 'Address Line #1' }
+      } %>
+  <%= f.text_field :address2, {
+        label:        { title: 'Address Line 2' },
+        html_options: { id: 'input_address2', placeholder: 'Address Line #2' }
+      } %>
+  <%= f.text_field :city, {
+        label:        { title: 'City' },
+        html_options: { id: 'input_city', placeholder: 'City' }
+      } %>
+  <%= f.text_field :state, {
+        label:        { title: 'State' },
+        html_options: { id: 'select_state' },
+        options:      { for_select: options_for_state(country: %w[US Canada], selected: presenter.contact.state), blank: 'Select a State', selected: 'string/integer' }
+      } %>
+  <%= f.text_field :zipcode, {
+        label:        { title: 'Zip Code' },
+        html_options: { maxlength: 6, placeholder: 'Zip Code' },
+        messages:     { note: 'Must be maximum of 6 characters.' }
+      } %>
+  <%= f.email_field :email, {
+        label:        { title: 'Email Address' },
+        html_options: { id: 'input_email', placeholder: 'Email' }
+      } %>
+
+  <div id="contact_phones">
+    <%= render partial: 'contacts/phones/index', locals: { presenter: } %>
+  </div>
+
+  <div id="contact_ext_references">
+    <%= render partial: 'contacts/ext_references/index', locals: { presenter: } %>
+  </div>
+
+  <%= bootstrap_calendar_field(
+        field:           'contact[birthdate]',
+        value:           presenter.contact_birthdate_formatted,
+        modal:           { id: 'dash_modal' },
+        label:           { title: 'Birthdate' },
+        html_options:    { id: 'contact_birthdate', placeholder: 'Birthdate' },
+        flatpickr:       { include_time: false, mode: 'single' },
+        google_calendar: { calendar_ids: presenter.google_calendar_array, title: "#{presenter.contact.fullname.possessive} Birthday", description: '', location: '', recurrence: 'annually', attendee_emails: '' }
+      ) %>
+
+  <div class="mb-3" id="custom_fields_list">
+    <%= render partial: 'client_custom_fields/contact_form_list', collection: presenter.contact.client_custom_fields.order(var_important: :desc, var_name: :asc), locals: { presenter:, hide_important_fields: true, field_tag_name: 'client_custom_fields' }, as: :custom_field %>
+  </div>
+
+  <%= f.switch :null, {
+        label:      { title: '<i class="fa fa-eye-slash pr-2"></i>Put Contact to Sleep'.html_safe },
+        checkboxes: [{ field: 'sleep', checked: presenter.contact.sleep, values: %w[true false] }],
+        messages:   { note: 'Contact will not appear in Active Contacts.' }
+      } %>
+  <%= f.switch :null, {
+        label:      { title: '<i class="fa fa-bell-slash pr-2"></i>Block Contact'.html_safe },
+        checkboxes: [{ field: 'block', checked: presenter.contact.block, values: %w[true false] }],
+        messages:   { note: 'Contact will not appear in Active Contacts & all communications will be blocked.' }
+      } %>
+  <%= f.switch :null, {
+        label:      { title: 'OK to Send Text Messages' },
+        checkboxes: [{ field: 'ok2text', checked: presenter.contact.ok2text.to_i == 1, values: %w[1 0] }]
+      } %>
+  <%= f.switch :null, {
+        label:      { title: 'OK to Send Email Messages' },
+        checkboxes: [{ field: 'ok2email', checked: presenter.contact.ok2email.to_i == 1, values: %w[1 0] }]
+      } %>
+
+  <%= f.select :lead_source_id, {
+        label:        { title: 'Lead Source' },
+        html_options: { id: 'lead_source_id', mobile: browser.device.mobile? },
+        choices:      { array: presenter.lead_sources_array, blank: 'Select a Lead Source', selected: presenter.contact.lead_source_id },
+        prepends:     [{ label: '<i class="fa fa-right-from-bracket"></i>' }]
+      } %>
+
+  <% if @contact.client.groups_count.positive? %>
+    <%= f.select :group_id, {
+          label:        { title: 'Group' },
+          html_options: { id: 'group_id', mobile: browser.device.mobile? },
+          choices:      { array: presenter.group_options, blank: 'Select a Group', selected: presenter.contact.group_id },
+          prepends:     [{ label: '<i class="fa fa-object-group"></i>' }]
+        } %>
+  <% end %>
+
+  <% if @contact.client.stages_count.positive? %>
+    <%= f.select :stage_id, {
+          label:        { title: 'Stage' },
+          html_options: { id: 'stage_id', mobile: browser.device.mobile? },
+          choices:      { for_select: grouped_options_for_select(presenter.stage_options, presenter.contact.stage_id), blank: 'Select a Stage' },
+          prepends:     [{ label: '<i class="fa fa-project-diagram"></i>' }]
+        } %>
+  <% end %>
+
+  <%= f.select :user_id, {
+        label:        { title: 'Assigned To' },
+        html_options: { id: 'user_id', mobile: browser.device.mobile? },
+        choices:      { array: presenter.user_options, selected: presenter.contact.user_id },
+        prepends:     [{ label: '<i class="fa fa-user"></i>' }]
+      } %>
+
+  <%= f.select :campaign_group_id, {
+        label:        { title: 'Campaign Group' },
+        html_options: { id: 'campaign_group_id', mobile: browser.device.mobile? },
+        choices:      { for_select: options_from_collection_for_select(presenter.contact_campaigns, :id, :name, presenter.contact.campaign_group_id), blank: 'Select a campaign group' },
+        prepends:     [{ label: '<i class="fa fa-user"></i>' }]
+      } %>
+
+  <% if @contact.client.folders_count.positive? %>
+    <%= f.select :folders, {
+          label:        { title: 'Selectable Message Folders' },
+          html_options: { id: 'selectable_folder_assignments', multiple: true, mobile: browser.device.mobile? },
+          choices:      { array: presenter.folders.pluck(:name, :id), selected: presenter.contact.folders },
+          prepends:     [{ label: '<i class="fa fa-folder"></i>' }]
+        } %>
+  <% end %>
+
+  <% if @contact.new_record? %>
+
+    <% if @contact.client.campaigns_count.positive? %>
+      <%= bootstrap_select_tag_campaign(
+            client:   @contact.client,
+            field:    'campaign_id',
+            label:    { title: 'Apply a Campaign Immediately' },
+            options:  { include_groups: true, active_only: true, blank: 'Select a Campaign' },
+            prepends: [{ label: '<i class="fa fa-filter"></i>' }]
+          ) %>
+    <% end %>
+
+    <%= bootstrap_select_tag(
+          field:    'tag_id',
+          label:    { title: 'Apply a Tag immediately' },
+          options:  { for_select: options_for_tag(@contact.client, 0, [], false), blank: 'Select a Tag' },
+          prepends: [{ label: '<i class="fa fa-user-tag text-muted"></i>' }]
+        ) %>
+  <% end %>
+
+  <% if current_user.client.id == I18n.t("tenant.#{Rails.env}.client_id").to_i %>
+    <%= f.text_field :corp_client_id, {
+          label:        { title: 'Associated Client' },
+          html_options: { value: presenter.contact.corp_client ? presenter.contact.corp_client.id : '', placeholder: 'Client ID' },
+          prepends:     [{ label: '<i class="fa fa-building"></i>' }],
+          messages:     { note: presenter.contact.corp_client ? link_to(presenter.contact.corp_client.name, edit_clients_profile_path(presenter.contact.corp_client.id)).html_safe : 'Unassigned' }
+        } %>
+  <% end %>
+
+  <% unless @contact.new_record? %>
+    <%= bootstrap_info_field(
+          info:  presenter.contact.created_at ? Friendly.new.date(presenter.contact.created_at, presenter.client.time_zone, true) : 'Not Yet',
+          label: { title: 'Date created' }
+        ) %>
+    <%= bootstrap_info_field(
+          info:  presenter.contact.updated_at ? Friendly.new.date(presenter.contact.updated_at, presenter.client.time_zone, true) : 'Not Yet',
+          label: { title: 'Last updated' }
+        ) %>
+    <%= bootstrap_info_field(
+          info:  presenter.contact.last_contacted ? Friendly.new.date(presenter.contact.last_contacted, presenter.client.time_zone, true) : 'Not Yet',
+          label: { title: 'Last contacted' }
+        ) %>
+
+    <% if presenter.contact.trusted_form&.dig(:token).present? || presenter.contact.trusted_form&.dig(:cert_url).present? || presenter.contact[:ping_url].present? %>
+      <fieldset class="border rounded p-2 mt-3 mb-2">
+        <legend class="w-auto mb-0"><h6>ActiveProspect Links</h6></legend>
+        <%= bootstrap_info_field(
+              info:  link_to(presenter.contact.trusted_form&.dig(:token), presenter.contact.trusted_form&.dig(:token), target: '_blank', rel: 'noopener'),
+              label: { title: 'Token' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:  link_to(presenter.contact.trusted_form&.dig(:cert_url), presenter.contact.trusted_form&.dig(:cert_url), target: '_blank', rel: 'noopener'),
+              label: { title: 'Certificate URL' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:  link_to(presenter.contact.trusted_form&.dig(:ping_url), presenter.contact.trusted_form&.dig(:ping_url), target: '_blank', rel: 'noopener'),
+              label: { title: 'Ping Url' }
+            ) %>
+      </fieldset>
+    <% end %>
+  <% end %>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [
+          { title: 'Save & Open in Message Central', id: 'submit_open_button', disable_with: 'Saving Contact Profile' },
+          { title: 'Save Contact Profile', id: 'submit_button', disable_with: 'Saving Contact Profile' }
+        ]
+      ) %>
+<% end %>
+
+<script>
+  $(function() {
+
+    <% if @contact.errors.any? %>
+      ChiirpAlert({
+        'title':      'Unable to Save Contact!',
+        'body':       '<%= @contact.errors.full_messages.join('<br />').html_safe -%>',
+        'type':       'danger',
+        'persistent': true
+      });
+    <% end %>
+
+    $("#new_contact").on("click", function (e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        url:    '<%= new_contact_path -%>'
+      });
+    });
+
+    if ($('.not_important')) {
+      $('.not_important').hide();
+      var first_button = parseInt($('.not_important_button').first().data('index'));
+
+      $('.not_important_button').each( function(i, item) {
+        if (parseInt( $(item).data('index')) > first_button) {
+          $('#hide_important_' + $(item).data('index')).remove();
+        }
+      });
+
+      $('#hide_important_button_' + first_button).on('click', function(e) {
+        $('.not_important').toggle('slow');
+      });
+    }
+
+    $('#submit_button').on('click', function(e) {
+      if ($('#contact_phone_phone_').length && $('#contact_phone_phone_').val().length > 0) {
+        $('#contact_phone_phone_').trigger("$.Event('keypress', {which: 13})");
+      }
+    });
+  });
+</script>

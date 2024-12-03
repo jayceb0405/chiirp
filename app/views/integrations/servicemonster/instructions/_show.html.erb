@@ -1,0 +1,100 @@
+<%
+  # app/views/integrations/servicemonster/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">ServiceMonster Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>ServiceMonster integration provides lead generation and 2-way text messaging capabilities at every point of customer communications.</li>
+      <li>A ServiceMonster connection is required.</li>
+      <li>The ServiceMonster Account ID, phone numbers & email address are used to match a customer received into <%= I18n.t('tenant.name') -%>.</li>
+      <li>A ServiceMonster connection to <%= I18n.t('tenant.name') -%> must be established from the Marketplace in ServiceMonster.</li>
+    </ul>
+
+    <h6>Push Contacts:</h6>
+    <ul>
+      <li>When a Contact is ready to become a customer you will want to push that Contact into ServiceMonster.</li>
+      <li>Select a Tag that, when applied, will trigger <%= I18n.t('tenant.name') -%> to push that Contact's data into ServiceMonster.</li>
+      <li>Whenever you want to push a Contact into ServiceMonster simply apply that Tag.</li>
+    </ul>
+
+    <h6>Events:</h6>
+    <ul>
+      <li>When events happen in ServiceMonster (a customer is created, an order is created, etc) an action can be triggered in <%= I18n.t('tenant.name') -%>.</li>
+      <li>ServiceMonster events are as follows...</li>
+      <ul>
+        <li>Account Created</li>
+        <li>Account Updated</li>
+        <li>Account Invoiced</li>
+        <li>Account Deleted</li>
+        <li>Order Created</li>
+        <li>Order Updated</li>
+        <li>Order Invoiced</li>
+        <li>Order Deleted</li>
+        <li>Appointment Created</li>
+        <li>Appointment Updated</li>
+        <li>Appointment Deleted</li>
+      </ul>
+      <li>Select a Campaign, Tag, etc to fire when a specific event takes place in ServiceMonster.</li>
+      <li>To further define ServiceMonster event actions you may also select line items that should appear in an Order to trigger actions.</li>
+      <li>Orders (estimates, work orders & invoices) provide for additional criteria to determine trigger actions.</li>
+      <li>Orders may trigger Campaigns leading up to scheduled dates.</li>
+      <li>Orders data are accessible through hashtag replacement fields in Campaigns that are started by events.</li>
+      <li>Hashtags available are as follows...</li>
+      <ul>
+        <li>Estimate Number</li>
+        <li>Estimate Status</li>
+        <li>Estimate Scheduled Start Date</li>
+        <li>Estimate Scheduled End Date</li>
+        <li>Estimate Started Date</li>
+        <li>Estimate Completed Date</li>
+        <li>Order Invoice Number</li>
+        <li>Order Status</li>
+        <li>Order Scheduled Start Date</li>
+        <li>Order Scheduled End Date</li>
+        <li>Order Started Date</li>
+        <li>Order Completed Date</li>
+        <li>Order Total</li>
+        <li>Order Balance</li>
+        <li>Technician ID</li>
+        <li>Technician Name</li>
+        <li>Technician Phone Number</li>
+        <li>Technician Email</li>
+        <li>Technician Image</li>
+      </ul>
+      <li>Account Types & Account SubTypes lists are automatically populated from received events.</li>
+      <li>Order Groups & Order SubGroups lists are automatically populated from received events.</li>
+    </ul>
+
+    <h6>Employees</h6>
+    <ul>
+      <li>Match ServiceMonster employees to <%= I18n.t('tenant.name') -%> Users.</li>
+      <li>Events may be configured to assign a Contact to a User when triggered.</li>
+    </ul>
+
+    <h6>Update Contacts</h6>
+    <ul>
+      <li>Import all of your ServiceMonster accounts into <%= I18n.t('tenant.name') -%>.</li>
+      <li>Choose whether to update existing <%= I18n.t('tenant.name') -%> Contacts or only import new ServiceMonster accounts.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

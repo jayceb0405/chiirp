@@ -1,0 +1,18 @@
+<%
+# app/views/integrations/pcrichard/v1/models/_model.html.erb
+#
+# Example:
+#   render partial: "integrations/pcrichard/v1/models/model", collection: presenter.current_models, as: :model, locals: { presenter: Presenter }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) model:     (Model)
+#   (req) presenter: (Presenter)
+#
+-%>
+<tr>
+  <td class="text-left align-middle"><%= model.dig(:model) -%></td>
+  <td class="text-left align-middle"><%= model.dig(:desc) -%></td>
+</tr>

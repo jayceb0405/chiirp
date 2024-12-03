@@ -1,0 +1,58 @@
+<%
+# app/views/integrations/servicetitan/contacts/balances/index.html.erb
+#
+# Example:
+#   render partial: "integrations/servicetitan/contacts/balances/index"
+#
+# Instance Variables:
+#   (req) @contacts: (Contacts)
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner">
+
+    <header class="page-title-bar">
+      <div class="d-flex justify-content-between">
+        <h1 class="page-title"><%= image_tag('integrations/servicetitan/logo.png', { class: 'mr-2', style: 'height:40px;' }).html_safe -%>ServiceTitan Contact Balances</h1>
+        <!-- <div class="btn-toolbar"> -->
+          <!-- <button type="button" class="btn btn-info">Add team</button> -->
+        <!-- </div> -->
+      </div>
+    </header>
+
+    <div class="page-section">
+      <div class="card-deck-xl card-margins-mobile">
+        <div class="card card-fluid ml-0">
+          <h6 class="card-header d-flex justify-content-between">
+            <span class="my-auto"></span>
+            <span>
+            </span>
+          </h6>
+
+          <div class="card-body">
+            <div class="table-responsive">
+              <table class="table">
+
+                <thead>
+                  <tr>
+                    <th class="text-left"> Contact </th>
+                    <th class="text-right"> Account Balance </th>
+                    <th style="width:100px; min-width:100px;"></th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <%= render partial: 'integrations/servicetitan/contacts/balances/contact', collection: @contacts %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

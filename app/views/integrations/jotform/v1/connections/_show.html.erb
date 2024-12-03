@@ -1,0 +1,101 @@
+<%
+  # app/views/integrations/jotform/v1/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/jotform/v1/show"
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jotform::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jotform::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect <%= I18n.t('tenant.name') -%> to JotForm</h6>
+  <div class="card-body">
+
+    <% if !presenter.user_api_integration.api_key.empty? %>
+      <%= bootstrap_info_field(
+            info: '<i class="fa fa-link text-success mr-2"></i>JotForm API Key was created.',
+            row:  { columns: [0, 12] }
+          ) %>
+    <% else %>
+      <%= bootstrap_info_field(
+            info: '<i class="fa fa-link text-danger mr-2"></i>JotForm API Key must be created. Click "Connect to JotForm" to create API Key.',
+            row:  { columns: [0, 12] }
+          ) %>
+    <% end %>
+
+    <% presenter.jotform_forms.each do |form_id, form| %>
+      <% if presenter.webhook(form_id).nil? %>
+        <%= bootstrap_info_field(
+              info:         "<i class=\"mdi mdi-webhook text-danger mr-2\"></i>Webhook NOT found for \"#{form[:title]}\" form - Create Webhook Now",
+              info_wrapper: { tag: 'a', href: integrations_jotform_v1_subscriptions_path(form_id:, subscribe: true), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': 'patch', rel: 'nofollow' },
+              row:          { columns: [0, 12] }
+            ) %>
+      <% else %>
+        <%= bootstrap_info_field(
+              info:         "<i class=\"mdi mdi-webhook text-success mr-2\"></i>Webhook found for \"#{form[:title]}\" form - Delete Webhook Now",
+              info_wrapper: { tag: 'a', href: integrations_jotform_v1_subscriptions_path(form_id:, webhook_id: presenter.webhook(form_id)[0], subscribe: false), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': 'patch', rel: 'nofollow' },
+              row:          { columns: [0, 12] }
+            ) %>
+      <% end %>
+    <% end %>
+
+    <div class="mt-auto">
+      <div class="form-actions">
+        <%= button_tag 'Connect to JotForm', { id: 'get_api_key', class: 'btn btn-info ml-auto' } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.jotform.com/JotForm.js"></script>
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+
+    $('#get_api_key').on("click", function(e) {
+      //JF.login(success, error) method takes two optional arguments
+      //Both arguments should be function
+      //First argument will be called after successful login
+      //Second argument will be called if authorization fails
+      JF.login(
+
+        function success(){
+          var apiKey = JF.getAPIKey();
+          console.log(apiKey);
+
+          $.ajax({
+            method: 'POST',
+            dataType: 'turbo_stream',
+            accepts: {
+              'turbo_stream': 'text/vnd.turbo-stream.html'
+            },
+            converters: {
+              'text turbo_stream': function (data) {
+                Turbo.renderStreamMessage(data);
+              }
+            },
+            url: '<%= integrations_jotform_v1_connections_path -%>',
+            data: { api_key: apiKey }
+          });
+          // JF.getForms(function(response){
+          //   for(var i=0; i<response.length; i++){
+          //     document.write( "<li> " + response[i].title);
+          //   }
+          // });
+        },
+
+        function error(){
+          window.alert("Could not authorize user");
+        }
+      );
+    });
+  });
+</script>

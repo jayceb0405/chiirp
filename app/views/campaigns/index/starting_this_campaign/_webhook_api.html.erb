@@ -1,0 +1,19 @@
+<%
+  # app/views/campaigns/index/starting_this_campaign/_webhook_api.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/index/starting_this_campaign/webhook_api', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+-%>
+<% if presenter.webhook_apis_starting_this_campaign(presenter.campaign.id).present? %>
+  <%= link_to '<i class="mdi mdi-webhook img-fluid"></i>'.html_safe,
+              integrations_webhook_integration_path(card: 'apis'),
+              class: 'btn btn-sm btn-icon btn-secondary' %>
+<% end %>

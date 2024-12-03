@@ -1,0 +1,95 @@
+<%
+  # app/views/clients/folders/_folder.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/folders/folder', collection: folders, locals: { client_presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   folder: (folder)
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#folder_<%= folder.id.to_s -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_folder_name_<%= folder.id -%>">
+    <%= folder.name -%>
+  </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(folder.created_at, cp.client.time_zone, true) -%> </td>
+  <td class="text-center align-middle"> <%= folder.folder_assignments.count.to_s -%> </td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#folder_#{folder.id}"
+                   }) %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_folder_#{folder.id}"
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="folder_<%= folder.id -%>">
+  <!-- folder -->
+</tr>
+
+<script>
+  $(function() {
+
+    <% if folder.new_record? %>
+      $('#folder_<%= folder.id -%>').html('<%= j render partial: 'clients/folders/edit' -%>');
+      $('#folder_<%= folder.id -%>').collapse('show');
+
+      $('#button_delete_folder_<%= folder.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= client_folders_path(cp.client) -%>'
+        });
+      });
+    <% else %>
+      $('#folder_<%= folder.id -%>').on('show.bs.collapse', function () {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= edit_client_folder_path(cp.client, folder) -%>'
+        });
+      });
+
+      $('#button_delete_folder_<%= folder.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= folder.name -%>" can NOT be un-done. Is it your intention to delete this <%= Folder.title.downcase -%>?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{folder.id}" }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_<%= folder.id -%>');
+        $(document).on('click', '#button_dump_it_<%= folder.id -%>', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= client_folder_path(cp.client.id, folder.id) -%>'
+          });
+        });
+      });
+    <% end %>
+
+  });
+</script>

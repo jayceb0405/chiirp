@@ -1,0 +1,56 @@
+<%
+  # app/views/integrations/webhooks/apis/edit/_variable_response_options.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/edit/variable_response_options', locals: { presenter: Integrations::Webhooks::Presenter, option: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:          (Integrations::Webhooks::Presenter)
+  #   (req) option:             (Array) ex: [key, value]
+  #   (opt) variable_response:  (Boolean)
+  #   (opt) variable_responses: (Hash)
+  #   (opt) reserved_key:       (Boolean)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter) && local_assigns.dig(:option).is_a?(Array)
+
+  variable_response = presenter.webhook.variable_response_from_external_key?(presenter.webhook.data_type, presenter.client, option.first) if local_assigns.dig(:variable_response).nil?
+
+  return unless variable_response
+
+  variable_responses = presenter.webhook.variable_responses_from_external_key(presenter.webhook.data_type, presenter.client, option.first) if local_assigns.dig(:variable_responses).nil?
+  reserved_key       = presenter.webhook.reserved_external_key?(presenter.webhook.data_type, presenter.client, option.first) if local_assigns.dig(:reserved_key).nil?
+-%>
+<div class="row">
+  <div class="col-9 offset-3">
+    <table class="table table-no-border">
+      <thead>
+        <tr>
+          <th class="p-1" width="50%">Response</th>
+          <th class="p-1" width="50%">Action</th>
+        </tr>
+      </thead>
+      <tbody id="zapier_webhook_form_table_body">
+        <% counter = 0 %>
+
+        <% variable_responses.each do |rk, rv| %>
+          <%= render partial: 'integrations/webhooks/apis/edit/form_keyresponse', locals: { actions: rv, key: option.first, presenter:, response: rk, response_counter: counter } %>
+          <% counter += 1 %>
+        <% end %>
+
+        <% if counter == 0 %>
+          <%= render partial: 'integrations/webhooks/apis/edit/form_keyresponse', locals: { actions: '', key: option.first, presenter:, response: '', response_counter: counter } %>
+          <% counter += 1 %>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% if reserved_key %>
+      <div id="zapier_webhook_form_add_response">
+        <%= render partial: 'integrations/webhooks/apis/edit/form_add_response', locals: { counter:, key: option.first, webhook: presenter.webhook } %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+<%
+# app/views/campaigns/show/_help.html.erb
+#
+# Example:
+#   render partial: 'campaigns/show/help'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="collapse app_collapse-inner mx-5 px-5 py-3" id="campaign_general_help">
+  <small class="text-muted">
+    <div class="mb-2" id="campaign_analysis_results_help">
+      <%= render partial: 'campaigns/show/analysis_info', locals: { campaign: @campaign } %>
+    </div>
+
+    Campaign Help:
+    <ul class="fa-ul">
+      <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Campaigns support automated interactions with your Contacts and Users using <%= I18n.t('tenant.name') -%>.</li>
+      <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Campaign Triggers begin Actions.</li>
+      <ul>
+        <li>A Campaign may start immediately when applied to a Contact or triggered by various actions within <%= I18n.t('tenant.name') -%>.</li>
+        <li>A text message received with a keyword (Trigger) can send a text message response (Action).</li>
+        <li>Campaigns may also be Triggered by a birthdate, an incoming phone call, a specific date or an upcoming event or appointment.</li>
+        <li>Campaigns may be scheduled starting from a date or leading up to a date.</li>
+        <li>Campaigns may start other Campaigns to form a chain of triggers & actions.</li>
+        <li>Campaigns may also have a chain of triggers.</li>
+      </ul>
+      <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Creating a Campaign.</li>
+      <ol>
+        <li>Name your Campaign and click "Save Campaign".</li>
+        <li>Configure a Trigger and click "Save Trigger".</li>
+        <ul>
+          <li>Most Triggers will be "Start a Drip Campaign (Immediately)" but could also be based on a keyword received in a text message.</li>
+        </ul>
+        <li>Select Actions for that Trigger, configure them and save each one.</li>
+        <li>Create more Triggers as desired.</li>
+        <ul>
+          <li>Most Campaigns will have one Trigger with various Actions.</li>
+        </ul>
+      </ul>
+    </ul>
+  </small>
+</div>

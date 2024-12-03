@@ -1,0 +1,67 @@
+<%
+  # /app/views/my_contacts/js/_show.js.erb
+  #
+  # Example:
+  # 	render partial: 'my_contacts/js/show', locals: { cards: Array, broadcast: Boolean, page_number: Integer }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (opt) broadcast:   (Boolean)
+  #   (opt) cards:       (Array)
+  #   (opt) page_number: (Integer)
+  #
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast   = local_assigns.dig(:broadcast).to_bool
+  presenter.page_number = local_assigns.dig(:page_number).to_i
+-%>
+<% if cards.include?('index_search') %>
+  $('#navbar-inner_button_close').hide();
+  $('#navbar-inner_button_open').show();
+  $('#sidebar-inner').removeClass('slideInLeft');
+  $('#sidebar-inner').addClass('slideOutLeft');
+  $('#contacts_search').html('<%= j render partial: 'my_contacts/search/index', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('index_actions') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-users-cog mr-2"></i>Scheduled Broadcast Actions');
+  $('#dash_modal_body').html('<%= j render partial: 'my_contacts/broadcast/action_list', locals: { presenter: } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+<% if cards.include?('index_my_contacts') %>
+  $('#dash_modal').modal('hide');
+
+  if ($('#contacts_list').length > 0) {
+    $('#contacts_list').html('<%= j render partial: 'my_contacts/broadcast/show', locals: { presenter: } -%>');
+  }
+
+  if ( $('#client_onboarding_new_contact').length > 0 ) {
+    <% if presenter.client.contacts.any? %>
+      $('#client_onboarding_new_contact').removeClass('fa-exclamation-triangle text-app');
+      $('#client_onboarding_new_contact').addClass('fa-check-double text-success');
+    <% else %>
+      $('#client_onboarding_new_contact').removeClass('fa-check-double text-success');
+      $('#client_onboarding_new_contact').addClass('fa-exclamation-triangle text-app');
+    <% end %>
+  }
+
+  Looper.hideSidebar();
+<% end %>
+
+<% if cards.include?('index_contacts') %>
+  $('#my_contacts').html('<%= j render partial: 'my_contacts/broadcast/contacts', locals: { presenter: } %>')
+<% end %>
+<%# actions %>
+<% if cards.length == 1 && cards.intersect?(%w[start_campaign stop_campaign contact_awake contact_delete export_csv contact_sleep send_email add_group remove_group assign_lead_source ok2text_on ok2text_off send_rvm add_stage remove_stage add_tag remove_tag send_text assign_user]) %>
+  $('#broadcast_action').html('<%= j render partial: "my_contacts/broadcast/actions/#{cards.first}", locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+$('.tooltip').remove();
+
+Looper.init();

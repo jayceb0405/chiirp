@@ -1,0 +1,98 @@
+<%
+# app/views/layouts/looper/common/header/_help.html.erb
+#
+# Example:
+#   render partial: 'layouts/looper/common/header/help'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<% if current_user %>
+  <li class="nav-item dropdown header-nav-dropdown">
+    <a class="nav-link" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <span class="fa fa-question"></span>
+    </a>
+
+    <div class="dropdown-menu dropdown-menu-rich dropdown-menu-right" id="navbar_dropdown_menu">
+      <div class="dropdown-arrow"></div>
+      <h6 class="dropdown-header stop-propagation">
+        <span>Need Help?</span> <span><small>We want you to succeed!</small></span>
+      </h6>
+      <div class="dropdown-scroll perfect-scrollbar" style="height:397px;">
+
+        <!-- Facebook Support Group -->
+        <%= link_to('https://www.facebook.com/groups/1205858082902946', { class: 'dropdown-item unread', target: '_blank', rel: 'noopener' }) do %>
+          <div class="tile tile-circle bg-indigo"><i class="fab fa-facebook"></i></div>
+          <div class="dropdown-item-body">
+            <p class="subject"> Facebook </p>
+            <p class="text text-truncate"> CHIIRP - User Support Group </p>
+            <span class="date">Engage with the CHIIRP community!</span>
+          </div>
+        <% end %>
+
+        <!-- Training -->
+        <% if current_user.client.active? && current_user.access_controller?('trainings', 'allowed', session) %>
+
+          <% current_user.client.training.each do |training_id| %>
+            <% if (training = Training.find_by(id: training_id)) %>
+
+              <%= link_to(main_app.training_path(training.id), { class: 'dropdown-item unread' }) do %>
+                <div class="tile tile-circle bg-teal"><i class="fa fa-graduation-cap"></i></div>
+                <div class="dropdown-item-body">
+                  <p class="subject"> Training Video </p>
+                  <p class="text text-truncate"> <%= training.menu_label -%> </p>
+                </div>
+              <% end %>
+
+            <% end %>
+          <% end %>
+
+          <% if current_user.super_admin? %>
+            <%= link_to(new_training_path, { class: 'dropdown-item unread' }) do %>
+              <div class="tile tile-circle bg-teal"><i class="fa fa-graduation-cap"></i></div>
+              <div class="dropdown-item-body">
+                <p class="subject"> Training Video </p>
+                <p class="text text-truncate"> Create New Training </p>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+
+        <!-- Support Hours -->
+        <a href="#" class="dropdown-item unread stop-propagation">
+          <div class="tile tile-circle bg-indigo"><i class="fa fa-clock"></i></div>
+          <div class="dropdown-item-body">
+            <p class="subject"> Support Hours </p>
+            <p class="text text-truncate"> <%= I18n.t("tenant.#{Rails.env}.support_hours") %> </p>
+          </div>
+        </a>
+
+        <!-- Text Support -->
+        <%= link_to((browser.device.mobile? ? "sms:+1-#{I18n.t("tenant.#{Rails.env}.phone_number")};?&body=HELP" : '#'), { class: 'dropdown-item unread' }) do %>
+          <div class="tile tile-circle bg-green"><i class="fa fa-comments"></i></div>
+          <div class="dropdown-item-body">
+            <p class="subject"> Text Support </p>
+            <p class="text text-truncate"> <%= number_to_phone(I18n.t("tenant.#{Rails.env}.phone_number"), { area_code: true }) -%> </p>
+            <span class="date">24 hour turn around</span>
+          </div>
+        <% end %>
+
+        <!-- Email Support -->
+        <%= link_to("mailto:#{I18n.t("tenant.#{Rails.env}.support_email")}?Subject=Help With #{I18n.t('tenant.name')}", { class: 'dropdown-item unread' }) do %>
+          <div class="tile tile-circle <%= bubble_color -%>"><i class="fa fa-envelope"></i></div>
+          <div class="dropdown-item-body">
+            <p class="subject"> Email Support </p>
+            <p class="text text-truncate"> <%= I18n.t("tenant.#{Rails.env}.support_email").to_s -%> </p>
+            <span class="date">24 hour turn around</span>
+          </div>
+        <% end %>
+
+      </div>
+      <!-- <a href="page-messages.html" class="dropdown-footer">All messages <i class="fa fa-fw fa-long-arrow-alt-right"></i></a> -->
+    </div>
+  </li>
+<% end %>

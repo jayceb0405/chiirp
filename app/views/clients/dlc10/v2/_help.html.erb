@@ -1,0 +1,62 @@
+<%
+  # app/views/clients/dlc10/v2/_help.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/help', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<header class="page-title-bar" id="breadcrumb">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active">
+        <%= link_to(edit_clients_dlc10_brand_path(presenter.client), { class: 'nav-link', remote: true }) do %>
+          <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Return to 10DLC Brand & Use Cases
+        <% end %>
+      </li>
+    </ol>
+  </nav>
+</header>
+
+<h6>General:</h6>
+<ul>
+  <li>10DLC is a new program created by the major carriers (AT&T, T-Mobile, US Cellular & Verizon) to help maintain the integrity of text messaging.</li>
+  <li>As legitimate business owners it sucks when scammers come in and ruin a good thing...  Think “email spam”. Email was once the king of digital communication... but spammers and scammers ruined it!</li>
+  <li>We don’t want the same to happen to text messaging.  So the carriers are taking strides to keep the spammers out so that legitimate businesses can continue to enjoy the awesome value that comes from text message automation.</li>
+  <li class="font-italic font-weight-bold text-info">10DLC is a simple registration process that shows the carriers that you are legit.</li>
+  <li>Here are some of the benefits that will come from registering your SMS traffic:</li>
+  <ol>
+    <li>Increased Deliverability: your messages will be sent from a verified source and have a much smaller chance of being filtered as spam</li>
+    <li>Increased Throughput: Registered businesses will be able to send more text messages throughout the day</li>
+    <li>Automatic Registration Renewal: no need to continually submit your messages for approval</li>
+  </ol>
+  <li>Register your Brand (company info) & Use Cases (messages) with The Campaign Registry (TCR) to increase your text message deliverability.</li>
+  <li>The Campaign Registry was formed by AT&T, T-Mobile, US Cellular & Verizon to regulate and monetize text messages sent from businesses.</li>
+  <li>All TCR registrations (brand & use cases) are completed in <%= I18n.t('tenant.name') -%>.</li>
+
+  <% if presenter.client.dlc10_charged %>
+    <li>TCR Fees</li>
+    <ul>
+      <li>Your credit card (on file) will be charged...</li>
+      <ol>
+        <li>the $5.00 TCR fee for each Brand submittal or re-submittal.</li>
+        <li>the appropriate TCR fee ($20.00 in most cases) for each Use Case submittal or re-submittal.</li>
+        <li>the appropriate TCR fee ($12.00 in most cases) each month for each Use Case submitted.</li>
+      </ol>
+      <li>TCR Use Cases are automatically renewed every 3 months for an additional 3 months.</li>
+    </ul>
+  <% end %>
+</ul>
+
+<h6>Definitions:</h6>
+<ul>
+  <li>Brand - your company name and info.</li>
+  <li>Use Case - your text messages (loosely grouped by message text).</li>
+  <li>A2P - Application to Person (all text messages originating from <%= I18n.t('tenant.name') -%> are considered "Application" messages).</li>
+</ul>

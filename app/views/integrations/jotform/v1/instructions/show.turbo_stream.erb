@@ -1,0 +1,14 @@
+<%
+  # /app/views/integrations/jotform/v1/instructions/show.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Jotform::V1::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/jotform/v1/instructions/show', locals: { presenter: } %>
+<% end %>

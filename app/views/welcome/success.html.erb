@@ -1,0 +1,61 @@
+<%
+  # app/views/welcome/success.html.erb
+  # 
+  # Example:
+  #   welcome_success_path(Client.id)
+  # 
+  # Required Parameters:
+  #   id: (Integer) Client ID
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<section class="position-relative py-5 bg-light">
+  <div class="container position-relative">
+    <h2 class="text-center"> Welcome to <%= I18n.t('tenant.name') -%> </h2>
+    <p class="lead text-muted text-center mb-5"> Let's get started! </p>
+  </div>
+
+  <div class="col-lg-6 offset-lg-3 mt-2 mb-2">
+    <div class="card">
+      <div class="card-body">
+
+        <p class="card-text">
+          <p class="pt-3">
+            <strong>Watch for your email. It includes your log in information.</strong>
+          </p>
+
+          <% if I18n.t('tenant.facebook').present? || I18n.t('tenant.youtube').present? || I18n.t('tenant.id').to_s.downcase == 'chiirp' %>
+            <h5 class="pt-5">More Information:</h5>
+
+            <% if I18n.t('tenant.facebook').present? %>
+              <p class="pt-2">
+                <%= link_to '', "https://www.facebook.com/#{I18n.t('tenant.facebook')}", { class: 'text-primary fab fa-facebook', target: '_blank' } %>
+                Like our <%= link_to 'FaceBook page', "https://www.facebook.com/#{I18n.t('tenant.facebook')}/", { style: 'text-decoration:underline;', target: '_blank' } %> to stay current with our updates and ask questions if needed.
+              </p>
+            <% end %>
+
+            <% if I18n.t('tenant.youtube').present? %>
+              <p class="pt-2">
+                <%= link_to '', "https://www.youtube.com/channel/#{I18n.t('tenant.youtube')}", { class: 'text-danger fab fa-youtube', target: '_blank' } %>
+                Subscribe to our <%= link_to 'YouTube channel', "https://www.youtube.com/channel/#{I18n.t('tenant.youtube')}", { style: 'text-decoration:underline;', target: '_blank' } %> and learn from the best.
+              </p>
+            <% end %>
+
+            <% if I18n.t('tenant.id').to_s.downcase == 'chiirp' %>
+              <p class="pt-2">
+                <%= link_to '', 'https://www.facebook.com/groups/1205858082902946/?ref=group_header', { class: 'text-primary fab fa-facebook', target: '_blank' } %>
+                Join our <%= link_to 'Chiirp Private Mastermind', 'https://www.facebook.com/groups/1205858082902946/?ref=group_header', { style: 'text-decoration:underline;', target: '_blank' } %> Facebook group to share ideas and knowledge.
+              </p>
+            <% end %>
+          <% end %>
+
+        </p>
+      </div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,49 @@
+<%
+  # app/views/dashboards/_dash_buttons.html.erb
+  #
+  # Example:
+  #   render partial: "dashboards/dash_buttons", locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<div class="row invisible-box list-group-dashboard" id="dash_buttons_inner_div">
+  <% presenter.dashboard_buttons.each do |dashboard_button| %>
+    <%
+      dashboard_button_split = dashboard_button.split('_')
+      dashboard_button_id    = dashboard_button_split.last.to_i
+      dashboard_button_split.pop if dashboard_button_id.positive?
+      dashboard_button_type = dashboard_button_split.join('_')
+    %>
+
+    <%= turbo_frame_tag dashboard_button_type, src: button_show_dashboard_path(dashboard_button_type, id: dashboard_button_id), class: "col-xl-4 col-lg-4 col-md-6 #{dashboard_button_id.to_s.empty? ? '' : 'list-group-dashboard__item'}", data: { button_id: dashboard_button } do %>
+      <div class="d-flex justify-content-center">
+        <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo m-4' %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    $('#dash_buttons_inner_div').sortable({
+      handle: '.dash-button-alpha__handle', // handle's class
+      animation: 150,
+      dataIdAttr: 'data-button-id',
+      ghostClass: 'dash-button-alpha__ghost',
+      onEnd: function(e) {
+
+        $.ajax({
+          type: 'PATCH',
+          url: '/dashboards/buttons/<%= presenter.dashboard_id -%>',
+          data: { dashboard_buttons: $('#dash_buttons_inner_div').sortable('toArray') }
+        });
+      }
+    });
+  });
+</script>

@@ -1,0 +1,64 @@
+<%
+  # app/views/integrations/servicetitan/reports/_report.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/report', collection: Array, as: :report, locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   (opt) @report: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #   (opt) report:    (Hash)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+
+  presenter.report = report
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#edit_report_#{presenter.report_id}"
+                   }) do %>
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    <% end %>
+  </td>
+  <td class="text-left align-middle">
+    <%= button_tag(presenter.report_name,
+                   class: 'btn',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#edit_report_#{presenter.report_id}"
+                   }) %>
+  </td>
+  <td class="text-left align-middle"><%= presenter.report_name -%></td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#edit_report_#{presenter.report_id}"
+                   }) %>
+    <%= link_to '',
+                integrations_servicetitan_report_path(presenter.report_id),
+                {
+                  class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt report_delete',
+                  data:  {
+                    id:   presenter.report_id,
+                    name: presenter.report_name
+                  }
+                } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_report" id="edit_report_<%= presenter.report_id -%>">
+  <td colspan="11" class="mt-3 text-center">
+    <%= render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Report' } %>
+  </td>
+</tr>

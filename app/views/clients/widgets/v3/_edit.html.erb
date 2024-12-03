@@ -1,0 +1,117 @@
+<%
+  # app/views/clients/widgets/v3/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/edit'
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @client_widget.new_record? && @client_widget.widget_name.to_s.empty?
+
+  presenter        = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+  presenter.widget = @client_widget
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.widget] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= presenter.widget.widget_name -%></span>
+
+      <% unless presenter.widget.new_record? %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_clients_widget_delete'
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+
+      <%= f.text_field :widget_name, {
+            label:        { title: 'SiteChat Button Name' },
+            html_options: { id: 'clients_widget_widget_name', minlength: 2, placeholder: 'SiteChat Button Name', required: true, autofocus: true },
+            messages:     { note: 'Must be minimum of 2 characters.' }
+          } %>
+
+      <% if current_user.client.share_widgets_allowed && !presenter.widget.new_record? %>
+        <%= f.copy_field :share_code, {
+              label: { title: 'SiteChat Button Share Code' }
+            } %>
+      <% end %>
+
+      <% unless presenter.widget.new_record? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'SiteChat Button Embed Code' },
+              html_options: { value: "<script src='#{presenter.sitechat_url}'></script>" },
+              messages:     { note: 'Place this code in the HTML of your website between the <head> & <\head> tags.' }
+            } %>
+      <% end %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save SiteChat', id: 'clients_widget_form_submit', disable_with: 'Saving SiteChat' }] %>
+    <% end %>
+
+    <div class="section-block">
+      <div class="card-expansion" id="clients_widget_accordion">
+        <div class="card card-expansion-item" id="clients_widget_button_outer">
+          <%= render partial: 'clients/widgets/v3/forms/button', locals: { widget_presenter: presenter } %>
+        </div>
+
+        <div class="card card-expansion-item" id="clients_widget_bubble_outer">
+          <%= render partial: 'clients/widgets/v3/forms/bubble', locals: { widget_presenter: presenter } %>
+        </div>
+
+        <div class="card card-expansion-item" id="clients_widget_window_outer">
+          <%= render partial: 'clients/widgets/v3/forms/window', locals: { widget_presenter: presenter } %>
+        </div>
+
+        <div class="card card-expansion-item" id="clients_widget_custom_fields_outer">
+          <%= render partial: 'clients/widgets/v3/forms/custom_fields', locals: { widget_presenter: presenter } %>
+        </div>
+
+        <div class="card card-expansion-item" id="clients_widget_actions_outer">
+          <%= render partial: 'clients/widgets/v3/forms/actions', locals: { widget_presenter: presenter } %>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+  $(function() {
+
+    if ($.isEmptyObject(window.google_fonts)) {
+
+      $.getJSON('https://webfonts.googleapis.com/v1/webfonts?sort=ALPHA&key=AIzaSyAc5_9jU8P5EzvH8jYRidM31o3k4q9CqJk').done(function(json) {
+        window.google_fonts = json.items;
+        $('head').append('<style id="font-styles"></style>');
+
+        $.each(window.google_fonts, function(i, font) {
+
+          if (font.variants.includes('regular')) {
+            $('head').append('<link href="https://fonts.googleapis.com/css?family=' + font.family + '" rel="stylesheet" type="text/css">');
+            $('#font-styles').append('.font-' + font.family.toLowerCase().replace(/ /g,"_") + ' {font-family: "' + font.family + '";font-style:normal;font-weight:400;}');
+          }
+        });
+      });
+    }
+
+    $('#submit_button_text').on('keyup', function() {
+      $('#submit_button_color').html($(this).val());
+    });
+
+    <% unless presenter.widget.new_record? %>
+      <%= render partial: 'snippets/js/confirm_alert', formats: :js, locals: {
+            element:     '#button_clients_widget_delete',
+            alert:       { body: "Deleting \"#{presenter.widget.widget_name}\" can NOT be un-done. Is it your intention to delete this SiteChat?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: presenter.widget_delete_path }
+          } %>
+    <% end %>
+  });
+</script>

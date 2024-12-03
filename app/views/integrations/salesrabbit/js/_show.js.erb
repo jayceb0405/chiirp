@@ -1,0 +1,39 @@
+<%
+  # app/views/integrations/salesrabbit/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: "integrations/salesrabbit/js/show", locals: { cards: Array }
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+  # Optional Local Variables:
+  #   none
+  # 
+-%>
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/overview' -%>');
+<% end %>
+<% if cards.include?('api_key') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/api_key' -%>');
+<% end %>
+<% if cards.include?('statuses') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/status_list' -%>');
+<% end %>
+<% if cards.include?('users') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/user_list' -%>');
+<% end %>
+<% if cards.include?('leads') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/leads' -%>');
+<% end %>
+<% if cards.include?('contacts') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/new_contact' -%>');
+<% end %>
+<% if cards.include?('instructions') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/salesrabbit/instructions' -%>');
+<% end %>
+
+Looper.init();

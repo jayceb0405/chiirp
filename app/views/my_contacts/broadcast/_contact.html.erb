@@ -1,0 +1,128 @@
+<%
+  # app/views/my_contacts/broadcast/_contact.html.erb
+  #
+  # Example:
+  # 	render partial: "my_contacts/broadcast/contact", collection: @user.contacts.order(lastname: :desc, firstname: :desc), locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) contact:   (Contact)
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+
+  presenter.contact = contact
+-%>
+<tr id="<%= dom_id presenter.contact %>">
+  <% if presenter.broadcast %>
+    <td class="px-1 align-middle" style="width: 1.5rem">
+      <%= bootstrap_check_box(
+            row:        { class: 'mb-0', columns: [0, 12] },
+            col:        { class: 'mb-0' },
+            label:      { class: 'mt-0' },
+            checkboxes: [{ field: "user_action[contacts][#{presenter.contact.id}]", class: 'user_action_select', id: "user_action_#{presenter.contact.id}", value: false, values: %w[1 0] }]
+          ) %>
+    </td>
+  <% end %>
+  <td class="text-left align-middle" colspan="2">
+    <%= link_to presenter.contact.lastname, edit_contact_path(presenter.contact.id), {
+          class:  'text-decoration-none text-reset',
+          method: :get,
+          remote: true
+        } %>
+  </td>
+  <td class="text-left align-middle">
+    <%= link_to presenter.contact.firstname, edit_contact_path(presenter.contact.id), {
+          class:  'text-decoration-none text-reset',
+          method: :get,
+          remote: true
+        } %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell">
+    <%= Friendly.new.date(presenter.contact.created_at, presenter.client.time_zone, false) %>
+  </td>
+  <td class="text-right align-middle">
+    <%= if presenter.client.message_central_allowed
+          link_to '', central_path(contact_id: presenter.contact.id), {
+            class: "btn btn-sm btn-icon btn-secondary fa fa-comments #{presenter.text_icon_color}",
+            title: 'Message Central',
+            data:  {
+              toggle:      'tooltip',
+              boundary:    'viewport',
+              turbo_frame: '_top'
+            }
+          }
+        end %>
+    <%= if presenter.client.id == I18n.t("tenant.#{Rails.env}.client_id") && presenter.contact.corp_client
+          link_to '', edit_clients_profile_path(presenter.contact.corp_client.id), {
+            class: 'btn btn-sm btn-icon btn-secondary fa fa-star',
+            title: "User under #{presenter.contact.corp_client.name}",
+            data:  {
+              toggle:   'tooltip',
+              boundary: 'viewport'
+            }
+          }
+        end %>
+    <%= link_to '', edit_contact_path(presenter.contact.id), {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+          title: 'Edit',
+          data:  {
+            toggle:       'tooltip',
+            boundary:     'viewport',
+            turbo_stream: true
+          }
+        } %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_contact_#{presenter.contact.id}",
+          title: 'Delete',
+          data:  {
+            toggle:   'tooltip',
+            boundary: 'viewport'
+          }
+        } %>
+  </td>
+</tr>
+
+<script>
+  $(function() {
+    $(document).off('click', '.user_action_select');
+    $(document).on('click', '.user_action_select', function(e) {
+      $('#select_switch').prop('checked', false);
+      $('#select_switch').val('false');
+      countSelectedContacts();
+      if (typeof updateTimeToComplete == 'function') updateTimeToComplete();
+    });
+
+    $('#button_delete_contact_<%= presenter.contact.id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':       'Deleting "<%= presenter.contact.fullname -%>" can NOT be un-done. Is it your intention to delete this Contact?',
+        'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{presenter.contact.id}" }].to_json) -%>,
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= presenter.contact.id -%>');
+      $(document).on('click', '#button_dump_it_<%= presenter.contact.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          dataType: 'turbo_stream',
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '<%= contact_path(presenter.contact) -%>',
+          data: { broadcast: '<%= presenter.broadcast -%>' }
+        });
+      });
+    });
+  });
+</script>

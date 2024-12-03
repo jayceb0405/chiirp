@@ -1,0 +1,114 @@
+<%
+  # app/views/stages/_stage.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/stage', collection: Stages
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   stage: (Stage)
+  #
+  presenter       = local_assigns.dig(:stages_presenter)
+  presenter.stage = stage
+  presenter.user  = current_user
+-%>
+<div class="tasks" style="width:17rem;">
+  <div class="task-header d-flex justify-content-center">
+    <h3 class="task-title mr-auto"><%= stage.name -%><span class="badge text-muted" id="stage_<%= stage.id -%>_contact_count">(<%= presenter.contacts.length -%>)</span></h3>
+    <div class="dropdown">
+      <button class="btn btn-sm btn-icon btn-light" data-toggle="dropdown"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+      <div class="dropdown-menu dropdown-menu-right">
+        <div class="dropdown-arrow mr-n1"></div>
+        <div class="dropdown-item-text pb-0">Sort by...</div>
+        <%= link_to '<i class="fa fa-long-arrow-alt-up sort_arrow mr-2"></i> Lastname'.html_safe, '', {
+          class: "dropdown-item ml-3",
+          id: "sort_last_asc_#{stage.id}"
+        } %>
+        <%= link_to '<i class="fa fa-long-arrow-alt-down sort_arrow mr-2"></i> Lastname'.html_safe, '', {
+          class: "dropdown-item ml-3",
+          id: "sort_last_desc_#{stage.id}"
+        } %>
+        <%= link_to '<i class="fa fa-long-arrow-alt-up sort_arrow mr-2"></i> Firstname'.html_safe, '', {
+          class: "dropdown-item ml-3",
+          id: "sort_first_asc_#{stage.id}"
+        } %>
+        <%= link_to '<i class="fa fa-long-arrow-alt-down sort_arrow mr-2"></i> Firstname'.html_safe, '', {
+          class: "dropdown-item ml-3",
+          id: "sort_first_desc_#{stage.id}"
+        } %>
+        <%= link_to '<i class="fa fa-long-arrow-alt-up sort_arrow mr-2"></i> Last Updated'.html_safe, '', {
+          class: "dropdown-item ml-3",
+          id: "sort_updated_asc_#{stage.id}"
+        } %>
+        <%= link_to '<i class="fa fa-long-arrow-alt-down sort_arrow mr-2"></i> Last Updated'.html_safe, '', {
+          class: "dropdown-item ml-3",
+          id: "sort_updated_desc_#{stage.id}"
+        } %>
+        <%= form_with url: stage_parent_search_path(presenter.stage_parent.id), builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', novalidate: true do |f| %>
+          <%= hidden_field_tag 'stage_id', stage.id %>
+          <%= bootstrap_text_field(
+            field: 'search_string',
+            value: '',
+            row: { class: 'dropdown-item ', columns: [12, 0] },
+            form_group: { class: 'mb-0' },
+            label: { title: 'Filter by...', class: 'mt-0' },
+            html_options: { minlength: 1, autofocus: true }
+          ) %>
+          <input type="submit" style="display:none"/>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <div class="task-body" id="stage_<%= stage.id -%>" data-id="<%= stage.id -%>" data-name="<%= stage.name -%>">
+    <div class="d-flex justify-content-center">
+      <%= image_tag "tenant/#{I18n.t("tenant.id")}/logo.svg", class: 'spinning-logo' %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= stages_path -%>',
+      data: {
+        stage_parent_id: '<%= presenter.stage_parent.id -%>',
+        stage_id: '<%= stage.id -%>'
+      }
+    });
+
+    $(document).off('click', '#sort_last_asc_<%= stage.id -%>');
+    $(document).on('click', '#sort_last_asc_<%= stage.id -%>', function(e) {
+      e.preventDefault();
+      sortContacts(<%= stage.id -%>, 'data-lastname', 'asc');
+    });
+    $(document).off('click', '#sort_last_desc_<%= stage.id -%>');
+    $(document).on('click', '#sort_last_desc_<%= stage.id -%>', function(e) {
+      e.preventDefault();
+      sortContacts(<%= stage.id -%>, 'data-lastname', 'desc');
+    });
+    $(document).off('click', '#sort_first_asc_<%= stage.id -%>');
+    $(document).on('click', '#sort_first_asc_<%= stage.id -%>', function(e) {
+      e.preventDefault();
+      sortContacts(<%= stage.id -%>, 'data-firstname', 'asc');
+    });
+    $(document).off('click', '#sort_first_desc_<%= stage.id -%>');
+    $(document).on('click', '#sort_first_desc_<%= stage.id -%>', function(e) {
+      e.preventDefault();
+      sortContacts(<%= stage.id -%>, 'data-firstname', 'desc');
+    });
+    $(document).off('click', '#sort_updated_asc_<%= stage.id -%>');
+    $(document).on('click', '#sort_updated_asc_<%= stage.id -%>', function(e) {
+      e.preventDefault();
+      sortContacts(<%= stage.id -%>, 'data-updated', 'asc');
+    });
+    $(document).off('click', '#sort_updated_desc_<%= stage.id -%>');
+    $(document).on('click', '#sort_updated_desc_<%= stage.id -%>', function(e) {
+      e.preventDefault();
+      sortContacts(<%= stage.id -%>, 'data-updated', 'desc');
+    });
+  });
+</script>

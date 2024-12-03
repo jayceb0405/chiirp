@@ -1,0 +1,81 @@
+<%
+# app/views/integrations/servicetitan/connections/_show.html.erb
+#
+# Example:
+#   render partial: "integrations/servicetitans/connection/show"
+#
+# Instance Variables:
+#   (req) @client_api_integration: (ClientApiIntegration)
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connection</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_with url: integrations_servicetitan_connection_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+        <%= bootstrap_text_field(
+              field:        'credentials[tenant_id]',
+              value:        @client_api_integration.credentials.dig('tenant_id').to_s,
+              label:        { title: 'ServiceTitan v2 Tenant ID' },
+              html_options: { placeholder: 'Tenant ID', id: 'input_credentials_tenant_id' },
+              messages:     { note: 'Required for v2 APIs - received from ServiceTitan.' }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'credentials[client_id]',
+              value:        @client_api_integration.credentials.dig('client_id').to_s,
+              label:        { title: 'ServiceTitan v2 Client ID' },
+              html_options: { placeholder: 'Client ID', id: 'input_credentials_client_id', disabled: @client_api_integration.credentials.dig('tenant_id').blank? },
+              messages:     { note: 'Required for v2 APIs - received from ServiceTitan.' }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'credentials[client_secret]',
+              value:        @client_api_integration.credentials.dig('client_secret').to_s,
+              label:        { title: 'ServiceTitan v2 Secret' },
+              html_options: { placeholder: 'Secret', id: 'input_credentials_client_secret', disabled: @client_api_integration.credentials.dig('tenant_id').blank?, password: true },
+              messages:     { note: 'Required for v2 APIs - received from ServiceTitan.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'credentials[app_id]',
+              label:    { title: 'Assigned ST App' },
+              options:  { array: [['Chiirp', '01'], ['Chiirp 02', '02'], ['Chiirp 03', '03']], selected: @client_api_integration.credentials.dig('app_id'), disabled: @client_api_integration.credentials.dig('tenant_id').blank? },
+              messages: { note: "WARNING: Should only be changed by #{I18n.t('tenant.name')} staff." }
+            ) %>
+
+        <%= bootstrap_submit_buttons(
+              row:     { class: 'mb-3' },
+              buttons: [{ title: 'Save', disable_with: 'Saving' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+
+    $('#input_credentials_tenant_id').off('change');
+    $('#input_credentials_tenant_id').on('change', function() {
+
+      if ($('#input_credentials_tenant_id').val()) {
+        $('#input_credentials_client_id').prop( "disabled", false );
+        $('#input_credentials_client_secret').prop( "disabled", false );
+      } else {
+        $('#input_credentials_client_id').prop( "disabled", true );
+        $('#input_credentials_client_secret').prop( "disabled", true );
+      }
+    });
+
+  });
+</script>

@@ -1,0 +1,59 @@
+<%
+  # app/views/affiliates/index/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/index/edit', locals: { presenter: }
+  #
+  # Instance Variables:
+  #   (req) @affiliate: (Survey)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<td colspan="5">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.affiliate.initials -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.affiliate.company_name -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <%= form_with model: presenter.affiliate, builder: LooperFormBuilder, remote: true, class: 'needs-validation card-body d-flex flex-column', id: "survey_form_#{presenter.affiliate.id}", novalidate: true do |f| %>
+        <%= f.text_field :company_name, {
+              label:        { title: 'Company Name' },
+              html_options: { minlength: 2, placeholder: 'Company Name', required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.text_field :contact_name, {
+              label:        { title: 'Contact Name' },
+              html_options: { minlength: 2, placeholder: 'Contact Name' }
+            } %>
+        <%= f.telephone_field :contact_phone, {
+              label:        { title: 'Phone Number' },
+              html_options: { value: presenter.affiliate.contact_phone, placeholder: 'Phone Number' },
+              messages:     { note: 'Must be 10 characters.' }
+            } %>
+        <%= f.email_field :contact_email, {
+              label:        { title: 'Email Address' },
+              html_options: { placeholder: 'Email' },
+              messages:     { note: 'Must not be empty.' }
+            } %>
+        <%= f.number_field :commission, {
+              label:        { title: 'Commission' },
+              html_options: { value: number_with_precision(presenter.affiliate.commission.to_d, precision: 2), min: '0.00', step: '0.01' },
+              prepends:     [{ button: false, label: '<i class="fa fa-percent"></i>' }]
+            } %>
+        <%= f.text_area :notes, {
+              label: { title: 'Notes' }
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Affiliate', id: "affiliate_button_#{presenter.affiliate.id}", disable_with: 'Saving Affiliate' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

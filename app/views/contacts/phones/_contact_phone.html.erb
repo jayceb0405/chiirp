@@ -1,0 +1,54 @@
+<%
+  # app/views/contacts/phones/_contact_phone.html.erb
+  #
+  # Example:
+  #   render partial: 'contacts/phones/contact_phone', collection: @contact_phones, as: :contact_phone, locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @contact:          (Contact)
+  #
+  # Local Variables:
+  #   (req) contact_phone: (ContactPhone)
+  #   (opt) presenter:     (Contacts::Presenter)
+  #   (opt) uuid:          (String)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+
+  contact_phone_id = contact_phone.new_record? ? (local_assigns.dig(:uuid) || SecureRandom.uuid).to_s : contact_phone.id
+-%>
+<tr id="contact_phone_tr_<%= contact_phone_id -%>">
+  <td class="text-left align-middle" colspan="3">
+    <%= bootstrap_select_tag(
+          field:        "contact_phones[#{contact_phone_id}][label]",
+          row:          { class: 'mb-0', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mt-0' },
+          html_options: { id: "contact_phone_label_#{contact_phone_id}" },
+          options:      { for_select: options_for_select(presenter.label_options, contact_phone.label) }
+        ) %>
+  </td>
+  <td class="text-left align-middle">
+    <%= text_field_tag "contact_phones[#{contact_phone_id}][phone]", number_to_phone(contact_phone.phone), { class: 'form-control', id: "contact_phone_phone_#{contact_phone_id}", placeholder: 'Phone Number', autocomplete: false } %>
+  </td>
+  <td class="text-left align-middle">
+    <%= bootstrap_switch_field(
+          field:        "contact_phones[#{contact_phone_id}][primary]",
+          value:        contact_phone.primary,
+          values:       [true, false],
+          row:          { class: 'mb-0', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mt-0' },
+          html_options: { class: 'contact_phone_primary', id: "contact_phone_primary_#{contact_phone_id}" }
+        ) %>
+  </td>
+  <td class="text-right align-middle">
+    <%= link_to '', '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_phone',
+                style: 'text-decoration: none;',
+                data:  {
+                  id: contact_phone_id
+                } %>
+  </td>
+</tr>

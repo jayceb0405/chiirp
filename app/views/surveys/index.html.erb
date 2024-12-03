@@ -1,0 +1,198 @@
+<%
+  # app/views/surveys/index.html.erb
+  #
+  # Example:
+  #   render partial: "surveys/index"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Surveys::Presenter.new(client: current_user.client)
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-poll-h mr-2"></i> Survey Builder </h1>
+
+        <div class="btn-toolbar">
+          <%= if current_user.client.surveys.count < current_user.client.surveys_count
+                link_to "<i class=\"fa fa-plus mr-2\"></i>New #{::Surveys::Survey.title}".html_safe, new_surveys_survey_path, {
+                  class:  'btn btn-light',
+                  id:     'button_new_survey',
+                  remote: true,
+                  method: :get
+                }
+              end %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit <%= ::Surveys::Survey.title -%></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_survey_dropdown">
+              <%= render partial: 'surveys/select_survey_dropdown', locals: { presenter: } %>
+            </div>
+          </div>
+          <% if current_user.client.surveys.count < current_user.client.surveys_count %>
+            <button type="button" class="btn btn-light" id="button_import_survey">
+              <i class="fa fa-cloud-download-alt mr-2"></i>Import Shared <%= ::Surveys::Survey.title -%>
+            </button>
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="surveys_body">
+      <%= render partial: 'surveys/index', locals: { presenter: } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_surveys').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '.option_client_widget');
+    $(document).on('click', '.option_client_widget', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/client_widgets/' + $(this).attr('id') + '/edit'
+      });
+    });
+
+    $(document).off('click', '#surveys_help');
+    $(document).on('click', '#surveys_help', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li><%= ::Surveys::Survey.title -%> provide a method of segmenting your Contacts for future selection.</li>'
+      help_info += '<li><%= ::Surveys::Survey.title -%> also provide for keeping track of what step in the sales process a Contact is currently positioned.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': '<%= ::Surveys::Survey.title -%> Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $(document).off('show.bs.collapse', '.survey_edit');
+    $(document).on('show.bs.collapse', '.survey_edit', function(e) {
+
+      if ($(this).is(e.target)) {
+        var surveyId = $(this).data('surveyid');
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/surveys/surveys/' + surveyId + '/edit'
+        });
+      }
+    });
+
+    $(document).off('hide.bs.collapse', '.survey_edit');
+    $(document).on('hide.bs.collapse', '.survey_edit', function(e) {
+
+      if ($(this).is(e.target)) {
+        var surveyId = $(this).data('surveyid');
+
+        $('#survey_' + surveyId).html('');
+      }
+    });
+
+    $(document).off('show.bs.collapse', '.survey_screen_edit');
+    $(document).on('show.bs.collapse', '.survey_screen_edit', function(e) {
+
+      if ($(this).is(e.target)) {
+        var surveyId = $(this).data('surveyid');
+        var screenId = $(this).data('screenid');
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/surveys/surveys/' + surveyId + '/surveys_screens/' + screenId + '/edit'
+        });
+      }
+    });
+
+    $(document).off('hide.bs.collapse', '.survey_screen_edit');
+    $(document).on('hide.bs.collapse', '.survey_screen_edit', function(e) {
+
+      if ($(this).is(e.target)) {
+        var surveyId = $(this).data('surveyid');
+        var screenId = $(this).data('screenid');
+
+        $('#survey_' + surveyId + '_screen_' + screenId).html('');
+      }
+    });
+
+    $(document).off('click', '.survey_screen_delete');
+    $(document).on('click', '.survey_screen_delete', function(e) {
+      e.preventDefault();
+
+      var surveyId = $(this).data('surveyid');
+      var screenId = $(this).data('screenid');
+      var surveyScreenName = $(this).data('surveyscreenname');
+
+      ChiirpAlert({
+        'body':'Deleting "' + surveyScreenName + '" can NOT be un-done. Is it your intention to delete this <%= ::Surveys::Screen.title -%>?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_survey_screen' }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_survey_screen');
+      $(document).on('click', '#button_dump_it_survey_screen', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/surveys/surveys/' + surveyId + '/surveys_screens/' + screenId
+        });
+      });
+    });
+
+    $(document).off('click', '.survey_delete');
+    $(document).on('click', '.survey_delete', function(e) {
+      e.preventDefault();
+
+      var surveyId = $(this).data('surveyid');
+      var surveyName = $(this).data('surveyname');
+
+      ChiirpAlert({
+        'body':       'Deleting "' + surveyName + '" can NOT be un-done. Is it your intention to delete this <%= ::Surveys::Survey.title -%>?',
+        'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_survey' }].to_json) -%>,
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_dump_it_survey');
+      $(document).on('click', '#button_dump_it_survey', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/surveys/surveys/' + surveyId
+        });
+      });
+    });
+
+    $(document).off('click', '#button_import_survey');
+    $(document).on('click', '#button_import_survey', function(e) {
+      e.preventDefault();
+
+      $('#dash_modal').modal('show');
+      $('#dash_modal_title').html('<i class="fa fa-cloud-download-alt"></i> Import Shared <%= ::Surveys::Survey.title -%>');
+      $('#dash_modal_body').html('<%= j render partial: 'surveys/import' -%>');
+      $('#dash_modal_footer').html('');
+    });
+  });
+</script>

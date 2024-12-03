@@ -1,0 +1,20 @@
+<%
+	# app/views/user_chats/users/_users_list.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_chats/users/users_list"
+	# 
+	# Required Instance Variables:
+	# 	@users: (Hash)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div>
+	<table class="table table-no-border table-striped">
+		<tbody id="user_chats_users_inner_list_<%= current_user.id -%>">
+			<%= render partial: "user_chats/users/user", collection: @users.collect { |k,v| v } %>
+		</tbody>
+	</table>
+</div>

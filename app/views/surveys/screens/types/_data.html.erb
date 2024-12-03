@@ -1,0 +1,187 @@
+<%
+  # app/views/surveys/screens/types/_data.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/data', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= bootstrap_text_area(
+      field:        'surveys_screen[form_data][question]',
+      value:        presenter.survey_screen.form_data&.dig('question').to_s,
+      label:        { title: 'Body Text' },
+      html_options: { placeholder: 'Body Text', rows: 5 }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'surveys_screen[form_data][submit_button_text]',
+      value:        presenter.survey_screen.form_data&.dig('submit_button_text').to_s,
+      label:        { title: 'Submit Button Text' },
+      html_options: { id: "submit_button_text_#{presenter.survey_screen.id}", placeholder: 'Submit' }
+    ) %>
+<%= bootstrap_switch_field(
+      field:  'surveys_screen[form_data][ok2text]',
+      value:  presenter.survey_screen.form_data&.dig('ok2text').to_s == '1',
+      values: %w[1 0],
+      label:  { title: 'Ask if OK to Text' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'surveys_screen[form_data][ok2text_text]',
+      value:        presenter.survey_screen.form_data&.dig('ok2text_text').to_s,
+      label:        { title: 'OK to Text Text' },
+      html_options: { id: "ok2text_text_#{presenter.survey_screen.id}", placeholder: 'May We Send Text Messages?' }
+    ) %>
+<%= bootstrap_switch_field(
+      field:  'surveys_screen[form_data][ok2email]',
+      value:  presenter.survey_screen.form_data&.dig('ok2email').to_s == '1',
+      values: %w[1 0],
+      label:  { title: 'Ask if OK to Email' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'surveys_screen[form_data][ok2email_text]',
+      value:        presenter.survey_screen.form_data&.dig('ok2email_text').to_s,
+      label:        { title: 'OK to Email Text' },
+      html_options: { id: "ok2email_text_#{presenter.survey_screen.id}", placeholder: 'May We Send Email Messages?' }
+    ) %>
+<%= bootstrap_color_picker(
+      field:        'surveys_screen[form_data][submit_button_color]',
+      value:        presenter.survey_screen.form_data&.dig('submit_button_color').to_s,
+      label:        { title: 'Submit Button Color' },
+      html_options: { id: "submit_button_color_hidden_field_#{presenter.survey_screen.id}" }
+    ) %>
+
+<div class="row ml-2 mr-2 mb-4" data-toggle="sortable" data-draggable=".sortable-tile" data-handle=".drag-handle">
+  <div class="sortable-tile w-100">
+    <div class="card-header drag-handle">
+      <div class="row">
+        <div class="col-6 pt-3 pl-4">
+          <h6>Field</h6>
+        </div>
+        <div class="col-3 pt-3">
+          <h6>Include</h6>
+        </div>
+        <div class="col-3 pt-3">
+          <h6>Required</h6>
+        </div>
+      </div>
+    </div>
+
+    <ul class="sortable-lists list-group list-group-flush" id="data_table_<%= presenter.survey_screen.id -%>" data-toggle="sortable" data-group="pages">
+      <% presenter.form_fields&.each do |key, value| %>
+        <% key_name = (value.dig('name') || 'Unknown').to_s %>
+        <% key_show = value.dig('show').to_i %>
+        <% key_required = value.dig('required').to_i %>
+        <% key_order = value.dig('order').to_i %>
+
+        <li class="list-group-item align-items-center drag-handle" data-id="<%= key -%>">
+          <div class="row w-100">
+            <%= hidden_field_tag "surveys_screen[form_fields][#{key}][order]", key_order, { id: "list_group_sort_order_#{presenter.survey_screen.id}_#{key}" } %>
+
+            <div class="col-6">
+              <span class="drag-indicator"></span>
+              <%= key_name %>
+            </div>
+
+            <div class="col-3">
+              <%= bootstrap_switch_field(
+                    field:        "surveys_screen[form_fields][#{key}][show]",
+                    value:        key_show == 1,
+                    values:       %w[1 0],
+                    row:          { columns: [0, 12] },
+                    col:          { class: 'mb-0' },
+                    form_group:   { class: 'mb-0' },
+                    html_options: { class: 'field_key', id: "fields_#{key}_check_box_#{presenter.survey_screen.id}" }
+                  ) %>
+            </div>
+
+            <div class="col-3">
+              <%= bootstrap_switch_field(
+                    field:        "surveys_screen[form_fields][#{key}][required]",
+                    value:        key_required == 1,
+                    values:       %w[1 0],
+                    row:          { columns: [0, 12] },
+                    col:          { class: 'mb-0' },
+                    form_group:   { class: 'mb-0' },
+                    html_options: { class: 'field_key_required', id: "fields_#{key}_check_box_#{presenter.survey_screen.id}_required" }
+                  ) %>
+            </div>
+          </div>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<%= bootstrap_text_area(
+      field:        'surveys_screen[form_data][disclaimer_text]',
+      value:        presenter.survey_screen.form_data&.dig('disclaimer_text').to_s,
+      label:        { title: 'Disclaimer Text' },
+      html_options: { placeholder: 'Disclaimer Text', rows: 5 }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'surveys_screen[actions][redirect_screen_id]',
+      label:        { title: 'Next Screen' },
+      html_options: { id: "survey_screen_redirect_screen_id_#{presenter.survey_screen.id}" },
+      options:      { array: presenter.survey_screen_option_screens_for_select, selected: presenter.survey_screen.actions&.dig('redirect_screen_id').to_i }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'surveys_screen[actions][redirect_url]',
+      value:        presenter.survey_screen.actions&.dig('redirect_url').to_s,
+      row:          { id: "survey_screen_redirect_url_#{presenter.survey_screen.id}" },
+      label:        { title: 'Web Page URL' },
+      html_options: { placeholder: 'Web Page URL' },
+      messages:     { note: 'Leave blank to return to the first screen.' }
+    ) %>
+
+<%= render partial: 'campaigns/action_fields', locals: {
+      client: presenter.survey_screen.survey.client,
+      campaign_id: presenter.survey_screen.actions&.dig('campaign_id').to_i, campaign_id_field: 'surveys_screen[actions][campaign_id]',
+      group_id: presenter.survey_screen.actions&.dig('group_id'), group_id_field: 'surveys_screen[actions][group_id]',
+      tag_id: presenter.survey_screen.actions&.dig('tag_id'), tag_id_field: 'surveys_screen[actions][tag_id]',
+      stage_id: presenter.survey_screen.actions&.dig('stage_id'), stage_id_field: 'surveys_screen[actions][stage_id]',
+      stop_campaign_ids: presenter.survey_screen.actions&.dig('stop_campaign_ids'), stop_campaign_ids_field: 'surveys_screen[actions][stop_campaign_ids]'
+    } %>
+
+<script>
+  $(function() {
+    show_hide($('#survey_screen_redirect_screen_id_<%= presenter.survey_screen.id -%>').val());
+
+    $(document).off('change', '#survey_screen_redirect_screen_id_<%= presenter.survey_screen.id -%>');
+    $(document).on('change', '#survey_screen_redirect_screen_id_<%= presenter.survey_screen.id -%>', function(e) {
+      show_hide($(this).val());
+    });
+
+    function show_hide(val) {
+      if (val == '0') {
+        $('#survey_screen_redirect_url_<%= presenter.survey_screen.id -%>').show();
+      } else {
+        $('#survey_screen_redirect_url_<%= presenter.survey_screen.id -%>').hide();
+      }
+    }
+
+    <% unless presenter.survey_screen.new_record? %>
+      $('.field_key_required').on('change', function(e) {
+        if ( $(this).is(':checked') ) {
+          $('#' + $(this).attr('id').replace('_required', '')).prop('checked', true);
+        } else {
+
+        }
+      });
+
+      $('.field_key').on('change', function(e) {
+        if ( $(this).is(':checked') ) {
+
+        } else {
+          $('#' + $(this).attr('id') + '_required').prop('checked', false);
+        }
+      });
+    <% end %>
+
+    Looper.init();
+  });
+</script>

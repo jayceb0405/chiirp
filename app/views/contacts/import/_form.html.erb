@@ -1,0 +1,141 @@
+<%
+  # app/views/contacts/import/_form.html.erb
+  #
+  # Example:
+  #   render partial: 'contacts/import/form', locals: { contacts_import_presenter: Presenter }
+  #   render partial: 'contacts/import/form', locals: { user: User }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (opt) user:                      (User)
+  #   (opt) contacts_import_presenter: (Presenter)
+  #
+  presenter = Contacts::Import::Presenter.new(local_assigns.dig(:user)) unless local_assigns.dig(:presenter).is_a?(Contacts::Import::Presenter)
+-%>
+<div class="card mt-3 mb-3">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-file-import mr-2"></i>Import Contacts</h6>
+      <div class="card-header-control"></div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <% if presenter.contacts_waiting.positive? %>
+      <ul>
+        <li class="text-success">
+          <strong>
+            <span id="contacts_waiting_<%= presenter.user.id -%>"><%= presenter.contacts_waiting.positive? ? '~' : '' -%><%= Contact.model_name.human(count: presenter.contacts_waiting) -%></span> remaining to be imported.
+          </strong>
+        </li>
+      </ul>
+    <% else %>
+      <%= form_tag contacts_import_path, { builder: LooperFormBuilder, multipart: true, id: 'form_contact_import' } do %>
+
+        <input type="file" name="user_contact_form[background_image]" id="background_image_input" class="image-url form-control" accept="image/*" style="display:none;" data-direct-upload-url="https://dev.chiirp.com/rails/active_storage/direct_uploads">
+        <div class="row fileinput-dropzone mb-3 dz-clickable" id="import_file_dropzone" style="">
+          <div class="text-center dz-clickable" id="import_file_cloud_container">
+            <i class="fa fa-cloud-upload-alt text-primary display-3"></i>
+          </div>
+          <div class="text-center" id="import_file_spinner_container" style="display:none;">
+            <div class="spinner-border text-primary" role="status"></div>
+            <div class="ml-3">Loading...</div>
+          </div>
+          <span class="text-muted" id="import_file_upload_text">Drag and drop or Click to Upload (.csv, .xlsx)</span>
+          <h6 class="text-center" id="import_file_text"></h6>
+        </div>
+
+        <div id="header_designer">
+        </div>
+
+        <div id="import_actions">
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+      // disable auto discover
+      Dropzone.autoDiscover = false;
+
+      $('#import_file_dropzone').dropzone( {
+        method: 'POST',
+        url: '<%= contacts_import_path -%>',
+        maxFiles: 1,
+        maxFilesize: 5, // MB
+        paramName: 'import_file',
+        addRemoveLinks: false,
+        acceptedFiles: 'text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,.xlsx',
+        previewsContainer: '#import_file_cloud_container',
+        clickable: '#import_file_dropzone, #import_file_container, #import_file_cloud_container',
+        headers: {
+          'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        },
+        dictMaxFilesExceeded: 'The maximum number of files is limited to {{maxFiles}}.',
+        dragover: function() {
+          $('#import_file_dropzone').addClass('hover');
+        },
+        dragleave: function() {
+          $('#import_file_dropzone').removeClass('hover');
+        },
+        drop: function() {
+          $('#import_file_dropzone').removeClass('hover');
+        },
+        maxfilesreached: function(file) {
+          console.log('The maximum number of files is reached.');
+          console.log(file);
+        },
+        maxfilesexceeded: function(file) {
+          console.log('The maximum number of files is exceeded.');
+          console.log(file);
+          this.removeFile(file);
+        },
+        sending: function(file, response) {
+          $('#import_file_cloud_container').hide();
+          $('#import_file_upload_text').hide();
+          $('#import_file_spinner_container').show();
+        },
+        success: function(file, response) {
+
+          if (response.filename.length > 0) {
+            $.ajax({
+              type: 'POST',
+              url: '<%= contacts_import_path -%>',
+              dataType: 'script',
+              data: { header: response.header, commit: 'header' }
+            });
+            $('#import_file_spinner_container').hide();
+            $('#import_file_cloud_container').show();
+            $('#import_file_upload_text').show();
+          } else {
+            $('#import_file_spinner_container').hide();
+            $('#import_file_cloud_container').show();
+            $('#import_file_upload_text').show();
+            $('#import_file_text').html('Unable to Read File');
+          }
+          $('.dz-error-mark').hide();
+          $('.dz-success-mark').hide();
+        },
+        error: function(file, message) {
+          this.removeFile(file);
+
+          if (message) {
+            $('#import_file_spinner_container').hide();
+            $('#import_file_cloud_container').show();
+            $('#import_file_upload_text').show();
+            $('#import_file_text').html(message);
+          }
+        }
+      });
+
+    $(document).off('change', '#file_upload_button');
+    $(document).on('change', '#file_upload_button', function (e) {
+      $('#file_upload_text').html($('#file_upload_button').val().replace('C:\\fakepath\\', ''));
+    });
+  });
+</script>

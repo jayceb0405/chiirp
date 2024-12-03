@@ -1,0 +1,15 @@
+<%
+  # app/views/integrations/jobnimbus/webhooks/_webhooks.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/webhooks/webhooks', collection: @client_api_integration.webhooks, as: :webhooks, locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'integrations/jobnimbus/webhooks/event_outer', collection: webhooks.last, as: :webhook_event, locals: { presenter: presenter } %>

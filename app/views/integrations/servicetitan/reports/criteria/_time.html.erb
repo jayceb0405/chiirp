@@ -1,0 +1,35 @@
+<%
+  # /app/views/integrations/servicetitan/reports/criteria/_time.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/criteria/time', locals: { presenter: Integrations::Servicetitan::ReportsPresenter, criteria: Hash }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) criteria: (Hash)
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter) && local_assigns.dig(:criteria).is_a?(Hash)
+-%>
+<%= hidden_field_tag "report[criteria][#{criteria.dig(:name)}][data_type]", criteria.dig(:dataType).to_s %>
+<%= bootstrap_select_tag(
+      field:        "report[criteria][#{criteria.dig(:name)}][direction]",
+      label:        { title: criteria.dig(:label) },
+      html_options: { required: criteria.dig(:isRequired).to_bool },
+      options:      { array: [['Days into the Past', 'past'], ['Days into the future', 'future']], selected: presenter.criteria_value(criteria.dig(:name), 'direction') },
+      messages:     { note: 'Select the direction of this dynamic date.' }
+    ) %>
+<%= bootstrap_number_field(
+      field:        "report[criteria][#{criteria.dig(:name)}][days]",
+      value:        presenter.criteria_value(criteria.dig(:name), 'days'),
+      html_options: { value: presenter.criteria_value(criteria.dig(:name), 'days'), min: 0, step: 1, required: criteria.dig(:isRequired).to_bool },
+      messages:     { note: 'Enter the number of days into the past/future to span.' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        "report[criteria][#{criteria.dig(:name)}][time]",
+      value:        presenter.criteria_value(criteria.dig(:name), 'time'),
+      html_options: { maxlength: 5, required: criteria.dig(:isRequired).to_bool },
+      messages:     { note: 'Enter the time on the past/future date in military time (ex: 13:00 = 1:00pm).' }
+    ) %>

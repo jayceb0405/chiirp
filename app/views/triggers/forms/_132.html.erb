@@ -1,0 +1,28 @@
+<%
+  # app/views/triggers/forms/_132.html.erb
+  #
+  # Example:
+  #   render partial: 'triggers/forms/132.html', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions on a Contacts::Invoice due_date (Jobber)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Start on a Jobber Invoice Due Date...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Are dynamic (they get their date from a Invoice due date).</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will locate the Invoice and fire the first Trigger as defined in Actions.</li>
+      </ul>
+    </small>
+  </div>
+</div>

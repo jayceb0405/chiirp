@@ -1,0 +1,36 @@
+<%
+  # app/views/integrations/servicetitan/events/events/edit.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/edit'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @event_id:               (Integer)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Servicetitan::EventsPresenter.new(@client_api_integration)
+  presenter.event = presenter.actions.find { |event_id, _event| event_id == @event_id.to_s }
+  cookie_hash = JSON.parse(RedisCloud.redis.get("user:#{current_user.id}:edit_servicetitan_event_shown") || '{}')
+-%>
+<% cookie_hash.each do |event_id, shown| %>
+  <% if event_id != @event_id && !shown.to_bool %>
+    <%= turbo_stream.collapse_hide("edit_event_#{event_id}") %>
+    <%= turbo_stream.rotate_button_closed("collapse_indicator_#{event_id}") %>
+  <% end %>
+<% end %>
+<% if cookie_hash[@event_id].to_bool %>
+  <%= turbo_stream.rotate_button("collapse_indicator_#{@event_id}") %>
+  <%= turbo_stream.collapse_show("edit_event_#{@event_id}") %>
+  <%= turbo_stream.update("edit_event_#{@event_id}", partial: 'integrations/servicetitan/events/events/edit_event', locals: { presenter: }) %>
+<% elsif @event_id == '0' %>
+  <%= turbo_stream.update('events_body', partial: 'integrations/servicetitan/events/events/action', collection: presenter.sorted_events, as: :action, locals: { presenter: }) %>
+<% else %>
+  <%= turbo_stream.update("list_event_#{@event_id}", partial: 'integrations/servicetitan/events/events/list_event', locals: { presenter: }) %>
+  <%= turbo_stream.collapse_hide("edit_event_#{@event_id}") %>
+  <%= turbo_stream.update("edit_event_#{@event_id}", '') %>
+<% end %>

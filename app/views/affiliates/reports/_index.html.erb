@@ -1,0 +1,82 @@
+<%
+  # app/views/affiliates/reports/_index.html.erb
+  #
+  # Example:
+  #   render partial: "affiliates/reports/index"
+  #
+  # Instance Variables:
+  #   (opt) @clients:              (Clients)
+  #   (opt) @report_period_string: (String) ex: "01/01/2023 to 01/31/2023"
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<div class="card card-fluid">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-handshake mr-2"></i>Affiliate Reports</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <%= form_with url: affiliates_reports_path, builder: LooperFormBuilder, remote: true, method: :get, class: 'needs-validation card-body d-flex flex-column', novalidate: true do |f| %>
+      <%= f.select :affiliate_id, {
+            label:        { title: 'Affiliate' },
+            html_options: { id: 'affiliate_id', multiple: false, autofocus: true, mobile: browser.device.mobile? },
+            choices:      { array: presenter.affiliate_array(true), selected: presenter.affiliate.id.to_i, blank: 'Select a Affiliate' },
+            messages:     { note: 'Select a Affiliate to report on.' }
+          } %>
+      <%= f.switch :include_setup_fees, {
+            label:      { title: 'Include Setup Fees?' },
+            checkboxes: [{ field: 'include_setup_fees', checked: @include_setup_fees, values: [true, false] }],
+            messages:   { note: "Turn on to include a 'Setup Fees' column and calculate commissions including setup fees." }
+          } %>
+      <%= bootstrap_calendar_field(
+            field:        'report_period_string',
+            value:        @report_period_string,
+            row:          { class: 'mb-0' },
+            label:        { title: 'Report Period' },
+            html_options: { id: 'report_period_string' },
+            flatpickr:    { include_time: false, mode: 'range' },
+            messages:     { note: 'Period of time for which to report.' }
+          ) %>
+
+      <%= f.submit_buttons buttons: presenter.report_submit_buttons %>
+    <% end %>
+
+    <% if @clients.present? %>
+      <% case presenter.affiliate.id %>
+      <% when (1..) %>
+        <%= render partial: 'affiliates/reports/affiliate/results', locals: { presenter: } -%>
+      <% when -1 %>
+        <%= render partial: 'affiliates/reports/searchlight/results', locals: { presenter: } -%>
+      <% when -2 %>
+        <%= render partial: 'affiliates/reports/cardx/results', locals: { presenter: } -%>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_affiliates_report').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_affiliates').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '#affiliates_reports_print');
+    $(document).on('click', '#affiliates_reports_print', function(e) {
+        e.preventDefault();
+
+        var affiliate_id = $('#affiliate_id').val();
+        var report_period_string = $('#report_period_string').val();
+        var include_setup_fees = $('#include_setup_fees').val();
+        var url = '<%= affiliates_reports_path -%>?affiliate_id=' + affiliate_id + '&report_period_string=' + report_period_string + '&include_setup_fees=' + include_setup_fees + '&commit=print'
+        window.open(url, '_blank');
+    });
+  });
+</script>

@@ -1,0 +1,17 @@
+<%
+  # app/views/integrations/facebook/pages/page.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/pages/page'
+  #
+  # Instance Variables:
+  #   (req) @fb_page_id: (String)
+  #
+  # Local Variables:
+  #   none
+  #
+  return if @fb_page_id.blank?
+-%>
+<%= turbo_stream.update "fb_page_id_#{@fb_page_id}_pages" do %>
+  <%= render partial: 'integrations/facebook/pages/index_pages' %>
+<% end %>

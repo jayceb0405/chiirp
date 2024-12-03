@@ -1,0 +1,84 @@
+<%
+  # app/views/my_contacts/broadcast/_action.html.erb
+  #
+  # Example:
+  # 	render partial: "my_contacts/broadcast/action", collection: group_actions, locals: { action_type: String, presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) action:      (Hash)
+  # 	(req) action_type: (String)
+  # 		"action"
+  #   (req) presenter: (MyContacts::Presenter)
+  #   (req) f: (FormBuilder)
+  #
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+
+  title = "actn: #{action[:process].gsub(%r{^group_}, '').titlecase}"
+-%>
+<%= turbo_stream_from "my-contacts-scheduled-action-#{action[:group_uuid]}" %>
+<tr>
+  <td class="align-left">
+    <% unless action[:locked_at].present? %>
+    <%= f.check_box :action_ids, {
+          checkboxes: [{ field: 'action_ids[]', class: 'action_select', id: "action_ids_#{action[:group_uuid]}", checked: false, value: action[:group_uuid], values: [action[:group_uuid], nil] }]
+        } %>
+    <% end %>
+  </td>
+  <td class="align-left" colspan="2">
+    <%= title %>
+    <% if action[:contacts_count] -%>
+      (<%= Contact.model_name.human(count: action[:contacts_count]) %>)
+    <% end %>
+    <%= turbo_frame_tag "action_detail_#{action[:id]}" do %>
+      <%= link_to '+', my_contacts_groupactions_detail_path(action[:id]) %>
+    <% end %>
+  </td>
+  <%= render partial: 'my_contacts/broadcast/action_time', locals: { id: "action_time_min_#{action[:group_uuid]}", run_at: action[:min_run_at].in_time_zone(presenter.client.time_zone), time_zone: presenter.client.time_zone } %>
+  <%= render partial: 'my_contacts/broadcast/action_time', locals: { id: "action_time_max_#{action[:group_uuid]}", run_at: action[:max_run_at].in_time_zone(presenter.client.time_zone), time_zone: presenter.client.time_zone } %>
+  <td class="align-middle text-right">
+    <% unless action[:locked_at].present? %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_action_#{action[:id]}"
+        } %>
+    <% end %>
+  </td>
+</tr>
+
+<script>
+  $(function() {
+    $('#button_delete_action_<%= action[:id] -%>').off('click');
+    $('#button_delete_action_<%= action[:id] -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting Scheduled Action "<%= title -%>" can NOT be un-done. Is it your intention to delete this Action?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{action[:id]}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= action[:id] -%>');
+      $(document).on('click', '#button_dump_it_<%= action[:id] -%>', function(e) {
+        $.ajax({
+          type: 'POST',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '<%= my_contacts_groupactions_path -%>',
+          data: { delete: '1', action_type: '<%= action_type -%>', action_id: '<%= action[:group_uuid] -%>' }
+        });
+      });
+    });
+  });
+</script>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg width="648" height="150" viewBox="0 0 648 150" xmlns="http://www.w3.org/2000/svg" xmlns:bx="https://boxy-svg.com">
+  <defs>
+    <style>
+      .cls-1 {
+        font-size: 100px;
+        fill: #515151;
+        font-family: Roboto;
+        font-weight: 700;
+      }
+
+      .cls-2 {
+        fill: #49a8ee;
+      }
+    </style>
+  </defs>
+  <text id="roofleadpro" class="cls-1" transform="matrix(0.960419, 0, 0, 1, 17.418232, 0)" style="fill: rgb(213, 6, 6); white-space: pre;"><tspan x="140.844" y="103.77" dx="0 0 0 0 10.646" dy="0 0 0 0 0.37" style="fill: rgb(158, 164, 168);">rooflead</tspan><tspan style="fill: rgb(255, 255, 255);">pro</tspan></text>
+  <g transform="matrix(1, 0, 0, 1, -135.107056, -245.355392)">
+    <circle style="fill: rgb(73, 168, 238);" cx="208.588" cy="317.156" r="70.18"/>
+    <path d="M 471.879 98.92 L 534.472 151.288 L 409.285 151.288 L 471.879 98.92 Z" style="fill: rgb(73, 168, 238);" transform="matrix(0.841685, -0.539969, 1.282996, 0.365008, -381.543457, 559.576233)" bx:shape="triangle 409.285 98.92 125.187 52.368 0.5 0 1@f4893c14"/>
+  </g>
+  <g transform="matrix(0.969588, 0, 0, 0.969588, 168.90596, -294.844452)" style="">
+    <polygon style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" points="-133.211 422.719 -108.35 422.855 -108.476 401.585 -85.188 401.667 -85.081 423.037 -60.435 422.867 -60.619 377.807 -96.747 346.164 -133.775 377.169"/>
+    <polygon style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" points="-142.993 378.827 -148.868 373.255 -97.263 329.396 -44.404 373.569 -49.927 378.821 -97.809 339.139"/>
+    <polygon style="fill: rgb(255, 255, 255); stroke: rgb(255, 255, 255);" points="-133.505 354.054 -120.245 342.747 -120.364 336.251 -133.765 336.51"/>
+  </g>
+</svg>

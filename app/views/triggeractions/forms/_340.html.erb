@@ -1,0 +1,22 @@
+<%
+  # /app/views/triggeractions/forms/_340.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/340", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # assign to a Stage
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[stage_id]',
+      label:        { title: 'Stage' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { for_select: option_groups_from_collection_for_select(presenter.stage_parents, :stages, :name, :id, :name, presenter.triggeraction.stage_id), blank: 'Select a Stage' }
+    ) %>

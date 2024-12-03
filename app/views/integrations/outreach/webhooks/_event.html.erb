@@ -1,0 +1,17 @@
+<%
+  # app/views/integrations/outreach/webhooks/_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/outreach/webhooks/event', collection: @client_api_integration.webhooks, as: :event, locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = event
+-%>
+<%= render partial: 'integrations/outreach/webhooks/webhook', collection: presenter.events, as: :webhook, locals: { presenter: presenter } %>
+  

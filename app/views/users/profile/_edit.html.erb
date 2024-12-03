@@ -1,0 +1,19 @@
+<%
+  # app/views/users/profile/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'users/profile/edit'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Users::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Users::Presenter)
+-%>
+<% if presenter.user.new_record? %>
+  <%= render partial: 'clients/users/new', locals: { presenter: } %>
+<% else %>
+  <%= render partial: 'clients/users/edit', locals: { presenter: } %>
+<% end %>

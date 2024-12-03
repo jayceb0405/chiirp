@@ -1,0 +1,23 @@
+<%
+  # app/views/user_contact_forms/_import.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/import'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<%= form_tag import_user_contact_form_path, { builder: LooperFormBuilder, remote: true, method: :post } do %>
+  <%= bootstrap_text_field(
+    field: 'share_code',
+    label: { title: 'QuickPage Share Code' },
+    html_options: { placeholder: 'Shared Code', autofocus: true }
+  ) %>
+  <%= bootstrap_submit_buttons(
+    buttons: [{ title: 'Import', disable_with: 'Importing' }]
+  ) %>
+<% end %>

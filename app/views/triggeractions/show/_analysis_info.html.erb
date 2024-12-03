@@ -1,0 +1,30 @@
+<%
+  # app/views/triggeractions/show/_analysis_info.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/show/analysis_info', locals: { triggeraction: Triggeraction }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) trigger: Trigger
+  #
+  return unless local_assigns.dig(:triggeraction).is_a?(Triggeraction)
+
+  if triggeraction.new_record?
+    info_string = ['Your Action has not been analyzed yet.']
+  elsif !triggeraction.trigger.campaign.analyzed && (campaign_issues = triggeraction.trigger.campaign.analyze!).find { |t| t.dig(:triggeraction_id) == triggeraction.id }.present?
+    info_string = ['Your Action is incomplete.']
+    info_string << '<ul class="fa-ul">'
+
+    campaign_issues.each do |result|
+      info_string << "<li><span class=\"fa-li\"><i class=\"fa fa-times text-danger\"></i></span>#{result.dig(:description)}</li>" if result.dig(:triggeraction_id).to_i == triggeraction.id
+    end
+
+    info_string << '</ul>'
+  else
+    info_string = ['Your Action is configured successfully.']
+  end
+-%>
+<%= info_string.join.html_safe %>

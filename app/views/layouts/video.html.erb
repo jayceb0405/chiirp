@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+  <head>
+    <!-- meta tags -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="google-site-verification" content="6SzjhFSa7i4Cwrw3n5kmXjKgmMYLxZDtUmPGcJXLIV0">
+
+    <%= render partial: 'layouts/common/open_graph', locals: {
+          title:       @contact_attachment.contact.client.name,
+          image:       @contact_attachment.image.thumb.url(secure: true),
+          description: 'A special video for you!'
+        } %>
+
+    <title><%= I18n.t('tenant.name') -%> - Who will you meet today?</title>
+
+    <% if Rails.env.production? %>
+      <!-- Google Tag Manager -->
+      <script>
+        (function(w,d,s,l,i){w[l]=w[l]||[];
+          w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});
+          var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';
+          j.async=true;
+          j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;
+          f.parentNode.insertBefore(j,f);
+        })(window,document,'script','dataLayer','GTM-5533X3D');
+      </script>
+      <!-- End Google Tag Manager -->
+    <% end %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- favicon -->
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon.ico" %>
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon-57.png", rel: 'apple-touch-icon', type: 'image/png' %>
+
+    <!-- stylesheet & javascript -->
+    <%= stylesheet_link_tag 'application_default', media: 'all' %>
+    <%= javascript_include_tag 'application_video' %>
+  </head>
+  <body data-turbo-prefetch="false">
+    <!-- layouts/video -->
+    <% if Rails.env.production? %>
+      <!-- Google Tag Manager (noscript) -->
+      <noscript>
+        <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5533X3D" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+      </noscript>
+      <!-- end Google Tag Manager (noscript) -->
+    <% end %>
+
+    <!-- ==============================================
+    **Preloader**
+    =================================================== -->
+    <div id="loader">
+      <div id="element">
+        <div class="circ-one"></div>
+        <div class="circ-two"></div>
+      </div>
+    </div>
+
+    <%= yield %>
+
+    <script>
+      <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+    </script>
+  </body>
+</html>

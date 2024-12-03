@@ -1,0 +1,22 @@
+<%
+  # /app/views/triggeractions/forms/_305.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/305", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # remove a Tag
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[tag_id]',
+      label:        { title: 'Tag to Remove' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { for_select: options_for_tag(presenter.client, presenter.triggeraction.tag_id, [], false), blank: 'Select a Tag' }
+    ) %>

@@ -1,0 +1,23 @@
+<%
+# app/views/clients/widgets/import/_show.html.erb
+#
+# Example:
+#   render partial: 'clients/widgets/import/show'
+#
+# Required Instance Variables:
+#   @client: Client
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= form_tag clients_import_widget_path, builder: LooperFormBuilder, remote: true, method: :post do %>
+  <%= bootstrap_text_field(
+        field:        'share_code',
+        label:        { title: 'SiteChat Share Code' },
+        html_options: { placeholder: 'Shared Code', autofocus: true }
+      ) %>
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Import', disable_with: 'Importing' }]
+      ) %>
+<% end %>

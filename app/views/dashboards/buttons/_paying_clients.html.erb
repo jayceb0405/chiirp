@@ -1,0 +1,31 @@
+<%
+  # app/views/dashboards/buttons/_paying_clients.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/paying_clients', { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.super_admin? %>
+  <%
+    clients       = Client.where(tenant: I18n.t('tenant.id')).where('data @> ?', { active: true }.to_json).where("(data ->> 'mo_charge')::numeric > ?", 0.0)
+    clients_count = clients.count
+    clients_sum   = clients.sum("(data ->> 'mo_charge')::float")
+  %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:             'paying_clients',
+        stats:          "#{clients_count} / #{number_to_currency(clients_sum)}",
+        description:    "Paying Clients <small>(avg: #{clients_count.positive? ? number_to_currency(clients_sum / clients_count) : 'N/A'}/mo)</small>",
+        icon:           'fa fa-city',
+        link:           clients_companies_path,
+        chart_id:       '',
+        chart_value:    0,
+        button_movable: true
+      } %>
+<% end %>

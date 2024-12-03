@@ -1,0 +1,57 @@
+<%
+   # app/views/integrations/thumbtack/v2/connections/_edit.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/thumbtack/v2/connections/edit', locals: { presenter: Integrations::Thumbtack::V2::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Thumbtack::V2::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Thumbtack::V2::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to Thumbtack</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if presenter.valid_credentials? %>
+        <%= bootstrap_info_field(
+              info: '<i class="fa fa-check text-success mr-2"></i>Thumbtack connection is valid.',
+              row:  { columns: [0, 12] }
+            ) %>
+      <% else %>
+        <%= bootstrap_info_field(
+              info: '<i class="fa fa-times text-danger mr-2"></i>Thumbtack connection must be refreshed. Click "Connect to Thumbtack" to refresh token.',
+              row:  { columns: [0, 12] }
+            ) %>
+      <% end %>
+
+      <div class="mt-auto">
+        <div class="form-actions">
+          <% if presenter.valid_credentials? %>
+            <%= link_to 'Delete Thumbtack Connection', integrations_thumbtack_v2_connections_path, class: 'btn btn-info ml-auto', method: :delete, data: { turbo: true, turbo_stream: true } %>
+          <% else %>
+            <%= link_to 'Connect to Thumbtack', presenter.connect_to_thumbtack_url, class: 'btn btn-info ml-auto', data: { turbo: false } %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

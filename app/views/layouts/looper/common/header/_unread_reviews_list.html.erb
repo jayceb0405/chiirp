@@ -1,0 +1,26 @@
+<%
+  # app/views/layouts/looper/common/header/_unread_reviews_list.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/header/unread_reviews_list', locals: { user: User }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  unread_reviews = Review.unread_reviews_by_client(current_user.client_id).includes(contact: :client).limit(10).order(target_created_at: :desc)
+-%>
+<% unread_reviews.each do |review| %>
+  <%= link_to(integrations_google_integrations_path, { class: 'dropdown-item unread' }) do %>
+    <div class="tile tile-circle bg-<%= review.contact_id.present? ? 'success' : 'danger' -%>"> <%= review.contact&.initials&.upcase || review.name.split.map(&:first).join.upcase -%> </div>
+    <div class="dropdown-item-body">
+      <p class="subject"> <%= review.contact&.fullname&.titleize || review.name.titleize -%> </p>
+      <p class="text text-truncate"> <%= truncate(review.comment, length: 50) -%> </p>
+      <span class="date">
+        <%= Friendly.new.date(review.target_created_at, review.client.time_zone, false) -%>
+      </span>
+    </div>
+  <% end %>
+<% end %>

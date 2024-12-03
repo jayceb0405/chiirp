@@ -1,0 +1,46 @@
+<%
+	# app/views/user_chats/index.html.erb
+	# 
+	# Example:
+	#   render partial: "user_chats/index"
+	# 
+	# Required Instance Variables:
+	#   none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	section_header_options = ""
+-%>
+<!-- user_chats.index -->
+<%= render partial: "layouts/shared/section_header", locals: { 
+		heading: "<span id=\"header_user_name\">Team Chat</span>",
+		options: section_header_options
+	}
+%>
+<div class="section-container m-central__live-messenger" id="team_chat">
+	<!-- TEAM CHAT -->
+</div>
+
+<script>
+	$(function() {
+		$('#navbar_inner_container').html('<%= j render partial: "layouts/dashboard/navbar_inner/navbar_inner", locals: { heading: "<i class=\"fa fa-comment-alt\"></i> Team Chat", description: "Communicate with your team to get the job done.", show_toggler: true } -%>');
+		$('#sidebar_inner_container').html('<div id="users_index_<%= current_user.id -%>"></div>');
+
+		// User list
+		$.ajax({
+			method: 'GET',
+			dataType: 'script',
+			url: '<%= index_user_chats_users_path -%>'
+		});
+
+		<% if @user %>
+			$.ajax({
+				method: 'GET',
+				dataType: 'script',
+				url: '<%= user_chat_path(@user.id) -%>'
+			});
+		<% end %>
+	});
+</script>
+<!-<!-- /.user_chats.index -->

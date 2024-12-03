@@ -1,0 +1,125 @@
+// Include parts of Bootstrap, Plugins & Theme Components
+//
+// Required
+
+@import "dark/variable-bs-overrides";
+@import "custom/variable-custom-dark"; // your own + custom variables
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+@import "dark/variables";
+@import "dark/mixins";
+
+
+// Bootstrap default
+// ==================================================
+
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/code";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/input-group";
+@import "bootstrap/scss/custom-forms";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/jumbotron";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/media";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/toasts";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/carousel";
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/utilities";
+@import "bootstrap/scss/print";
+
+
+// Bootstrap components overrides
+// ==================================================
+
+@import "dark/bootstrap/type";
+@import "dark/bootstrap/images";
+@import "dark/bootstrap/code";
+@import "dark/bootstrap/grid";
+@import "dark/bootstrap/embed-responsive";
+@import "dark/bootstrap/tables";
+@import "dark/bootstrap/buttons";
+@import "dark/bootstrap/alerts";
+@import "dark/bootstrap/badge";
+@import "dark/bootstrap/forms";
+@import "dark/bootstrap/input-group";
+@import "dark/bootstrap/custom-forms";
+@import "dark/bootstrap/list-group";
+@import "dark/bootstrap/cards";
+@import "dark/bootstrap/dropdowns";
+@import "dark/bootstrap/progress";
+@import "dark/bootstrap/breadcrumb";
+@import "dark/bootstrap/paginations";
+@import "dark/bootstrap/navs";
+@import "dark/bootstrap/navbar";
+@import "dark/bootstrap/modals";
+@import "dark/bootstrap/popovers";
+@import "dark/bootstrap/utilities";
+
+
+// Theme components
+// ==================================================
+// app plugins
+@import "stacked-menu/dist/scss/stacked-menu";
+// replace plugins
+@import "dark/components/plugins";
+
+// app layout
+@import "dark/components/base";
+@import "dark/components/header";
+@import "dark/components/aside";
+@import "dark/components/aside-compact";
+@import "dark/components/page";
+@import "dark/components/sidebar";
+@import "dark/components/footer";
+
+// app components
+@import "dark/components/rating";
+@import "dark/components/switchers";
+@import "dark/components/icons";
+@import "dark/components/tiles";
+@import "dark/components/avatar";
+@import "dark/components/mention";
+@import "default/components/event";
+@import "dark/components/hamburger";
+@import "dark/components/figure";
+@import "dark/components/outbound-link";
+@import "dark/components/steps";
+@import "dark/components/todos";
+@import "dark/components/progress-list";
+@import "dark/components/visual-picker";
+@import "dark/components/publisher";
+@import "dark/components/timeline";
+@import "dark/components/conversations";
+@import "dark/components/feeds";
+@import "dark/components/tasks";
+@import "dark/components/metrics";
+@import "dark/components/countdown";
+@import "dark/components/empty-state";
+@import "dark/components/invoice";
+@import "default/components/sticker";
+
+// pages
+@import "dark/components/auth";
+@import "dark/components/message";

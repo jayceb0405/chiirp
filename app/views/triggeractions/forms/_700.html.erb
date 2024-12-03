@@ -1,0 +1,91 @@
+<%
+  # app/views/triggeractions/forms/_700.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/forms/700', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # create a Task
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_text_field(
+      field:        'triggeraction[name]',
+      value:        presenter.triggeraction.name,
+      label:        { title: 'Task Name' },
+      html_options: { id: "name_#{presenter.triggeraction.id}", placeholder: 'Task Name', disabled: presenter.campaign_disabled?, typeahead_client: presenter.client },
+      messages:     { note: "This field is hashtag aware. Press '#' to access data fields." }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[assign_to]',
+      label:        { title: 'Assign Task To' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_users_182_700_750, selected: presenter.triggeraction.assign_to, blank: 'Select an Assignee' }
+    ) %>
+<!-- Due Date Delay -->
+<%= bootstrap_range_slider(
+      field:        'triggeraction[due_delay_days]',
+      label:        { title: 'Select Delay for Due Date' },
+      html_options: { id: "due_delay_days_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 90, from: presenter.triggeraction.due_delay_days, grid: true, grid_num: 5, postfix: ' days', disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[due_delay_hours]',
+      html_options: { id: "due_delay_hours_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 24, from: presenter.triggeraction.due_delay_hours, grid: true, grid_num: 5, postfix: ' hours', disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[due_delay_minutes]',
+      html_options: { id: "due_delay_minutes_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 60, from: presenter.triggeraction.due_delay_minutes, grid: true, grid_num: 5, postfix: ' minutes', disabled: presenter.campaign_disabled? }
+    ) %>
+<!-- Deadline Delay -->
+<%= bootstrap_range_slider(
+      field:        'triggeraction[dead_delay_days]',
+      label:        { title: 'Select Delay for Deadline (after Due Date)' },
+      html_options: { id: "dead_delay_days_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 90, from: presenter.triggeraction.dead_delay_days, grid: true, grid_num: 5, postfix: ' days', disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[dead_delay_hours]',
+      html_options: { id: "dead_delay_hours_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 24, from: presenter.triggeraction.dead_delay_hours, grid: true, grid_num: 5, postfix: ' hours', disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[dead_delay_minutes]',
+      html_options: { id: "dead_delay_minutes_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 60, from: presenter.triggeraction.dead_delay_minutes, grid: true, grid_num: 5, postfix: ' minutes', disabled: presenter.campaign_disabled? }
+    ) %>
+
+<%= bootstrap_text_area(
+      field:        'triggeraction[description]',
+      value:        presenter.triggeraction.description,
+      label:        { title: 'Description' },
+      html_options: { id: "description_#{presenter.triggeraction.id}", placeholder: 'Description', disabled: presenter.campaign_disabled?, typeahead_client: presenter.client },
+      messages:     { note: "This field is hashtag aware. Press '#' to access data fields." }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[from_phone]',
+      label:        { title: 'Select A Phone Number to Send Notifications From' },
+      html_options: { disabled: presenter.campaign_disabled? || presenter.campaign.lock_phone },
+      options:      { for_select: options_for_phone_numbers(client: presenter.client, selected: presenter.triggeraction.from_phone, options: [['user_number', 'User\'s Default Number']]), blank: 'Last Number Used' },
+      messages:     { note: "Actions are #{presenter.campaign_disabled? || presenter.campaign.lock_phone ? '' : 'NOT '}locked to the Campaign default phone number." }
+    ) %>
+<%= bootstrap_select_tag_campaign(
+      client:       presenter.client,
+      field:        'triggeraction[campaign_id]',
+      label:        { title: 'Campaign to Start on Completion' },
+      html_options: { id: 'task_campaign_id', disabled: presenter.campaign_disabled? },
+      options:      { selected: presenter.triggeraction.campaign_id, active_only: true, blank: 'Select a Campaign' }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[cancel_after]',
+      label:        { title: 'Days After Deadline to Auto-Complete' },
+      html_options: { id: "cancel_after_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 90, from: presenter.triggeraction.cancel_after, grid: true, grid_num: 9, postfix: ' days', disabled: presenter.campaign_disabled? }
+    ) %>

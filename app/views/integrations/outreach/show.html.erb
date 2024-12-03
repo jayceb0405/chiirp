@@ -1,0 +1,59 @@
+<%
+  # app/views/integrations/outreach/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/outreach/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  # 
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: Presenter
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/outreach/logo.svg', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">Outreach Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_outreach_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'Connection', edit_integrations_outreach_connections_path, { class: 'nav-link', id: 'link_connections', remote: true } %>
+        <%= link_to 'Webhooks', integrations_outreach_webhooks_path, { class: 'nav-link', id: 'link_webhooks', remote: true } %>
+        <%= link_to 'Users', integrations_outreach_users_path, { class: 'nav-link', id: 'link_users', remote: true } %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_outreach_integration_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <%= render partial: 'integrations/outreach/overview', locals: { presenter: presenter } %>
+    </div>
+  </div>
+</div>

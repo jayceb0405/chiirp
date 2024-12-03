@@ -1,0 +1,42 @@
+<%
+  # app/views/triggeractions/forms/_605.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/605", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # process/act on a Contact custom field
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[client_custom_field_id]',
+      label:        { title: 'Field to Act On' },
+      html_options: { id: "client_custom_field_id_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_client_custom_field_id_605, selected: presenter.triggeraction.client_custom_field_id.to_i, blank: 'Select a Custom Field' }
+    ) %>
+
+<div id="triggeraction_client_custom_field_<%= presenter.triggeraction.id -%>">
+  <%= render partial: 'triggeractions/forms/custom_field_action/client_custom_field', locals: { presenter: } %>
+</div>
+
+<script>
+  $(function () {
+    $('#client_custom_field_id_<%= presenter.triggeraction.id -%>').on('change', function(e) {
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_client_custom_fields_trigger_triggeraction_path(presenter.triggeraction.trigger_id, presenter.triggeraction.id) -%>',
+        data: {
+          orig_triggeraction_id: '<%= presenter.triggeraction.id -%>',
+          client_custom_field_id: $('#client_custom_field_id_<%= presenter.triggeraction.id -%>').val()
+        }
+      });
+    });
+  });
+</script>

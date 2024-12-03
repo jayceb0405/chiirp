@@ -1,0 +1,29 @@
+<%
+  # app/views/integrations/servicetitan/reports/criteria/_criteria.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/criteria/criteria', collection: presenter.report_criteria, as: :criteria, locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) criteria: (Hash)
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter) && local_assigns.dig(:criteria).is_a?(Hash)
+-%>
+<% case criteria.dig(:dataType).to_s.downcase %>
+<% when 'boolean' %>
+  <%= render partial: 'integrations/servicetitan/reports/criteria/bool', locals: { presenter:, criteria: } %>
+<% when 'date' %>
+  <%= render partial: 'integrations/servicetitan/reports/criteria/date', locals: { presenter:, criteria: } %>
+<% when 'number' %>
+  <%= render partial: 'integrations/servicetitan/reports/criteria/number', locals: { presenter:, criteria: } %>
+<% when 'string' %>
+  <%= render partial: 'integrations/servicetitan/reports/criteria/string', locals: { presenter:, criteria: } %>
+<% when 'time' %>
+  <%= render partial: 'integrations/servicetitan/reports/criteria/time', locals: { presenter:, criteria: } %>
+<% else %>
+  Missing input for a <%= criteria.dig(:dataType).to_s -%> field.
+<% end %>

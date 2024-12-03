@@ -1,0 +1,23 @@
+<%
+# app/views/integrations/servicetitan/contacts/balances/_contact.html.erb
+#
+# Example:
+#   render partial: "integrations/servicetitan/contacts/balances/contact", collection: contacts
+#
+# Instance Variables:
+#   (req) @client_api_integration: (ClientApiIntegration)
+#
+# Local Variables:
+#   (req) contact: ()
+#
+-%>
+<tr>
+  <td class="text-left"> <%= Friendly.new.fullname(contact.firstname, contact.lastname) -%> </td>
+  <td class="text-right"> <%= number_to_currency(contact.contact_api_integrations.find_by(target: 'servicetitan').account_balance) -%> </td>
+  <td class="text-middle text-right">
+    <%= link_to '', edit_contact_path(contact),
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+  </td>
+</tr>

@@ -1,0 +1,54 @@
+<%
+  # app/views/clients/stage_parents/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/stage_parents/edit', locals: { client_stage_parents_presenter: ClientStageParentsPresenter }
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (req) client_stage_parents_presenter: (ClientStageParentsPresenter)
+  #
+  presenter = local_assigns.dig(:client_stage_parents_presenter) || Clients::StageParents::Presenter.new(client: @client)
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.stage_parent.name.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.stage_parent.name -%> </h3>
+    </div>
+
+    <div class="col">
+
+      <%= form_with model: [presenter.client, presenter.stage_parent], builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "stage_parent_form_#{presenter.stage_parent.id}", novalidate: true } do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: "#{StageParent.title} Name" },
+              html_options: { minlength: 2, placeholder: " #{StageParent.title} Name", required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+
+        <% if current_user.client.share_stages_allowed && !presenter.stage_parent.new_record? %>
+          <%= f.copy_field :share_code, {
+                label: { title: "#{StageParent.title} Share Code" }
+              } %>
+        <% end %>
+
+        <%= f.select :users_permitted, {
+              label:        { title: 'Users Accessible' },
+              html_options: { multiple: true, mobile: browser.device.mobile? },
+              choices:      { array: presenter.users_array, selected: presenter.stage_parent.users_permitted },
+              messages:     { note: "Select the Users who may access this #{StageParent.title}." }
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: "Save #{StageParent.title}", id: "stage_parent_button_#{presenter.stage_parent.id}", disable_with: "Saving #{StageParent.title}" }] %>
+      <% end %>
+
+      <div id="stages_<%= presenter.stage_parent.id -%>">
+        <%= render partial: 'clients/stage_parents/stages/index', locals: { stage_parent: presenter.stage_parent } %>
+      </div>
+    </div>
+  </div>
+</td>

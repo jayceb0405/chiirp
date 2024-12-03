@@ -1,0 +1,60 @@
+<%
+  # app/views/integrations/servicetitan/reports/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/index', locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><%= presenter.report.dig(:name).to_s.presence || 'Unknown' -%></span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <%= render partial: 'integrations/servicetitan/reports/results/header', collection: presenter.report_fields, as: :header_field, locals: { presenter: } %>
+            </tr>
+          </thead>
+
+          <tbody id="reports_body">
+
+            <% if presenter.report_results.present? %>
+              <%= render partial: 'integrations/servicetitan/reports/results/result', collection: presenter.report_data, as: :result_row, locals: { presenter: } %>
+
+              <% if presenter.report_message.present? %>
+                <tr>
+                  <td colspan="<%= presenter.report_fields.length.to_i -%>">
+                    <%= bootstrap_info_field(
+                          info: presenter.report_message
+                        ) %>
+                  </td>
+                </tr>
+              <% end %>
+            <% else %>
+              <tr>
+                <td colspan="<%= presenter.report_fields.length.to_i -%>">
+                  <%= bootstrap_info_field(
+                        info: presenter.report_message
+                      ) %>
+                </td>
+              </tr>
+            <% end %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

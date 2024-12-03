@@ -1,0 +1,40 @@
+<%
+  # app/views/clients/widgets/js/_show.js.erb
+  #
+  # Example:
+  # 	render partial: "clients/widgets/show", locals: { cards: (Array) }
+  #
+  # Required Instance Variables:
+  # 	cards[1]
+  # 		none
+  # 	cards[2]
+  # 		@client_widget: (Clients::Widget)
+  #
+  # Required Local Variables:
+  #   cards: (Array)
+  #
+  cards   = [local_assigns.dig(:cards) || []].flatten
+  version = (local_assigns.dig(:version) || 'v3').to_s
+-%>
+<% if cards.include?('edit') %>
+  $('#widgets_body').html('<%= j render partial: "clients/widgets/#{version}/edit" -%>');
+<% end %>
+<% if cards.include?('dropdown') %>
+  $('#select_widget_dropdown').html('<%= j render partial: 'clients/widgets/index/select_widget_dropdown' -%>');
+<% end %>
+<% if cards.include?('index') %>
+  $('#widgets_body').html('<%= j render partial: 'clients/widgets/index/list' -%>');
+<% end %>
+<% if cards.include?('import') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-cloud-download-alt"></i> Import SiteChat');
+  $('#dash_modal_body').html('<%= j render partial: 'clients/widgets/import/show' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('import_close') %>
+  $('#dash_modal').modal('hide');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

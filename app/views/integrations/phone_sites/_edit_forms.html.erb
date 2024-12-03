@@ -1,0 +1,78 @@
+<%
+  # app/views/integrations/phone_sites/_edit_forms.html.erb
+  #
+  # Example:
+  # 	render partial: "integrations/phone_sites/edit"
+  #
+  # Required Instance Variables:
+  # 	@user_api_integration: (UserApiIntegration)
+  # 	@page_forms:           (Hash)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  options_for_key_hash = ::Webhook.internal_key_hash(current_user.client, 'contact', %w[personal ext_references]).invert.to_a + [['OK to Text', 'ok2text'], ['OK to Email', 'ok2email']] + ::Webhook.internal_key_hash(current_user.client, 'contact', %w[phones]).merge(current_user.client.client_custom_fields.pluck(:id, :var_name).to_h).invert.to_a
+  options_for_campaign_hash = Campaign.for_select(current_user.client_id).pluck(:name, :id)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Match Your PhoneSites Fields with <%= I18n.t('tenant.name') -%></h6>
+  <div class="card-body">
+
+    <div id="forms_accordion" class="card-expansion">
+
+      <% @user_api_integrations.each do |user_api_integration| %>
+
+        <div class="card card-expansion-item">
+          <div class="card-header border-0" id="form_header_id_<%= user_api_integration.api_key %>">
+            <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#api_key_<%= user_api_integration.api_key %>" aria-expanded="false" aria-controls="api_key_<%= user_api_integration.api_key %>">
+              <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+              <span><%= user_api_integration.name %></span>
+            </button>
+          </div>
+
+          <div class="collapse" id="api_key_<%= user_api_integration.api_key %>" aria-labelledby="form_header_id_<%= user_api_integration.api_key %>" data-parent="#forms_accordion">
+            <div class="card-body pt-0">
+
+              <%= form_tag integrations_phone_sites_integration_forms_edit_path, { builder: LooperFormBuilder, remote: true, method: :post, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+                <%= hidden_field_tag 'api_key', user_api_integration.api_key %>
+                <%= bootstrap_switch_field(
+                      field:  'live',
+                      value:  user_api_integration.live,
+                      values: [true, false],
+                      label:  { title: 'Website is Live' }
+                    ) %>
+                <%= bootstrap_select_tag(
+                      field:   'campaign_id',
+                      label:   { title: 'Start Campaign when Contact is Received' },
+                      options: { array: options_for_campaign_hash, selected: user_api_integration.campaign_id, prompt: 'Select a Campaign' }
+                    ) %>
+
+                <hr class="my-3">
+
+                <% user_api_integration.form_fields.each do |ext_field_name, int_field_name| %>
+                  <%= bootstrap_select_tag(
+                        field:   "form_fields[#{ext_field_name}]",
+                        label:   { title: ext_field_name },
+                        options: { array: options_for_key_hash, selected: int_field_name, prompt: 'Matching Field or Skip' }
+                      ) %>
+                <% end %>
+
+                <%= bootstrap_submit_buttons(
+                      buttons: [{ title: 'Save', disable_with: 'Saving' }]
+                    ) %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_websites').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

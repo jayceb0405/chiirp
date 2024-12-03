@@ -1,0 +1,103 @@
+<%
+  # app/views/integrations/servicetitan/push_contacts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/push_leads/edit', locals: { presenter: Integrations::Servicetitan::PushContactsPresenter }
+  #
+  # Instance Variables:
+  #   (req) @push_contact: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::PushContactsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::PushContactsPresenter)
+
+  presenter.push_contact = @push_contact
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<td colspan="11" class="p-3">
+  <%= form_with model: presenter.client_api_integration, url: integrations_servicetitan_push_contact_path(presenter.push_contact_id), builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+    <fieldset class="border rounded p-2 mt-3 mb-2">
+      <legend class="w-auto mb-0"><h6>Required</h6></legend>
+
+      <%= bootstrap_select_tag(
+            field:        'push_contact[type]',
+            label:        { title: 'ServiceTitan Push Type' },
+            html_options: { class: 'push_contact_type_select', id: "push_contact_type_select_#{presenter.push_contact_id}" },
+            options:      { array: presenter.push_contacts_type_options, selected: presenter.push_contact_type }
+          ) %>
+
+      <div id="tag_id_<%= presenter.push_contact_id -%>">
+        <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: presenter.push_contact_tag, select_or_add_field_name: 'push_contact[tag_id]', select_or_add_div_id: "tag_id_#{presenter.push_contact_id}" } %>
+      </div>
+
+      <%= bootstrap_text_field(
+            field:    'push_contact[booking_provider_id]',
+            value:    presenter.push_contact_booking_provider_id,
+            row:      { id: "push_contact_booking_provider_id_row_#{presenter.push_contact_id}" },
+            label:    { title: 'ServiceTitan Booking Provider Tag ID' },
+            messages: { note: '(Required) Copy/Paste from ServiceTitan > Settings > Integrations > Booking Providers' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:    'push_contact[booking_source]',
+            value:    presenter.push_contact_booking_source,
+            row:      { id: "push_contact_booking_source_row_#{presenter.push_contact_id}" },
+            label:    { title: 'Booking Source' },
+            messages: { note: '(Required) Source of the booking.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'push_contact[summary_client_custom_field_id]',
+            row:          { id: "push_contact_custom_field_id_row_#{presenter.push_contact_id}" },
+            label:        { title: 'ServiceTitan Summary' },
+            html_options: { class: 'push_contact_custom_field_id_select', id: "push_contact_custom_field_id_select_#{presenter.push_contact_id}" },
+            options:      { array: presenter.push_contacts_custom_field_id_options, selected: presenter.push_contact_custom_field_id, blank: 'Select a Custom Field' },
+            messages:     { note: '(Required) Select a Custom Field from which to pull a job booking summary.' }
+          ) %>
+    </fieldset>
+
+    <fieldset class="border rounded p-2 mt-3 mb-2">
+      <legend class="w-auto mb-0"><h6>Optional</h6></legend>
+
+      <%= bootstrap_select_tag(
+            field:   'push_contact[customer_type]',
+            label:   { title: 'ServiceTitan Customer Type' },
+            options: { array: presenter.push_contacts_customer_type_options, selected: presenter.push_contact_customer_type, blank: 'Leave Blank' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:   'push_contact[business_unit_id]',
+            row:     { id: "push_contact_business_unit_id_row_#{presenter.push_contact_id}" },
+            label:   { title: 'ServiceTitan Business Unit' },
+            options: { array: presenter.push_contacts_business_unit_id_options, selected: presenter.push_contact_business_unit_id, blank: 'Leave Blank' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:   'push_contact[job_type_id]',
+            row:     { id: "push_contact_job_type_row_#{presenter.push_contact_id}" },
+            label:   { title: 'ServiceTitan Job Type' },
+            options: { array: presenter.push_contacts_job_type_id_options, selected: presenter.push_contact_job_type_id, blank: 'Leave Blank' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:   'push_contact[priority]',
+            row:     { id: "push_contact_priority_row_#{presenter.push_contact_id}" },
+            label:   { title: 'ServiceTitan Priority' },
+            options: { array: presenter.push_contacts_priority_options, selected: presenter.push_contact_priority, blank: 'Leave Blank' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:   'push_contact[campaign_id]',
+            row:     { id: "push_contact_campaign_id_row_#{presenter.push_contact_id}" },
+            label:   { title: 'ServiceTitan Campaign' },
+            options: { array: presenter.push_contacts_campaign_id_options, selected: presenter.push_contact_campaign_id, blank: 'Leave Blank' }
+          ) %>
+    </fieldset>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Save Push Tag', disable_with: 'Saving Push Tag' }]
+        ) %>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    displayInputs('<%= presenter.push_contact_id -%>');
+  });
+</script>

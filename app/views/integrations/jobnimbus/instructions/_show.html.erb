@@ -1,0 +1,103 @@
+<%
+  # app/views/integrations/jobnimbus/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">JobNimbus Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>JobNimbus integration provides enhanced leads & customer follow-up and 2-way text messaging capabilities at every point of customer communications.</li>
+      <li>A JobNimbus connection is required.</li>
+      <li>The JobNimbus Customer ID, phone numbers & email address are used to match a customer received into <%= I18n.t('tenant.name') -%>.</li>
+      <li>A JobNimbus connection to <%= I18n.t('tenant.name') -%> must be established from Settings in JobNimbus.</li>
+      <li>Bid data are accessible through hashtag replacement fields in Campaigns that are started by events.</li>
+      <li>Hashtags available are as follows...</li>
+      <ul>
+        <li>Estimate Status</li>
+        <li>Estimate Scheduled Start Date</li>
+        <li>Estimate Scheduled End Date</li>
+        <li>Estimate Scheduled Arrival Window Date</li>
+        <li>Estimate Scheduled Arrival Window Time</li>
+      </ul>
+    </ul>
+
+    <h6>Automation:</h6>
+    <ul>
+      <li>An API key is required by JobNimbus.</li>
+      <li>To get your API key for <%= I18n.t('tenant.name') -%> in JobNimbus...</li>
+      <ol>
+        <li>Click the User button in the right side of the top menu bar then click "Settings".</li>
+        <li>At the bottom of the left menu click "API".</li>
+        <li>Click the "New API Key" button.</li>
+        <li>Enter "<%= I18n.t('tenant.name') -%>" for the description.</li>
+        <li>Select "Owner" for the Access Profile.</li>
+        <li>Click the "Save" button.</li>
+        <li>Click the "Copy" link next to the new key that was generated.</li>
+      </ol>
+      <li>Once you have copied the key open <%= I18n.t('tenant.name') -%> to save it...</li>
+      <ol>
+        <li>If not already on the JobNimbus Integration screen...</li>
+        <ol type="a">
+          <li>Click "Integrations" in the left menu.</li>
+          <li>Click the JobNimbus Integration.</li>
+        </ol>
+        <li>Click "Connections" in the horizontal menu bar.</li>
+        <li>Paste your JobNimbus API key in the "JobNimbus API Key" field.</li>
+        <li>Click the "Save API Key" button.</li>
+      </ol>
+    </ul>
+
+    <h6>Events:</h6>
+    <ul>
+      <li>JobNimbus Automation types accepted by <%= I18n.t('tenant.name') -%>...</li>
+      <ul>
+        <li>Contact</li>
+        <li>Estimate</li>
+        <li>Invoice</li>
+        <li>Work Order</li>
+        <li>Tasks</li>
+      </ul>
+      <li>Events are considered new when an Automation type & status with a given type ID is received for the first time.</li>
+      <li>Actions may be triggered for events based the following criteria...</li>
+      <ul>
+        <li>Automation type</li>
+        <li>Status</li>
+        <li>Task type</li>
+        <li>New event</li>
+        <li>Subsequent event</li>
+      </ul>
+      <li>Task types selections are populated by types received in Task webhooks.</li>
+    </ul>
+
+    <h6>Push Contacts:</h6>
+    <ul>
+      <li>When a Contact is ready to become a customer you will want to push that Contact into JobNimbus.</li>
+      <li>Select a Tag that, when applied, will trigger <%= I18n.t('tenant.name') -%> to push that Contact's data into JobNimbus.</li>
+      <li>Whenever you want to push a Contact into JobNimbus simply apply that Tag.</li>
+    </ul>
+
+    <h6>Import Contacts</h6>
+    <ul>
+      <li>Import all of your JobNimbus contacts into <%= I18n.t('tenant.name') -%>.</li>
+      <li>Choose whether to update existing <%= I18n.t('tenant.name') -%> Contacts or only import new JobNimbus contact.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

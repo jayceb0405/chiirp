@@ -1,0 +1,130 @@
+<%
+  # app/views/user_contact_forms/v2/shared/_form.html.erb
+  #
+  # Example:
+  # 	render partial: "user_contact_forms/v2/shared/form", locals: { rendered_by: String }
+  #
+  # Required Instance Variables:
+  # 	@user_contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   rendered_by: (String)
+  # 		page, frame or modal
+  #
+  rendered_by = local_assigns.include?(:rendered_by) && %w[page frame modal].include?(local_assigns[:rendered_by].to_s) ? local_assigns[:rendered_by].to_s : 'page'
+
+  # parse YouTube link
+  if @user_contact_form.youtube_video.to_s.length == 11
+    # 27Rgz1SUS3A
+    youtube_video = @user_contact_form.youtube_video.to_s
+  elsif @user_contact_form.youtube_video.to_s.include?('/embed/')
+    # ex: https://www.youtube.com/embed/27Rgz1SUS3A\
+    # ex: <iframe width="560" height="315" src="https://www.youtube.com/embed/27Rgz1SUS3A" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    youtube_video = @user_contact_form.youtube_video.to_s.split('/embed/')[1][0..10]
+  elsif @user_contact_form.youtube_video.to_s.include?('watch?v=')
+    # ex: https://www.youtube.com/watch?v=27Rgz1SUS3A
+    youtube_video = @user_contact_form.youtube_video.to_s.split('watch?v=')[1][0..10]
+  elsif @user_contact_form.youtube_video.to_s.include?('youtu.be/')
+    # ex: https://youtu.be/27Rgz1SUS3A
+    youtube_video = @user_contact_form.youtube_video.to_s.split('youtu.be/')[1][0..10]
+  else
+    # unknown YouTube video link
+    youtube_video = ''
+
+    if @user_contact_form.youtube_video.to_s.present?
+      ProcessError::Report.send(
+        error_message: "Current User #{@user_contact_form.user_id} - #{@user_contact_form.user.fullname} included a YouTube video link. The link (#{@user_contact_form.youtube_video}) could NOT be parsed.",
+        variables:     {
+          rendered_by:   rendered_by.inspect,
+          youtube_video: @user_contact_form.youtube_video.inspect
+        },
+        file:          __FILE__,
+        line:          __LINE__
+      )
+    end
+  end
+-%>
+<div class="text-center">
+  <h2 class="font-weight-bold"><%= @user_contact_form.title -%></h2>
+</div>
+
+<% if youtube_video.present? %>
+  <div class="embed-responsive embed-responsive-16by9">
+    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/<%= youtube_video -%>?rel=0" allowfullscreen></iframe>
+  </div>
+<% end %>
+
+<div class="text-center pb-3">
+  <%= @user_contact_form.header_notes.strip %>
+</div>
+
+<% date_field_ids = [] %>
+<%= form_tag api_v2_user_contact_form_save_contact_path(@user_contact_form.page_key), { builder: LooperFormBuilder } do %>
+  <%= hidden_field_tag 'rendered_by', rendered_by %>
+  <% client_custom_fields = @user_contact_form.user.client.client_custom_fields %>
+
+  <% Webhook.internal_key_hash(@user_contact_form.user.client, 'contact', %w[personal phones custom_fields]).each do |key, name| %>
+
+    <% if @user_contact_form.form_fields.dig(key.to_sym).to_i.positive? %>
+      <% custom_field = client_custom_fields.find_by(var_var: key) || @user_contact_form.user.client.client_custom_fields.new(var_name: name, var_var: key, var_type: 'string', var_placeholder: '', var_options: {}) %>
+      <% required = @user_contact_form.form_fields.dig(:"#{key}_required").to_i.positive? %>
+      <% custom_field.var_name = "#{custom_field.var_name} #{required ? '*' : ''}" %>
+      <% field_tag = 'client_custom_fields' %>
+
+      <div class="form-group mb-3">
+        <%= contact_custom_field_input(
+              custom_field:,
+              object_name:  field_tag,
+              row:          { class: 'mb-0', columns: [4, 8] },
+              col:          { class: 'mb-0' },
+              form_group:   { class: 'mb-0' },
+              label:        { class: 'mt-0 mb-0' },
+              html_options: { required: }
+            ) %>
+      </div>
+    <% end %>
+  <% end %>
+
+  <% if @user_contact_form.ok2text.to_s == "1" %>
+    <div class="input-group mt-2">
+      <div class="custom-control custom-switch">
+        <%= check_box_tag 'client_custom_fields[ok2text]', '1', true, { class: 'custom-control-input', id: 'ok2text' } %>
+        <label class="custom-control-label" for="ok2text"><%= @user_contact_form.ok2text_text.to_s -%></label>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @user_contact_form.ok2email.to_s == "1" %>
+    <div class="input-group">
+      <div class="custom-control custom-switch">
+        <%= check_box_tag 'client_custom_fields[ok2email]', '1', true, { class: 'custom-control-input', id: 'ok2email' } %>
+        <label class="custom-control-label" for="ok2email"><%= @user_contact_form.ok2email_text.to_s -%></label>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="text-center pt-3 pb-3">
+    <%= submit_tag @user_contact_form.submit_button_text, { id: 'contact_form_submit', class: 'btn btn-info rounded pl-5 pr-5', style: "background-color:#{@user_contact_form.submit_button_color};border-color:#{@user_contact_form.submit_button_color};" } %>
+  </div>
+<% end %>
+
+<div class="text-center">
+  <%= @user_contact_form.footer_notes.strip %>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('#contact_form_submit').css({'color':contrastColor('<%= @user_contact_form.submit_button_color.to_s -%>', true)});
+
+    <% date_field_ids.each do |id| %>
+      // date calendar
+      $('#<%= id -%>').flatpickr({
+        nextArrow: '>',
+        prevArrow: '<',
+        dateFormat: 'm/d/Y',
+        enableTime: 'false',
+        allowInput: 'true'
+      });
+    <% end %>
+  });
+</script>

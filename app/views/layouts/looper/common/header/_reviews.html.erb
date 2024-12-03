@@ -1,0 +1,53 @@
+<%
+  # app/views/layouts/looper/common/header/_reviews.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/header/reviews'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  unread_reviews = Review.unread_reviews_by_client(current_user.client_id).any?
+-%>
+<% if current_user.access_controller?('integrations', 'user', session) && current_user.client.integrations_allowed.include?('google') %>
+  <li class="nav-item dropdown header-nav-dropdown <%= unread_reviews ? 'has-notified' : '' -%>" id="header_unread_reviews_light">
+    <%= link_to(integrations_google_integrations_path, class: 'nav-link', data: { toggle: browser.device.mobile? ? '' : 'dropdown' }) do %>
+      <span class="fa fa-thumbs-up"></span>
+    <% end %>
+
+    <div class="dropdown-menu dropdown-menu-rich dropdown-menu-right">
+      <div class="dropdown-arrow"></div>
+      <h6 class="dropdown-header">
+        <span>Unread Reviews</span>
+        <%= link_to('Mark all as read', integrations_google_reviews_clear_path, { id: 'header_unread_reviews_clear', remote: true, method: :post }) %>
+      </h6>
+      <div class="dropdown-scroll perfect-scrollbar" id="header_unread_reviews_list">
+        <div class="text-center py-3">
+          <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo py-2' %>
+          <div class="m-auto">Loading Unread Reviews...</div>
+        </div>
+      </div>
+
+      <%= link_to(integrations_google_integrations_path, { class: 'dropdown-footer' }) do %>
+        Google Reviews <i class="fa fa-fw fa-long-arrow-alt-right"></i>
+      <% end %>
+    </div>
+  </li>
+
+  <% unless browser.device.mobile? %>
+    <script>
+      $(function() {
+        $('#header_unread_reviews_light').on('show.bs.dropdown', function () {
+          $.ajax({
+            type: 'GET',
+            dataType: 'script',
+            url: '<%= integrations_google_reviews_unread_reviews_path -%>'
+          });
+        });
+      });
+    </script>
+  <% end %>
+<% end %>

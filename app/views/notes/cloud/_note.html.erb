@@ -1,0 +1,51 @@
+<%
+  # app/views/notes/cloud/_note.html.erb
+  #
+  # Example:
+  #   render partial: 'notes/cloud/note', collection: Contacts::Notes, as: :note, locals: { presenter: Contacts::Notes::Presenter }
+  #
+  # Instance Variables:
+  #   (req) note: (Contacts::Note)
+  #
+  # Local Variables:
+  #   (req) presenter: (Contacts::Notes::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Notes::Presenter)
+-%>
+<div class="list-group-item justify-content-between align-items-center">
+  <span>
+    <i class="fa fa-square text-primary mr-2"></i>
+    <%= truncate(note.note, length: 30) %>
+  </span>
+  <span class="text-muted">
+    <%= Friendly.new.date(note.created_at, presenter.client.time_zone, true) %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_cloud_contact_note_#{note.id}"
+        } %>
+  </span>
+</div>
+
+<script>
+  $(function() {
+    $('#button_delete_cloud_contact_note_<%= note.id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting Note dated "<%= Friendly.new.date(note.created_at, presenter.client.time_zone, false) -%>" can NOT be un-done. Is it your intention to delete this Note?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_cloud_#{note.id}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_cloud_<%= note.id -%>');
+      $(document).on('click', '#button_dump_it_cloud_<%= note.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= contact_note_path(presenter.contact.id, note.id) -%>'
+        });
+      });
+    });
+  });
+</script>

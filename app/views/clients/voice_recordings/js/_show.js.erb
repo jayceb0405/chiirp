@@ -1,0 +1,30 @@
+<%
+  # app/views/clients/voice_recordings/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'clients/voice_recordings/js/show.js.erb', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  presenter = Clients::VoiceRecordings::Presenter.new(client: @client)
+-%>
+<% if cards.include?('voice_recordings') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/voice_recordings/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('voice_recordings_edit') %>
+  $('#td_voice_recording_name_<%= @voice_recording.id -%>').html('<%= @voice_recording.recording_name -%>');
+  $('#voice_recording_<%= @voice_recording.id -%>').html('<%= j render partial: 'clients/voice_recordings/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('voice_recordings_new') %>
+  $('#voice_recording_<%= @voice_recording.id -%>').html('<%= j render partial: 'clients/voice_recordings/edit', locals: { presenter: } -%>');
+  $('#voice_recording_<%= @voice_recording.id -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

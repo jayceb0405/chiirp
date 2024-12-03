@@ -1,0 +1,49 @@
+<%
+  # app/views/integrations/jobnimbus/connections/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/jobnimbus/connections/show"
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">JobNimbus Automations</h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: integrations_jobnimbus_connections_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+
+      <%= f.text_field :api_key, {
+            label:        { title: 'JobNimbus API Key' },
+            html_options: { placeholder: 'API Key', required: true, autofocus: true },
+            prepends:     [{ button: false, label: '<i class="fa fa-key"></i>' }],
+            messages:     { note: 'Required. Created in JobNimbus (JobNimbus > Settings > API)' }
+          } %>
+
+      <% if presenter.client_api_integration.api_key.present? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'Automation Webhook' },
+              html_options: { value: integrations_jobnimbus_endpoint_url(presenter.client_api_integration.webhook_api_key) }
+            } %>
+      <% end %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [{ title: 'Save API Key', disable_with: 'Saving API Key...' }]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

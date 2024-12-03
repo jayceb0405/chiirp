@@ -1,0 +1,22 @@
+<%
+  # /app/views/groups/create.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (req) group:                    (Group)
+  #
+  #   (opt) exclude_groups:           (Array / default: [])
+  #   (opt) select_or_add_div_id:     (String / default: 'client_group')
+  #   (opt) select_or_add_field_name: (String / default: 'group_id')
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @group.is_a?(Group)
+
+  select_or_add_div_id = (@select_or_add_div_id || 'client_group').to_s
+-%>
+<%= turbo_stream.update select_or_add_div_id do %>
+  <%= render partial: 'groups/select_or_add', locals: { user: current_user, group: @group, select_or_add_field_name: (@select_or_add_field_name || 'group_id').to_s, select_or_add_div_id:, exclude_groups: @exclude_groups.is_a?(Array) ? @exclude_groups : [] } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

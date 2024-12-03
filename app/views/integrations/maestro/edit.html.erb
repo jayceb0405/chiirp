@@ -1,0 +1,54 @@
+<%
+  # app/views/integrations/maestro/edit.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/maestro/edit"
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<div class="section-container row">
+  <div class="col-12">
+    <div id="maestro_integration_info">
+      <%= render partial: "integrations/maestro/integration_info" %>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-xl-5 col-lg-12">
+    <!-- API KEY -->
+    <div id="maestro_hotel_id">
+      <%= render partial: "integrations/maestro/hotel_id" %>
+    </div>
+
+    <!-- NEW CONTACT ACTIONS -->
+    <div id="maestro_new_contact_actions">
+      <%= render partial: "integrations/maestro/new_contact" %>
+    </div>
+
+    <!-- CHECKIN CONTACT ACTIONS -->
+    <div id="maestro_checkin_contact_actions">
+      <%= render partial: "integrations/maestro/checkin_contact" %>
+    </div>
+
+    <!-- CHECKOUT CONTACT ACTIONS -->
+    <div id="maestro_checkout_contact_actions">
+      <%= render partial: "integrations/maestro/checkout_contact" %>
+    </div>
+
+    <!-- ROOM MOVE CONTACT ACTIONS -->
+    <div id="maestro_roommove_contact_actions">
+      <%= render partial: "integrations/maestro/roommove_contact" %>
+    </div>
+  </div>
+
+  <div class="col-xl-7 col-lg-12">
+    <div id="maestro_custom_field_assignments">
+      <%= render partial: "integrations/maestro/custom_field_assignments" %>
+    </div>
+  </div>
+</div>

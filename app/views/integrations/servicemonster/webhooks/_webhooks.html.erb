@@ -1,0 +1,16 @@
+<%
+  # app/views/integrations/servicemonster/webhooks/_webhooks.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/webhooks/webhooks', collection: @client_api_integration.webhooks, as: :webhooks, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   (req) webhooks:                 (Array)
+  #   (opt) presenter:                (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'integrations/servicemonster/webhooks/event_outer', collection: webhooks.last.dig('events'), as: :webhook_event, locals: { presenter: presenter } %>

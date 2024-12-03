@@ -1,0 +1,61 @@
+<%
+  # app/views/welcome/join.html.erb
+  #
+  # Example:
+  # 	render 'welcome/join', locals: { package_id: (Integer), package_page_id: (Integer) }
+  #
+  # Instance Variables:
+  # 	(req) @client:         (Client)
+  # 	(req) @package:        (Package)
+  # 	(req) @package_page:   (PackagePage)
+  #
+  # Local Variables:
+  #   none
+  #
+  wp         = local_assigns.dig(:welcome_presenter) || WelcomePresenter.new(package_page: @package_page, upgrade: local_assigns.dig(:upgrade).to_bool)
+  wp.package = @package
+  wp.client  = @client
+-%>
+<section class="position-relative py-5 bg-light">
+
+  <div class="col-lg-6 offset-lg-3 mb-2 p-3">
+    <div class="card border shadow-lg mb-5 rounded">
+      <div class="card-body p-0 rounded">
+        <div class="card-title bg-info p-2 mb-0 rounded-top text-white">
+          <h2 class="p-0 m-0">Join Us Today!</h2>
+          <small>Start connecting with 97% of your leads immediately!</small>
+        </div>
+
+        <div class="p-3">
+          <h2>Congratulations!</h2>
+          <p>
+            You've taken the first step in connecting with more of your customers.<br>
+            Please fill out the form below and we'll get you set up in no time.
+          </p>
+          <% if @package.expired_on %>
+            <p>
+              Hurry! This offer expires on <%= Friendly.new.date(@package.expired_on, 'Mountain Time (US & Canada)', false) %>.
+            </p>
+          <% end %>
+          <h3><%= I18n.t('tenant.name') -%> Package Selected: <%= wp.package.name -%></h3>
+
+          <p class="card-text">
+            <div id="client_form_container">
+              <%= render partial: 'clients/new', locals: { self_create: true } %>
+            </div>
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<script>
+  $(function () {
+    <% if wp.package.join_form_image.attached? %>
+      $('#banner_logo_image').attr('src', '<%= cl_image_path(wp.package.join_form_image.key, secure: true) -%>');
+    <% end %>
+  });
+</script>

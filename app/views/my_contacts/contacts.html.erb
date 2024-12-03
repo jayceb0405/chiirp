@@ -1,0 +1,11 @@
+<%
+  # /app/views/my_contacts/contacts.html.erb
+  #
+  cards     = @cards
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast   = @broadcast
+  presenter.page_number = @page_number
+-%>
+<%= turbo_frame_tag 'my_contacts', class: 'mt-2' do %>
+  <%= render 'my_contacts/broadcast/contacts', presenter: %>
+<% end %>

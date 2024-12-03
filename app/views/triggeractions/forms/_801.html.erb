@@ -1,0 +1,42 @@
+<%
+  # app/views/triggeractions/forms/_801.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/forms/801', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # Push Contact to Client
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'client_ids',
+      label:        { title: 'Clients' },
+      html_options: { id: 'selected_clients', multiple: true, disabled: presenter.campaign_disabled? },
+      options:      { array: Client.by_agency(presenter.client.id).order(:name).pluck(:name, :id), selected: presenter.triggeraction.clients.pluck('client_id'), blank: 'No Clients Selected' },
+      messages:     { note: 'Select from your Clients to push Contacts to.' }
+    ) %>
+
+<div id="triggeraction_801_clients_<%= presenter.triggeraction.id -%>">
+  <%= render partial: 'triggeractions/forms/801/index', locals: { triggeraction: presenter.triggeraction, disabled: presenter.campaign_disabled? } -%>
+</div>
+
+<script>
+  $(function() {
+    $(document).off('change', '#selected_clients');
+    $(document).on('change', '#selected_clients', function(e) {
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= index_801_trigger_triggeraction_path(presenter.triggeraction.trigger_id, presenter.triggeraction.id) -%>',
+        data: { clients: $('#selected_clients').val() }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,24 @@
+<%
+  # app/views/aiagents/_select_aiagents_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'aiagents/select_aiagents_dropdown'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select an AI Agent</span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% @aiagents.each do |aiagent| %>
+    <a href="#" class="dropdown-item option_aiagent ml-3" id="<%= aiagent.id -%>"><%= aiagent.name -%></a>
+  <% end %>
+</div>

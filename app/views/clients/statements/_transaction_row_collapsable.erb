@@ -1,0 +1,24 @@
+<%
+  # app/views/clients/statements/transaction_row_collapsable.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/statements/transaction_row_collapsable', locals: { selection: String, printable: Boolean, presenter: ClientPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (ClientPresenter)
+  #   (opt) printable: (Boolean)
+  #   (req) selection: (String) selection type and id
+  #
+  return unless local_assigns.dig(:presenter).is_a?(ClientPresenter)
+-%>
+<tr class="row-details bg-light <%= local_assigns.dig(:printable).to_bool && params[:selections]&.include?(selection) ? '' : 'collapse' %>" id="<%= selection %>">
+  <% if local_assigns.dig(:printable).to_bool && params[:selections]&.include?(selection) %>
+    <% @transaction_type = selection %>
+    <%= render partial: 'clients/statements/index', locals: { presenter: } %>
+  <% else %>
+    <!-- <%= selection %> -->
+  <% end %>
+</tr>

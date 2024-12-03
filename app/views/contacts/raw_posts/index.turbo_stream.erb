@@ -1,0 +1,23 @@
+<%
+# /app/views/contacts/raw_posts/index.turbo_stream.erb
+#
+# Instance Variables:
+#   (opt) contact:   (Contact)
+#
+# Local Variables:
+#
+-%>
+
+<%= turbo_stream.update 'dash_modal_title' do %>
+  <i class="fas fa-scroll"></i> Raw Posts for <%= @contact.new_record? ? 'New Contact' : @contact.fullname_or_phone -%>
+<% end %>
+
+<%= turbo_stream.update 'dash_modal_body' do %>
+  <%= render 'contacts/raw_posts/raw_posts' %>
+<% end %>
+
+<%= turbo_stream.update 'dash_modal_footer' %>
+
+<%= turbo_stream.show_modal :dash_modal %>
+
+<%= turbo_stream.bootstrap_init %>

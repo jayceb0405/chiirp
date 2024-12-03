@@ -1,0 +1,102 @@
+<%
+  # app/views/integrations/five9/lists/_list.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/lists/list', collection: client_api_integration.lists, as: :list
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if list[0].to_s.blank?
+
+  list_id     = list[0].to_s
+  list_name   = list[1].symbolize_keys[:name].to_s
+  list_action = list[1].symbolize_keys[:action].to_s
+  list_tag_id = list[1].symbolize_keys[:tag_id].to_i
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#list_<%= list_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left" colspan="2" id="td_list_name_<%= list_id -%>"> <%= list_name -%> </td>
+  <td class="text-left"> <%= list_action.capitalize -%> </td>
+  <td class="text-left"> <%= Tag.find_by(client_id: @client_api_integration.client_id, id: list_tag_id)&.name -%> </td>
+  <td class="text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#list_<%= list_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_list_#{list_id}"
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="list_<%= list_id -%>">
+  <td colspan="6" id="edit_list_<%= list_id -%>">
+    <div class="text-center mt-3">
+      <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %>
+    </div>
+    <div class="text-center mb-3">
+      Retrieving Lists from Five9...
+    </div>
+  </td>
+</tr>
+
+<script>
+  $(document).ready(function() {
+
+    <% if list_id == 'new_list' %>
+      $('#list_<%= list_id -%>').collapse('show');
+      $('#edit_list_<%= list_id -%>').html('<%= j render partial: 'integrations/five9/lists/edit', locals: { list: } -%>');
+
+      $('#button_delete_list_<%= list_id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= integrations_five9_lists_path -%>'
+        });
+      });
+    <% else %>
+      $(document).off('show.bs.collapse', '#list_<%= list_id -%>');
+      $(document).on('show.bs.collapse', '#list_<%= list_id -%>', function(e) {
+
+        if ($(this).is(e.target)) {
+          $.ajax({
+            type: 'GET',
+            dataType: 'script',
+            url: '<%= edit_integrations_five9_list_path(list_id) -%>'
+          });
+        }
+      });
+
+      $('#button_delete_list_<%= list_id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= list_name -%>" can NOT be un-done. Is it your intention to delete this List?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{list_id}" }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_<%= list_id -%>');
+        $(document).on('click', '#button_dump_it_<%= list_id -%>', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= integrations_five9_list_path(list_id) -%>'
+          });
+        });
+      });
+    <% end %>
+
+  });
+</script>

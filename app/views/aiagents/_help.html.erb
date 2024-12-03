@@ -1,0 +1,71 @@
+<%
+# app/views/aiagents/_help.html.erb
+#
+# Example:
+# 	render partial: "aiagents/help"
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-robot mr-2"></i>AI Agents</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="wistia_responsive_padding" style="padding:56.25% 0 0 0;position:relative;">
+        <div class="wistia_responsive_wrapper" style="height:100%;left:0;position:absolute;top:0;width:100%;">
+          <iframe src="https://fast.wistia.net/embed/iframe/yf7076kuju?seo=false&videoFoam=true" title="aidemo Video" allow="autoplay; fullscreen" allowtransparency="true" frameborder="0" scrolling="no" class="wistia_embed" name="wistia_embed" msallowfullscreen width="100%" height="100%"></iframe>
+        </div>
+      </div>
+
+      <p class="text-right mt-3">
+        <% if current_user.client.aiagent_terms_accepted_at %>
+          <button id="terms" class="btn btn-secondary">Terms</button>
+        <% end %>
+        <% if current_user.client.aiagent_terms_accepted_at %>
+          <button id="continue" class="btn btn-info">Continue</button>
+        <% else %>
+          <button id="continue" class="btn btn-info">Start my <%= current_user.client.aiagent_trial_period_months.to_i %> month<%= current_user.client.aiagent_trial_period_days.to_i&.zero? ? nil : " and #{current_user.client.aiagent_trial_period_days.to_i} day" %> trial</button>
+        <% end %>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $(document).off('click', '#continue')
+    $(document).on('click', '#continue', function(e) {
+      e.preventDefault();
+
+      var cards = ['<%= current_user.client.aiagent_terms_accepted_at ? 'index' : 'terms' %>'];
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/aiagents',
+        data: { cards: cards }
+      });
+    });
+
+    $(document).off('click', '#terms')
+    $(document).on('click', '#terms', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/aiagents',
+        data: { cards: ['terms'] }
+      });
+    });
+  });
+</script>

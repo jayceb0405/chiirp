@@ -1,0 +1,127 @@
+<%
+  # app/views/email_templates/shared/_email_template_select_field.html.erb
+  #
+  # Example:
+  #   render partial: 'email_templates/shared/email_template_select_field', locals: { client: presenter.client, field_prefix: 'message' }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   client: (Object) Client
+  #
+  # Optional Instance Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   email_template_id:      (Integer) initial value for email template select box
+  #   email_template_yield:   (String) initial value for email template yield textbox
+  #   email_template_subject: (String) initial value for email template subject field
+  #   id:                     (String) HTML ID suffix
+  #   field_prefix:           (String) html field prefix
+  #   handle_template_change: (Boolean) whether or not to run the handle_template_change on page load
+  #
+
+  # client                 = local_assigns.dig(:client)
+  email_templates        = client.email_templates.order(:name)
+  email_template_id      = local_assigns.dig(:email_template_id) || 0
+  email_template_yield   = local_assigns.dig(:email_template_yield)
+  email_template_subject = local_assigns.dig(:email_template_subject)
+  id                     = local_assigns.dig(:id) || RandomCode.new.create
+  field_prefix           = local_assigns.dig(:field_prefix)
+  left_border            = local_assigns.dig(:left_border)
+%>
+
+<div id="email_template_select_field_<%= id %>">
+  <%= bootstrap_select_tag(
+        field:        "#{field_prefix}[email_template_id]",
+        label:        { title: 'Email Template' },
+        options:      { for_select: options_from_collection_for_select(email_templates, :id, :name, email_template_id), blank: 'Use Empty Template', left_border: },
+        html_options: { id: "email_template_id_field_#{id}" },
+        messages:     { note: 'Choose an email template to use. You must select an email template.' }
+      ) %>
+  <%= bootstrap_text_field(
+        field:        "#{field_prefix}[email_template_subject]",
+        value:        email_template_subject,
+        row:          { class: 'mb-1' },
+        col:          { display: true },
+        label:        { title: 'Subject' },
+        html_options: { class: 'border-1 email_template_subject_field', typeahead_client: client, typeahead_drop_up: true },
+        messages:     { note: 'Set the subject for the email. This field is hashtag aware.' },
+        input_group:  { class: 'input-group-alt' }
+      ) %>
+  <div class="email_template_yield">
+    <%= bootstrap_text_area(
+          field:        "#{field_prefix}[email_template_yield]",
+          value:        email_template_yield,
+          label:        { title: 'Custom Email Section' },
+          html_options: { class: 'email_template_yield_field', required: false, typeahead_client: client, typeahead_drop_up: true },
+          messages:     { note: "Enter message to be included in the custom email section. This field is hashtag aware. Press '#' to access data fields." }
+        ) %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    var $root = $('#email_template_select_field_<%= id %>');
+    var $email_template_id_field = $root.find('#email_template_id_field_<%= id %>');
+    var $email_template_subject_field = $root.find('.email_template_subject_field');
+    var $email_template_yield = $root.find('.email_template_yield');
+    var $email_template_yield_field = $root.find('.email_template_yield_field');
+
+    var email_templates = <%= client.email_templates.to_h { |email_template| [email_template.id, { yield: email_template.yield?, subject: email_template.subject }] }.to_json.html_safe %>;
+
+    $email_template_id_field.selectpicker('refresh');
+
+    $email_template_id_field.off('change');
+    $email_template_id_field.on('change', handleTemplateChange);
+
+    // initial field setup
+    var id = $email_template_id_field.val();
+    if ($email_template_subject_field.val() == '' && !idFieldBlank()) setSubjectFieldToTemplate(id);
+    if (!idFieldBlank()) setEmailTemplateYieldVisibility(id);
+
+    function handleTemplateChange() {
+      var id = $email_template_id_field.val();
+
+      $email_template_id_field.selectpicker('refresh');
+
+      if (idFieldBlank()) {
+        $email_template_yield.show();
+        $email_template_subject_field.val('');
+        $email_template_yield.val('');
+        return;
+      }
+
+      setEmailTemplateYieldVisibility(id);
+      setSubjectFieldToTemplate(id);
+    }
+
+    $root.off('clear')
+    $root.on('clear', function(e) {
+      e.stopPropagation();
+
+      $email_template_id_field.val('');
+      $email_template_id_field.selectpicker('refresh');
+      $email_template_subject_field.typeahead('val', '');
+      $email_template_yield_field.typeahead('val', '');
+    })
+
+    function idFieldBlank(id) {
+      var id = $email_template_id_field.val();
+      return (id === undefined || id == '')
+    }
+
+    function setSubjectFieldToTemplate(id) {
+      $email_template_subject_field.val(email_templates[id].subject);
+    }
+
+    function setEmailTemplateYieldVisibility(id) {
+      if (email_templates[id].yield) {
+        $email_template_yield.show();
+      } else {
+        $email_template_yield.hide();
+      }
+    }
+  });
+</script>

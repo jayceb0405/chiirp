@@ -1,0 +1,46 @@
+<%
+   # app/views/clients/users/common/_user_header.html.erb
+   #
+   # Example:
+   #   render partial: 'clients/users/common/user_header', locals: { presenter: Users::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Users::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Users::Presenter)
+   return if presenter.user.new_record?
+-%>
+<div class="media mb-3">
+  <div class="user-avatar user-avatar-xl fileinput-button">
+    <%= form_with(url: users_avatar_path(presenter.user.id), method: :patch, remote: true, html: { multipart: true, id: 'profile_avatar_form' }) do |f| %>
+      <div class="fileinput-button-label"> Change photo </div>
+      <span id="profile_avatar"><%= presenter.user_avatar -%></span>
+      <%= f.file_field :avatar %>
+      <input id="fileupload_avatar" type="file" name="avatar">
+    <% end %>
+  </div>
+
+  <div class="media-body pl-3">
+    <h3 class="card-title"> Avatar </h3>
+    <h6 class="card-subtitle text-muted"> Click the current avatar to change your photo. </h6>
+    <p class="card-text">
+      <small>JPG, GIF or PNG 400x400, &lt; 2 MB.</small>
+    </p>
+    <div id="progress-avatar" class="progress progress-xs fade">
+      <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $(document).off('change', '#fileupload_avatar');
+    $(document).on('change', '#fileupload_avatar', function(e) {
+      var elem = document.getElementById('profile_avatar_form')
+      Rails.fire(elem, 'submit');
+    });
+  });
+</script>

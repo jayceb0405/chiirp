@@ -1,0 +1,40 @@
+<%
+  # app/views/integrations/servicetitan/reports/_schedule.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/schedule', locals: { presenter: Integrations::Servicetitan::ReportsPresenter
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:          (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<fieldset class="border rounded p-2 my-3">
+  <legend class="w-auto mb-0"><h6>Automated Schedule</h6></legend>
+
+  <%= bootstrap_select_tag(
+        field:        'report[schedule][days]',
+        label:        { title: 'Days of week' },
+        html_options: { multiple: true },
+        options:      { for_select: weekday_options_for_select(presenter.report_schedule_days, day_format: :abbr_day_names) },
+        messages:     { note: 'Select which days the report should be processed.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'report[schedule][occurrence]',
+        label:        { title: 'Occurrence in month' },
+        html_options: { multiple: true },
+        options:      { array: presenter.options_for_occurrences, selected: presenter.report_schedule_occurrences },
+        messages:     { note: 'Select the occurrence of the selected days of the month the report should be processed (ie: 1st Monday).' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'report[schedule][hour]',
+        label:        { title: 'Hour of day' },
+        html_options: { multiple: true, maxoptions: 6 },
+        options:      { array: presenter.options_for_hour, selected: presenter.report_schedule_hour },
+        messages:     { note: 'Select what hours of the day the report should be processed.' }
+      ) %>
+
+</fieldset>

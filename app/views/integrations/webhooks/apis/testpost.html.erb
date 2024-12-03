@@ -1,0 +1,104 @@
+<%
+# app/views/integrations/webhooks/apis/testpost.html.erb
+#
+# Example:
+#   render partial: 'integrations/webhooks/apis/testpost'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="section-container">
+  <div class="col-xl-5 col-lg-12">
+    <!-- WEBHOOK FORM -->
+    <div id="webhooks_form">
+
+    <%= form_tag(integrations_webhook_client_api_url(current_user.client, 'b2bcc7f4f0ede3777fa9bfcd9a7c06b0e8234a22'), method: 'post') do %>
+
+      <div class="form-group">
+        <%= label_tag('phone_number', 'Phone Number', class: 'form-control-label') %>
+        <%= text_field_tag('phone_number', '+18023455136', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('ad_id', 'Ad ID', class: 'form-control-label') %>
+        <%= text_field_tag('ad_id', 'Red', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('form_id', 'Form ID', class: 'form-control-label') %>
+        <%= text_field_tag('form_id', '241993286348885', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('may_we_text_you?', 'may_we_text_you?', class: 'form-control-label') %>
+        <%= text_field_tag('may_we_text_you?', 'Yes', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('adset_id', 'Ad Set', class: 'form-control-label') %>
+        <%= text_field_tag('adset_id', '', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('campaign_id', 'Campaign ID', class: 'form-control-label') %>
+        <%= text_field_tag('campaign_id', '', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('email', 'Email', class: 'form-control-label') %>
+        <%= text_field_tag('email', 'kevin@kevinneubert.com', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('ad_name', 'Ad Name', class: 'form-control-label') %>
+        <%= text_field_tag('ad_name', '', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('full_name', 'Full Name', class: 'form-control-label') %>
+        <%= text_field_tag('full_name', 'Kevin Neubert', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('created_time', 'Time Created', class: 'form-control-label') %>
+        <%= text_field_tag('created_time', '2018-08-14T19:59:56+0000', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('campaign_name', 'Campaign Name', class: 'form-control-label') %>
+        <%= text_field_tag('campaign_name', 'Belmont', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('id', 'ID', class: 'form-control-label') %>
+        <%= text_field_tag('id', '242155146332699', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <div class="form-group">
+        <%= label_tag('adset_name', 'Adset Name', class: 'form-control-label') %>
+        <%= text_field_tag('adset_name', '', class: 'form-control', autocomplete: false) %>
+      </div>
+
+      <%= submit_tag 'Post', data: { 'disable-with': 'Posting...' }, class: 'btn btn-app' %>
+    <% end %>
+
+    </div>
+  </div>
+
+  <div class="col-xl-7 col-lg-12">
+    <!-- WEBHOOK FORM -->
+    <div id="webhooks_form">
+#= render partial: "integrations/webhooks/apis/form", locals: { collapsed: false } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#navbar_inner_container').html('<%= j render partial: 'layouts/dashboard/navbar_inner/navbar_inner', locals: { heading: 'Webhook Tester', description: '', show_toggler: false } -%>');
+  });
+</script>

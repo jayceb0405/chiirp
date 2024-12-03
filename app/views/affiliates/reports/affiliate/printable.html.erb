@@ -1,0 +1,24 @@
+<%
+  # app/views/affiliates/reports/printable.html.erb
+  #
+  # Example:
+  #   render 'affiliates/reports/printable'
+  #
+  # Instance Variables:
+  #   (opt) @clients:       (Clients)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Affiliates::Presenter.new(affiliate: @affiliate)
+-%>
+<div class="p-5">
+  <h4><i class="fa fa-handshake mr-2"></i>Affiliate Report</h4>
+  <p>
+    Affiliate: <%= presenter.affiliate.company_name -%><br>
+    Period: <%= @report_period_string -%><br>
+    Printed: <%= Time.current.in_time_zone(current_user.client.time_zone).strftime('%m/%d/%Y %H:%M %p') -%>
+  </p>
+
+  <%= render partial: 'affiliates/reports/affiliate/results', locals: { presenter: } %>
+</div>

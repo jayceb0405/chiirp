@@ -1,0 +1,195 @@
+<%
+  # app/views/clients/dlc10/v2/campaigns/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/campaigns/edit', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   (req) @dlc10_campaign: (Clients::Dlc10::Campaign)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless @dlc10_campaign.is_a?(Clients::Dlc10::Campaign) && local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+
+  presenter.dlc10_campaign = @dlc10_campaign
+-%>
+<td colspan="8">
+
+  <%= form_with model: presenter.dlc10_campaign, url: presenter.dlc10_campaign.new_record? ? clients_dlc10_campaigns_path(client_id: presenter.client.id) : clients_dlc10_campaign_path(presenter.client.id, id: presenter.dlc10_campaign.id), builder: LooperFormBuilder, id: "dlc10_campaign_form_#{presenter.dlc10_campaign.id}", remote: true, class: 'needs-validation', novalidate: true do |f| %>
+    <%= hidden_field_tag 'clients_dlc10_campaign[mo_charge]', @dlc10_campaign.mo_charge, id: "dlc10_mo_charge_#{presenter.dlc10_campaign.id}" %>
+    <%= f.text_field :name, {
+          label:        { title: 'Use Case Name' },
+          html_options: { placeholder: 'Use Case Name', minlength: 2, required: true },
+          messages:     { note: 'Name this use case for your reference, Minimum 2 characters.' }
+        } %>
+    <%= f.text_area :description, {
+          label:        { title: 'Use Case Description' },
+          html_options: { placeholder: 'Use Case Description', minlength: 40, maxlength: 4096, required: true },
+          messages:     { note: 'Describe what this use case is used for. Between 40 & 4096 characters.' }
+        } %>
+    <%= f.select :use_case, {
+          label:        { title: 'Use Case' },
+          html_options: { id: "dlc10_use_case_#{presenter.dlc10_campaign.id}", required: true, mobile: browser.device.mobile?, disabled: presenter.dlc10_campaign_verified? },
+          choices:      { array: presenter.options_for_dlc10_use_case, selected: presenter.dlc10_campaign.use_case, blank: 'Select a Use Case' },
+          messages:     { note: 'Select a use case. Must not be empty.' }
+        } %>
+    <%= f.select :sub_use_cases, {
+          row:          { id: "dlc10_sub_use_cases_row_#{presenter.dlc10_campaign.id}", display: presenter.max_sub_use_cases.positive? },
+          label:        { id: "dlc10_sub_use_cases_label_#{presenter.dlc10_campaign.id}", title: "Sub Use Cases (#{presenter.min_sub_use_cases} - #{presenter.max_sub_use_cases})" },
+          html_options: { id: "dlc10_sub_use_cases_#{presenter.dlc10_campaign.id}", required: presenter.min_sub_use_cases.positive?, multiple: true, mobile: browser.device.mobile?, disabled: presenter.dlc10_campaign_verified?, data: { 'max-options' => 5 } },
+          choices:      { array: presenter.options_for_dlc10_sub_use_cases, selected: presenter.dlc10_campaign.sub_use_cases, blank: 'Select Sub Use Cases' },
+          messages:     { note: 'Select sub use cases. See left for number of sub use cases required.' }
+        } %>
+    <%= f.select :vertical, {
+          label:        { title: 'Business Type (Vertical)' },
+          html_options: { required: true, mobile: browser.device.mobile?, disabled: presenter.dlc10_campaign_verified? },
+          choices:      { array: presenter.options_for_brand_verticals, selected: presenter.dlc10_campaign.vertical, blank: 'Select a Business Type' },
+          messages:     { note: 'Select a business type. Must not be empty.' }
+        } %>
+    <%= f.text_area :message_flow, {
+          label:        { title: 'Opt-In Methods' },
+          html_options: { id: "dlc10_message_flow_#{presenter.dlc10_campaign.id}", minlength: 40, maxlength: 2048, required: true },
+          messages:     { note: 'Describe how your company is receiving opt-ins from your customers and leads. If opt-ins are collected on your website, make sure to include a link to your website and a link to your privacy policy.' }
+        } %>
+    <%= bootstrap_info_field(
+          info:     presenter.client.dlc10_brand.opt_in_message,
+          label:    { title: 'Opt-in message' },
+          messages: { note: "The message sent after 'JOIN' or 'START' text messages are received." }
+        ) %>
+    <%= bootstrap_info_field(
+          info:     presenter.client.dlc10_brand.help_message,
+          label:    { title: 'Help message' },
+          messages: { note: "The message sent after 'HELP' or 'SUPPORT' text messages are received." }
+        ) %>
+    <%= bootstrap_info_field(
+          info:     presenter.client.dlc10_brand.opt_out_message,
+          label:    { title: 'Opt-out message' },
+          messages: { note: "The message sent after 'STOP', 'STOPALL' or 'UNSUBSCRIBE' text messages are received." }
+        ) %>
+
+    <% max_count = presenter.campaign_required_sample_count %>
+    <% 5.times do |i| %>
+      <%= f.text_area :"sample#{i + 1}", {
+            label:        { title: "Sample ##{i + 1}" },
+            html_options: { id: "dlc10_sample_#{i + 1}_input_#{presenter.dlc10_campaign.id}", minlength: 20, maxlength: 1024, required: (i + 1) <= max_count, value: presenter.dlc10_campaign.send("sample#{i + 1}") },
+            messages:     { note: 'Enter a sample text message. Between 20 & 1024 characters.' }
+          } %>
+    <% end %>
+
+    <%= f.switch :embedded_link, {
+          label:      { title: 'Embedded Link' },
+          checkboxes: [{ field: 'embedded_link', checked: presenter.dlc10_campaign.embedded_link, values: [true, false], note: 'Indicates that a message may include an embedded link. (normally set on)', disabled: presenter.dlc10_campaign_verified? }]
+        } %>
+    <%= f.switch :embedded_phone, {
+          label:      { title: 'Embedded Phone Number' },
+          checkboxes: [{ field: 'embedded_phone', checked: presenter.dlc10_campaign.embedded_phone, values: [true, false], note: 'Indicates that a message may include an embedded phone number. (normally set off)', disabled: presenter.dlc10_campaign_verified? }]
+        } %>
+    <%= f.switch :affiliate_marketing, {
+          label:      { title: 'Affiliate Marketing' },
+          checkboxes: [{ field: 'affiliate_marketing', checked: presenter.dlc10_campaign.affiliate_marketing, values: [true, false], note: 'Indicates that affiliate marketing is/was used in acquiring this Contact.', disabled: presenter.dlc10_campaign_verified? }]
+        } %>
+    <%= f.switch :direct_lending, {
+          label:      { title: 'Direct Lending / Loan Arrangement' },
+          checkboxes: [{ field: 'direct_lending', checked: presenter.dlc10_campaign.direct_lending, values: [true, false], note: 'Indicates that the message relates to direct lending or other loan arrangements.', disabled: presenter.dlc10_campaign_verified? }]
+        } %>
+    <%= f.switch :age_gated, {
+          label:      { title: 'Age Gated Content' },
+          checkboxes: [{ field: 'age_gated', checked: presenter.dlc10_campaign.age_gated, values: [true, false], note: 'Indicates that the message may include age-gated content as defined by Carrier and CTIA guidelines.', disabled: presenter.dlc10_campaign_verified? }]
+        } %>
+    <%= f.switch :number_pool, {
+          label:      { title: 'Number Pooling (50+)' },
+          checkboxes: [{ field: 'number_pool', checked: presenter.dlc10_campaign.number_pool, values: [true, false], note: 'Indicates that more than 50 phone numbers will be used when sending messages.', disabled: presenter.dlc10_campaign_verified? }]
+        } %>
+    <%= f.switch :auto_renewal, {
+          label:      { title: 'Auto Renew Every 3 Months' },
+          checkboxes: [{ field: 'auto_renewal', checked: presenter.dlc10_campaign.auto_renewal, values: [true, false], note: 'Automatically renew Campaign every 3 months.' }],
+          messages:   { note: 'TCR Use Cases can be automatically renewed every 3 months for an additional 3 months.' }
+        } %>
+    <%= bootstrap_info_field(
+          label: { title: 'Next Renewal Date' },
+          info:  "Your Use Case will renew for another 3 months on #{Friendly.new.date(presenter.dlc10_campaign.tcr_campaign_renewal_date, presenter.client.time_zone, false)}"
+        ) %>
+
+    <% if presenter.client.dlc10_charged %>
+      <%= bootstrap_info_field(
+            label: { title: 'Please Note' },
+            info:  "Your credit card (on file) will be charged the $20.00 TCR fee for each Use Case submittal or re-submittal and the <span class=\"dlc10_mo_charge_note_#{presenter.dlc10_campaign.id}\">#{number_to_currency(@dlc10_campaign.mo_charge)}</span> TCR monthly fee each month there after."
+          ) %>
+    <% end %>
+
+    <%= f.submit_buttons buttons: presenter.campaign_edit_submit_buttons(current_user, session) %>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    var min_sub_use_cases = <%= presenter.min_sub_use_cases -%>;
+
+    $(document).off('change', '#dlc10_use_case_<%= presenter.dlc10_campaign.id -%>');
+    $(document).on('change', '#dlc10_use_case_<%= presenter.dlc10_campaign.id -%>', function(e) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'json',
+        url: '/clients/dlc10/campaign/<%= presenter.client.id -%>/sub_use_cases',
+        data: {
+          use_case: $('#dlc10_use_case_<%= presenter.dlc10_campaign.id -%>').val()
+        },
+        success: function(result) {
+          min_sub_use_cases = result['min_options'];
+
+          $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').find('option').remove().end();
+
+          if (result['max_options'] == 0) {
+            $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').prop('required', false);
+            $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').prop('disabled', true);
+            $('#dlc10_sub_use_cases_row_<%= presenter.dlc10_campaign.id -%>').hide();
+          } else {
+
+            if (result['min_options'] == 0) {
+              $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').prop('required', false);
+            } else {
+              $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').prop('required', true);
+            }
+
+            $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').prop('disabled', false);
+            $('#dlc10_sub_use_cases_row_<%= presenter.dlc10_campaign.id -%>').show();
+            $('#dlc10_sub_use_cases_label_<%= presenter.dlc10_campaign.id -%>').html('Sub Use Cases (' + result['min_options'] + ' - ' + result['max_options'] + ')');
+            $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').attr('data-min-options', result['min_options']);
+            $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').attr('data-max-options', result['max_options']);
+
+            $.each(result['use_cases'], function(index, element) {
+              $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').append('<option value="' + element[1] + '">' + element[0] + '</option>');
+            });
+          }
+
+          for (var i = 1; i < 6; ++ i) {
+            if (i > result['req_sample_count']) {
+              // console.log(i + ' required: false');
+              $('#dlc10_sample_' + i + '_input_<%= presenter.dlc10_campaign.id -%>').prop('required', false);
+            } else {
+              // console.log(i + ' required: true');
+              $('#dlc10_sample_' + i + '_input_<%= presenter.dlc10_campaign.id -%>').prop('required', true);
+            }
+          }
+
+          $('#dlc10_mo_charge_<%= presenter.dlc10_campaign.id -%>').val(result['mo_charge']);
+          $('.dlc10_mo_charge_note_<%= presenter.dlc10_campaign.id -%>').html('$' + (parseFloat(result['mo_charge']) + 2).toFixed(2));
+          $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').selectpicker('refresh');
+        }
+      });
+    });
+
+    $('#dlc10_campaign_form_<%= presenter.dlc10_campaign.id -%>').on('submit', function(e) {
+      if ($('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').val().length >= min_sub_use_cases) {
+        $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').removeClass('is-invalid');
+        $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').selectpicker('refresh');
+      } else {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').addClass('is-invalid');
+        $('#dlc10_sub_use_cases_<%= presenter.dlc10_campaign.id -%>').selectpicker('refresh');
+      }
+    });
+  });
+</script>

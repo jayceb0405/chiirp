@@ -1,0 +1,56 @@
+<%
+# app/views/layouts/looper/common/header/_show.html.erb
+#
+# Example:
+#   render partial: 'layouts/looper/common/header/show'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<header class="app-header app-header-dark d-print-none">
+
+  <div class="top-bar">
+    <%= render partial: 'layouts/looper/common/header/brand' %>
+
+    <% if current_user %>
+      <div class="top-bar-list">
+        <div class="top-bar-item px-2 d-md-none d-lg-none d-xl-none">
+          <button href="#" class="hamburger hamburger-squeeze" type="button" data-toggle="aside" aria-label="toggle menu">
+            <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+          </button>
+          <%= image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { height: 40 }) %>
+        </div>
+
+        <div class="top-bar-item top-bar-item-full justify-content-end pr-0">
+          <ul class="header-nav nav pr-0">
+            <%= render partial: 'layouts/looper/common/header/reviews' %>
+            <%= render partial: 'layouts/looper/common/header/messages' %>
+            <% if current_user.access_controller?('my_contacts', 'allowed', session) %>
+              <li class="nav-item dropdown header-nav-dropdown pr-0">
+                <%= link_to '<span class="fa fa-user-plus"></span>'.html_safe, new_contact_path, {
+                      remote: true,
+                      method: :get,
+                      class:  'nav-link'
+                    } %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+
+        <div class="top-bar-item top-bar-item-right px-0 d-none d-sm-flex">
+          <ul class="header-nav nav pl-0">
+
+            <%= render partial: 'layouts/looper/common/header/help' %>
+
+          </ul>
+
+          <%= render partial: 'layouts/looper/common/header/user' %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</header>

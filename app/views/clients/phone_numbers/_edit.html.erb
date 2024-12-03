@@ -1,0 +1,153 @@
+<%
+  # app/views/clients/phone_numbers/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/phone_numbers/edit'
+  #
+  # Instance Variables:
+  #   (req) @client:   (Client)
+  #   (req) @twnumber: (Twnumber)
+  #
+  # Local Variables:
+  #   (opt) client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Clients::PhoneNumbers::Presenter.new(client: @client)
+  presenter.twnumber = @twnumber
+-%>
+<td colspan="7">
+  <div class="row">
+    <div class="col-md-2 text-center">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.twnumber.name[0, 3] -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.twnumber.name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: presenter.twnumber, url: client_phone_number_path(presenter.client.id, presenter.twnumber.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "phone_number_form_#{presenter.twnumber.id}", novalidate: true } do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: 'Phone Number Label' },
+              html_options: { minlength: 2, placeholder: 'Phone Number Label', required: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= bootstrap_select_tag(
+              field:        'user_ids',
+              label:        { title: 'Users Who May Use This Phone Number' },
+              html_options: { id: "select_users_#{presenter.twnumber.id}", multiple: true, count_selected_text: 'users' },
+              options:      { array: presenter.options_for_phone_users, selected: presenter.twnumber_users },
+              messages:     { note: 'Selected Users may place calls and send text messages using this number.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'def_user_id',
+              label:        { title: 'Default User For This Phone Number' },
+              html_options: { id: "select_def_user_#{presenter.twnumber.id}" },
+              options:      { array: presenter.options_for_def_phone_user, selected: presenter.twnumber_def_user, blank: 'Select User' },
+              messages:     { note: 'New Contacts created from incoming calls or texts will be assigned to this User.' }
+            ) %>
+        <%= f.radio_button :incoming_call_routing, {
+              row:     { class: 'mb-2' },
+              label:   { title: 'Route Incoming Calls' },
+              buttons: presenter.radio_buttons_incoming_call_routing
+            } %>
+        <%= f.select :announcement_recording_id, {
+              row:          { id: "announcement_recording_row_#{presenter.twnumber.id}" },
+              label:        { title: 'Voice Announcement' },
+              html_options: { mobile: browser.device.mobile? },
+              choices:      { array: presenter.client.voice_recording_options, blank: 'Select a Voice Recording', selected: presenter.twnumber.announcement_recording_id },
+              messages:     { note: 'This announcement will be played for incoming calls.' }
+            } %>
+        <%= bootstrap_select_tag(
+              row:          { class: 'mb-2', id: "pass_routing_row_#{presenter.twnumber.id}" },
+              field:        'twnumber[pass_routing]',
+              label:        { title: 'Incoming Call Routing' },
+              html_options: { id: "select_pass_routing_#{presenter.twnumber.id}", multiple: true },
+              options:      { array: presenter.options_for_twnumber_pass_routing, selected: presenter.twnumber.pass_routing, required: true },
+              messages:     { note: 'Incoming calls will be routed to selected Users and/or Phone Number.' }
+            ) %>
+        <%= f.telephone_field :pass_routing_phone_number, {
+              row:          { id: "pass_routing_phone_number_row_#{presenter.twnumber.id}", display: presenter.twnumber.pass_routing.include?('phone_number') },
+              label:        { title: 'Phone Number' },
+              html_options: { placeholder: 'Phone Number' },
+              messages:     { note: "Calls will be routed to this number when 'Phone Number' is selected." }
+            } %>
+        <%= f.radio_button :pass_routing_method, {
+              row:     { class: 'mt-1 mb-2', id: "pass_routing_method_row_#{presenter.twnumber.id}" },
+              label:   { title: 'Call Routing Method' },
+              buttons: presenter.radio_buttons_pass_routing_method
+            } %>
+
+        <div class="form-row" id="sorted_routing_row_<%= presenter.twnumber.id -%>">
+          <label class="col-md-3 mt-2" id="">Chained Order</label>
+          <div class="col-md-9">
+            <%= render partial: 'clients/phone_numbers/sorted_routing/index', locals: { presenter: } %>
+          </div>
+        </div>
+
+        <%= f.number_field :pass_routing_ring_duration, {
+              row:          { id: "pass_routing_ring_duration_row_#{presenter.twnumber.id}" },
+              label:        { title: 'Ring Duration' },
+              html_options: { value: presenter.twnumber.pass_routing_ring_duration || 20, min: 0, max: 60, step: 1 },
+              prepends:     [{ button: false, label: '<i class="fas fa-stopwatch"></i>' }],
+              messages:     { note: 'Ring each selected number the entered length in seconds ( > 0 overrides User Ring Duration).' }
+            } %>
+        <%= f.number_field :hangup_detection_duration, {
+              row:          { id: "hangup_detection_duration_row_#{presenter.twnumber.id}" },
+              label:        { title: 'Hangup Detection Duration' },
+              html_options: { value: presenter.twnumber.hangup_detection_duration || 15, min: 0, max: 60, step: 1 },
+              prepends:     [{ button: false, label: '<i class="fas fa-stopwatch"></i>' }],
+              messages:     { note: "A call will be considered a 'hangup' if the call does NOT last longer than the selected number of seconds." }
+            } %>
+        <%= f.select :vm_greeting_recording_id, {
+              row:          { id: "vm_greeting_recording_row_#{presenter.twnumber.id}" },
+              label:        { title: 'Voicemail Recording' },
+              html_options: { mobile: browser.device.mobile? },
+              choices:      { array: presenter.client.voice_recording_options, blank: 'Select a Voicemail Recording', selected: presenter.twnumber.vm_greeting_recording_id },
+              messages:     { note: 'Caller may press * (star) or simply hang up when a voicemail message is complete.' }
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', id: "phone_button_#{presenter.twnumber.id}", disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(document).ready( function() {
+    displayPassRouting('<%= presenter.twnumber.id -%>');
+    displayPassRoutingMethod('<%= presenter.twnumber.id -%>');
+    displaySortedRouting('<%= presenter.twnumber.id -%>');
+    displayIncomingCallRouting('<%= presenter.twnumber.id -%>');
+    displayPassRoutingPhoneNumber('<%= presenter.twnumber.id -%>');
+    displayPassRoutingRingDuration('<%= presenter.twnumber.id -%>');
+    var client_users = <%= raw(presenter.client.users.pluck(:id, :firstname, :lastname).to_h { |user| [user[0].to_s, Friendly.new.fullname(user[1], user[2])] }.to_json) -%>;
+
+    // $('#select_users_<%= presenter.twnumber.id -%>').off('changed.bs.select');
+    $('#select_users_<%= presenter.twnumber.id -%>').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+      var users_selected  = $(this).val();
+      var previous_selection = $('#select_def_user_<%= presenter.twnumber.id -%>').val();
+
+      updateSelDefUser(client_users, users_selected, previous_selection, '<%= presenter.twnumber.id -%>');
+    });
+
+    // $('#select_routing_<%= presenter.twnumber.id -%>').off('changed.bs.select');
+    $('#select_pass_routing_<%= presenter.twnumber.id -%>').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+      updateSortedRouting('<%= presenter.twnumber.id -%>');
+      displayPassRoutingMethod('<%= presenter.twnumber.id -%>');
+      displaySortedRouting('<%= presenter.twnumber.id -%>');
+      displayIncomingCallRouting('<%= presenter.twnumber.id -%>');
+      displayPassRoutingPhoneNumber('<%= presenter.twnumber.id -%>');
+      displayPassRoutingRingDuration('<%= presenter.twnumber.id -%>');
+    });
+
+    $('.incoming_call_routing_radio_<%= presenter.twnumber.id -%>').off('change');
+    $('.incoming_call_routing_radio_<%= presenter.twnumber.id -%>').on('change', function() {
+      displayIncomingCallRouting('<%= presenter.twnumber.id -%>');
+    });
+
+    $('.pass_routing_method_radio_<%= presenter.twnumber.id -%>').off('change');
+    $('.pass_routing_method_radio_<%= presenter.twnumber.id -%>').on('change', function() {
+      displaySortedRouting('<%= presenter.twnumber.id -%>');
+    });
+  });
+</script>

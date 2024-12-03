@@ -1,0 +1,74 @@
+<%
+  # app/views/integrations/five9/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: 'integrations/five9/js/show'
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+-%>
+// Campaigns
+<% if cards.include?('campaigns_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/campaigns/edit' -%>');
+<% end %>
+<% if cards.include?('campaigns_edit_tbody') %>
+  $('#campaigns_tbody').html('<%= j render partial: 'integrations/five9/campaigns/edit_tbody' -%>');
+<% end %>
+
+// Contact Lists
+<% if cards.include?('contact_lists_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/contact_lists/edit' -%>');
+<% end %>
+<% if cards.include?('contact_lists_form') %>
+  $('#contact_lists_form').html('<%= j render partial: 'integrations/five9/contact_lists/form' -%>');
+<% end %>
+
+// Dispositions
+<% if cards.include?('disposition_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/dispositions/index', locals: { disposition: local_assigns.dig(:disposition) } -%>');
+<% end %>
+<% if cards.include?('disposition_index_tbody') %>
+  $('#dispositions_tbody').html('<%= j render partial: 'integrations/five9/dispositions/index_tbody' -%>');
+<% end %>
+<% if cards.include?('disposition_edit') %>
+  $('#disposition_<%= disposition[:name].gsub(' ', '_') -%>').collapse('show');
+  $('#disposition_<%= disposition[:name].gsub(' ', '_') -%>').html('<%= j render partial: 'integrations/five9/dispositions/edit', locals: { disposition: disposition } -%>');
+<% end %>
+<% if cards.include?('disposition_update') %>
+  $('#disposition_<%= disposition[:id] -%>').collapse('hide');
+  $('#disposition_campaign_<%= disposition[:id] -%>').html('<%= Campaign.find_by(client_id: @client_api_integration.client_id, id: disposition[:campaign_id])&.name -%>');
+  $('#disposition_group_<%= disposition[:id] -%>').html('<%= Group.find_by(client_id: @client_api_integration.client_id, id: disposition[:group_id])&.name -%>');
+  $('#disposition_tag_<%= disposition[:id] -%>').html('<%= Tag.find_by(client_id: @client_api_integration.client_id, id: disposition[:tag_id])&.name -%>');
+  $('#disposition_stage_<%= disposition[:id] -%>').html('<%= Stage.for_client(@client_api_integration.client_id).find_by(id: disposition[:stage_id])&.name -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/instructions' -%>');
+<% end %>
+
+// Lead Sources
+<% if cards.include?('lead_source_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/lead_sources/edit' -%>');
+<% end %>
+
+// Lists
+<% if cards.include?('list_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/lists/index', locals: { list: list } -%>');
+<% end %>
+<% if cards.include?('list_edit') %>
+  <% list_id = local_assigns.dig(:list).is_a?(Array) ? list[0] : nil %>
+  $('#list_<%= list_id -%>').collapse('show');
+  $('#edit_list_<%= list_id -%>').html('<%= j render partial: 'integrations/five9/lists/edit', locals: { list: list } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/five9/overview' -%>');
+<% end %>
+
+Looper.init();

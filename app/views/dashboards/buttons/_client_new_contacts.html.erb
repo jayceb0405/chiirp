@@ -1,0 +1,27 @@
+<%
+  # app/views/dashboards/buttons/_client_new_contacts.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/client_new_contacts', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               'client_new_contacts',
+        stats:            presenter.client.contacts.where(created_at: presenter.date_range[0]..presenter.date_range[1]).count.to_s,
+        description:      'New Contacts',
+        description_icon: 'c',
+        icon:             'fa fa-address-book',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         '',
+        chart_value:      0,
+        button_movable:   true
+      } %>
+<% end %>

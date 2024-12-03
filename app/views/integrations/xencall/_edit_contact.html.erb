@@ -1,0 +1,31 @@
+<%
+	# app/views/integrations/xencall/_edit_contact.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/xencall/edit_contact"
+	# 
+	# Required Instance Variables:
+	# 	@contact:                 (Contact)
+	# 	@contact_api_integration: (ContactApiIntegration)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<%= render partial: "layouts/shared/section_header", locals: { 
+		heading: image_tag( "integrations/xencall_logo_white.png", { style: "height:40px;" }) + " Xencall Customer Information",
+		options: ""
+	}
+%>
+<div class="container-body">
+	<%= form_with model: @contact_api_integration, url: integrations_xencall_contact_update_path(@contact), builder: LooperFormBuilder, remote: true do |f| %>
+
+		<div class="form-group">
+			<%= f.label( "", "Customer ID", { class: "form-group-label" } ) %>
+			<%= f.text_field :xencall_lead_id, type: 'text', class: 'form-control', placeholder: 'Customer ID' %>
+		</div>
+
+		<%= submit_tag 'Save', data: { "disable-with": "Saving..." }, class: 'btn btn-app mt-0 ml-2 mb-2' %>
+	<% end %>
+
+</div>

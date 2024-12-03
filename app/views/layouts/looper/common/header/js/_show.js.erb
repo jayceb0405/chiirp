@@ -1,0 +1,23 @@
+<%
+  # app/views/layouts/looper/common/header/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/header/js/show', locals: { cards: %w[array] }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  cards = local_assigns.dig(:cards) || []
+-%>
+<% if cards.include?('header_unread_messages_list') %>
+  $('#header_unread_messages_list').html('<%= j render partial: 'layouts/looper/common/header/unread_messages_list', locals: { user: current_user } -%>');
+<% end %>
+<% if cards.include?('header_unread_reviews_list') %>
+  $('#header_unread_reviews_list').html('<%= j render partial: 'layouts/looper/common/header/unread_reviews_list', locals: { user: current_user } -%>');
+<% end %>
+<% if cards.include?('header_unread_reviews_clear') %>
+  $('#header_unread_reviews_light').removeClass('has-notified');
+<% end %>

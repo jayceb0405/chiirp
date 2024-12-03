@@ -1,0 +1,65 @@
+<%
+  # app/views/integrations/email/stats/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/email/v1/stats/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Email::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="col-4 py-2">
+  <div class="metric metric-bordered align-items-center">
+    <h2 class="metric-label">Reputation</h2>
+    <p class="metric-value h3">
+      <span class="value">
+        <%= @reputation&.floor %>%
+      </span>
+    </p>
+  </div>
+</div>
+<div class="col-4 py-2">
+  <div class="metric metric-bordered align-items-center">
+    <h2 class="metric-label">Total Requests</h2>
+    <p class="metric-value h3">
+      <span class="value">
+        <%= @requests %>
+      </span>
+    </p>
+  </div>
+</div>
+<div class="col-4 py-2">
+  <div class="metric metric-bordered align-items-center">
+    <h2 class="metric-label">Total Opens</h2>
+    <p class="metric-value h3">
+      <span class="value">
+        <%= @opens %>
+      </span>
+    </p>
+  </div>
+</div>
+<div class="col-4 py-2">
+  <div class="metric metric-bordered align-items-center">
+    <h2 class="metric-label">Unique Clicks</h2>
+    <p class="metric-value h3">
+      <span class="value">
+        <%= @clicks %>
+      </span>
+    </p>
+  </div>
+</div>
+<div class="col-4 py-2">
+  <div class="metric metric-bordered align-items-center">
+    <h2 class="metric-label">Bounces</h2>
+    <p class="metric-value h3">
+      <span class="value">
+        <%= @bounces %>
+      </span>
+    </p>
+  </div>
+</div>
+<%= line_chart @stats %>

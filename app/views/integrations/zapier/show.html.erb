@@ -1,0 +1,40 @@
+<%
+  # app/views/integrations/zapier/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/zapier/show'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/zapier_logo.svg', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' })-%></div>
+      <h2 class="h4 mt-4 mb-0" id="show_user_fullname">Zapier Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+      <!-- <p class="text-muted"> Project Manager @CreativeDivision </p> -->
+      <!-- <p> Huge fan of HTML, CSS and Javascript. Web design and open source lover. </p> -->
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <!-- <a class="nav-link active" href="user-activities.html">Activities <span class="badge">16</span></a> -->
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <div class="page-section" id="integration_page_section">
+      <%= render partial: 'integrations/zapier/instructions' %>
+    </div>
+  </div>
+</div>

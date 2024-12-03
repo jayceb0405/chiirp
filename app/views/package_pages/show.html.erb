@@ -1,0 +1,81 @@
+<%
+  # app/views/package_pages/show.html.erb
+  #
+  # Example:
+  #   render partial: 'package_pages/show'
+  #
+  # Required Instance Variables:
+  #   @package_pages = (Relation) PackagePage
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-cubes mr-2"></i>Package/Page Manager</h1>
+
+        <div class="btn-toolbar">
+          <%= link_to '<i class="fa fa-plus mr-2"></i>New Package/Page'.html_safe, new_package_page_path, {
+                class:  'btn btn-light',
+                remote: true,
+                method: :get
+              } %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit Package/Page</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_package_page_dropdown">
+              <%= render partial: 'package_pages/select_package_page_dropdown' %>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <span>More</span>
+              <span class="fa fa-caret-down"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-arrow"></div>
+              <%= link_to '<i class="fa fa-cube mr-2"></i>Packages'.html_safe, packagemanager_path, {
+                    class: 'dropdown-item'
+                  } %>
+              <%= link_to '<i class="fa fa-cubes mr-2"></i>Package Pages'.html_safe, packagepages_path, {
+                    class: 'dropdown-item'
+                  } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="package_pages_body">
+
+      <% if @package_page.nil? || (@package_page.new_record? && @package_page.name.to_s.empty?) %>
+        <%= render partial: 'package_pages/index' %>
+      <% else %>
+        <%= render partial: 'package_pages/edit' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_packages').addClass('has-active');
+
+    $(document).on('click', '.option_package_page', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/package_pages/' + $(this).attr('id') + '/edit'
+      });
+    });
+  });
+</script>

@@ -1,0 +1,24 @@
+<%
+# app/views/devise/shared/_links.html.erb
+#
+# Example:
+# 	render partial: "devise/shared/links"
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<% if devise_mapping.confirmable? && controller_name != 'confirmations' %>
+  <p class="mt-1">
+    <%= link_to 'Resend confirmation instructions', new_confirmation_path(resource_name) %>
+  </p>
+<% end %>
+
+<% if devise_mapping.lockable? && resource_class.unlock_strategy_enabled?(:email) && controller_name != 'unlocks' %>
+  <p class="mt-1">
+    <%= link_to 'Resend unlock instructions', new_unlock_path(resource_name) %>
+  </p>
+<% end %>

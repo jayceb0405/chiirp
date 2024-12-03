@@ -1,0 +1,76 @@
+<%
+  # app/views/integrations/callrail/v3/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/callrail/v3/connections/edit"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to CallRail</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_tag integrations_callrail_v3_connections_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_text_field(
+              field:        'credentials[api_key]',
+              value:        presenter.client_api_integration.credentials&.dig('api_key').to_s,
+              label:        { title: 'CallRail API V3 Key' },
+              html_options: { placeholder: 'CallRail API V3 Key' },
+              messages:     { note: 'Paste the API V3 key provided by CallRail.' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'inbound_post_call-webhook',
+              value:    integrations_callrail_v3_endpoint_url(presenter.client_api_integration.webhook_api_key, type: :inbound_post_call),
+              row:      { class: 'mb-0' },
+              label:    { title: 'Inbound Post Call Webhook Url' },
+              messages: { note: 'Enter this URL into the Post-Call webhook on CallRail.' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'outbound_post_call-webhook',
+              value:    integrations_callrail_v3_endpoint_url(presenter.client_api_integration.webhook_api_key, type: :outbound_post_call),
+              row:      { class: 'mb-0' },
+              label:    { title: 'Outbound Post-Call Webhook Url' },
+              messages: { note: 'Enter this URL into the Outbound Post-Call webhook on CallRail.' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'form_submission-webhook',
+              value:    integrations_callrail_v3_endpoint_url(presenter.client_api_integration.webhook_api_key, type: :form_submission),
+              row:      { class: 'mb-0' },
+              label:    { title: 'Form Submission Webhook Url' },
+              messages: { note: 'Enter this URL into the Form Submission webhook on CallRail.' }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'credentials[webhook_signature_token]',
+              value:        presenter.client_api_integration.credentials&.dig('webhook_signature_token').to_s,
+              label:        { title: 'CallRail Webhook Signature Secret Token' },
+              html_options: { placeholder: 'CallRail Webhook Signature Secret Token' },
+              messages:     { note: 'Paste the Webhook Signature Secret Token provided by CallRail.' }
+            ) %>
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Credentials', disable_with: 'Saving Credentials' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

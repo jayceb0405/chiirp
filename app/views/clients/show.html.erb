@@ -1,0 +1,80 @@
+<%
+  # app/views/clients/show.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/show'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = ClientPresenter.new(client: @client)
+  client_page_section = (local_assigns.dig(:client_page_section) || 'overview').to_s.downcase
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div class="user-avatar user-avatar-xl" id="show_client_avatar"><%= presenter.client_avatar -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_client_name"><%= presenter.client_name -%></h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+      <!-- <p class="text-muted"> Project Manager @CreativeDivision </p> -->
+      <!-- <p> Huge fan of HTML, CSS and Javascript. Web design and open source lover. </p> -->
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <!-- <a href="#" class="btn btn-light" data-toggle="modal" data-target="#followersModal">2,159 Followers</a> <a href="#" class="btn btn-light" data-toggle="modal" data-target="#followingModal">136 Following</a> -->
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+
+        <% if @phone_number_assigned && @contact_created && @user_phone_defined %>
+          <%= link_to('Profile', edit_clients_profile_path(presenter.client), { class: 'nav-link client_menu', id: 'link_profile', remote: true }) if current_user.access_controller?('clients', 'profile', session) %>
+          <%= link_to('Billing', edit_clients_billing_path(presenter.client), { class: 'nav-link client_menu', id: 'link_billing', remote: true }) if current_user.access_controller?('clients', 'billing', session) %>
+          <%= link_to('Settings', edit_clients_setting_path(presenter.client), { class: 'nav-link client_menu', id: 'link_settings', remote: true }) if current_user.access_controller?('clients', 'settings', session) %>
+          <%= link_to('Features', edit_clients_feature_path(presenter.client), { class: 'nav-link client_menu', id: 'link_features', remote: true }) if current_user.team_member? %>
+        <% end %>
+
+        <%= link_to('Phone Numbers', client_phone_numbers_path(presenter.client), { class: 'nav-link client_menu', id: 'link_phone_numbers', remote: true }) if current_user.access_controller?('clients', 'phone_numbers', session) %>
+        <%= link_to('Voice Recordings', client_voice_recordings_path(presenter.client), { class: 'nav-link client_menu', id: 'link_voice_recordings', remote: true }) if current_user.access_controller?('clients', 'voice_recordings', session) %>
+        <%= link_to('Users', client_users_path(presenter.client), class: 'nav-link client_menu', id: 'link_users', style: 'text-decoration: none;', data: { turbo: true, turbo_stream: true }) if current_user.access_controller?('clients', 'users', session) %>
+        <%= link_to('Groups', client_groups_path(presenter.client), { class: 'nav-link client_menu', id: 'link_groups', remote: true }) if current_user.access_controller?('clients', 'groups', session) %>
+        <%= link_to('Tags', client_tags_path(presenter.client), { class: 'nav-link client_menu', id: 'link_tags', remote: true }) if current_user.access_controller?('clients', 'tags', session) %>
+        <%= link_to('Custom Fields', client_custom_fields_path(presenter.client), { class: 'nav-link client_menu', id: 'link_custom_fields', remote: true }) if current_user.access_controller?('clients', 'custom_fields', session) %>
+        <%= link_to(StageParent.title.pluralize, client_stage_parents_path(presenter.client), { class: 'nav-link client_menu', id: 'link_stage_parents', remote: true }) if current_user.access_controller?('clients', 'pipelines', session) %>
+        <%= link_to('Lead Sources', client_lead_sources_path(presenter.client), { class: 'nav-link client_menu', id: 'link_lead_sources', remote: true }) if current_user.access_controller?('clients', 'lead_sources', session) %>
+        <%= link_to('Org Chart', client_org_chart_path(presenter.client), { class: 'nav-link client_menu', id: 'link_org_chart', remote: true }) if current_user.access_controller?('clients', 'org_chart', session) %>
+        <%= link_to('KPIs', clients_kpis_path, { class: 'nav-link client_menu', id: 'link_kpis', remote: true }) if current_user.access_controller?('clients', 'kpis', session) %>
+        <%= link_to('Task Actions', edit_clients_task_action_path(presenter.client), { class: 'nav-link client_menu', id: 'link_task_actions', remote: true }) if current_user.access_controller?('clients', 'task_actions', session) %>
+        <%= link_to('Holidays', clients_holidays_path, { class: 'nav-link client_menu', id: 'link_holidays', remote: true }) if current_user.access_controller?('clients', 'holidays', session) %>
+        <%= link_to(Folder.title.pluralize, client_folders_path(presenter.client), { class: 'nav-link client_menu', id: 'link_folder_assignments', remote: true }) if current_user.access_controller?('clients', 'folder_assignments', session) %>
+        <%= link_to('10DLC', edit_clients_dlc10_brand_path(presenter.client), { class: 'nav-link client_menu', id: 'link_dlc10', remote: true }) if current_user.access_controller?('clients', 'dlc10', session) %>
+        <%= link_to('Statements', clients_statement_path(presenter.client), { class: 'nav-link client_menu', id: 'link_statements', remote: true }) if current_user.access_controller?('clients', 'statements', session) %>
+        <%= link_to('Terms', edit_clients_term_path(presenter.client, show: true), { class: 'nav-link client_menu', id: 'link_terms', remote: true }) if current_user.access_controller?('clients', 'terms', session) %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(edit_clients_overview_path(presenter.client), { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="client_page_section">
+      <%= render partial: "clients/#{client_page_section}/#{presenter.show_partial(client_page_section)}", locals: { client_presenter: presenter } %>
+    </div>
+  </div>
+</div>

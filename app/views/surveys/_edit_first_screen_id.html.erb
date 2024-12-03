@@ -1,0 +1,21 @@
+<%
+  # app/views/surveys/_edit_first_screen_id.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/edit_first_screen_id', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'surveys_survey[first_screen_id]',
+      label:        { title: 'First Screen' },
+      html_options: { id: "survey_first_screen_id_#{presenter.survey.id}", mobile: browser.device.mobile? },
+      options:      { array: presenter.options_for_first_screen_id, selected: presenter.survey.first_screen_id, blank: 'Select a Screen' },
+      messages:     { note: 'Select from screens created for this survey.' }
+    ) %>

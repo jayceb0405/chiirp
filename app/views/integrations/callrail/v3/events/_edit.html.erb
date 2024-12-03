@@ -1,0 +1,65 @@
+<%
+  # app/views/integrations/callrail/v3/events/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/events/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+  presenter.account_and_company_id = presenter.event[:account_company_id]
+-%>
+<td colspan="11">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.event[:name].split.pluck(0).join -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.event[:name] -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= bootstrap_text_field(
+              field:    'event[name]',
+              value:    presenter.event[:name],
+              label:    { title: 'Event Name' },
+              messages: { note: 'Enter any name to identify this event. This is for your reference only and will not be used to filter incoming Post-Call Events.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'event[account_company_id]',
+              label:        { title: 'Company' },
+              html_options: { id: 'event_account_company' },
+              options:      { for_select: grouped_options_for_select(presenter.grouped_companies, presenter.event[:account_company_id], prompt: 'Choose company') },
+              messages:     { note: 'Choose which company this event applies to.' }
+            ) %>
+        <div id="edit_event_account_company_<%= presenter.event[:event_id] %>">
+          <% if presenter.event[:account_company_id] %>
+            <%= render partial: 'company_fields', locals: { presenter: } %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function () {
+    var updateEditForm = function(e) {
+      $('#edit_event_account_company_<%= presenter.event[:event_id] %>').html('<span class="text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Event' } %></span>');
+      $.ajax('<%= edit_integrations_callrail_v3_event_path(presenter.event[:event_id]) %>?account_company_id=' + e.target.value);
+    };
+
+    $(document).off('change', '#event_account_company');
+    $(document).on('change', '#event_account_company', function(e) {
+      updateEditForm(e);
+    });
+  });
+</script>

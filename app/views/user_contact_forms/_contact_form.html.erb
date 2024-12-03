@@ -1,0 +1,54 @@
+<%
+  # app/views/user_contact_forms/_contact_form.html.erb
+  #
+  # Example:
+  # 	render partial: 'user_contact_forms/contact_form', collection: @user.user_contact_forms.order( :title )
+  #
+  # Required Instance Variables:
+  # 	contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  case contact_form.version
+  when 2
+    edit_path = edit_api_v2_user_contact_form_path(contact_form)
+  when 3
+    edit_path = edit_api_v3_user_contact_form_path(contact_form)
+  end
+
+  default_for_custom_domain = contact_form.user.client.domains.invert[contact_form.id].to_s
+-%>
+<tr>
+  <td class="text-left align-middle">
+    <%= link_to contact_form.form_name,
+                edit_path,
+                class:  'text-decoration-none text-reset',
+                remote: true,
+                method: :get %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= contact_form.title -%> </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(contact_form.created_at, contact_form.user.client.time_zone, true) -%> </td>
+  <td class="text-center align-middle d-none d-md-table-cell"> v<%= contact_form.version -%> </td>
+  <td class="text-middle align-middle text-right">
+    <%= link_to '',
+                edit_path,
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to_if contact_form.user.client.domains.present?, '',
+                   edit_path,
+                   class:  "btn btn-sm btn-icon btn-secondary fa fa-star text-#{default_for_custom_domain.present? ? 'warning' : ''}",
+                   remote: true,
+                   method: :get %>
+    <%= link_to_if (contact_form.version == 3), '',
+                   edit_user_contact_form_marketplace_path(contact_form.id),
+                   class:  'btn btn-sm btn-icon btn-secondary fa fa-file-invoice-dollar',
+                   remote: true,
+                   method: :get %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_user_contact_form',
+                data:  { id: contact_form.id, name: contact_form.form_name } %>
+  </td>
+</tr>

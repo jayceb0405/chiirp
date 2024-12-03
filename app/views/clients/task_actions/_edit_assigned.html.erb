@@ -1,0 +1,65 @@
+<%
+  # app/views/clients/task_actions/_edit_assigned.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/task_actions/edit_assigned', locals: { client_presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#task_actions_assigned">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" id="td_task_assigned_name">Task Assigned</td>
+  <td class="text-left align-middle" id="td_task_action_assigned_campaign"> <%= cp.assigned_campaign.name -%> </td>
+  <td class="text-left align-middle" id="td_task_action_assigned_group"> <%= cp.assigned_group.name -%> </td>
+  <td class="text-left align-middle" id="td_task_action_assigned_tag"> <%= cp.assigned_tag.name -%> </td>
+  <td class="text-left align-middle" id="td_task_action_assigned_tag"> <%= cp.assigned_stage.name -%> </td>
+  <td class="text-left align-middle" id="td_task_action_assigned_tag"> <%= cp.assigned_stop_campaigns.join(', ') -%> </td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: '#task_actions_assigned'
+                   }) %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="task_actions_assigned">
+  <td colspan="8">
+    <div class="row">
+      <div class="col-md-2 text-center" style="max-width:150px;">
+        <h3 class="card-title mb-4">Actions Triggered on Assigned Task</h3>
+      </div>
+
+      <div class="col-md-10">
+
+        <%= form_with model: cp.client, url: clients_task_action_path(cp.client.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'task_action_form_assigned', novalidate: true } do |f| %>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: cp.client,
+                campaign: cp.assigned_campaign, campaign_id_field: 'client[task_actions][assigned][campaign_id]',
+                group: cp.assigned_group, group_id_field: 'client[task_actions][assigned][group_id]',
+                tag: cp.assigned_tag, tag_id_field: 'client[task_actions][assigned][tag_id]',
+                stage: cp.assigned_stage, stage_id_field: 'client[task_actions][assigned][stage_id]',
+                stop_campaign_ids: cp.assigned_stop_campaign_ids, stop_campaign_ids_field: 'client[task_actions][assigned][stop_campaign_ids]'
+              } %>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Actions', id: 'button_save_assigned', disable_with: 'Saving Actions' }] %>
+        <% end %>
+      </div>
+    </div>
+  </td>
+</tr>

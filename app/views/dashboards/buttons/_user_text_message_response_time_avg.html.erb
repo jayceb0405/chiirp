@@ -1,0 +1,29 @@
+<%
+  # app/views/dashboards/buttons/_user_text_message_response_time_avg.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/user_text_message_response_time_avg', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) Tag id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  response_time = presenter.text_response_time(:user, :avg)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               'user_text_response_time_avg',
+        stats:            Friendly.new.duration(response_time, response_time < 3_600).to_s,
+        description:      'Texts Response Time Average',
+        description_icon: 'u',
+        icon:             'fa fa-comments',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', last_msg_direction: 'rcvd', last_msg_absolute: 'last', user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         '',
+        button_movable:   true
+      } %>
+<% end %>

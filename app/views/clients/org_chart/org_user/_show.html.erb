@@ -1,0 +1,138 @@
+<%
+# app/views/clients/org_chart/org_user/_show.html.erb
+#
+# Example:
+#   render partial: "clients/org_chart/org_user/show"
+#
+# Required Instance Variables:
+#   @client:        (Client)
+#   @org_users:     (OrgUsers)
+#   @org_positions: (OrgPositions)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<h6 class="mt-2 mb-2">Organizational Groups</h6>
+
+<%= form_with url: client_org_user_path(@client, 0), builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', novalidate: true } do |f| %>
+  <div class="list-group list-group-flush list-group-divider">
+    <div id="org_positions_table" style="min-height:50px;">
+
+      <% @org_groups.sort.each do |org_group| %>
+        <h6 class="p-2 bg-light">Org Group # <%= org_group -%></h6>
+
+        <% @org_positions.each do |org_position| %>
+          <% org_position_id = "orgposition_#{org_group}_#{org_position.id}" %>
+
+          <div class="my-2" id="<%= org_position_id -%>">
+            <%= hidden_field_tag "organization[#{org_position_id}]", org_position.level, { id: "list_group_sort_order_#{org_position_id}" } %>
+            <h6 class="mb-0 pl-2"><%= org_position.title -%></h6>
+          </div>
+
+            <% @org_users.where(org_group:, org_position_id: org_position.id).each do |org_user| %>
+              <% org_user_id = (org_user.user_id.positive? ? "user_#{org_user.user_id}" : "orguser_#{org_user.id}") %>
+              <% org_user_fullname = org_user.user_id.positive? ? Friendly.new.fullname(org_user.user.firstname, org_user.user.lastname) : Friendly.new.fullname(org_user.firstname, org_user.lastname) %>
+              <% org_user_phone = org_user.user_id.positive? ? number_to_phone(org_user.user.phone) : number_to_phone(org_user.phone) %>
+              <% org_user_email = org_user.user_id.positive? ? org_user.user.email : org_user.email %>
+
+              <div class="list-group-item pl-3">
+                <div class="list-group-item-body d-sm-flex justify-content-sm-between pl-0" id="<%= org_user_id -%>">
+                  <%= hidden_field_tag "organization[#{org_user_id}]", org_user[:id], { id: "list_group_sort_order_#{org_user_id}" } %>
+                  <div id="org_user_col_<%= org_user_id -%>">
+                    <i class="fa fa-grip-vertical dash-button__handle list-group-handle mr-2"></i>
+                    <%= org_user_fullname %> (<%= org_user_phone -%> / <%= org_user_email -%>)
+                  </div>
+
+                  <div>
+                    <% if org_user.user_id == 0 %>
+                      <%= link_to '<i class="fa fa-pencil-alt"></i>'.html_safe, edit_client_org_user_path(@client, org_user.id),
+                                  class:  'btn btn-sm btn-icon btn-secondary',
+                                  remote: true,
+                                  method: :get %>
+                      <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#',
+                                  class: 'btn btn-sm btn-icon btn-secondary button_delete_orggroupuser',
+                                  data:  { clientid: @client.id, orguserid: org_user.id, username: org_user_fullname } %>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+        <% end %>
+
+      <% end %>
+    </div>
+  </div>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Save Organizations', disable_with: 'Saving' }]
+      ) %>
+<% end %>
+
+<script>
+  $(function() {
+    $(document).off('click', '.button_delete_orggroupuser');
+    $(document).on('click', '.button_delete_orggroupuser', function(e) {
+      e.preventDefault();
+
+      var client_id   = $(this).data('clientid');
+      var org_user_id = $(this).data('orguserid');
+      var user_name   = $(this).data('username');
+
+      ChiirpAlert({
+        'body':'Deleting "' + user_name + '" can NOT be un-done. Is it your intention to delete this Org User?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/client/' + client_id + '/org_users/' + org_user_id
+        });
+      });
+    });
+
+    $('#org_users_table').sortable({
+      handle: '.list-group-handle',
+      animation: 150,
+      dataIdAttr: 'id',
+      ghostClass: 'list-group-ghost',
+      group: {
+        name: 'org_users_table',
+        put: ['org_positions_table']
+      }
+    });
+
+    $('#org_positions_table').sortable({
+      handle: '.list-group-handle',
+      animation: 150,
+      dataIdAttr: 'id',
+      ghostClass: 'list-group-ghost',
+      group: {
+        name: 'org_positions_table',
+        put: ['org_users_table']
+      },
+      onUpdate: function (e) {
+        $.each($('#org_positions_table').sortable('toArray'), function(index, value) {
+          $('#list_group_sort_order_' + value).val(index);
+        });
+      },
+      onAdd: function (e) {
+        $.each($('#org_positions_table').sortable('toArray'), function(index, value) {
+          $('#list_group_sort_order_' + value).val(index);
+        });
+      },
+      onRemove: function (e) {
+        $.each($('#org_positions_table').sortable('toArray'), function(index, value) {
+          $('#list_group_sort_order_' + value).val(index);
+        });
+      }
+    });
+  });
+</script>

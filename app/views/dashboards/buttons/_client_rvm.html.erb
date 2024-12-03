@@ -1,0 +1,35 @@
+<%
+  # app/views/dashboards/buttons/_client_rvm.html.erb
+  #
+  # Example:
+  # 	render partial: 'dashboards/buttons/rvm_client', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) VoiceRecording id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) && presenter.client.max_voice_recordings.positive? && (voice_recording = presenter.client.voice_recordings.find_by(id: local_assigns.dig(:id).to_i)) %>
+  <%
+    voice_recordings_delivered = Messages::Message.voice_recordings_delivered(voice_recording.id, presenter.date_range[0], presenter.date_range[1]).count.to_i
+    voice_recordings_failed    = Messages::Message.voice_recordings_failed(voice_recording.id, presenter.date_range[0], presenter.date_range[1]).count.to_i
+    delivery_rate = (voice_recordings_delivered + voice_recordings_failed).to_f.positive? ? (voice_recordings_delivered.to_f / (voice_recordings_delivered.to_i + voice_recordings_failed)).round(2) : 0.0
+  %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               "client_rvm_#{voice_recording.id}",
+        stats:            "#{voice_recordings_delivered + voice_recordings_failed} / #{voice_recordings_delivered}",
+        description:      voice_recording.recording_name,
+        description_icon: 'c',
+        icon:             'fa fa-voicemail',
+        link:             client_voice_recordings_path(presenter.client.id),
+        # link: edit_clients_voice_recording_path(voice_recording.id, user_setting_id: presenter.user_settings_buttons.id),
+        chart_id:         "client_rvm_chart_#{voice_recording.id}",
+        chart_type:       'circle_progress',
+        chart_value:      delivery_rate,
+        button_movable:   true
+      } %>
+<% end %>

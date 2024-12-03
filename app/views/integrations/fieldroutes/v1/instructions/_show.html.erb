@@ -1,0 +1,69 @@
+<%
+  # app/views/integrations/fieldroutes/_instructions.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/fieldroutes/instructions"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldroutes::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldroutes::V1::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">FieldRoutes Integration Instructions</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your FieldRoutes Account.</li>
+      <li>Your FieldRoutes leads will be imported into <%= I18n.t('tenant.name') -%> as soon as they are submitted.</li>
+      <li>As your FieldRoutes leads are imported a new Contact is created (if not already found in <%= I18n.t('tenant.name') -%>).</li>
+      <li>Select <%= I18n.t('tenant.name') -%> fields to update from imported FieldRoutes fields.</li>
+      <li>Start Campaigns in <%= I18n.t('tenant.name') -%> using the responses selected by your FieldRoutes leads.</li>
+    </ul>
+
+    <h6>How To Get Started:</h6>
+    <ul>
+      <li class="font-weight-bold">Create an API Key in FieldRoutes and create a webhook</li>
+      <ol>
+        <li>Click "Connection" in the left menu.</li>
+        <li>Click "Login with FieldRoutes" and give <%= I18n.t('tenant.name') -%> the requested permissions.</li>
+        <li>Click "Connection" again in the left menu.</li>
+        <li>Click "Create Webhook" to subscribe to FieldRoutes leads.</li>
+      </ol>
+
+      <li class="font-weight-bold">Assign Fields and select Campaigns</li>
+      <ol>
+        <li>Click "Forms" in the left menu.</li>
+        <li>Scroll through each Form and select matching fields in <%= I18n.t('tenant.name') -%> and response Campaigns.</li>
+        <li>Be sure to click "Save" at the bottom to save your selections.</li>
+      </ol>
+
+      <li class="font-weight-bold">Relax and Wait for Your Leads to Arrive</li>
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your FieldRoutes Account.</li>
+      <li><%= I18n.t('tenant.name') -%> must have permissions to access your FieldRoutes forms.</li>
+      <li>After your connection is complete you may select the FieldRoutes forms that you wish to use.</li>
+    </ul>
+
+    <h6>Define How Your FieldRoutes Fields Match Up With <%= I18n.t('tenant.name') -%></h6>
+    <ul>
+      <li>Your current FieldRoutes forms are listed below.</li>
+      <li>Select the <%= I18n.t('tenant.name') -%> fields to save the form data when leads are received.</li>
+      <li>Select a Campaign to start for those selections with options.</li>
+      <li>Please scroll to the bottom and click "Save" to save your changes.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/servicetitan/reports/new.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/new'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @report:                 (Hash)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && @report.is_a?(Hash)
+
+  presenter        = Integrations::Servicetitan::ReportsPresenter.new(client_api_integration: @client_api_integration)
+  presenter.report = @report || {}
+-%>
+<%= turbo_stream.hide('no_reports') %>
+<%= turbo_stream.hide('new_report_spinner') %>
+<%= turbo_stream.prepend('reports_body', partial: 'integrations/servicetitan/reports/report', locals: { report: presenter.report, presenter: }) %>
+<%= turbo_stream.collapse_toggle("edit_report_#{presenter.report_id}") %>
+
+<%= turbo_stream.bootstrap_init %>

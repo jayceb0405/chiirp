@@ -1,0 +1,62 @@
+<%
+	# app/views/system_settings/js/_show.js.erb
+	#
+	# Example:
+	# 	render partial: 'system_settings/js/show'
+	#
+	# Required Instance Variables:
+	# 	none
+	#
+	# Required Local Variables:
+	#   none
+	#
+	cards = [local_assigns.dig(:cards) || []].flatten
+
+	if cards.intersect?(%w[integration_edit integrations_index integration_new])
+		integrations_presenter = SystemSettings::IntegrationsPresenter.new(user: current_user)
+		integrations_presenter.integration = @integration
+	end
+-%>
+
+// Integrations
+<% if cards.include?('integrations_index') %>
+	$('#system_settings_body').html('<%= j render( partial: 'system_settings/integrations/index', locals: { presenter: integrations_presenter } ) -%>');
+<% end %>
+<% if cards.include?('integration_edit') %>
+	$('#integration_<%= integrations_presenter.integration.id -%>').html('<%= j render( partial: 'system_settings/integrations/edit', locals: { presenter: integrations_presenter } ) -%>');
+<% end %>
+<% if cards.include?('integration_new') %>
+	$('#integrations_table_body').append('<%= j render( partial: 'system_settings/integrations/integration', locals: { presenter: integrations_presenter } ) -%>');
+	$('#integration_<%= integrations_presenter.integration.id -%>').collapse('show');
+<% end %>
+
+// New Phone Number
+<% if cards.include?('phone_number_new') %>
+	$('#system_settings_body').html('<%= j render( partial: 'system_settings/phone_numbers/new' ) -%>');
+<% end %>
+
+// Versions
+<% if cards.include?('version_index') %>
+	$('#system_settings_body').html('<%= j render( partial: 'system_settings/versions/index' ) -%>');
+
+	<% if @version&.new_record? %>
+		$('#version_<%= @version.id %>').collapse('show');
+		$('#version_<%= @version.id %>').html('<%= j render( partial: 'system_settings/versions/edit' ) -%>');
+	<% end %>
+<% end %>
+<% if cards.include?('version_edit') %>
+	$('#version_' + <%= @version.id %>).html('<%= j render( partial: 'system_settings/versions/edit' ) -%>');
+<% end %>
+
+// Version History
+<% if cards.include?('append_history') %>
+	$('#vhistory').append('<%= j render partial: 'system_settings/versions/history_item', collection: @versions, as: :version, locals: { offset: local_assigns.dig(:offset).to_i } -%>');
+	$('#vhistory_next').html('<%= link_to '<i class="fa fa-fw fa-angle-double-down mr-2"></i>Load More'.html_safe, system_settings_version_history_path(offset: local_assigns.dig(:offset).to_i + 10), { class: 'btn btn-light', remote: true, method: :get } -%>');
+<% end %>
+
+// Toasts
+<% if cards.include?('toasts_edit') %>
+	$('#system_settings_body').html('<%= j render( partial: 'system_settings/toasts/edit' ) -%>');
+<% end %>
+
+Looper.init();

@@ -1,0 +1,89 @@
+<%
+  # app/views/integrations/responsibid/webhooks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/responsibid/webhooks/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #   (req) @webhook:                 (Hash)
+  #            {"actions"=>{"tag_id"=>157, "group_id"=>0, "stage_id"=>0, "campaign_id"=>0}, "criteria"=>{}, "event_id"=>"4612b56a-de62-480d-9665-ca50a5dbcb6c"}
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter               = local_assigns.dig(:presenter) || Integrations::Responsibid::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook_event = @webhook_event
+-%>
+<%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, html: { class: 'needs-validation', novalidate: true } do |f| %>
+  <%= hidden_field_tag :version, presenter.webhook_event_version %>
+
+  <%= bootstrap_select_tag(
+        field:        'webhook[event]',
+        label:        { title: 'ResponsiBid Event' },
+        html_options: { id: "event_#{presenter.webhook_event_id}", required: true },
+        options:      { array: presenter.webhook_events_array, selected: presenter.webhook_object, blank: 'Select a ResponsiBid Event' },
+        messages:     { error: 'ResponsiBid event selection is required.' }
+      ) %>
+
+  <% if presenter.webhook_event_version == 1 %>
+    <%= bootstrap_switch_field(
+          field:        'webhook[event_new]',
+          value:        presenter.webhook_event_new,
+          values:       [true, false],
+          row:          { id: "job_event_new_#{presenter.webhook_event_id}" },
+          label:        { title: 'First Event' },
+          html_options: { id: "event_new_#{presenter.webhook_event_id}" },
+          messages:     { note: 'Event actions will trigger only on receipt of first event.' }
+        ) %>
+    <%= bootstrap_switch_field(
+          field:        'webhook[event_updated]',
+          value:        presenter.webhook_event_updated,
+          values:       [true, false],
+          row:          { id: "job_event_updated_#{presenter.webhook_event_id}" },
+          label:        { title: 'Subsequent Events' },
+          html_options: { id: "event_updated_#{presenter.webhook_event_id}" },
+          messages:     { note: 'Event actions will trigger on receipt of all subsequent events.' }
+        ) %>
+  <% elsif presenter.webhook_event_id.present? %>
+    <%= bootstrap_copy_field(
+          field:    'webhook_url',
+          value:    integrations_responsibid_endpoint_url(presenter.webhook_event_id),
+          row:      { class: 'mb-0' },
+          label:    { title: 'Webhook Event URL' },
+          messages: { note: 'Copy/Paste this URL into the ResponsiBid URL.' }
+        ) %>
+  <% end %>
+
+  <fieldset class="border rounded p-2 mt-3 mb-2">
+    <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+    <%= render partial: 'campaigns/action_fields', locals: {
+          client: presenter.client,
+          campaign: presenter.webhook_event_campaign, campaign_id_field: 'webhook[actions][campaign_id]',
+          group: presenter.webhook_event_group, group_id_field: 'webhook[actions][group_id]',
+          tag: presenter.webhook_event_tag, tag_id_field: 'webhook[actions][tag_id]',
+          stage: presenter.webhook_event_stage, stage_id_field: 'webhook[actions][stage_id]',
+          stop_campaign_ids: presenter.webhook_event_stop_campaign_ids, stop_campaign_ids_field: 'webhook[actions][stop_campaign_ids]',
+          first_trigger_types: [115, 120, 125, 130, 135, 138, 140, 145, 148]
+        } %>
+  </fieldset>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: "Save Actions for #{presenter.webhook_name.titleize} Event", disable_with: "Saving Actions for #{presenter.webhook_name.titleize} Event" }]
+      ) %>
+<% end %>
+
+<script>
+  $(function () {
+    $(document).off('change', '#event_new_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#event_new_<%= presenter.webhook_event_id -%>', function(e) {
+      eventNewToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#event_updated_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#event_updated_<%= presenter.webhook_event_id -%>', function(e) {
+      eventUpdatedToggle('<%= presenter.webhook_event_id -%>');
+    });
+  });
+</script>

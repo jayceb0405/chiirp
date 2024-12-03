@@ -1,0 +1,401 @@
+<%
+  # app/views/clients/settings/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "clients/settings/edit"
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = ClientPresenter.new(client: @client)
+-%>
+<% if !presenter.client.new_record? %>
+  <div class="card-deck-xl card-margins-mobile">
+    <div class="card card-fluid ml-0">
+      <h6 class="card-header">Settings</h6>
+      <%= form_with model: presenter.client, url: clients_setting_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'settings_form', novalidate: true } do |f| %>
+
+        <%= f.time_zone_select :time_zone, {
+              row:          { columns: presenter.row_columns(current_user, session) },
+              label:        { title: 'Time Zone Where Business is Located' },
+              html_options: { id: 'select_time_zone' },
+              choices:      { blank: 'Select a Time Zone' },
+              messages:     { note: 'All times shown are based on time zone selected.' }
+            } %>
+        <%= f.text_field :primary_area_code, {
+              row:          { columns: presenter.row_columns(current_user, session) },
+              label:        { title: 'Primary Area Code' },
+              html_options: { minlength: 3, maxlength: 3, placeholder: 'Area Code' },
+              messages:     { note: 'Must be 3 characters.' }
+            } %>
+          <%= f.switch :null, {
+                row:        { columns: presenter.row_columns(current_user, session) },
+                label:      { title: 'Contact Matching with Email' },
+                checkboxes: [{ id: 'contact_matching_with_email', field: 'contact_matching_with_email', checked: presenter.client.contact_matching_with_email?, values: %w[true false] }],
+                messages:   { note: 'Use email addresses when matching incoming Contacts with existing Contacts.' }
+              } %>
+        <%= f.text_area :contact_matching_ignore_emails, {
+              row:          { id: 'contact_matching_ignore_emails', columns: presenter.row_columns(current_user, session) },
+              label:        { title: 'Emails to Ignore' },
+              html_options: { id: 'contact_matching_ignore_emails_input', value: (presenter.client.contact_matching_ignore_emails || [])&.join(', ') },
+              messages:     { note: 'Enter comma separated email addresses to ignore when matching Contacts.' }
+            } %>
+        <%= if presenter.ok_to_select_default_user
+              f.select :def_user_id, {
+                row:          { columns: presenter.row_columns(current_user, session) },
+                label:        { title: 'Assign All New Contacts to' },
+                html_options: { id: 'def_user_id' },
+                choices:      { array: presenter.client.users.map { |user| [user.fullname, user.id] }, blank: 'Select a User', selected: presenter.client.def_user_id }
+              }
+            end %>
+
+        <% if presenter.client.agency_access %>
+          <%= bootstrap_info_field(
+                info:  'Agency Access Granted',
+                row:   { columns: presenter.row_columns(current_user, session) },
+                label: { title: 'Agency' }
+              ) %>
+        <% end %>
+
+        <% if current_user.team_member? %>
+          <%= bootstrap_info_field(
+                info:  presenter.date_created_string,
+                row:   { columns: [6, 6] },
+                label: { title: 'Date Created' }
+              ) %>
+          <%= f.radio_button :active, {
+                row:     { columns: [6, 6] },
+                label:   { title: 'Account Status' },
+                buttons: presenter.radio_buttons_active_status
+              } %>
+          <%= bootstrap_info_field(
+                row:   { columns: [6, 6] },
+                label: { title: '10DLC Campaign Charges Due' },
+                info:  number_to_currency(presenter.client.dlc10_brand&.campaigns_amount_due)
+              ) %>
+          <%= f.switch :null, {
+                row:        { columns: [6, 6] },
+                label:      { title: 'Unlimited Spending' },
+                checkboxes: [{ field: 'unlimited', checked: presenter.client.unlimited, values: %w[true false] }]
+              } %>
+          <%= f.switch :null, {
+                row:          { columns: [6, 6] },
+                html_options: { id: 'client_checkbox_agency' },
+                label:        { title: 'Company is an Agency' },
+                checkboxes:   [{ field: 'agency_access', checked: presenter.client.agency_access, values: %w[true false] }]
+              } %>
+          <%= bootstrap_info_field(
+                info:  presenter.associated_contact_link,
+                row:   { columns: [6, 6] },
+                label: { class: 'string', id: 'string', title: 'Associated Contact' }
+              ) %>
+          <%= bootstrap_calendar_field(
+                field:        'client[terms_accepted]',
+                value:        presenter.client_terms_accepted_formatted,
+                row:          { columns: [6, 6] },
+                label:        { title: 'Date Terms of Service Accepted' },
+                html_options: { id: 'client_terms_accepted' },
+                flatpickr:    { include_time: true, mode: 'single' }
+              ) %>
+          <%= bootstrap_calendar_field(
+                field:        'client[onboarding_scheduled]',
+                value:        presenter.client_onboarding_scheduled_formatted,
+                row:          { columns: [6, 6] },
+                label:        { title: 'Onboarding Session Date' },
+                html_options: { id: 'client_onboarding_scheduled' },
+                flatpickr:    { include_time: true, mode: 'single' }
+              ) %>
+          <%= bootstrap_number_field(
+                field:        'client[current_balance]',
+                value:        presenter.current_balance,
+                row:          { columns: [6, 6] },
+                label:        { title: 'Credit Balance' },
+                html_options: { min: 0.00, step: 0.01 },
+                prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+                messages:     { note: 'Must be minimum of 0 credits.' }
+              ) %>
+          <%= if presenter.client.mo_charge_retry_count.positive?
+                bootstrap_info_field(
+                  info:  pluralize(presenter.client.mo_charge_retry_count, 'Day', 'Days'),
+                  row:   { columns: [6, 6] },
+                  label: { class: 'string', id: 'string', title: 'Monthly Pmt Failed (Days)' }
+                )
+              end %>
+        <% end %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Settings', disable_with: 'Saving Settings' }] %>
+      <% end %>
+    </div>
+
+    <% if current_user.team_member? %>
+      <div class="card card-fluid mr-0">
+        <h6 class="card-header"> Package Settings </h6>
+        <div class="card-body">
+          <%= form_with model: presenter.client, url: clients_setting_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'settings_form', novalidate: true } do |f| %>
+            <%= f.select :package_page_id, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Package Page' },
+                  html_options: { id: 'client_package_page_id', mobile: browser.device.mobile? },
+                  choices:      { array: PackagePage.pluck(:name, :id), blank: 'Select a Package Page', selected: presenter.client.package_page_id }
+                } %>
+            <%= f.select :package_id, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Package' },
+                  html_options: { id: 'client_package_id', mobile: browser.device.mobile? },
+                  choices:      { array: presenter.options_for_package, blank: 'Select a Package', selected: presenter.client.package_id }
+                } %>
+            <%= bootstrap_calendar_field(
+                  field:        'client[next_pmt_date]',
+                  value:        presenter.client_next_pmt_date_formatted,
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Next Billing Date' },
+                  html_options: { id: 'client_next_pmt_date' },
+                  flatpickr:    { include_time: false, mode: 'single' }
+                ) %>
+            <%= bootstrap_info_field(
+                  info:  number_to_currency(presenter.client.setup_fee.to_d),
+                  row:   { columns: [6, 6] },
+                  label: { class: 'string', id: 'string', title: 'Setup Fee' }
+                ) %>
+            <%= f.number_field :mo_charge, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Monthly Charge' },
+                  html_options: { value: presenter.client.mo_charge.to_d, min: 0, step: 0.01 },
+                  prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                  messages:     { note: 'Must be minimum of $0.00.' }
+                } %>
+            <%= f.number_field :credit_charge, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Credit Price' },
+                  html_options: { value: presenter.client.credit_charge.to_d, min: 0.01, step: 0.0001 },
+                  prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                  messages:     { note: 'Must be minimum of $0.0001.' }
+                } %>
+            <%= f.number_field :searchlight_fee, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'SearchLight Fee' },
+                  html_options: { value: presenter.client.searchlight_fee.to_d, min: 0, step: 1.00 },
+                  prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                  messages:     { note: "The amount #{I18n.t('tenant.name')} pays SearchLight monthly for this Client." }
+                } %>
+            <%= f.number_field :mo_credits, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Monthly Credits Received' },
+                  html_options: { value: presenter.client.mo_credits.to_d, min: 0, step: 1 },
+                  prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+                  messages:     { note: 'Must be minimum of 0 credits.' }
+                } %>
+            <%= f.number_field :text_delay, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Text Message Delay<br /><small>(per phone number / seconds / suggest 10)</small>'.html_safe },
+                  html_options: { min: 5, step: 1 },
+                  messages:     { note: 'Must be minimum of 5 seconds.' }
+                } %>
+            <%= f.number_field :max_phone_numbers, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Maximum Phone Numbers Permitted' },
+                  html_options: { min: 0, step: 1 },
+                  messages:     { note: 'Must be minimum of 0 phone numbers.' }
+                } %>
+            <%= f.select :phone_vendor, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Phone Number Provider' },
+                  html_options: { id: 'phone_vendor_id', mobile: browser.device.mobile? },
+                  choices:      { for_select: options_for_phone_vendor(presenter.client.phone_vendor), blank: 'Select a Provider' }
+                } %>
+            <%= f.select :affiliate_id, {
+                  row:          { columns: [6, 6] },
+                  label:        { title: 'Affiliate' },
+                  html_options: { id: 'affiliate_id', mobile: browser.device.mobile? },
+                  choices:      { for_select: options_for_affiliate(presenter.client.affiliate_id), blank: 'Select a Affiliate' },
+                  messages:     { note: "Affiliate to whom #{I18n.t('tenant.name')} pays a monthly fee." }
+                } %>
+            <%= f.switch :dlc10_charged, {
+                  row:          { columns: [6, 6] },
+                  html_options: { id: 'client_switch_dlc10_charged' },
+                  label:        { title: 'Charge for 10dlc Costs' },
+                  checkboxes:   [{ field: 'dlc10_charged', checked: presenter.client.dlc10_charged, values: %w[true false] }]
+                } %>
+
+            <fieldset class="border rounded p-2 mt-3 mb-2">
+              <legend class="w-auto mb-0"><h6>Trial Period</h6></legend>
+
+              <%= f.number_field :first_payment_delay_days, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Delay First Payment (days)' },
+                    html_options: { id: 'first_payment_delay_days', min: 0, step: 1 },
+                    messages:     { note: 'Must be minimum of 0 days.' }
+                  } %>
+              <%= f.number_field :first_payment_delay_months, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Delay First Payment (months)' },
+                    html_options: { id: 'first_payment_delay_months', min: 0, step: 1 },
+                    messages:     { note: 'Must be minimum of 0 months.' }
+                  } %>
+              <%= bootstrap_info_field(
+                    info:  pluralize(presenter.client.trial_credits.to_i, 'Credit', 'Credits'),
+                    row:   { columns: [6, 6] },
+                    label: { class: 'string', id: 'string', title: 'Trial Credits Received' }
+                  ) %>
+
+            </fieldset>
+
+            <fieldset class="border rounded p-2 mt-3 mb-2">
+              <legend class="w-auto mb-0"><h6>Promotional Period</h6></legend>
+
+              <%= f.number_field :promo_months, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Promotional Period (months)' },
+                    html_options: { min: 0, step: 1 },
+                    messages:     { note: 'Must be minimum of 0 months.' }
+                  } %>
+              <%= f.number_field :promo_mo_charge, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Monthly Charge' },
+                    html_options: { value: presenter.client.promo_mo_charge.to_d, min: 0, step: 0.01 },
+                    prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                    messages:     { note: 'Must be minimum of $0.00.' }
+                  } %>
+              <%= f.number_field :promo_credit_charge, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Credit Price' },
+                    html_options: { value: presenter.client.promo_credit_charge.to_d, min: 0, step: 0.01 },
+                    prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                    messages:     { note: 'Must be minimum of $0.00.' }
+                  } %>
+              <%= f.number_field :promo_mo_credits, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Monthly Credits Received' },
+                    html_options: { value: presenter.client.promo_mo_credits.to_d, min: 0, step: 1 },
+                    prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+                    messages:     { note: 'Must be minimum of 0 credits.' }
+                  } %>
+              <%= f.number_field :promo_max_phone_numbers, {
+                    row:          { columns: [6, 6] },
+                    label:        { title: 'Maximum Phone Numbers Permitted' },
+                    html_options: { min: 0, step: 1 },
+                    messages:     { note: 'Must be minimum of 0 phone numbers.' }
+                  } %>
+
+            </fieldset>
+
+            <%= f.submit_buttons buttons: [{ title: 'Save Package Settings', disable_with: 'Saving Package Settings' }] %>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+<% end %>
+
+<% if !presenter.client.new_record? && presenter.client.credit_card_on_file? && current_user.team_member? %>
+  <div class="card card-fluid card-margins-mobile">
+    <h6 class="card-header"> Charge Credit Card </h6>
+    <div class="card-body">
+      <%= form_with model: presenter.client, url: clients_setting_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'charge_card_form', novalidate: true } do |f| %>
+        <%= bootstrap_number_field(
+              field:        'charge_card',
+              value:        '20.00',
+              label:        { title: 'Charge Card', id: 'charge_card_label' },
+              html_options: { id: 'charge_card_input', min: 5.00, step: 1.00 },
+              prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+              messages:     { note: 'Must be minimum of $5.00.' }
+            ) %>
+        <%= f.submit_buttons buttons: [{ title: 'Charge Credit Card', disable_with: 'Charging' }] %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<script>
+  $(function () {
+
+    <% if presenter.client.errors.any? %>
+      ChiirpAlert({
+        'body':presenter.client.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    $('#contact_matching_with_email').off('change');
+    $('#contact_matching_with_email').on('change', function() {
+      if ($('#contact_matching_with_email').is(':checked')) {
+        $('#contact_matching_ignore_emails').show();
+      } else {
+        $('#contact_matching_ignore_emails_input').val('');
+        $('#contact_matching_ignore_emails').hide();
+      }
+    });
+
+    $('#client_package_page_id').on('change', function() {
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= package_pages_select_path -%>',
+        data: {
+          id: $(this).find(':selected')[0].value,
+          selected_package_id: $('#client_package_id').find(':selected')[0].value
+        }
+      });
+    });
+
+    $('#first_payment_delay_days').off('change');
+    $('#first_payment_delay_days').on('change', function() {
+      update_next_payment_date();
+    });
+
+    $('#first_payment_delay_months').off('change');
+    $('#first_payment_delay_months').on('change', function() {
+      update_next_payment_date();
+    });
+
+    $('#radio_inactive_status').on('change', function() {
+      if ($(this).prop("checked") == true) {
+        ChiirpAlert({
+          'body':'Deactivating <%= presenter.client.name -%> will delete all future Campaign activity and release all telephone numbers. Is that your intention?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_inactive' }, { label: '<i class="fa fa-thumbs-up"></i> Delete Them All!', id: 'button_dump_it' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+        $(document).off('click', '#button_not_inactive');
+        $(document).on('click', '#button_not_inactive', function(e) {
+          $('#radio_active_status').click();
+        });
+      }
+    });
+
+    $('#client_checkbox_agency').on('change', function() {
+      if ($(this).prop("checked") == false) {
+        ChiirpAlert({
+          'body':'Turning Company Agency Capability off will delete all current connections. Is that your intention?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no' }, { label: '<i class="fa fa-thumbs-up"></i> Delete Them All!', id: 'button_dump_it' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+        $(document).off('click', '#button_no');
+        $(document).on('click', '#button_no', function(e) {
+          $('#client_checkbox_agency').prop("checked", true);
+        });
+      }
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_settings').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_settings').addClass('has-active');
+    $('#breadcrumb').show();
+
+    function update_next_payment_date() {
+      var months_advance = parseInt($('#first_payment_delay_months').val());
+      while (moment('<%= presenter.client.created_at.rfc2822 -%>').add(parseInt($('#first_payment_delay_days').val()), 'days').add(months_advance, 'months') < moment().add(1, 'day')) {
+        months_advance = months_advance + 1
+      }
+      $('#client_next_pmt_date').val(moment('<%= presenter.client.created_at.rfc2822 -%>').add(parseInt($('#first_payment_delay_days').val()), 'days').add(months_advance, 'months').format('MM/DD/YYYY'));
+    }
+  });
+</script>

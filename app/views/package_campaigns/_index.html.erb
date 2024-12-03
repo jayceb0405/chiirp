@@ -1,0 +1,39 @@
+<%
+  # app/views/package_campaigns/_index.html.erb
+  # 
+  # Example:
+  #   render partial: 'package_campaigns/index'
+  # 
+  # Required Instance Variables:
+  #   @package:           (Package)
+  #   @package_campaigns: (Campaigns)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  package_campaigns = @package.package_campaigns
+-%>
+<fieldset class="border p-2 mb-2">
+  <legend class="w-auto mb-0"><h6>Auto Imported Campaigns/Campaign Packages</h6></legend>
+  <%= render partial: 'package_campaigns/edit', locals: { package_campaigns: package_campaigns } %>
+
+  <% if package_campaigns %>
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th> Campaign </th>
+            <th style="width:100px;min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <%= render partial: 'package_campaigns/package_campaign', collection: package_campaigns -%>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <h6 class="p-2 m-0">No Campaigns found.</h6>
+  <% end -%>
+</fieldset>

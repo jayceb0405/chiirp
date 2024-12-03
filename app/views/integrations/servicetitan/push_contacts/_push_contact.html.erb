@@ -1,0 +1,45 @@
+<%
+  # app/views/integrations/servicetitan/push_contacts/_push_contact.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/push_contacts/push_contact', collection: Array, as: :push_contact, , locals: { presenter: Integrations::Servicetitan::PushContactsPresenter }
+  #
+  # Instance Variables:
+  #   (opt) @push_contact: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter:    (Integrations::Servicetitan::PushContactsPresenter)
+  #   (opt) push_contact: (Hash)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::PushContactsPresenter)
+
+  presenter.push_contact = push_contact || @push_contact
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_push_contact_<%= presenter.push_contact_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#edit_push_contact_<%= presenter.push_contact_id -%>">
+      <%= presenter.push_contact_tag&.name.to_s -%>
+    </button>
+  </td>
+  <td class="text-left align-middle"><%= presenter.push_contact_type -%></td>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_push_contact_<%= presenter.push_contact_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', integrations_servicetitan_push_contact_path(presenter.push_contact_id), {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt push_contact_delete',
+          data:  { id: presenter.push_contact_id, name: presenter.push_contact_tag&.name.to_s }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_push_contact" id="edit_push_contact_<%= presenter.push_contact_id -%>">
+  <td colspan="11" class="mt-3 text-center">
+    <%= render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Tag' } %>
+  </td>
+</tr>

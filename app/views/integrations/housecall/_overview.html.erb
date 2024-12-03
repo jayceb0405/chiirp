@@ -1,0 +1,113 @@
+<%
+  # app/views/integrations/housecall/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/overview', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'housecall' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_housecall_api_key_path, { class: 'metric metric-bordered align-items-center', id: 'link_api_key', remote: true }) do %>
+            <h2 class="metric-label"> <%= presenter.overview_api_key_title -%> </h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <%= presenter.overview_api_key_icon.html_safe %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <% if presenter.valid_credentials? %>
+          <div class="col-4 py-2">
+            <%= link_to(edit_integrations_housecall_push_leads_path, { class: 'metric metric-bordered align-items-center', id: 'link_push_leads', remote: true }) do %>
+              <h2 class="metric-label"> Push Contacts Tag </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= (presenter.push_leads_customer_tag || Tag.new(name: 'Not Selected'))&.name %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if presenter.valid_credentials? %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_housecall_webhooks_path, { class: 'metric metric-bordered align-items-center', id: 'link_webhooks', remote: true }) do %>
+              <h2 class="metric-label"> Events Configured </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.webhooks.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if presenter.valid_credentials? %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_housecall_employees_path, { class: 'metric metric-bordered align-items-center', id: 'link_employees', remote: true }) do %>
+              <h2 class="metric-label"> Employees Matched </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.employees.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if presenter.valid_credentials? %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_housecall_price_book_path, { class: 'metric metric-bordered align-items-center', id: 'link_price_book', remote: true }) do %>
+              <h2 class="metric-label"> Price Book Line Items </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.price_book.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if presenter.valid_credentials? && presenter.contact_imports_remaining != '0' %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_housecall_update_contacts_path, { class: 'metric metric-bordered align-items-center', id: 'link_update_contacts', remote: true }) do %>
+              <h2 class="metric-label"> Housecall Pro Customers Awaiting Import </h2>
+              <p class="metric-value h3">
+                <span class="value text-success" id="contact_imports_remaining_count">
+                  <%= presenter.contact_imports_remaining %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

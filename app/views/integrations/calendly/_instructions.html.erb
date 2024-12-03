@@ -1,0 +1,44 @@
+<%
+  # app/views/integrations/calendly/_instructions.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/calendly/instructions'
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Calendly Integration Instructions</h6>
+  <div class="card-body">
+    <h6>Calendly Functions:</h6>
+    <ul>
+      <li><%= I18n.t("tenant.name") -%> supports scheduling using your Calendly account.</li>
+      <li>From Message Central drop down any ellipsis menu and click "Schedule an Appointment'.</li>
+    </ul>
+
+    <h6>Calendly Setup:</h6>
+    <ul>
+      <li>Click on an event gear and click "Add to Website".</li>
+      <li>Select Inline Embed and click "Continue".</li>
+      <li>Configure your page settings and click "Copy Code"</li>
+    </ul>
+
+    <h6><%= I18n.t("tenant.name") -%> Setup:</h6>
+    <ul>
+      <li>From the Calendly Integration click on "Embed Script".</li>
+      <li>Paste the Calendly embed script that you copied from Calendly and click "Save".</li>
+      <li>All set!</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

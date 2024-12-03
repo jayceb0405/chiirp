@@ -1,0 +1,45 @@
+<%
+  # app/views/clients/companies/rows/_clients.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/rows/clients', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+-%>
+<tr>
+  <%= presenter.company_cell(client) %>
+  <td class="align-middle text-left"><%= Friendly.new.date(client.created_at, client.time_zone, false) -%></td>
+  <td class="align-middle text-left"><%= number_to_phone(client.phone) %></td>
+  <td class="align-middle text-center"><%= client.user_count %></td>
+
+  <% if current_user.team_member? %>
+    <td class="align-middle text-left">
+      <% if client.affiliate %>
+        <%= link_to client.affiliate.company_name,
+                    '#',
+                    class: 'w-100 text-decoration-none text-reset affiliate_info_link',
+                    id:    client.affiliate_id %>
+      <% end %>
+    </td>
+    <td class="align-middle text-center"><%= client.agency_access ? presenter.success_html : presenter.fail_html -%></td>
+    <td class="align-middle text-left">
+      <%= bootstrap_select_tag(
+            field:        'string',
+            row:          { class: 'mb-0', columns: [0, 12] },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            label:        { class: 'mb-0' },
+            html_options: { class: 'select_agencies_approved', id: "select_agencies_approved_#{client.id}", multiple: true },
+            options:      { array: Client.where(tenant: I18n.t('tenant.id')).where('data @> ?', { agency_access: true }.to_json).order(:name).pluck(:name, :id), selected: client.my_agencies }
+          ) %>
+    </td>
+  <% end %>
+
+  <%= render partial: 'clients/companies/rows/action_buttons', locals: { client: } %>
+</tr>

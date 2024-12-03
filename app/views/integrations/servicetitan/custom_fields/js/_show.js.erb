@@ -1,0 +1,26 @@
+// app/views/integrations/servicetitan/custom_fields/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/servicetitan/custom_fields/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   (req) @client_api_integration: (ClientApiIntegration)
+//
+// Local Variables:
+//   (req) cards: (Array)
+//
+<% presenter = Integrations::Servicetitan::CustomFieldsPresenter.new(client_api_integration: @client_api_integration) %>
+
+<% if cards.include?('edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/custom_fields/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('edit_custom_field_assignments') %>
+  $('#custom_field_assignments').html('<%= j render partial: 'integrations/servicetitan/custom_fields/edit_custom_field_assignments', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('edit_booking_field_assignments') %>
+  $('#booking_field_assignments').html('<%= j render partial: 'integrations/servicetitan/custom_fields/edit_booking_field_assignments', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,100 @@
+<%
+  # app/views/contacts/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'contacts/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (opt) @delayed_job (Delayed::Job)
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  return unless local_assigns.dig(:cards).is_a?(Array)
+
+  contact_presenter = Contacts::Presenter.new(contact: @contact) if %w[edit_scheduled_action ext_references index_scheduled_actions new_ext_reference].intersect?(cards)
+  contact_presenter.delayed_job = @delayed_job if %w[edit_scheduled_action].intersect?(cards)
+-%>
+<% if cards.include?('edit_contact') %>
+  // show Contact edit in modal
+  $('#dash_modal_title').html('<i class="fa fa-pencil-alt"></i> Contact Profile for <%= @contact.new_record? ? 'New Contact' : @contact.fullname_or_phone -%>')
+  $('#dash_modal_body').html('<%= j render partial: 'contacts/edit', locals: { return_to: local_assigns.dig(:return_to).to_s } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('edit_contact_show') %>
+  // show Contact edit in modal
+  $("#dash_modal").modal('show');
+<% end %>
+<% if cards.include?('edit_contact_close') %>
+  $("#dash_modal").modal('hide');
+  $('#dash_modal_title').html('')
+  $('#dash_modal_body').html('');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+// Scheduled Actions
+<% if cards.include?('index_scheduled_actions') %>
+  $("#dash_modal").modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-person-running"></i> Scheduled Actions for <%= @contact.fullname_or_phone -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'contacts/scheduled_actions/index', locals: { presenter: contact_presenter } -%>');
+
+  <% if @contact.scheduled_actions.any? %>
+    $('#dash_modal_footer').html('<%= bootstrap_submit_buttons(buttons: [{ title: 'Delete All Actions', id: 'delete_all_actions', disable_with: 'Deleting All Actions' }]) %>');
+  <% else %>
+    $('#dash_modal_footer').html('');
+  <% end %>
+<% end %>
+<% if cards.include?('edit_scheduled_action') %>
+  <% case @delayed_job&.process %>
+  <% when 'send_text' %>
+    $('#delayed_job_<%= @delayed_job.id -%>').html('<%= j render partial: 'contacts/scheduled_actions/edit/send_text', locals: { presenter: contact_presenter } -%>');
+  <% when 'send_email' %>
+    $('#delayed_job_<%= @delayed_job.id -%>').html('<%= j render partial: 'contacts/scheduled_actions/edit/send_email', locals: { presenter: contact_presenter } -%>');
+  <% end %>
+<% end %>
+
+// Contacts::ExtReferences
+<% if cards.include?('ext_references') %>
+  $('#contact_ext_references').html('<%= j render partial: 'contacts/ext_references/index', locals: { presenter: contact_presenter } -%>')
+<% end %>
+<% if cards.include?('new_ext_reference') %>
+  $('#contact_ext_references_tbody').append('<%= j render partial: 'contacts/ext_references/ext_reference', locals: { ext_reference: @ext_reference, presenter: contact_presenter } -%>')
+<% end %>
+
+<% if cards.include?( 3 ) %>
+  // list Contacts::Notes
+  <% contact_notes_count = @contact.notes.count %>
+  $('#contact_notes_badge').html('<%= contact_notes_count.positive? ? contact_notes_count : '' -%>');
+  $("#dash_modal").modal('show');
+  $('#dash_modal_body').html('<%= j render partial: 'contacts/notes/index' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?( 7 ) %>
+  // edit Maestro ContactApiIntegration
+  $("#dash_modal").modal('show');
+  $('#dash_modal_body').html('<%= j render partial: 'integrations/maestro/edit_contact' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?( 8 ) %>
+  // close ContactApiIntegration modal
+  $("#dash_modal").modal('hide');
+<% end %>
+<% if cards.include?( 11 ) %>
+  // edit Xencall ContactApiIntegration
+  $("#dash_modal").modal('show');
+  $('#dash_modal_body').html('<%= j render partial: 'integrations/xencall/edit_contact' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<% if local_assigns.dig(:error_message).present? %>
+  ChiirpAlert({
+    'title':      'Error!',
+    'body':       '<%= error_message.to_s -%>',
+    'type':       'danger',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

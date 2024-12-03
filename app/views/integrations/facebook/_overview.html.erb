@@ -1,0 +1,113 @@
+<%
+  # app/views/integrations/facebook/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/overview'
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'facebook_leads' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_facebook_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_connection', remote: true }) do %>
+            <h2 class="metric-label">Facebook Users</h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= presenter.user_api_integration.users.count %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <% presenter.user_api_integration.users.map(&:deep_symbolize_keys).each do |user| %>
+          <div class="col-4 py-2">
+            <%= link_to(edit_integrations_facebook_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_connection', remote: true }) do %>
+              <h2 class="metric-label mb-0">Facebook Connection</h2>
+              <h2 class="metric-label">(<%= user[:name] -%>)</h2>
+              <p class="metric-value h3">
+                <span class="value">
+                  <% if Integration::Facebook::Base.new(presenter.user_api_integration, fb_user_id: user.dig(:id)).valid_credentials? %>
+                    <i class="fa fa-link text-success"></i>
+                  <% else %>
+                    <i class="fa fa-link text-danger"></i>
+                  <% end %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_facebook_pages_path, { class: 'metric metric-bordered align-items-center', id: 'link_connection', remote: true }) do %>
+            <h2 class="metric-label">Facebook Pages</h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= presenter.user_api_integration.pages.count %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_messenger') %>
+          <% fb_model = Integration::Facebook::Base.new(@user_api_integration) %>
+
+          <% presenter.user_api_integration.pages.map(&:deep_symbolize_keys).each do |page| %>
+            <div class="col-4 py-2">
+              <%= link_to(integrations_facebook_pages_path, { class: 'metric metric-bordered align-items-center', id: 'link_connection', remote: true }) do %>
+                <h2 class="metric-label mb-0">Facebook Messenger</h2>
+                <h2 class="metric-label">(<%= page[:name] -%>)</h2>
+                <p class="metric-value h3">
+                  <span class="value">
+                    <% if fb_model.page_subscribed?(page_id: page[:id], permissions: Integration::Facebook::Base::PAGE_PERMISSIONS_MESSENGER) %>
+                      <i class="fa fa-check text-success"></i>
+                    <% else %>
+                      <i class="fa fa-times text-danger"></i>
+                    <% end %>
+                  </span>
+                </p>
+              <% end %>
+            </div>
+          <% end %>
+
+        <% end %>
+
+        <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_leads') %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_facebook_leads_forms_path, { class: 'metric metric-bordered align-items-center', id: 'link_connection', remote: true }) do %>
+              <h2 class="metric-label">Facebook Forms Defined</h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.forms_defined_count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

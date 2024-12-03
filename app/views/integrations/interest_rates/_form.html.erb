@@ -1,0 +1,71 @@
+<%
+  # app/views/integrations/interest_rates/_form.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/interest_rates/form"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  client_api_integration_group = @client_api_integration.group_id.to_i.positive? ? @client_api_integration.client.groups.find_by(id: @client_api_integration.group_id.to_i) : @client_api_integration.client.groups.new
+  client_api_integration_tag   = @client_api_integration.tag_id.to_i.positive? ? @client_api_integration.client.tags.find_by(id: @client_api_integration.tag_id.to_i) : @client_api_integration.client.tags.new
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Interest Rate Actions</h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: integrations_interest_rates_integration_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } do |f| %>
+      <%= bootstrap_select_tag(
+            field:   'client_api_integration[mortgage_rate_type_id]',
+            label:   { title: 'Mortgage Rate to Compare' },
+            options: { array: @client_api_integration.current_mortgage_rates.map { |rate| [rate['title'], rate['id']] }, selected: @client_api_integration.mortgage_rate_type_id, blank: 'Select Mortgage Rate' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:   'client_api_integration[custom_field_id]',
+            label:   { title: 'Custom Field Where Contact\'s Interest Rate is Found' },
+            options: { array: @client_api_integration.client.client_custom_fields.where(var_type: 'numeric').order(:var_name).pluck(:var_name, :id), selected: @client_api_integration.custom_field_id, blank: 'Select Custom Field' }
+          ) %>
+      <%= bootstrap_number_field(
+            field:        'client_api_integration[differential]',
+            value:        @client_api_integration.differential,
+            label:        { title: 'Interest Rate Gap is (or is greater than)' },
+            html_options: { min: 0, step: 0.1 },
+            prepends:     [{ button: false, label: '<i class="fa fa-percent"></i>' }]
+          ) %>
+
+      <fieldset class="border rounded p-2 mt-3 mb-2"">
+          <legend class=" w-auto mb-0 "><h6>Action when Interest Rate Gap is Reached</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: @client_api_integration.client,
+                campaign_id: @client_api_integration.campaign_id, campaign_id_field: 'client_api_integration[campaign_id]',
+                group: client_api_integration_group, group_id_field: 'client_api_integration[group_id]',
+                tag: client_api_integration_tag, tag_id_field: 'client_api_integration[tag_id]',
+                stage_id: @client_api_integration.stage_id, stage_id_field: 'client_api_integration[stage_id]',
+                stop_campaign_ids: @client_api_integration.stop_campaign_ids, stop_campaign_ids_field: 'client_api_integration[stop_campaign_ids]'
+              } %>
+      </fieldset>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [{ title: 'Save', disable_with: 'Saving' }]
+          ) %>
+
+      <% unless @client_api_integration.mortgage_rate_disclaimer.empty? %>
+        <fieldset class=" border rounded p-3 mt-3 mb-2 ">
+          <legend class=" w-auto mb-0 "><h6>Disclaimer</h6></legend>
+          <p class=" small text-muted mb-0 "><%= @client_api_integration.mortgage_rate_disclaimer -%></p>
+        </fieldset>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

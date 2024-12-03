@@ -1,0 +1,106 @@
+<%
+  # app/views/affiliates/affiliates/_index.html.erb
+  #
+  # Example:
+  #   render partial: "affiliates/affiliates/index"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<div class="card card-fluid">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-handshake mr-2"></i>Affiliates <span class="badge"><%= presenter.affiliates.count -%></span></h6>
+      <div class="card-header-control">
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Affiliate'.html_safe, new_affiliates_affiliate_path, {
+              class:  'btn btn-light',
+              id:     'button_new_affiliate',
+              remote: true,
+              method: :get
+            } %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="2" style="min-width: 240px"> Company Name </th>
+            <th class="text-left d-none d-md-table-cell"> Contact Name </th>
+            <th class="text-left d-none d-md-table-cell"> Created </th>
+            <th style="min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% if @affiliate&.new_record? %>
+            <%= render partial: 'affiliates/index/affiliate', locals: { affiliate: @affiliate, presenter: } -%>
+          <% end %>
+
+          <% if presenter.affiliates.any? %>
+            <%= render partial: 'affiliates/index/affiliate', collection: presenter.affiliates.order(:company_name, :contact_name), as: :affiliate, locals: { presenter: } -%>
+          <% else %>
+            <tr><td class="pt-4" colspan="5">
+              Affiliates have NOT been created.
+            </td></tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_affiliates').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_affiliates').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.affiliate_edit');
+    $(document).on('show.bs.collapse', '.affiliate_edit', function (e) {
+
+      if (e.target.id > 'affiliate_') {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/affiliates/affiliates/' + e.target.id.replace('affiliate_', '') + '/edit'
+        })
+      }
+    });
+
+    $(document).off('click', '.affiliate_delete');
+    $(document).on('click', '.affiliate_delete', function(e) {
+      e.preventDefault();
+
+      var affiliateId = $(this).data('affiliateid');
+      var affiliateName = $(this).data('affiliatename');
+
+      ChiirpAlert({
+        'body':       'Deleting "' + affiliateName + '" can NOT be un-done. Is it your intention to delete this Affiliate?',
+        'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_affiliate' }].to_json) -%>,
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_dump_it_affiliate');
+      $(document).on('click', '#button_dump_it_affiliate', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/affiliates/affiliates/' + affiliateId
+        });
+      });
+    });
+  });
+</script>

@@ -1,0 +1,106 @@
+<%
+  # app/views/user_contact_forms/v3/modal/_init.js.erb
+  # 
+  # Example:
+  #   render partial: 'user_contact_forms/v3/modal/_init'
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  # Notes:
+  #   similar code in (all 3 must be updated)...
+  #     app/views/clients/widgets/v3/_sitechat.js.erb
+  #     app/views/user_contact_forms/v3/modal/_init.js.erb
+  #     app/views/user_contact_forms/v3/frame/_init.js.erb
+  # 
+-%>
+function addLoadEvent(func) {
+  var oldonload = window.onload;
+
+  if (typeof window.onload != 'function') {
+    window.onload = func;
+  } else {
+    window.onload = function() {
+
+      if (oldonload) {
+        oldonload();
+      }
+
+      func();
+    }
+  }
+}
+
+(function() {
+  var quicklead_modal = '<input type="hidden" name="redirect_url" id="redirect_url" value="<%= @user_contact_form.redirect_url.to_s -%>" /><iframe id="tenant-quicklead-modal" src="<%= api_v3_user_contact_form_modal_url(@user_contact_form.page_key) -%>" style="display:none;position:fixed;z-index:2147483647;border:0px;border-radius:25px;left:50%;" scrolling="no" frameborder="0" allowfullscreen></iframe>';
+
+  addLoadEvent( function() {
+    if (document.readyState === 'complete') {
+      document.body.insertAdjacentHTML('afterbegin', quicklead_modal);
+
+      window.addEventListener('message', function(event) {
+        if ( ~event.origin.indexOf('<%= I18n.t('tenant.domain') -%>') ) {
+          try { var obj = JSON.parse(event.data); }
+          catch(e) { var obj = event.data }
+          
+          if ( obj.action === 'setatt_sitechat' ) {
+            document.getElementById('tenant-sitechat-frame').setAttribute('width', obj.width);
+            document.getElementById('tenant-sitechat-frame').setAttribute('height', obj.height);
+          }
+          else if (obj.action === 'close_sitechat_bubble') {
+            var sitechat_bubble_frame = document.getElementById('tenant-sitechat-bubble-frame')
+
+            if (sitechat_bubble_frame) {
+              sitechat_bubble_frame.style.display = 'none';
+            }
+          }
+          else if (obj.action === 'setatt_quicklead_modal' ) {
+            var frame_height = Math.min(obj.height, window.innerHeight - 100);
+            document.getElementById('tenant-quicklead-modal').width = obj.width;
+            document.getElementById('tenant-quicklead-modal').height = frame_height;
+            document.getElementById('tenant-quicklead-modal').style.marginLeft = ((obj.width / 2) * -1).toString() + 'px';
+            document.getElementById('tenant-quicklead-modal').style.top = '25px';
+          }
+          else if ( obj.action === 'setatt_quicklead_frame' ) {
+            document.getElementById('tenant-quicklead-frame').setAttribute('width', obj.width);
+            document.getElementById('tenant-quicklead-frame').setAttribute('height', obj.height);
+          }
+          else if (obj.action === 'close_quicklead_modal') {
+            document.getElementById('tenant-quicklead-modal').style.display = 'none';
+          }
+          else if (obj.action === 'redirect_frame' && document.getElementById('redirect_url').value.length > 0) {
+            window.location.href = document.getElementById('redirect_url').value;
+          }
+        } else {
+          return;
+        }
+      });
+    }
+  });
+}).call(this)
+
+function openQuickPage(width='', height='', position_x='', position_y='') {
+  document.getElementById('tenant-quicklead-modal').contentWindow.postMessage('{"action":"open_quicklead_modal"}', '*');
+  document.getElementById('tenant-quicklead-modal').style.display = 'block';
+
+  if (width.length > 0) {
+    document.getElementById('tenant-quicklead-modal').style.width = width;
+  }
+  if (height.length > 0) {
+    document.getElementById('tenant-quicklead-modal').style.height = height;
+  }
+  if ( (position_x.length + position_y.length) > 0 ) {
+    document.getElementById('tenant-quicklead-modal').style.position = 'absolute';
+
+    if (position_x.length > 0) {
+      document.getElementById('tenant-quicklead-modal').style.left = position_x;
+    }
+    if (position_y.length > 0) {
+      document.getElementById('tenant-quicklead-modal').style.top = position_y;
+    }
+  }
+  return false;
+}

@@ -1,0 +1,50 @@
+<%
+  # app/views/my_contacts/broadcast/actions/_send_text.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/broadcast/actions/send_text', locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #  (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+
+  presenter.contact = current_user.contacts.new(ok2text: 1, ok2email: 1)
+
+  messages_text_presenter = Messages::Text::Presenter.new(contact: presenter.contact, user: current_user)
+  messages_text_presenter.file_type                 = 'user'
+  messages_text_presenter.include_estimate_hashtags = false
+  messages_text_presenter.include_invoice_hashtags  = false
+  messages_text_presenter.include_job_hashtags      = false
+  messages_text_presenter.show_msg_delay            = false
+  messages_text_presenter.show_payment_request      = false
+  messages_text_presenter.show_submit               = false
+  messages_text_presenter.show_voicemail            = false
+  messages_text_presenter.show_video_calls          = false
+-%>
+<%= bootstrap_select_tag(
+      field:        'selected_number[send_text]',
+      label:        { title: 'Phone(s) to Send From' },
+      html_options: { multiple: true },
+      options:      { for_select: options_for_phone_numbers(user: current_user, options: [['last', 'Last Number Used']], selected: current_user.latest_client_phonenumber(current_session: session)&.phonenumber.to_s) },
+      messages:     { note: "When more than 1 phone number is selected messages are sent in a 'round robin' method.<br />When 'Last Number Used' is selected the previous phone number used will be used again.".html_safe }
+    ) %>
+<%= bootstrap_select_tag(
+      field:   'selected_number[send_text_to]',
+      label:   { title: 'Phone to Send To' },
+      options: { array: presenter.client.contact_phone_labels_for_select, blank: 'Primary Number' }
+    ) %>
+
+<%= render partial: 'messages/texts/message', locals: { presenter: messages_text_presenter } %>
+<%= render partial: 'my_contacts/broadcast/actions/show_calendar', locals: { presenter: } %>
+<%= render partial: 'my_contacts/broadcast/actions/show_processing', locals: { presenter: } %>
+
+<script>
+  $(function() {
+    $('#file_attachments_message_id').val('<%= messages_text_presenter.message_id -%>');
+    updateTimeToComplete();
+  });
+</script>

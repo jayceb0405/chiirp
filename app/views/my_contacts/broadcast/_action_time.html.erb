@@ -1,0 +1,19 @@
+<%
+# app/views/my_contacts/broadcast/_action_time.html.erb
+#
+# Example:
+# 	render partial: "my_contacts/broadcast/action_time", locals: { id: String, run_at: DateTime, time_zone: TimeZone }
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   (req) id:        (String)
+#   (req) run_at:      (DateTime)
+#   (req) time_zone:   (TimeZone)
+#
+#
+-%>
+<td id="<%= id %>" class="align-left date-change" data-original="<%= Friendly.new.date(run_at.in_time_zone(time_zone), time_zone, true) %>" data-date="<%= run_at.in_time_zone(time_zone).rfc2822 %>">
+  <%= Friendly.new.date(run_at.in_time_zone(time_zone), time_zone, true) %>
+</td>

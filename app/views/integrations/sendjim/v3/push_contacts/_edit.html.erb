@@ -1,0 +1,80 @@
+<%
+  # app/views/integrations/sendjim/v3/push_contacts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendjim/v3/push_leads/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @push_contact: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Sendjim::V3::PushContactsPresenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.push_contact = @push_contact
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<td colspan="11" class="p-3">
+  <%= form_with model: presenter.client_api_integration, url: integrations_sendjim_v3_push_contact_path(presenter.push_contact_id), builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+    <div id="tag_id_<%= presenter.push_contact_id -%>">
+      <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: presenter.push_contact_tag, select_or_add_field_name: 'push_contact[tag_id]', select_or_add_div_id: "tag_id_#{presenter.push_contact_id}" } %>
+    </div>
+
+    <%= render partial: 'snippets/radio_field', locals: {
+          field:   'push_contact[quick_send_type]',
+          label:   { title: 'SendJim Mailing Type' },
+          buttons: [{ label: 'Quick Send Mailing', value: 'quick_send_mailing', class: ['push_contact_quick_send_type_select'], id: "push_contact_quick_send_type_quick_send_#{presenter.push_contact_id}", checked: presenter.push_contact_quick_send_type == 'quick_send_mailing' },
+                    { label: 'Neighbor Mailing', value: 'neighbor_mailing', class: ['push_contact_quick_send_type_select'], id: "push_contact_quick_send_type_neighbor_quick_send_#{presenter.push_contact_id}", checked: presenter.push_contact_quick_send_type == 'neighbor_mailing' }]
+        } %>
+    <%= bootstrap_select_tag(
+          field:        'push_contact[quick_send_id]',
+          row:          { id: "push_contact_quick_send_id_row_#{presenter.push_contact_id}" },
+          label:        { title: 'SendJim Mailing' },
+          html_options: { class: 'push_contact_quick_send_id_select', id: "push_contact_quick_send_id_select_#{presenter.push_contact_id}", required: true },
+          options:      { array: presenter.push_contacts_quick_send_id_options, selected: presenter.push_contact_quick_send_id, blank: 'Select a SendJim Mailing' },
+          messages:     { note: '(Required) Select a Mailing to send.' }
+        ) %>
+    <%= bootstrap_switch_field(
+          field:    'push_contact[send_tags]',
+          value:    presenter.push_contact_send_tags,
+          values:   [true, false],
+          label:    { title: 'Send Tags to SendJim' },
+          messages: { note: "Switch on to send #{I18n.t('tenant.name')} Tags to SendJim." }
+        ) %>
+    <%= bootstrap_number_field(
+          field:        'push_contact[neighbor_count]',
+          value:        presenter.push_contact_neighbor_count,
+          row:          { id: "push_contact_neighbor_count_row_#{presenter.push_contact_id}" },
+          label:        { title: 'Number of Neighbors' },
+          html_options: { class: 'push_contact_neighbor_count_enter', id: "push_contact_neighbor_count_enter_#{presenter.push_contact_id}", min: 0, max: 100, step: 1 },
+          messages:     { note: 'Enter the number of neighbors that you want to send mailings to.' }
+        ) %>
+    <%= bootstrap_number_field(
+          field:        'push_contact[radius]',
+          value:        presenter.push_contact_radius,
+          row:          { id: "push_contact_radius_row_#{presenter.push_contact_id}" },
+          label:        { title: 'All Neighbors in Radius (Miles)' },
+          html_options: { class: 'push_contact_radius_enter', id: "push_contact_radius_enter_#{presenter.push_contact_id}", min: 0, max: 100, step: 0.1 },
+          messages:     { note: 'Enter the number of miles within which to send mailings to (decimals ok).' }
+        ) %>
+    <%= bootstrap_switch_field(
+          field:    'push_contact[same_street_only]',
+          value:    presenter.push_contact_same_street_only,
+          values:   [true, false],
+          row:      { id: "push_contact_same_street_only_row_#{presenter.push_contact_id}" },
+          label:    { title: 'Same Street Only' },
+          messages: { note: 'Switch on to send mailings to neighbors only on the same street.' }
+        ) %>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Save Push Tag', disable_with: 'Saving Push Tag' }]
+        ) %>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    displayInputs('<%= presenter.push_contact_id -%>');
+  });
+</script>

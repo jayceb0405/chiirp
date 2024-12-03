@@ -1,0 +1,50 @@
+<%
+	# app/views/integrations/xencall/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/xencall/js/show", locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+-%>
+<% if cards.include?( 0 ) %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/xencall/integration_info' -%>');
+<% end %>
+<% if cards.include?( 1 ) %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/xencall/api_key' -%>');
+<% end %>
+<% if cards.include?( 2 ) %>
+	<% if @client_api_integration.api_key.length.positive? %>
+		$('#api_key_saved').removeClass('sidebar-inner__alert');
+		$('#api_key_saved').addClass('sidebar-inner__ok');
+	<% else %>
+		$('#api_key_saved').removeClass('sidebar-inner__ok');
+		$('#api_key_saved').addClass('sidebar-inner__alert');
+	<% end %>
+<% end %>
+<% if cards.include?( 3 ) %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/xencall/channel_assign' -%>');
+<% end %>
+<% if cards.include?( 4 ) %>
+	<% if @client_api_integration.live_mode.to_i == 1 %>
+		$('#live_mode_link').removeClass('sidebar-inner__alert');
+		$('#live_mode_link').addClass('sidebar-inner__ok');
+	<% else %>
+		$('#live_mode_link').removeClass('sidebar-inner__ok');
+		$('#live_mode_link').addClass('sidebar-inner__alert');
+	<% end %>
+<% end %>
+<% if cards.include?('overview') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/xencall/overview' -%>');
+<% end %>
+
+// custom field
+<% if cards.include?( 10 ) %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/xencall/custom_field/edit' -%>');
+<% end %>
+
+Looper.init();

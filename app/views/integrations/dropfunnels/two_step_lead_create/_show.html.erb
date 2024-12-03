@@ -1,0 +1,40 @@
+<%
+  # /Users/Kevin/Rails Projects/funyl/app/views/integrations/dropfunnels/two_step_lead_create/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'xxx/_show.html.erb', collection: @client.tags.order( :name ), locals: {  }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Two Step Lead Create</h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: integrations_dropfunnels_two_step_lead_create_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+      <%= render partial: 'campaigns/action_fields', locals: {
+            client: @client_api_integration.client,
+            campaign_id: @client_api_integration.two_step_lead_create['campaign_id'].to_i, campaign_id_field: 'client_api_integration[two_step_lead_create][campaign_id]',
+            group_id: @client_api_integration.two_step_lead_create['group_id'].to_i, group_id_field: 'client_api_integration[two_step_lead_create][group_id]',
+            tag_id: @client_api_integration.two_step_lead_create['tag_id'].to_i, tag_id_field: 'client_api_integration[two_step_lead_create][tag_id]',
+            stage_id: @client_api_integration.two_step_lead_create['stage_id'].to_i, stage_id_field: 'client_api_integration[two_step_lead_create][stage_id]',
+            stop_campaign_ids:@client_api_integration.two_step_lead_create['stop_campaign_ids'], stop_campaign_ids_field: 'client_api_integration[two_step_lead_create][stop_campaign_ids]'
+          } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Two Step Lead Create Actions', id: 'client_api_integration_form_submit', disable_with: 'Saving Two Step Lead Create Actions' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_two_step_lead_create').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

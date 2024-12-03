@@ -1,0 +1,44 @@
+<%
+# app/views/integrations/servicetitan/jobs/_technicians.html.erb
+#
+# Example:
+# 	render partial: "integrations/servicetitan/jobs/technicians"
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   multiple: (Boolean)
+#
+multiple = @form_type == 'aiagents'
+-%>
+<%= bootstrap_select_tag(
+      field:        'ext_tech_id',
+      label:        { title: "Select a Technician<span class=\"ml-2\">#{link_to '', edit_integrations_servicetitan_contact_booking_path(@contact, commit: 'refresh_technicians'), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', remote: true, title: 'Refresh Technicians', data: { toggle: 'tooltip' } }}</span>" },
+      html_options: { id: 'technician_select', multiple: },
+      options:      { for_select: options_for_select(@technicians, @technician_ids), blank: 'Technicians' }
+    ) %>
+
+<script>
+  $(function () {
+
+    <% unless @form_type == 'aiagents' %>
+      $('#technician_select').on('change', function(e) {
+
+        if ($('#business_unit_select').val() && $('#job_type_select').val()) {
+          $.ajax({
+            type: 'GET',
+            dataType: 'script',
+            url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+            data: {
+              commit: 'get_availability',
+              business_unit_id: $('#business_unit_select').val(),
+              job_type_id: $('#job_type_select').val(),
+              ext_tech_id: $('#technician_select').val()
+            }
+          });
+        }
+      });
+    <% end %>
+  });
+</script>

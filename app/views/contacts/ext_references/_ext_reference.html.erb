@@ -1,0 +1,50 @@
+<%
+  # app/views/contacts/ext_references/_ext_reference.html.erb
+  #
+  # Example:
+  #   render partial: 'contacts/ext_references/ext_reference', collection: Contacts::ExtReferences, as: :ext_reference, locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @contact:      (Contact)
+  #
+  # Local Variables:
+  #   (req) ext_reference: (Contacts::ExtReference)
+  #   (req) presenter:     (Contacts::Presenter)
+  #   (opt) uuid:          (String)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+
+  ext_reference_id = ext_reference.new_record? ? (local_assigns.dig(:uuid) || SecureRandom.uuid).to_s : ext_reference.id
+-%>
+<tr id="ext_reference_tr_<%= ext_reference_id -%>">
+  <td class="text-left align-middle" colspan="3">
+    <%= bootstrap_select_tag(
+          field:        "ext_references[#{ext_reference_id}][target]",
+          row:          { class: 'mb-0', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mt-0' },
+          html_options: { id: "ext_reference_target_#{ext_reference_id}" },
+          options:      { array: presenter.ext_references_target_array, selected: ext_reference.target, blank: 'Select an Integration' }
+        ) %>
+  </td>
+  <td class="text-left align-middle">
+    <%= bootstrap_text_field(
+          field:        "ext_references[#{ext_reference_id}][ext_id]",
+          value:        ext_reference.ext_id,
+          row:          { class: 'mb-0', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mt-0' },
+          html_options: { id: "ext_reference_ext_id_#{ext_reference_id}" }
+        ) %>
+  </td>
+  <td class="text-right align-middle">
+    <%= link_to '', '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_ext_reference',
+                style: 'text-decoration: none;',
+                data:  {
+                  id: ext_reference_id
+                } %>
+  </td>
+</tr>

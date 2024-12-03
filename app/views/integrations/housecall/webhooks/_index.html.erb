@@ -1,0 +1,185 @@
+<%
+  # app/views/integrations/housecall/webhooks/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/webhooks/index'
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: ClientApiIntegration
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Housecall Pro Events</span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Webhook'.html_safe, new_integrations_housecall_webhook_path, {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 200px">Housecall Pro Event</th>
+              <%= content_tag(:th, class: 'text-left') { 'Line Items' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed %>
+              <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed %>
+              <th class="text-left">Tag</th>
+              <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed %>
+              <%= content_tag(:th, class: 'text-left') { 'Stop Campaigns' } if presenter.campaigns_allowed %>
+              <th style="min-width:150px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% if presenter.webhooks.present? %>
+              <%= render partial: 'integrations/housecall/webhooks/event', collection: presenter.webhooks.sort, as: :event, locals: { presenter: } %>
+            <% else %>
+              <tr>
+                <td colspan="9" class="text-center p-5">
+                  Webhooks were NOT found.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_webhooks').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '.button_delete_webhook');
+    $(document).on('click', '.button_delete_webhook', function(e) {
+      e.preventDefault();
+
+      var id    = $(this).data('id');
+      var event = $(this).data('event');
+      var name  = $(this).data('name');
+
+      if (id) {
+        ChiirpAlert({
+          'body':'Deleting ' + name + ' can NOT be un-done. Is it your intention to delete this Webhook?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_webhook' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_delete_webhook');
+        $(document).on('click', '#button_dump_it_delete_webhook', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '/integrations/housecall/webhooks/' + id + '?event=' + event
+          });
+        });
+      } else {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= integrations_housecall_webhooks_path -%>'
+        });
+      }
+    });
+  });
+
+  $(document).off('show.bs.collapse', '.edit_webhook');
+  $(document).on('show.bs.collapse', '.edit_webhook', function (e) {
+
+    if (e.target.id.replace('edit_webhook_', '')) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '/integrations/housecall/webhooks/' + e.target.id.replace('edit_webhook_', '') + '/edit'
+      });
+    }
+  });
+
+  function formOptionsController(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().substr(0, 3) == 'job') {
+      $('#row_line_items_' + webhook_event_id).show();
+    } else {
+      $('#row_line_items_' + webhook_event_id).hide();
+    }
+
+    if (($('#event_' + webhook_event_id).val().substr(0, 3) == 'job' || $('#event_' + webhook_event_id).val().substr(0, 8) == 'estimate') && $('#event_' + webhook_event_id).val().substr(0, 15) != 'job_appointment') {
+      $('#row_event_new_' + webhook_event_id).show();
+      $('#row_event_updated_' + webhook_event_id).show();
+      $('#row_ext_tech_ids_' + webhook_event_id).show();
+
+      // if ($.inArray($('#event_' + webhook_event_id).val(), ['job_scheduled', 'estimate_scheduled']) > -1 && $('#event_updated_' + webhook_event_id).prop('checked')) {
+      //   $('#row_tech_updated_' + webhook_event_id).show();
+      //   $('#row_start_date_updated_' + webhook_event_id).show();
+      // } else {
+      //   $('#row_tech_updated_' + webhook_event_id).hide();
+      //   $('#row_start_date_updated_' + webhook_event_id).hide();
+      // }
+    } else if ($('#event_' + webhook_event_id).val().substr(0, 15) == 'job_appointment') {
+      $('#row_ext_tech_ids_' + webhook_event_id).show();
+
+      if ($.inArray($('#event_' + webhook_event_id).val(), ['job_appointment_rescheduled', 'job_appointment_appointment_pros_assigned', 'job_appointment_appointment_pros_unassigned']) > -1) {
+        $('#row_event_new_' + webhook_event_id).show();
+        $('#row_event_updated_' + webhook_event_id).show();
+
+        // if ($('#event_updated_' + webhook_event_id).prop('checked')) {
+        //   $('#row_tech_updated_' + webhook_event_id).show();
+
+        //   if ($.inArray($('#event_' + webhook_event_id).val(), ['job_appointment_rescheduled']) > -1) {
+        //     $('#row_start_date_updated_' + webhook_event_id).show();
+        //   } else {
+        //     $('#row_start_date_updated_' + webhook_event_id).hide();
+        //   }
+        // } else {
+        //   $('#row_tech_updated_' + webhook_event_id).hide();
+        //   $('#row_start_date_updated_' + webhook_event_id).hide();
+        // }
+      } else {
+        $('#row_event_new_' + webhook_event_id).hide();
+        $('#row_event_updated_' + webhook_event_id).hide();
+        // $('#row_tech_updated_' + webhook_event_id).hide();
+      }
+  } else {
+      $('#row_event_new_' + webhook_event_id).hide();
+      $('#row_event_updated_' + webhook_event_id).hide();
+      $('#row_ext_tech_ids_' + webhook_event_id).hide();
+      // $('#row_tech_updated_' + webhook_event_id).hide();
+      // $('#row_start_date_updated_' + webhook_event_id).hide();
+    }
+
+    if ($('#event_' + webhook_event_id).val() == 'estimate_option_approval_status_changed' || $('#event_' + webhook_event_id).val() == 'estimate_sent') {
+      $('#row_approval_status_' + webhook_event_id).show();
+    } else {
+      $('#row_approval_status_' + webhook_event_id).hide();
+    }
+  }
+  function eventNewToggle(webhook_event_id) {
+    if (!$('#event_new_' + webhook_event_id).is(':checked')) {
+      $('#event_updated_' + webhook_event_id).prop('checked', true);
+    }
+  }
+  function eventUpdatedToggle(webhook_event_id) {
+    if (!$('#event_updated_' + webhook_event_id).is(':checked')) {
+      $('#event_new_' + webhook_event_id).prop('checked', true);
+    }
+  }
+</script>

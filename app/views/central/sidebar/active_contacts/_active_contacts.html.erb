@@ -1,0 +1,36 @@
+<%
+  # app/views/central/sidebar/active_contacts/_active_contacts.html.erb
+  #
+  # Example:
+  #   render partial: 'central/sidebar/active_contacts/active_contacts', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+-%>
+<% if presenter.active_contacts_list.current_page.to_i > 1 %>
+  <div class="list-group-header pb-0">
+    <div class="form-group text-right pr-2 mb-0">
+      Page: <%= presenter.active_contacts_list.current_page.to_i.to_s %>
+    </div>
+  </div>
+<% end %>
+
+<% current_contact = presenter.contact %>
+<%= render partial: 'central/sidebar/active_contacts/contact', collection: presenter.active_contacts_list, as: :contact, locals: { presenter: } %>
+<% presenter.contact = current_contact %>
+
+<div class="list-group-footer px-3">
+  <%= render partial: 'snippets/paginate', locals: {
+        per_page:    presenter.user_settings.data[:per_page].to_i,
+        object:      presenter.active_contacts_list,
+        window:      0,
+        path_params: { controller: 'central', action: 'conversation', contact_id: presenter.contact.id.to_i, page: 1 },
+        div_class:   'justify-content-end',
+        options:     [10, 25, 50, 100]
+      } %>
+</div>

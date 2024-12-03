@@ -1,0 +1,118 @@
+<%
+  # app/views/integrations/servicetitan/balance_updates/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicetitan/balance_updates/show", locals: { presenter: Integrations::Servicetitan::BalanceUpdatesPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::BalanceUpdatesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::BalanceUpdatesPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Automatic Update Actions</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_tag integrations_servicetitan_balance_update_path, { builder: LooperFormBuilder, remote: true, method: :put, data: { turbo: true, turbo_stream: true }, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_range_slider(
+              field:        'update_balance_actions[update_open_estimate_window_days]',
+              label:        { title: 'Check for Updated Open Estimates' },
+              html_options: { id: 'update_open_estimate_window_days' },
+              range_slider: { type: 'single', min: 0, max: 90, from: presenter.update_open_estimate_window_days, grid: true, grid_num: 9, postfix: ' days' },
+              messages:     { note: 'Automatically check ServiceTitan for updated open estimates up to <selected days> from when the estimate was last updated.' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:         presenter.update_open_estimate_window_days_info,
+              col:          { class: 'text-muted' },
+              info_wrapper: { id: 'update_open_estimate_window_days_info' }
+            ) %>
+        <%= bootstrap_range_slider(
+              field:        'update_balance_actions[update_open_job_window_days]',
+              label:        { title: 'Check for Updated Open Jobs' },
+              html_options: { id: 'update_open_job_window_days' },
+              range_slider: { type: 'single', min: 0, max: 365, from: presenter.update_open_job_window_days, grid: true, grid_num: 10, step: 15, postfix: ' days' },
+              messages:     { note: 'Automatically check ServiceTitan for updated open jobs up to <selected days> from when the job was last updated.' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:         presenter.update_open_job_window_days_info,
+              col:          { class: 'text-muted' },
+              info_wrapper: { id: 'update_open_job_window_days_info' }
+            ) %>
+        <%= bootstrap_range_slider(
+              field:        'update_balance_actions[update_invoice_window_days]',
+              label:        { title: 'Check for Updated Invoices' },
+              html_options: { id: 'update_invoice_window_days' },
+              range_slider: { type: 'single', min: 0, max: 90, from: presenter.update_invoice_window_days, grid: true, grid_num: 9, postfix: ' days' },
+              messages:     { note: "Automatically check ServiceTitan at #{Time.current.change(hour: 6, min: 30).in_time_zone(presenter.client.time_zone).strftime('%k:%M%P').strip} for updated invoices up to <selected days> after a \"Job Complete\"." }
+            ) %>
+        <%= bootstrap_range_slider(
+              field:        'update_balance_actions[update_balance_window_days]',
+              label:        { title: 'Check for Updated Balances' },
+              html_options: { id: 'update_balance_window_days' },
+              range_slider: { type: 'single', min: 0, max: 90, from: presenter.update_balance_window_days, grid: true, grid_num: 9, postfix: ' days' },
+              messages:     { note: "Automatically check ServiceTitan at #{Time.current.change(hour: 6).in_time_zone(presenter.client.time_zone).strftime('%k:%M%P').strip} for updated customer balances up to <selected days> after a \"Job Complete\"." }
+            ) %>
+
+        <fieldset class="border rounded p-2 mt-5 mb-2">
+          <legend class="w-auto mb-0"><h6>Processes on Contacts When Balance Becomes $0.00</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client:            presenter.client_api_integration.client,
+                campaign_id:       presenter.campaign_id_0, campaign_id_field: 'update_balance_actions[campaign_id_0]',
+                stop_campaign_ids: presenter.stop_campaign_ids_0, stop_campaign_ids_field: 'update_balance_actions[stop_campaign_ids_0]',
+                group:             presenter.group_0, group_id_field: 'update_balance_actions[group_id_0]',
+                tag:               presenter.tag_0, tag_id_field: 'update_balance_actions[tag_id_0]',
+                stage_id:          presenter.stage_id_0, stage_id_field: 'update_balance_actions[stage_id_0]'
+              } %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Processes on Contacts When Balance Increases</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client:            presenter.client_api_integration.client,
+                campaign_id:       presenter.campaign_id_increase, campaign_id_field: 'update_balance_actions[campaign_id_increase]',
+                stop_campaign_ids: presenter.stop_campaign_ids_increase, stop_campaign_ids_field: 'update_balance_actions[stop_campaign_ids_increase]',
+                group:             presenter.group_increase, group_id_field: 'update_balance_actions[group_id_increase]',
+                tag:               presenter.tag_increase, tag_id_field: 'update_balance_actions[tag_id_increase]',
+                stage_id:          presenter.stage_id_increase, stage_id_field: 'update_balance_actions[stage_id_increase]'
+              } %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Processes on Contacts When Balance Decreases</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client:            presenter.client_api_integration.client,
+                campaign_id:       presenter.campaign_id_decrease, campaign_id_field: 'update_balance_actions[campaign_id_decrease]',
+                stop_campaign_ids: presenter.stop_campaign_ids_decrease, stop_campaign_ids_field: 'update_balance_actions[stop_campaign_ids_decrease]',
+                group:             presenter.group_decrease, group_id_field: 'update_balance_actions[group_id_decrease]',
+                tag:               presenter.tag_decrease, tag_id_field: 'update_balance_actions[tag_id_decrease]',
+                stage_id:          presenter.stage_id_decrease, stage_id_field: 'update_balance_actions[stage_id_decrease]'
+              } %>
+        </fieldset>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Automatic Update Actions', disable_with: 'Saving Automatic Update Actions' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_balance_update').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

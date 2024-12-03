@@ -1,0 +1,19 @@
+<%
+# app/views/campaign_marketplaces/_show_footer.html.erb
+#
+# Example:
+# 	render partial: "campaign_marketplaces/show_footer"
+#
+# Required Instance Variables:
+# 	@campaign: (Campaign)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= link_to "#{@campaign['marketplace_ok'] && @campaign['price'].to_d.positive? ? 'Buy' : 'Get'} This Campaign#{@campaign.campaign_share_code.campaign_group_id.to_i.positive? ? ' Package' : ''}!",
+            buy_campaign_path(@campaign.campaign_share_code.id),
+            remote: true,
+            method: :post,
+            class:  'btn btn-info ml-auto' %>
+<%= button_tag 'Close', { type: 'button', class: 'btn btn-info', data: { dismiss: 'modal' } } %>

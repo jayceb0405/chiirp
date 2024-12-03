@@ -1,0 +1,75 @@
+<%
+  # app/views/clients/analytics/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'clients/analytics/js/show', locals: { cards: Array, month: Integer, year: Integer }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   cards: (Array)
+  #   month: (String)
+  #   year:  (Integer)
+  #
+  cards = [local_assigns.dig(:cards) || []].flatten
+  month = (local_assigns.dig(:month) || Time.current.month).to_i
+  year  = (local_assigns.dig(:year) || Time.current.year).to_i
+-%>
+<% if cards.include?(1) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/edit', locals: { month:, year: } -%>');
+<% end %>
+
+// comparisons
+<% if cards.include?(2) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/new_clients_startup', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(3) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/new_clients_ad_costs', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(4) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/new_clients_commissions', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(5) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/new_leads_startup', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(6) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/new_leads_ad_costs', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(7) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/new_clients_leads', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(8) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/startup_costs', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(9) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/comparison/revenue_costs', locals: { month:, year: } -%>');
+<% end %>
+
+// ratios
+<% if cards.include?(22) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/new_clients_startup', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(23) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/new_clients_ad_costs', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(24) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/new_clients_commissions', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(25) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/new_leads_startup', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(26) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/new_leads_ad_costs', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(27) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/new_clients_leads', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(28) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/startup_costs', locals: { month:, year: } -%>');
+<% end %>
+<% if cards.include?(29) %>
+  $('#analytics').html('<%= j render partial: 'clients/analytics/ratio/revenue_costs', locals: { month:, year: } -%>');
+<% end %>
+
+Looper.init();

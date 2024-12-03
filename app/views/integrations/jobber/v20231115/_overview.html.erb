@@ -1,0 +1,93 @@
+<%
+  # app/views/integrations/jobber/v20231115/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobber/v20231115/overview', locals: { presenter: Integrations::Jobber::V20231115::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jobber::V20231115::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jobber::V20231115::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'jobber' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_jobber_v20231115_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_connections', remote: true }) do %>
+            <h2 class="metric-label">Jobber Connection</h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if presenter.valid_credentials? %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_jobber_v20231115_webhooks_path, { class: 'metric metric-bordered align-items-center', id: 'link_webhooks', remote: true }) do %>
+            <h2 class="metric-label"> Events </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= presenter.client_api_integration.webhooks.length %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_jobber_v20231115_employees_path, { class: 'metric metric-bordered align-items-center', id: 'link_employees', remote: true }) do %>
+            <h2 class="metric-label"> Linked Employees </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <div id="employees" class="dash-button-statistic-g__chart">
+                  <span class="dash-button-statistic-g__chart-text text-success" style="text-shadow:1px 1px 2px white;"></span>
+                </div>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+
+    $('#employees').circleProgress({
+      value: <%= presenter.jobber_employees_linked -%>,
+      size: 60,
+      thickness: 8,
+      startAngle: 1.5 * Math.PI,
+      lineCap: 'round',
+      emptyFill: '#e8ebef',
+      fill: {
+        gradient: ['#ff9100', '#ffffff']
+      }
+    }).on('circle-animation-progress', function(event, progress, stepValue) {
+      if (progress >= <%= presenter.jobber_employees_linked -%>) {
+        progress = <%= presenter.jobber_employees_linked -%>;
+        $(this).find('.dash-button-statistic-g__chart-text').text(Math.round(100 * progress) + '%');
+      }
+    });
+  });
+</script>

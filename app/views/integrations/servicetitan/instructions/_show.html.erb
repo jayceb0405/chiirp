@@ -1,0 +1,130 @@
+<%
+# app/views/integrations/servicetitan/instructions/_show.html.erb
+#
+# Example:
+#   render partial: "integrations/servicetitan/instructions/show"
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">ServiceTitan Integration Instructions</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <h6>General:</h6>
+      <ul>
+        <li>ServiceTitan integration provides 2-way text message & other communications capabilities beginning at the dispatch of a technician.</li>
+        <li>The ServiceTitan "MobilePhone" number field is required to receive a customer into <%= I18n.t('tenant.name') -%>.</li>
+      </ul>
+
+      <h6>Connection:</h6>
+      <ul>
+        <li>A ServiceTitan v2 Tenant ID is required (issued by ServiceTitan).</li>
+        <ul>
+          <li>Step #1:</li>
+          <ol>
+            <li>In the ServiceTitan left hand menu, click Integrations > API Application Access. The Manage API Application Access screen opens.</li>
+            <li>Copy your "My Tenant ID" from the top right corner of the screen.</li>
+            <li>In the <%= I18n.t('tenant.name') -%> left hand menu click Integrations > ServiceTitan > Connection. The Connection screen opens.</li>
+            <li>Paste your Tenant ID into the form and click the "Save" button.</li>
+            <li>Notify your <%= I18n.t('tenant.name') -%> support representative.</li>
+          </ol>
+          <li>Wait for your <%= I18n.t('tenant.name') -%> support representative to add your ServiceTitan Tenant ID to the <%= I18n.t('tenant.name') -%> app.</li>
+          <li>Step #2:</li>
+          <ol>
+            <li>In the ServiceTitan left hand menu, click Integrations > API Application Access. The Manage API Application Access screen opens.</li>
+            <li>Click the "Connect New App" button. Available apps will appear in a popup window.</li>
+            <li>Click the Chiirp app then click the "Connect" button.</li>
+            <li>Copy the Client ID.</li>
+            <li>In the <%= I18n.t('tenant.name') -%> left hand menu click Integrations > ServiceTitan > Connection. The Connection screen opens.</li>
+            <li>Paste the Client ID into the form.</li>
+            <li>Switch back to the ServiceTitan API Application Access screen and click the "Generate" then "Yes, Continue" buttons.</li>
+            <li>Copy the Client Secret (this is the only time you will be able to copy the Client Secret).</li>
+            <li>Switch to the <%= I18n.t('tenant.name') -%> Connection screen and paste the Client Secret into the form.</li>
+            <li>Click the "Save" button.</li>
+            <li>Notify your <%= I18n.t('tenant.name') -%> support representative.</li>
+          </ol>
+        </ul>
+        <li>ServiceTitan v2 APIs are accessed when v2 Tenant ID, Client ID and Client Secret are saved.</li>
+        <li>ServiceTitan v1 Webhooks are always received (until ServiceTitan releases v2 webhooks).</li>
+        <li><%= I18n.t('tenant.name') -%> v1 Webhook Endpoints must be provided to ServiceTitan to receive updated data in real time.</li>
+      </ul>
+
+      <h6>Events:</h6>
+      <ul>
+        <li>Choose from various events that happen in ServiceTitan.</li>
+        <li>Select from multiple criteria.</li>
+        <li>When the event happens ServiceTitan will notify <%= I18n.t('tenant.name') -%>.</li>
+        <li>When the notification is received the event will be compared to the criteria selected.</li>
+        <li>When all selected criteria match actions will be processed.</li>
+        <li>Choose to start a Campaign, apply a Tag and more.</li>
+      </ul>
+
+      <h6>Technicians:</h6>
+      <ul>
+        <li>Match your Technicians with <%= I18n.t('tenant.name') -%> Users.</li>
+      </ul>
+
+      <h6>Custom Fields:</h6>
+      <ul>
+        <li>Data received from ServiceTitan may be saved in Custom Fields in <%= I18n.t('tenant.name') -%>.</li>
+        <li>Select the Custom Fields used to store data received.</li>
+      </ul>
+
+      <ul>
+        <li>Each company may require specific fields when submitting a Booking to ServiceTitan.</li>
+        <li>Those fields may be created as Custom Fields in <%= I18n.t('tenant.name') -%>.</li>
+        <li>Select the Custom Fields that must be submitted with your bookings.</li>
+      </ul>
+
+      <h6>Auto Update Actions:</h6>
+      <ul>
+        <li>Each day <%= I18n.t('tenant.name') -%> will update Contact balances within the defined automatic update window or when a balance is greater than $0.00.</li>
+        <li><%= I18n.t('tenant.name') -%> will automatically check with ServiceTitan for an updated Contact balance each day at 6:00am (UTC) after a job is completed.</li>
+        <li>Select the number of days to automatically check for an updated Contact balance after a job is completed.</li>
+        <li>When a Contact balance in ServiceTitan becomes $0.00, increases or decreases:</li>
+        <li>Choose to start a Campaign, apply a Tag and more.</li>
+      </ul>
+
+      <h6>Push Contacts:</h6>
+      <ul>
+        <li>When a Contact is ready to become a customer you will want to push that Contact into ServiceTitan.</li>
+        <li>Select a Tag that, when applied, will trigger <%= I18n.t('tenant.name') -%> to push that Contact's data into ServiceTitan.</li>
+        <li>Whenever you want to push a Contact into ServiceTitan simply apply that Tag.</li>
+      </ul>
+
+      <h6>Importing Contacts:</h6>
+      <ul>
+        <li>Import all of your ServiceTitan customers (or just those with positive/negative/zero balances).</li>
+        <li>Start a Campaign for each imported customer based on balance/business unit.</li>
+        <li>Add customers to a Group based on balance/business unit.</li>
+        <li>Apply a Tag to each imported customer based on balance/business unit.</li>
+        <li>Add customers to a Stage based on balance/business unit.</li>
+      </ul>
+
+      <h6>Reports:</h6>
+      <ul>
+        <li>Access reports created in ServiceTitan.</li>
+        <li>Run ServiceTitan reports in <%= I18n.t('tenant.name') -%> manually or automatically.</li>
+        <li>Reports that list customers may be used to start a Campaign, apply a Tag and more.</li>
+        <li>ServiceTitan sets "rate limits" on reports. When a rate limit is hit information will be provided noting when the report may be run again.</li>
+      </ul>
+   </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

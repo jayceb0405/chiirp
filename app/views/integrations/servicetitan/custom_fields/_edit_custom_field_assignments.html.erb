@@ -1,0 +1,104 @@
+<%
+  # app/views/integrations/servicetitan/custom_fields/_edit_custom_field_assignments.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/custom_fields/edit_custom_field_assignments', locals: { presenter: Integrations::Servicetitan::CustomFieldsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::CustomFieldsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::CustomFieldsPresenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Custom Field Assignments</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_tag integrations_servicetitan_custom_fields_path, { builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[completion_date]',
+              label:    { title: 'Completion Date' },
+              options:  { array: presenter.custom_field_date_hash, selected: presenter.completion_date, blank: 'Select a Custom Date Field' },
+              messages: { note: 'Select a Custom Field to save the most recent Job Completion date.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[account_balance]',
+              label:    { title: 'Invoice Balance' },
+              options:  { array: presenter.custom_field_currency_hash, selected: presenter.account_balance, blank: 'Select a Custom Currency Field' },
+              messages: { note: 'Select a Custom Field to save the Contact\'s account balance.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[estimate_total]',
+              label:    { title: 'Estimate Total' },
+              options:  { array: presenter.custom_field_currency_hash, selected: presenter.estimate_total, blank: 'Select a Custom Currency Field' },
+              messages: { note: 'Select a Custom Field to save the Contact\'s estimate total.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[job_total]',
+              label:    { title: 'Job Total' },
+              options:  { array: presenter.custom_field_currency_hash, selected: presenter.job_total, blank: 'Select a Custom Currency Field' },
+              messages: { note: 'Select a Custom Field to save the Contact\'s job total.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[ext_tech_name]',
+              label:    { title: 'Technician Name' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.ext_tech_name, blank: 'Select a Custom String Field' },
+              messages: { note: "Select a Custom Field to save the most recent Technician's name." }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[ext_tech_phone]',
+              label:    { title: 'Technician Phone Number' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.ext_tech_phone, blank: 'Select a Custom String Field' },
+              messages: { note: "Select a Custom Field to save the most recent Technician's phone number." }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[customer_type]',
+              label:    { title: 'Customer Type' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.customer_type, blank: 'Select a Custom String Field' },
+              messages: { note: 'Select a Custom Field to save the ServiceTitan customer type.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[job_number]',
+              label:    { title: 'Job Number' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.job_number, blank: 'Select a Custom String Field' },
+              messages: { note: 'Select a Custom Field to save the most recent job number.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[job_address]',
+              label:    { title: 'Job Address' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.job_address, blank: 'Select a Custom String Field' },
+              messages: { note: 'Select a Custom Field to save the most recent job street address.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[job_city]',
+              label:    { title: 'Job City' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.job_city, blank: 'Select a Custom String Field' },
+              messages: { note: 'Select a Custom Field to save the most recent job city.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[job_state]',
+              label:    { title: 'Job State' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.job_state, blank: 'Select a Custom String Field' },
+              messages: { note: 'Select a Custom Field to save the most recent job state.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_field_assignments[job_zip]',
+              label:    { title: 'Job Zip Code' },
+              options:  { array: presenter.custom_field_string_hash, selected: presenter.job_zip, blank: 'Select a Custom String Field' },
+              messages: { note: 'Select a Custom Field to save the most recent job postal code.' }
+            ) %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Custom Field Assignments', disable_with: 'Saving Custom Field Assignments' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+<%
+  # /app/views/triggeractions/forms/_350.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/350", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # assign to a Group
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction) && presenter.client.groups_count.positive?
+-%>
+<div id="triggeraction_link_group" class="pb-2">
+  <%= render partial: 'groups/select_or_add', locals: { user: presenter.user, group: presenter.triggeraction_group, select_or_add_field_name: 'triggeraction[group_id]', select_or_add_div_id: 'triggeraction_link_group', disabled: presenter.campaign_disabled? } %>
+</div>

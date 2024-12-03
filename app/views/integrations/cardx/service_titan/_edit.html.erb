@@ -1,0 +1,61 @@
+<%
+  # app/views/integrations/cardx/service_titan/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/cardx/service_titan/edit"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect CardX to ServiceTitan</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_tag integrations_cardx_service_titan_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_switch_field(
+              field:    'service_titan[post_payments]',
+              values:   [true, false],
+              value:    presenter.client_api_integration.service_titan['post_payments'] == 'true',
+              label:    { title: 'Post Payments to ServiceTitan' },
+              messages: { note: 'Enable posting payments from CardX to ServiceTitan.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'service_titan[payment_type]',
+              label:        { title: 'Payment Type' },
+              options:      { for_select: options_for_select(presenter.service_titan_payment_types, presenter.client_api_integration.service_titan['payment_type']), blank: 'Select a payment type' },
+              html_options: { required: true },
+              messages:     { note: 'Payment Type sent to ServiceTitan for all payments processed through this integration.' }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'service_titan[comment]',
+              value:        presenter.client_api_integration.service_titan['comment'],
+              label:        { title: 'Comment (Optional)' },
+              html_options: { placeholder: '' },
+              messages:     { note: 'Enter an optional comment sent to ServiceTitan for all payments processed through this integration.' }
+            ) %>
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save ServiceTitan Details', disable_with: 'Saving Details' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_service_titan').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

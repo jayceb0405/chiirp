@@ -1,0 +1,57 @@
+<%
+  # app/views/tags/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'tags/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards[1]
+  #     @tag:       (Tag)
+  #     @tags:      (Tag::ActiveRecord_Associations_CollectionProxy)
+  #   cards[2]
+  #     @tag:       (Tag)
+  #   cards[3]
+  #     @tag:       (Tag)
+  #
+  # Required Local Variables:
+  #   cards: (Array)
+  #     cards[1]
+  #       select_or_add_field_name: (String)
+  #       select_or_add_div_id:     (String)
+  #       exclude_tags:             (Array)
+  #     cards[2]
+  #       select_or_add_field_name: (String)
+  #       select_or_add_div_id:     (String)
+  #       exclude_tags:             (Array)
+  #     cards[3]
+  #       select_or_add_field_name: (String)
+  #       select_or_add_div_id:     (String)
+  #       exclude_tags:             (Array)
+  #
+  # Optional Local Variables:
+  #     cards[2]
+  #       disabled:                 (Boolean)
+  #
+  cards                    = [local_assigns.dig(:cards) || []].flatten
+  select_or_add_field_name = (local_assigns.dig(:select_or_add_field_name) || 'tag_id').to_s
+  select_or_add_div_id     = (local_assigns.dig(:select_or_add_div_id) || 'client_tag').to_s
+  exclude_tags             = (local_assigns.dig(:exclude_tags) || [])
+  disabled                 = local_assigns.dig(:disabled).to_bool
+  allow_cgt_assignments    = local_assigns.dig(:allow_cgt_assignments).to_bool
+  autofocus                = local_assigns.dig(:autofocus).to_bool
+-%>
+<% if cards.include?( 1 ) %>
+  $('#tag_collection').html('<%= j render partial: 'tags/tag', collection: @tags, locals: { select_or_add_field_name:, select_or_add_div_id:, exclude_tags: } -%>');
+
+  <% if autofocus %>
+    $('#tag_text_field_client_tag').focus();
+  <% end %>
+<% end %>
+<% if cards.include?( 2 ) %>
+  $('#<%= select_or_add_div_id -%>_tag_name_field').html('<%= j render partial: 'tags/tag_name_field', locals: { select_or_add_field_name:, select_or_add_div_id:, exclude_tags:, allow_cgt_assignments:, disabled:, autofocus: } -%>');
+<% end %>
+<% if cards.include?( 3 ) %>
+  $('#<%= select_or_add_div_id -%>').html('<%= j render partial: 'tags/select_or_add', locals: { user: current_user, tag: @tag, select_or_add_field_name:, select_or_add_div_id:, exclude_tags: } -%>' );
+<% end %>
+
+Looper.init();

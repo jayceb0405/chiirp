@@ -1,0 +1,16 @@
+<%
+# app/views/central/sidebar/active_contacts/contact/_user_typing.html.erb
+#
+# Example:
+#   render partial: 'central/sidebar/active_contacts/contact/user_typing', locals: { user_typing: }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) user_typing: (User)
+#
+-%>
+<p class="list-group-item-text text-danger small">
+  <%= user_typing&.firstname_last_initial || 'Someone' -%> is typing...
+</p>

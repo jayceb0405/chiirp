@@ -1,0 +1,39 @@
+<%
+  # app/views/dashboards/buttons/_user_campaigns_completed.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/user_campaigns_completed', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.client.my_contacts_allowed %>
+  <%
+    if Contacts::Campaign.campaigns_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).any?
+      contact_campaigns           = Contacts::Campaign.campaigns_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count
+      completed_contact_campaigns = Contacts::Campaign.campaigns_completed_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count
+      completed_rate              = contact_campaigns.positive? ? (completed_contact_campaigns.to_f / contact_campaigns).round(2) : 0.0
+    else
+      contact_campaigns           = 0
+      completed_contact_campaigns = 0
+      completed_rate              = 0.0
+    end
+  %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               'user_campaigns_completed',
+        stats:            "#{contact_campaigns} / #{completed_contact_campaigns}",
+        description:      'Completed Campaigns',
+        description_icon: 'u',
+        icon:             'fa fa-filter',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'user', campaign_id_completed: 'completed', user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         'user_campaigns_chart',
+        chart_type:       'circle_progress',
+        chart_value:      completed_rate,
+        button_movable:   true
+      } %>
+<% end %>

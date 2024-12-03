@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/sendjim/v3/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendjim/v3/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards: Array
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Sendjim::V3::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Connection
+<% if cards.include?('connections_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendjim/v3/connections/edit', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendjim/v3/instructions/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Import Contacts
+<% if cards.include?('import_contacts_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendjim/v3/import_contacts/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendjim/v3/overview', locals: { presenter: presenter } -%>');
+  $('#contact_imports_remaining').html('<%= presenter.contact_imports_remaining(current_user.id) -%>')
+<% end %>
+
+// Push Contacts
+<% if cards.include?('push_contacts_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendjim/v3/push_contacts/index', locals: { presenter: presenter } -%>');
+<% end %>
+
+<% if cards.include?('push_contacts_edit') %>
+  $('#edit_push_contact_<%= @push_contact.dig(:id) -%>').html('<%= j render partial: 'integrations/sendjim/v3/push_contacts/edit', locals: { presenter: presenter } -%>');
+<% end %>
+
+<% if cards.include?('push_contacts_new') %>
+  $('#no_tags').hide();
+  $('#push_contacts_body').prepend('<%= j render partial: 'integrations/sendjim/v3/push_contacts/push_contact', locals: { push_contact: @push_contact, presenter: presenter } -%>');
+  $('#edit_push_contact_<%= @push_contact.dig(:id) -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

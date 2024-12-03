@@ -1,0 +1,106 @@
+<%
+  # app/views/clients/stage_parents/stages/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/stage_parents/stages/index', locals: { stage_parent: StageParent }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   stage_parent: (StageParent)
+  #
+  # Optional Local Variables:
+  #   stage: (Stage)
+  #
+  csp = ClientStagesPresenter.new(stage_parent: local_assigns.dig(:stage_parent))
+-%>
+<style>
+  .dd-list { display:table-row-group; }
+  .dd-item { display:table-row; }
+  .dd-handle { display:table-cell; }
+</style>
+<div class="card card-fluid">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><%= Stage.title.pluralize -%><span class="badge"><%= csp.stage_parent.stages.count -%></span></h6>
+      <div class="card-header-control">
+        <div class="dropdown">
+          <button type="button" class="btn btn-icon btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-arrow"></div>
+            <%= link_to_unless csp.stage_parent.new_record?, "New #{Stage.title}", new_client_stage_parent_stage_path(csp.stage_parent.client_id, (csp.stage_parent.id || 0)), { class: 'dropdown-item', remote: true, method: :get } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 240px"><%= Stage.title -%></th>
+            <th class="text-left"> Created </th>
+            <th class="text-left"> Campaign </th>
+            <th class="text-center"> Contacts </th>
+            <th style="min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody class="dd-list" id="stage_parent_sort_<%= csp.stage_parent.id -%>">
+
+          <% if local_assigns.dig(:stage) %>
+            <%= render partial: 'clients/stage_parents/stages/stage', locals: { client_stages_presenter: csp, stage: } %>
+          <% end %>
+
+          <%= render partial: 'clients/stage_parents/stages/stage', collection: csp.stages, as: :stage, locals: { client_stages_presenter: csp } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    <% unless csp.stage_parent.new_record? %>
+      var sortable = Sortable.create(stage_parent_sort_<%= csp.stage_parent.id -%>, {
+        handle: '.dd-handle', // handle's class
+        animation: 150,
+        dataIdAttr: 'id',
+        ghostClass: 'sortable-ghost',
+        chosenClass: 'sortable-chosen',
+        dragClass: 'sortable-drag',
+        supportPointer: Sortable.supportPointer !== false && 'PointerEvent' in window,
+        onEnd: function (/**Event*/evt) {
+          var itemEl = evt.item;
+          var current_order = sortable.toArray();
+
+          $.each(current_order, function(index, value) {
+
+            if (value.substr(value.length - 3, 3) == '_tr') {
+              // remove "_tr" from element id then remove the element id from the current_order
+              current_order.splice($.inArray(value.substr(0, value.length - 3), current_order), 1);
+
+              // move the non-"_tr" element id behind the "_tr" element id
+              current_order.splice($.inArray(value, current_order) + 1, 0, value.substr(0, value.length - 3));
+            }
+          });
+
+          sortable.sort(current_order, true);
+
+          $.ajax({
+            type: 'PATCH',
+            dataType: 'script',
+            url: '<%= client_stage_parent_path(csp.stage_parent.client, csp.stage_parent) -%>',
+            data: { sort_order: current_order }
+          });
+        }
+      });
+    <% end %>
+  });
+</script>

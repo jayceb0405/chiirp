@@ -1,0 +1,168 @@
+<%
+  # app/views/clients/voice_recordings/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/voice_recordings/edit', locals: { presenter: Clients::VoiceRecordings::Presenter }
+  #
+  # Required Instance Variables:
+  #   @voice_recording: (VoiceRecording)
+  #
+  # Required Local Variables:
+  #   presenter: (Clients::VoiceRecordings::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.voice_recording = @voice_recording
+-%>
+<td colspan="5">
+  <div class="row">
+    <div class="col-md-2 text-center">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.voice_recording.recording_name.to_s.first %>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.voice_recording.recording_name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: presenter.voice_recording, url: presenter.voice_recording.new_record? ? client_voice_recordings_path(presenter.client.id) : client_voice_recording_path(presenter.client, presenter.voice_recording), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "voice_recording_form_#{presenter.voice_recording.id}", novalidate: true } do |f| %>
+        <%= f.text_field :recording_name, {
+              label:        { title: 'Voice Recording Label' },
+              html_options: { minlength: 2, placeholder: 'Voice Recording Label', required: true, autofocus: true },
+              messages:     { error: 'Must be minimum of 2 characters.' }
+            } %>
+
+        <div class="form-row mb-1">
+          <%= label_tag "audio_file_input_#{presenter.voice_recording.id}", 'Audio File', { class: 'col-md-3 mt-2' } %>
+          <%= f.file_field :url, { class: 'image-url form-control', id: "audio_file_input_#{presenter.voice_recording.id}", direct_upload: true, style: 'display:none;' } %>
+          <!-- <input type="file" name="audio_file" id="audio_file_input" value="audio_file" class="image-url form-control" accept="image/*" style="display:none;" data-direct-upload-url="https://app.chiirp.com/rails/active_storage/direct_uploads"> -->
+          <div class="col-md-9 fileinput-dropzone dz-clickable" id="audio_file_dropzone_<%= presenter.voice_recording.id -%>" style="">
+            <div class="text-center dz-clickable" id="audio_file_container_<%= presenter.voice_recording.id -%>">
+              <i class="ua-icon-upload text-primary display-3"></i>
+            </div>
+            <div class="spinner-border text-primary d-none" id="spinner_audio_file_container_<%= presenter.voice_recording.id -%>" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <span class="text-muted">Drag and drop or Click to Upload</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-9 offset-md-3 text-center" id="audio_file_tag_<%= presenter.voice_recording.id -%>">
+            <% if presenter.voice_recording_url.present? %>
+              <%= audio_tag presenter.voice_recording_url, controls: true %>
+            <% end %>
+          </div>
+        </div>
+
+        <%= bootstrap_info_field(
+              info:  presenter.phone_numbers_using_voice_recording_as_greeting.map(&:name).join(', ').to_s,
+              label: { title: 'Phone Numbers (Greeting)' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:  presenter.phone_numbers_using_voice_recording_as_announcement.map(&:name).join(', ').to_s,
+              label: { title: 'Phone Numbers (Announcement)' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:  "#{presenter.voice_recordings_sent}  / #{presenter.voice_recordings_delivered} (#{number_to_percentage(presenter.voice_recordings_delivery_rate * 100, precision: 2)})",
+              label: { title: 'Ringless VM Delivery Rate' }
+            ) %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Record New Message', disable_with: 'Recording New Message', id: "button_record_new_message_#{presenter.voice_recording.id}" }, { title: 'Save', disable_with: 'Saving' }] %>
+      <% end %>
+
+    </div>
+  </div>
+</td>
+
+<script>
+  $(document).ready( function() {
+    <% if presenter.voice_recording.new_record? %>
+      $('#button_record_new_message_<%= presenter.voice_recording.id -%>').prop('disabled', true);
+    <% else %>
+      $(document).off('click', '#button_record_new_message_<%= presenter.voice_recording.id -%>');
+      $(document).on('click', '#button_record_new_message_<%= presenter.voice_recording.id -%>', function(e) {
+        e.preventDefault();
+
+        var button_element = $(this);
+        var button_label = button_element.val();
+        button_element.val('Recording New Message...');
+
+        ChiirpAlert({
+          'title':      'Have Your Cell Phone Ready!',
+          'body':       'Calling your Mobile Phone Number (<%= number_to_phone(current_user.phone) -%>)!',
+          'buttons':    <%= raw([{ label: 'Place the Call', id: 'button_ok' }, { label: 'Cancel the Call', id: 'button_cancel' }].to_json) -%>,
+          'type':       'info',
+          'persistent': true
+        });
+
+        $(document).off('click', '#button_cancel');
+        $(document).on('click', '#button_cancel', function(e) {
+          button_element.val(button_label);
+        });
+
+        $(document).off('click', '#button_ok');
+        $(document).on('click', '#button_ok', function(e) {
+          $.ajax({
+            type:     'PATCH',
+            dataType: 'script',
+            url:      '<%= new_voice_recording_path(presenter.client, presenter.voice_recording) -%>',
+            data:     $('#voice_recording_form_<%= presenter.voice_recording.id -%>').serialize()
+          });
+
+          button_element.val(button_label);
+
+          setTimeout(function(){ ChiirpAlert({
+            'title':      'Answer Your Phone!',
+            'body':       'Calling your Mobile Phone Number (<%= number_to_phone(current_user.phone) -%>)!',
+            'type':       'success',
+            'persistent': false
+          })}, 1000);
+        });
+
+      });
+
+      Dropzone.autoDiscover = false;
+
+      $('#audio_file_dropzone_<%= presenter.voice_recording.id -%>').dropzone({
+        url: ' ',
+        autoQueue: false,
+        maxFilesize: 150,
+        addRemoveLinks: false,
+        acceptedFiles: 'audio/*',
+        clickable: '#audio_file_dropzone_<%= presenter.voice_recording.id -%>, #audio_file_container_<%= presenter.voice_recording.id -%>',
+        dragover: function() {
+          $('#audio_file_dropzone_<%= presenter.voice_recording.id -%>').addClass('hover');
+        },
+        dragleave: function() {
+          $('#audio_file_dropzone_<%= presenter.voice_recording.id -%>').removeClass('hover');
+        },
+        drop: function() {
+          $('#audio_file_container_<%= presenter.voice_recording.id -%>').hide();
+          $('#spinner_audio_file_container_<%= presenter.voice_recording.id -%>').show();
+        },
+        addedfile: function(file, response) {
+          $('#audio_file_container_<%= presenter.voice_recording.id -%>').hide();
+          $('#spinner_audio_file_container_<%= presenter.voice_recording.id -%>').show();
+
+          const input  = document.querySelector('#audio_file_input_<%= presenter.voice_recording.id -%>');
+          const url    = input.dataset.directUploadUrl;
+          const upload = new ActiveStorage.DirectUpload(file, url);
+          console.log(upload);
+
+          upload.create((error, blob) => {
+            if (error) {
+              console.log(error);
+              console.log(blob);
+            } else {
+              $.ajax({
+                method:   'PATCH',
+                dataType: 'script',
+                url:      '<%= save_audio_file_voice_recording_path(presenter.client, presenter.voice_recording) -%>',
+                data:     { 'audio_file': blob.signed_id }
+              });
+            }
+          });
+        }});
+    <% end %>
+  });
+</script>

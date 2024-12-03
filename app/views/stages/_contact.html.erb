@@ -1,0 +1,65 @@
+<%
+  # app/views/stages/_contact.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/contact', collection: contacts, locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   stages_presenter: (StagesPresenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<div class="task-issue dd-handle contact" id="contact_<%= contact.id -%>" style="display:block;" data-id="<%= contact.id -%>" data-name="<%= contact.fullname -%>" data-lastname="<%= contact.lastname -%>" data-firstname="<%= contact.firstname -%>" data-updated="<%= contact.updated_at.iso8601 -%>">
+  <div class="card">
+    <div class="card-header">
+      <div class="task-label-group">
+
+        <% presenter.contact_tags.select { |ct| ct.contact_id == contact.id }.each do |contact_tag| %>
+          <span class="task-label" style="background-color:<%= contact_tag.tag.color -%>;" data-toggle="tooltip" title="<%= contact_tag.tag.name -%>"></span>
+        <% end %>
+        <!-- <span class="task-label bg-teal"></span> <span class="task-label bg-green"></span> -->
+      </div>
+      <h4 class="card-title"><%= contact.fullname -%></h4>
+      <h6 class="card-subtitle text-muted">
+        <div class="text-muted">User: <%= contact.user.fullname -%></div>
+        <div class="text-muted"><%= number_to_phone(contact.phone) || 'No Phone Number' -%></div>
+
+        <div class="text-muted">Custom Fields:</div>
+
+        <% presenter.client_custom_fields.select { |ccf| ccf.contact_id == contact.id }.each do |client_custom_field| %>
+          <%= sanitize(presenter.show_client_custom_field(contact, client_custom_field), tags: %w[div]) %>
+        <% end %>
+      </h6>
+    </div>
+
+    <div class="card-body py-0 px-1">
+      <div class="p-2 d-flex flex-row justify-content-between">
+        <%= link_to '', edit_contact_path(contact.id),
+                    class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                    remote: true,
+                    method: :get %>
+        <%= link_to '', central_campaigns_path(contact.id),
+                    class:  'btn btn-sm btn-icon btn-secondary fa fa-filter',
+                    remote: true,
+                    method: :get %>
+        <%= link_to '', central_tasks_path(contact.id),
+                    class:  'btn btn-sm btn-icon btn-secondary fa fa-tasks',
+                    remote: true,
+                    method: :get %>
+        <%= link_to '', contact_notes_path(contact.id),
+                    class:  'btn btn-sm btn-icon btn-secondary fa fa-sticky-note',
+                    remote: true,
+                    method: :get %>
+
+        <%= link_to_if presenter.client.phone_calls_allowed && contact.phone.present?, '', '#',
+                       class: 'btn btn-sm btn-icon btn-secondary fa fa-phone call_contact',
+                       data:  { contactid: contact.id, fullname: contact.fullname, userid: current_user.id } %>
+
+        <%= link_to '', central_path(contact_id: contact.id), class: 'btn btn-sm btn-icon btn-secondary fa fa-comments' %>
+      </div>
+    </div>
+  </div>
+</div>

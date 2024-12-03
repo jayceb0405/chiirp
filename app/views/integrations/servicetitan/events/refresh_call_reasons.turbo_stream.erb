@@ -1,0 +1,23 @@
+<%
+  # app/views/integrations/servicetitan/events/refresh_call_reasons.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/refresh_call_reasons'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @event_id:               (Integer)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && @event_id.to_i.positive?
+
+  presenter = Integrations::Servicetitan::EventsPresenter.new(@client_api_integration)
+  presenter.event = presenter.actions.find { |event_id, _event| event_id == @event_id.to_s }
+-%>
+<%= turbo_stream.update "events_call_reasons_#{@event_id}" do %>
+  <%= render partial: 'integrations/servicetitan/events/events/select_tags/call_reasons', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

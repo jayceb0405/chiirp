@@ -1,0 +1,26 @@
+<%
+  # app/views/integrations/outreach/users/_user.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/outreach/users/user", collection: @client_api_integration.users, as: :user, locals: { presenter: Presenter }
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<tr>
+  <td>
+    <%= user[:name] -%> <small>(<%= user[:id] -%>)</small><br />
+  </td>
+  <td>
+    <%= bootstrap_select_tag(
+      field: "users[#{user[:id].to_s}]",
+      row: { columns: [0, 12] },
+      options: { for_select: options_from_collection_for_select(presenter.client_api_integration.client.users, 'id', 'fullname', presenter.client_api_integration.users.invert.dig(user[:id]).to_i), blank: 'Select a User' },
+      messages: { note: "Select a matching #{I18n.t('tenant.name')} User."}
+    ) %>
+  </td>
+</tr>

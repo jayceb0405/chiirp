@@ -1,0 +1,41 @@
+<%
+   # app/views/clients/profile/_vitally.html.erb
+   #
+   # Example:
+   #   render partial: 'clients/profile/vitally', locals: { presenter: ClientPresenter}
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (ClientPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(ClientPresenter)
+-%>
+<% if current_user.team_member? %>
+  <% if presenter.client_found_in_vitally %>
+    <%= bootstrap_info_field(
+          info:  'Client found in Vitally.',
+          label: { title: 'Vitally<span class="ml-2 small">(Super Admin Only)</span>'.html_safe }
+        ) %>
+  <% else %>
+    <%= bootstrap_info_field(
+          info:         '<i class="fa fa-times text-danger mr-2"></i>Not found in Vitally. Click to send Client to Vitally.',
+          label:        { title: 'Vitally<span class="ml-2 small">(Super Admin Only)</span>'.html_safe },
+          info_wrapper: { tag: 'a', class: 'btn btn-link mb-1', href: clients_profile_update_vitally_path(presenter.client.id), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': 'patch', rel: 'nofollow' }
+        ) %>
+  <% end %>
+<% end %>
+
+<script>
+  $(function() {
+    <% if @client&.errors&.any? %>
+      ChiirpAlert({
+        'title':      'Errors Encountered!',
+        'body':       '<%= @client.errors.full_messages.join('<br />') -%>',
+        'type':       'warning',
+        'persistent': true
+      });
+    <% end %>
+  });
+</script>

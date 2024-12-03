@@ -1,0 +1,44 @@
+<%
+  # app/views/dashboards/tasks/_task.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/tasks/task', collection: Tasks, locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:   (DashboardPresenter)
+  #   (opt) column_type: (String) options: "past" / "current" / "future"
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  column_type = local_assigns.dig(:column_type).to_s.downcase
+-%>
+<div class="todo">
+  <div class="custom-control custom-checkbox">
+    <%= check_box_tag("task_#{task.id}", 'true', false, {
+                        class: 'custom-control-input',
+                        data:  {
+                          remote: true,
+                          url:    task_complete_path(task_id: task.id, user_for_tasks: task.user_id),
+                          method: :patch
+                        }
+                      }) %>
+    <label class="custom-control-label" for="task_<%= task.id -%>">
+      <%= task.name -%>
+
+      <% case column_type %>
+      <% when 'past' %>
+        <span class="text-red small mr-2">(Past Due by <%= ActionController::Base.helpers.time_ago_in_words(task.due_at) -%>)</span>
+      <% when 'future' %>
+        <span class="text-red small mr-2">(Due in <%= ((task.due_at - Time.current) / (60 * 60 * 24)).round -%> days)</span>
+      <% end %>
+    </label>
+  </div>
+  <%= link_to('', edit_task_path(task.id), {
+                remote: true,
+                method: :get,
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt'
+              }) %>
+</div>

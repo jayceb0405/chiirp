@@ -1,0 +1,56 @@
+<%
+  # app/views/groups/_select_or_add.html.erb
+  #
+  # Example:
+  # 	render partial: "groups/select_or_add", locals: { user: User, group: Group, select_or_add_field_name: String, select_or_add_div_id: String, select_class: String }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  # 	(req) user:                     (User)
+  # 	(req) group:                    (Group)
+  #   (req) select_or_add_field_name: (String)
+  # 	(req) select_or_add_div_id:     (String)
+  #   (opt) select_id:                (String)
+  # 	(opt) select_class:             (String)
+  # 	(opt) exclude_groups:           (Array)
+  # 	(opt) disabled:                 (Boolean)
+  #
+  return unless local_assigns.dig(:user).is_a?(User) && local_assigns.dig(:group).is_a?(Group) && local_assigns.dig(:select_or_add_field_name).present? && local_assigns.dig(:select_or_add_div_id).present?
+-%>
+<%= bootstrap_select_tag(
+      field:        select_or_add_field_name,
+      label:        { title: (local_assigns.dig(:legend_string) || 'Add to Group').to_s },
+      options:      { for_select: options_for_group(group.client, group.id, [local_assigns.dig(:exclude_groups) || []].flatten, false), blank: 'Select a Group' },
+      html_options: { class: (local_assigns.dig(:select_class).presence || "group_class_#{rand(100_000)}").to_s, id: (local_assigns.dig(:select_id).presence || "group_id_#{rand(100_000)}").to_s, disabled: local_assigns.dig(:disabled).to_bool }
+    ) %>
+
+<div id="<%= select_or_add_div_id -%>_group_name_field">
+</div>
+
+<% if user.access_controller?('clients', 'groups', session) %>
+  <script>
+    $(function () {
+      $.ajax({
+        type: 'GET',
+        dataType: 'turbo_stream',
+        accepts: {
+          'turbo_stream': 'text/vnd.turbo-stream.html'
+        },
+        converters: {
+          'text turbo_stream': function (data) {
+            Turbo.renderStreamMessage(data);
+          }
+        },
+        url: '<%= new_group_path -%>',
+        data:     {
+          select_or_add_field_name: '<%= select_or_add_field_name -%>',
+          select_or_add_div_id: '<%= select_or_add_div_id -%>',
+          exclude_groups: '<%= local_assigns.dig(:exclude_groups) || [] -%>',
+          disabled: '<%= local_assigns.dig(:disabled).to_bool -%>'
+        }
+      });
+    });
+  </script>
+<% end %>

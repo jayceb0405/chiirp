@@ -1,0 +1,102 @@
+<%
+  # app/views/clients/tags/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/tags/index'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-user-tag mr-2"></i>Tags <span class="badge"><%= presenter.client.tags.count -%></span></span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Tag'.html_safe, new_client_tag_path(presenter.client.id), {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary ml-2',
+              id:    'tags_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px"> Tag </th>
+              <th class="text-left"> Created </th>
+              <th class="text-left"> Campaign </th>
+              <th class="text-center"> Contacts </th>
+              <th style="width:100px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% if @tag&.new_record? %>
+              <%= render partial: 'clients/tags/tag', locals: { client_presenter: presenter, tag: @tag } %>
+            <% end %>
+
+            <%= render partial: 'clients/tags/tag', collection: presenter.tags, locals: { client_presenter: presenter } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if presenter.client.errors.any? %>
+      ChiirpAlert({
+        'body':triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    <% if @tag.present? %>
+      $('#tag_<%= @tag.id -%>').collapse('show');
+      $('#tag_<%= @tag.id -%>').html('<%= j render partial: 'clients/tags/edit' -%>');
+    <% end %>
+
+    $('#tags_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li>Tags provide a method of segmenting your Contacts for future selection.</li>'
+      help_info += '<li>Multiple tags may be applied to a Contact for various segmentations.</li>'
+      help_info += '<li>Contacts show tag color when the tag is applied.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': 'Tags Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_tags').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_tags').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

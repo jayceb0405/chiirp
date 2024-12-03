@@ -1,0 +1,24 @@
+<%
+  # app/views/clients/notes/_index_title.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/notes/index_title', locals: { presenter: Clients::Notes::Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @note: (Note)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Clients::Notes::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Notes::Presenter)
+-%>
+<div class="d-flex justify-content-between">
+  <span class="my-auto">Notes for <%= presenter.client.name -%></span>
+  <span>
+    <%= link_to '<i class="fa fa-plus mr-2"></i>New Note'.html_safe, new_client_note_path(presenter.client), {
+          class:  'btn btn-light',
+          remote: true,
+          method: :get
+        } %>
+  </span>
+</div>

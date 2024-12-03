@@ -1,0 +1,28 @@
+<%
+  # app/views/dashboards/buttons/_client_group.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/client_group', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) Group id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) && presenter.user.client.groups_count.positive? && (group = presenter.client.groups.find_by(id: local_assigns.dig(:id).to_i)) %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               "client_group_#{group.id}",
+        stats:            Contact.group_by_client(presenter.client.id, group.id, presenter.date_range[0], presenter.date_range[1]).count.to_s,
+        description:      group.name,
+        description_icon: 'c',
+        icon:             'fa fa-user-cog',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', group_id: group.id, user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         '',
+        chart_value:      0,
+        button_movable:   true
+      } %>
+<% end %>

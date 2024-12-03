@@ -1,0 +1,48 @@
+<%
+  # app/views/integrations/email/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/email/v1/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Email::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Email Integration Help</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <p>This email integration allows you to send emails to your customers from your domain.</p>
+      <p>In order to set up the integration you will need to add a few DNS records to your domain.</p>
+      <p>To set up the integration with Email please follow the below proceedure:</p>
+      <ol>
+        <li>On the connection page enter the domain name used on your user accounts. Note that you must be able to add DNS records for this domain name.</li>
+        <li>Click the "Save Domain" button.</li>
+        <li>After a moment you will see a new tab at the top labeled "Domain Verification". Click this tab. If the tab does not appear please try to reload the page.</li>
+        <li>On the Domain Verification page you will see three DNS records that need to be created.</li>
+        <li>Make these changes on your DNS provider's website and return here when completed. Note that it may take several minutes for the DNS records to update.</li>
+        <li>Click on the "Verify" button.</li>
+        <li>This will validate your DNS records and will let you know of any issues that were found. Please repeat the last two instructions until all records show a checkmark under "Verified".</li>
+      </ol>
+      <p>Please contact our support for any questions or problems during set up.</p>
+      <p><strong>NOTE:</strong> The domain name that you set up here must match the domain name used on your user accounts. Deliverability will be reduced if the domains do not match.</p>
+      <p><strong>NOTE:</strong> This email integration currently supports sending email only. It does not support recieving emails.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

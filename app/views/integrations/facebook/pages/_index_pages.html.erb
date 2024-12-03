@@ -1,0 +1,68 @@
+<%
+  # app/views/integrations/facebook/pages/_index_pages.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/pages/index_pages.html.erb', locals: { page_id: String }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #   (req) @fb_page_id:           (String)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Facebook::Presenter)
+  #
+  return if @fb_page_id.blank? || @user_api_integration.blank? || !@user_api_integration.is_a?(UserApiIntegration)
+
+  presenter     = Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration) if local_assigns.dig(:presenter).blank?
+  facebook_page = presenter.user_api_integration.pages.map(&:deep_symbolize_keys).find { |p| p[:id] == @fb_page_id.to_s }
+  fb_model      = Integration::Facebook::Base.new(@user_api_integration)
+-%>
+<div id="users_accordion" class="card-expansion">
+
+    <% if fb_model.valid_page_token?(fb_page_id: facebook_page[:id]) %>
+
+      <% if current_user.client.integrations_allowed.include?('facebook_leads') %>
+
+        <% if fb_model.page_subscribed?(page_id: facebook_page[:id], permissions: Integration::Facebook::Base::PAGE_PERMISSIONS_LEADS) %>
+          <%= bootstrap_info_field(
+                info:         '<i class="fa fa-link text-success mr-2"></i>Leads connection: <span class="text-success">Subscribed</span> - Click to Unsubscribe',
+                info_wrapper: { tag: 'a', class: 'btn btn-link', href: integrations_facebook_connections_path(fb_page_id: facebook_page[:id], permission: 'leads', subscribe: false), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': :patch, rel: 'nofollow' },
+                row:          { columns: [0, 12] }
+              ) %>
+        <% else %>
+          <%= bootstrap_info_field(
+                info:         '<i class="fa fa-link text-danger mr-2"></i>Leads connection: <span class="text-danger">Not Subscribed</span> - Click to Subscribe',
+                info_wrapper: { tag: 'a', class: 'btn btn-link', href: integrations_facebook_connections_path(fb_page_id: facebook_page[:id], permission: 'leads', subscribe: true), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': :patch, rel: 'nofollow' },
+                row:          { columns: [0, 12] }
+              ) %>
+        <% end %>
+
+      <% end %>
+
+      <% if current_user.client.integrations_allowed.include?('facebook_messenger') %>
+
+        <% if fb_model.page_subscribed?(page_id: facebook_page[:id], permissions: Integration::Facebook::Base::PAGE_PERMISSIONS_MESSENGER) %>
+          <%= bootstrap_info_field(
+                info:         '<i class="fa fa-link text-success mr-2"></i>Messenger connection: <span class="text-success">Subscribed</span> - Click to Unsubscribe',
+                info_wrapper: { tag: 'a', class: 'btn btn-link', href: integrations_facebook_connections_path(fb_page_id: facebook_page[:id], permission: 'messenger', subscribe: false), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': :patch, rel: 'nofollow' },
+                row:          { columns: [0, 12] }
+              ) %>
+        <% else %>
+          <%= bootstrap_info_field(
+                info:         '<i class="fa fa-link text-danger mr-2"></i>Messenger connection: <span class="text-danger">Not Subscribed</span> - Click to Subscribe',
+                info_wrapper: { tag: 'a', class: 'btn btn-link', href: integrations_facebook_connections_path(fb_page_id: facebook_page[:id], permission: 'messenger', subscribe: true), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': :patch, rel: 'nofollow' },
+                row:          { columns: [0, 12] }
+              ) %>
+        <% end %>
+
+      <% end %>
+
+    <% else %>
+      <%= bootstrap_info_field(
+            col:  { class: 'mb-0' },
+            info: '<i class="fa fa-link text-danger mr-2"></i>Invalid Facebook page token. Return to Connection and "Login with Facebook" to refresh connection.',
+            row:  { columns: [0, 12] }
+          ) %>
+    <% end %>
+
+</div>

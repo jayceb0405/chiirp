@@ -1,0 +1,434 @@
+<%
+   # app/views/my_contacts/broadcast/actions/_show_processing.html.erb
+   #
+   # Example:
+   #   render partial: 'my_contacts/broadcast/actions/show_processing', locals: { presenter: MyContacts::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (MyContacts::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-2">
+  <legend class="w-auto mb-0 font-weight-normal" style="font-size:.9rem;">Process Contacts</legend>
+  <%= bootstrap_switch_field(
+        field:        'common_args[quantity_all]',
+        value:        true,
+        values:       [true, false],
+        label:        { title: 'As Soon As Possible' },
+        html_options: { id: 'common_args_quantity_all_switch' },
+        messages:     { note: "Switch on to process all selected Contacts as soon as possible (after the 'When?' selected above)." }
+      ) %>
+
+  <div class="w-100 mb-4" style="height: 11px; border-bottom: 1px solid; text-align: center">
+    <span style="padding: 0 10px; background-color: rgb(246, 247, 249)">
+      ~ or ~
+    </span>
+  </div>
+
+  <div class="form-row">
+    <%= label_tag 'common_args_quantity_entry', 'Over Time', { class: 'col-md-3 pt-2' } %>
+    <div class="col-md-8">
+      <div class="form-group d-flex flex-row">
+        <%= number_field_tag('common_args[quantity]', 0,
+                             { class:        'form-control mr-2',
+                               id:           'common_args_quantity_entry',
+                               min:          0,
+                               step:         1,
+                               autocomplete: 'off' }) %>
+        <span class="pt-2">Contacts</span>
+        <span class="w-100">
+          <%= label_tag 'common_args_quantity_interval_select', 'Every', { class: 'pl-5 pr-3 pt-2' } %>
+          <%= select_tag('common_args[quantity_interval]',
+                         options_for_select((1..52).to_a, 1),
+                         { class: 'form-control mr-2',
+                           id:    'common_args_quantity_interval_select',
+                           data:  { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? } }) %>
+          <%= select_tag('common_args[quantity_period]',
+                         options_for_select(%w[hours days weeks], 'days'),
+                         { class: 'form-control',
+                           id:    'common_args_quantity_period_select',
+                           data:  { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? } }) %>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center">
+    <small>
+      See broadcast time estimator below to learn how long the broadcast will take to process based on the current selections.
+    </small>
+  </div>
+</fieldset>
+
+<%= label_tag 'common_args_safe_times', 'Select Acceptable Times' %>
+<div class="form-row ml-3 mt-3 mr-3">
+  <div class="form-group col-12">
+    <%= text_field_tag('common_args[safe_times]', '', { class: 'form-control', id: 'common_args_safe_times', autocomplete: 'off' }) %>
+  </div>
+</div>
+
+<div class="form-row mb-3">
+  <div class="col-6 offset-3 d-flex justify-content-between">
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_sun]', '0' %>
+      <%= check_box_tag 'common_args[safe_sun]', 1, false, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_sun' } %>
+      <%= label_tag 'common_args_safe_days_sun', 'Sun', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_mon]', '0' %>
+      <%= check_box_tag 'common_args[safe_mon]', 1, true, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_mon' } %>
+      <%= label_tag 'common_args_safe_days_mon', 'Mon', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_tue]', '0' %>
+      <%= check_box_tag 'common_args[safe_tue]', 1, true, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_tue' } %>
+      <%= label_tag 'common_args_safe_days_tue', 'Tue', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_wed]', '0' %>
+      <%= check_box_tag 'common_args[safe_wed]', 1, true, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_wed' } %>
+      <%= label_tag 'common_args_safe_days_wed', 'Wed', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_thu]', '0' %>
+      <%= check_box_tag 'common_args[safe_thu]', 1, true, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_thu' } %>
+      <%= label_tag 'common_args_safe_days_thu', 'Thu', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_fri]', '0' %>
+      <%= check_box_tag 'common_args[safe_fri]', 1, true, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_fri' } %>
+      <%= label_tag 'common_args_safe_days_fri', 'Fri', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'common_args[safe_sat]', '0' %>
+      <%= check_box_tag 'common_args[safe_sat]', 1, false, { class: 'custom-control-input common_args_safe_days', id: 'common_args_safe_days_sat' } %>
+      <%= label_tag 'common_args_safe_days_sat', 'Sat', { class: 'custom-control-label' } %>
+    </div>
+  </div>
+</div>
+
+<%= bootstrap_switch_field(
+      field:        'common_args[honor_holidays]',
+      value:        true,
+      values:       [true, false],
+      label:        { title: 'Don\'t Process on My Holidays' },
+      html_options: { id: 'common_args_honor_holidays_switch' },
+      messages:     { note: 'Switch on to not process on the Holidays defined in My Company Profile.' }
+    ) %>
+
+<div id="contacts-throttle_note" class="mt-2">
+  <div class="border ml-4 mr-4 mb-2 p-2">
+    <h5>Note:</h5>
+    <small>
+      A multitude of criteria is used by carriers to filter potentially unwanted traffic through their networks.
+      Chiirp does not filter any messages.
+      If your messages are being blocked by a carrier you will see undelivered messages with a 30007 error code assigned.
+      One carrier criteria used to detect unwanted messages is the speed at which messages are sent.
+      <span class="font-weight-bold">Campaigns, Text Messages & Ringless Voicemails are timed at 1 every <%= presenter.client.text_delay -%> seconds per phone number selected so as to reduce concerns with carriers.</span>
+    </small>
+    <div class="mt-2 text-center">
+      <small id="contacts-completion_text">
+        Based on current selections your broadcast action will take <span id="contacts-time_to_complete">no time</span>.
+      </small>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#common_args_safe_times').ionRangeSlider({
+      type: 'double',
+      min: 0,
+      max: 1440,
+      from: 480,
+      to: 1200,
+      step: 30,
+      grid: true,
+      grid_num: 12,
+      skin: 'round',
+      prettify: function(value){
+        if (value == 0) {
+          time = "am";
+          value = 720;
+        }
+        else if (value < 720) {
+          time = "am";
+        }
+        else if (value == 720) {
+          time = "noon";
+        }
+        else if (value == 1440) {
+          time = "am";
+          value = value - 720;
+        }
+        else {
+          time = "pm";
+          value = value - 720;
+        }
+        hours = String(parseInt(value / 60, 10));
+        minutes = String(value - (hours * 60));
+        if (minutes.length == 1) {
+          minutes = "0" + minutes;
+        }
+        return hours + ":" + minutes + time;
+      },
+      onFinish: function (data) {
+        validateSafeTimes(data);
+      }
+    });
+
+    $(document).off('change', '#common_args_honor_holidays_switch');
+    $(document).on('change', '#common_args_honor_holidays_switch', function(e) {
+      e.stopPropagation();
+
+      updateTimeToComplete();
+    });
+
+    $(document).off('change', '#common_args_quantity_all_switch');
+    $(document).on('change', '#common_args_quantity_all_switch', function(e) {
+      e.stopPropagation();
+
+      if ($(this).is(':checked')) {
+        $('#common_args_quantity_entry').val(0);
+      }
+
+      updateTimeToComplete();
+    });
+
+    $(document).off('change keyup', '#common_args_quantity_entry');
+    $(document).on('change keyup', '#common_args_quantity_entry', function(e) {
+      e.stopPropagation();
+
+      if ($(this).val() == 0) {
+        $('#common_args_quantity_all_switch').prop('checked', true);
+      } else {
+        $('#common_args_quantity_all_switch').prop('checked', false);
+      }
+
+      updateTimeToComplete();
+    });
+
+    $(document).off('change', '#common_args_quantity_interval_select');
+    $(document).on('change', '#common_args_quantity_interval_select', function(e) {
+      e.stopPropagation();
+
+      updateTimeToComplete();
+    });
+
+    $(document).off('change', '#common_args_quantity_period_select');
+    $(document).on('change', '#common_args_quantity_period_select', function(e) {
+      e.stopPropagation();
+
+      updateTimeToComplete();
+    });
+
+    $(document).off('change', '.common_args_safe_days');
+    $(document).on('change', '.common_args_safe_days', function(e) {
+      e.stopPropagation();
+
+      updateTimeToComplete();
+    });
+  });
+
+  function actionStartDate() {
+    return new Date(Math.max(new Date($('#contacts-calendar-string').val()), new Date(new Date().getTime())));
+  }
+
+  function contactsCompletionTextColor(seconds_to_complete) {
+    $('#contacts-completion_text').removeClass('text-danger');
+    $('#contacts-completion_text').removeClass('text-success');
+
+    if (seconds_to_complete > 604800) {
+      $('#contacts-completion_text').addClass('text-danger');
+    } else if (seconds_to_complete > 0) {
+      $('#contacts-completion_text').addClass('text-success');
+    }
+  }
+
+  function estimatedCompletion(seconds_to_complete) {
+    var now       = new Date(actionStartDate().getTime() + (seconds_to_complete * 1000));
+    var date      = months_abbreviated(now.getMonth()) + ' ' + now.getDate() + ', ' + now.getFullYear();
+    var time      = now.toLocaleTimeString().toLowerCase().replace(/([\d]+:[\d]+):[\d]+(\s\w+)/g, '$1$2');
+    return (date + ' ' + time);
+  };
+
+  function months_abbreviated(month) {
+    return ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][month];
+  }
+
+  function pluralize(count, noun, suffix = 's') {
+    return count + ' ' + noun + (count !== 1 ? suffix : '');
+  }
+
+  function throttledAction(action) {
+    if (action.length == 0) {
+      var action = $('#contacts-action-select').val();
+    }
+
+    if (action == 'start_campaign' || action == 'send_text' || action == 'send_email' || action == 'send_rvm') {
+      return true
+    } else {
+      return false
+    }
+  }
+
+  function updateTimeToComplete() {
+
+    if (throttledAction('')) {
+      // selectedContactsCount is found in app/views/my_contacts/broadcast/_contacts.html.erb
+      var remaining_contact_count = selectedContactsCount();
+
+      if (remaining_contact_count > 0) {
+        var common_args_quantity_all_switch      = $('#common_args_quantity_all_switch').is(':checked');
+        var common_args_quantity_entry           = $('#common_args_quantity_entry').val();
+        var common_args_quantity_interval_select = $('#common_args_quantity_interval_select').val();
+        var common_args_quantity_period_select   = $('#common_args_quantity_period_select').val();
+        var common_args_safe_times               = $('#common_args_safe_times').val();
+        var common_args_safe_days                = [$('#common_args_safe_days_sun').is(':checked') ? 'Sun' : '', $('#common_args_safe_days_mon').is(':checked') ? 'Mon' : '', $('#common_args_safe_days_tue').is(':checked') ? 'Tue' : '', $('#common_args_safe_days_wed').is(':checked') ? 'Wed' : '', $('#common_args_safe_days_thu').is(':checked') ? 'Thu' : '', $('#common_args_safe_days_fri').is(':checked') ? 'Fri' : '', $('#common_args_safe_days_sat').is(':checked') ? 'Sat' : ''];
+        var common_args_honor_holidays_switch    = $('#common_args_honor_holidays_switch').is(':checked');
+        var seconds_to_complete                  = 0;
+        var holidays                             = <%= raw presenter.client.holidays.where(occurs_at: Date.current..).map { |h| h.occurs_at.to_s }.compact_blank.to_json %>;
+        var seconds_to_complete                  = 0;
+        var remaining_safe_seconds               = 0;
+        var contacts_today_count                 = 0;
+
+        var now = new actionStartDate(),
+            then = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                0,0,0),
+            diff = (now.getTime() - then.getTime()) / 1000;
+
+        if ($.grep(common_args_safe_days, function (elem) { return elem === ''; }).length < 7) {
+          // current date is a safe day & current date is not a defined holiday & current time is within the acceptable times
+          // calculate how many Contacts can be processed today
+          if ($.inArray(now.toLocaleDateString('en', {weekday:'short'}), common_args_safe_days) >= 0 && $.inArray((now.getFullYear() + '-' + (now.getMonth() + 1).toString().padStart(2, '0') + '-' + now.getDate().toString().padStart(2, '0')), holidays) == -1 && diff > (common_args_safe_times.split(';')[0] * 60) && diff < (common_args_safe_times.split(';')[1] * 60)) {
+            remaining_safe_seconds   = ((common_args_safe_times.split(';')[1] * 60) - diff);
+            contacts_today_count     = Math.floor(Math.min(remaining_safe_seconds / <%= presenter.client.text_delay -%>, ($('#common_args_quantity_entry').val() > 0) ? $('#common_args_quantity_entry').val() : remaining_contact_count));
+            remaining_contact_count -= contacts_today_count;
+
+            if (remaining_contact_count > 0) {
+              seconds_to_complete += ((new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59) - now.getTime()) / 1000);
+            } else {
+              seconds_to_complete += (contacts_today_count *  <%= presenter.client.text_delay -%>);
+            }
+          } else {
+            seconds_to_complete += ((new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59) - now.getTime()) / 1000);
+          }
+
+          var day_count = 2;
+          var contacts_this_week_count = contacts_today_count;
+          var max_contacts_today_count = 0;
+
+          while (remaining_contact_count > 0) {
+            now = new Date(now.valueOf() + 1000*3600*24);
+
+            if ($('#common_args_quantity_entry').val() > 0) {
+
+              if ($('#common_args_quantity_period_select').val() === 'days' && ((day_count - 1) % $('#common_args_quantity_interval_select').val()) === 0) {
+                max_contacts_today_count = Math.min($('#common_args_quantity_entry').val(), remaining_contact_count);
+              } else if ($('#common_args_quantity_entry').val() > 0 && $('#common_args_quantity_period_select').val() === 'weeks' && contacts_this_week_count < $('#common_args_quantity_entry').val()) {
+                max_contacts_today_count = Math.max(0, Math.min($('#common_args_quantity_entry').val() - contacts_this_week_count, remaining_contact_count));
+              } else if ($('#common_args_quantity_entry').val() > 0 && $('#common_args_quantity_period_select').val() === 'hours') {
+                max_contacts_today_count = Math.min(((common_args_safe_times.split(';')[1] - common_args_safe_times.split(';')[0]) / 60) * $('#common_args_quantity_entry').val(), remaining_contact_count);
+              } else {
+                max_contacts_today_count = 0;
+              }
+            } else {
+              max_contacts_today_count = remaining_contact_count;
+            }
+
+            if ($.inArray(now.toLocaleDateString('en', {weekday:'short'}), common_args_safe_days) >= 0 && $.inArray((now.getFullYear() + '-' + (now.getMonth() + 1).toString().padStart(2, '0') + '-' + now.getDate().toString().padStart(2, '0')), holidays) == -1) {
+              contacts_today_count = Math.floor(Math.min(((common_args_safe_times.split(';')[1] - common_args_safe_times.split(';')[0]) * 60) / <%= presenter.client.text_delay -%>, max_contacts_today_count));
+              remaining_contact_count -= contacts_today_count;
+
+              if (remaining_contact_count > 0) {
+                seconds_to_complete += 86400;
+              } else {
+                seconds_to_complete += ((contacts_today_count *  <%= presenter.client.text_delay -%>) + (common_args_safe_times.split(';')[0] * 60));
+              }
+              contacts_this_week_count += contacts_today_count;
+            } else {
+              seconds_to_complete += 86400;
+            }
+            day_count = day_count + 1;
+            if (((day_count - 1) % (7 * $('#common_args_quantity_interval_select').val())) === 0) { contacts_this_week_count = 0 }
+          }
+
+          contactsCompletionTextColor(seconds_to_complete);
+
+          var time_to_complete = '';
+          estimated_completion = ' (estimated completion: ' + estimatedCompletion(seconds_to_complete) + ')'
+
+          if (seconds_to_complete > 86400) {
+            time_to_complete    += pluralize(Math.floor(seconds_to_complete / 86400), 'day');
+            seconds_to_complete %= 86400;
+          }
+
+          if (seconds_to_complete > 3600) {
+            if (time_to_complete.length > 0) { time_to_complete += ', '; }
+            time_to_complete    += pluralize(Math.floor(seconds_to_complete / 3600), 'hour');
+            seconds_to_complete %= 3600;
+          }
+
+          if (seconds_to_complete > 60) {
+            if (time_to_complete.length > 0) { time_to_complete += ', '; }
+            time_to_complete    += pluralize(Math.floor(seconds_to_complete / 60), 'minute');
+            seconds_to_complete %= 60;
+          }
+        } else {
+          time_to_complete     = 'forever';
+          estimated_completion = '';
+          contactsCompletionTextColor(0)
+        }
+
+        // if (seconds_to_complete > 0) {
+        //   if (time_to_complete.length > 0) { time_to_complete = time_to_complete + ', '; }
+        //   time_to_complete = time_to_complete + pluralize(seconds_to_complete, 'second');
+        //   seconds_to_complete = seconds_to_complete % 60;
+        // }
+
+        if (time_to_complete.length == 0) {
+          time_to_complete = 'no time';
+          estimated_completion = '';
+          contactsCompletionTextColor(0)
+        }
+
+        $('#contacts-time_to_complete').html(time_to_complete + estimated_completion);
+      } else {
+        contactsCompletionTextColor(0)
+        $('#contacts-time_to_complete').html('no time');
+      }
+    }
+  }
+
+  function validateSafeTimes(data) {
+    updateTimeToComplete();
+
+    if (data.from < 480 || data.to > 1200) {
+
+      ChiirpAlert({
+        'title':      'Suggested Hours Exceeded!',
+        'body':       'Suggested acceptable hours are 8am to 8pm. Continue with selected hours?',
+        'buttons':    [{label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_go_for_it'}],
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_no_wait');
+      $(document).on('click', '#button_no_wait', function(e) {
+        e.preventDefault();
+
+        let my_range = $("#common_args_safe_times").data('ionRangeSlider');
+
+        my_range.reset();
+        updateTimeToComplete();
+      });
+    }
+  }
+</script>

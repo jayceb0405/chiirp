@@ -1,0 +1,237 @@
+<%
+  # app/views/clients/js/_show.js.erb
+  #
+  # Example:
+  # 	render partial: 'clients/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Parameters:
+  # 	(opt) cards: (Array)
+  #
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  add_new   = local_assigns.include?(:add_new) && local_assigns[:add_new].is_a?(Boolean) ? local_assigns[:add_new] : true
+  list_type = local_assigns.include?(:list_type) ? local_assigns[:list_type].to_s : 'statistics'
+  presenter = ClientPresenter.new(client: @client) if cards.intersect?(%w[index_transactions show_statements tags])
+-%>
+// Billing
+<% if cards.include?('billing') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/billing/edit' -%>');
+<% end %>
+<% if cards.include?('credit_balance') %>
+  $('#credit_balance').html('<%= (@client.current_balance.to_d / 100).to_i -%>');
+<% end %>
+
+// Custom Fields
+<% if cards.include?('custom_fields') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/custom_fields/index' -%>');
+<% end %>
+<% if cards.include?('custom_fields_edit') %>
+  $('#custom_field_<%= @custom_field.id -%>').html('<%= j render partial: 'clients/custom_fields/edit' -%>');
+<% end %>
+<% if cards.include?('td_custom_field_name') %>
+  $('#td_custom_field_name_<%= @custom_field.id -%>').html('<%= @custom_field.var_name -%>');
+<% end %>
+
+// Features
+<% if cards.include?('features') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/features/edit' -%>');
+<% end %>
+
+// Folders
+<% if cards.include?('folders') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/folders/index' -%>');
+<% end %>
+<% if cards.include?('folders_edit') %>
+  $('#folder_<%= @folder.id -%>').html('<%= j render partial: 'clients/folders/edit' -%>');
+<% end %>
+<% if cards.include?('td_folder_name') %>
+  $('#td_folder_name_<%= @folder.id -%>').html('<%= @folder.name -%>');
+<% end %>
+
+// Groups
+<% if cards.include?('groups') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/groups/index' -%>');
+<% end %>
+<% if cards.include?('groups_edit') %>
+  $('#group_<%= @group.id -%>').html('<%= j render partial: 'clients/groups/edit' -%>');
+<% end %>
+<% if cards.include?('td_group_name') %>
+  $('#td_group_name_<%= @group.id -%>').html('<%= @group.name -%>');
+<% end %>
+
+// Holidays
+<% if cards.include?('holidays_index') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/holidays/index' -%>');
+<% end %>
+<% if cards.include?('holidays_new') %>
+  $('#holidays_body').prepend('<%= j render partial: 'clients/holidays/holiday', locals: { holiday: @holiday } -%>');
+  $('#edit_holiday_row_<%= @holiday.id -%>').collapse('show');
+<% end %>
+<% if cards.include?('holidays_edit') %>
+  $('#edit_holiday_row_<%= @holiday.id -%>').html('<%= j render partial: 'clients/holidays/edit' -%>');
+<% end %>
+
+// KPIs
+<% if cards.include?('kpis') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/kpis/index' -%>');
+<% end %>
+<% if cards.include?('kpis_edit') %>
+  $('#kpi_<%= @kpi.id -%>').html('<%= j render partial: 'clients/kpis/edit' -%>');
+<% end %>
+<% if cards.include?('kpis_show') %>
+  $('#kpi_<%= @kpi.id -%>').collapse('show');
+<% end %>
+<% if cards.include?('td_kpi_name') %>
+  $('#td_kpi_name_<%= @kpi.id -%>').html('<%= @kpi.name -%>');
+<% end %>
+
+// Modal
+<% if cards.include?('dash_modal_hide') %>
+  $('#dash_modal').modal('hide');
+<% end %>
+<% if cards.include?('dash_modal_show') %>
+  $('#dash_modal').modal('show');
+<% end %>
+
+// Org Chart
+<% if cards.include?('org_chart') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/org_chart/index' -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/overview/edit' -%>');
+<% end %>
+
+// Phone Numbers
+<% if cards.include?('phone_numbers') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/phone_numbers/index' -%>');
+<% end %>
+<% if cards.include?('phone_numbers_edit') %>
+  $('#twnumber_<%= @twnumber.id -%>').html('<%= j render partial: 'clients/phone_numbers/edit' -%>');
+<% end %>
+<% if cards.include?('td_twnumber_name') %>
+  $('#td_twnumber_name_<%= @twnumber.id -%>').html('<button type="button" class="btn" data-toggle="collapse" data-target="#twnumber_<%= @twnumber.id -%>"><%= @twnumber.name -%></button>');
+<% end %>
+<% if cards.include?('td_twnumber_user') %>
+  $('#td_twnumber_user_<%= @twnumber.id -%>').html('<%= @twnumber.def_user_name -%>');
+<% end %>
+
+// Profile
+<% if cards.include?('profile') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/profile/edit' -%>');
+  $('#show_client_name').html('<%= @client.name -%>');
+<% end %>
+<% if cards.include?('profile_avatar') %>
+  $('#profile_avatar').html('<%= image_tag(Cloudinary::Utils.cloudinary_url(@client.logo_image.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' })) -%>');
+  $('#show_client_avatar').html('<%= image_tag(Cloudinary::Utils.cloudinary_url(@client.logo_image.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' })) -%>');
+<% end %>
+
+// Settings
+<% if cards.include?('settings') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/settings/edit' -%>');
+<% end %>
+
+// Statements
+<% if cards.include?('show_statements') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/statements/show', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('index_transactions') %>
+  $('#<%= @transaction_type -%>').html('<%= j render partial: 'clients/statements/index', locals: { presenter: } -%>');
+<% end %>
+
+// Tags
+<% if cards.include?('tags') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/tags/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('tags_edit') %>
+  $('#tag_<%= @tag.id -%>').html('<%= j render partial: 'clients/tags/edit' -%>');
+<% end %>
+<% if cards.include?('td_tag_name') %>
+  $('#td_tag_name_<%= @tag.id -%>').html('<i class="fa fa-square <%= @tag.color.present? ? '' : 'text-primary' -%> mr-2" style="color:<%= @tag.color -%>;"></i><%= @tag.name -%>');
+<% end %>
+
+// Task Actions
+<% if cards.include?('task_actions') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/task_actions/edit' -%>');
+<% end %>
+
+// Terms
+<% if cards.include?('terms') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/terms/edit', locals: { destination: 'client' } -%>');
+<% end %>
+<% if cards.include?('print_terms') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/terms/print', locals: { destination: 'client' } -%>');
+<% end %>
+
+<% if cards.include?(1) %>
+  $('#client_body').html('<%= j render partial: 'clients/edit' -%>');
+  $('#page_header_company_name').html('<%= @client.name -%>');
+<% end %>
+<% if cards.include?(4) %>
+  $('#client_body').html('<%= j render partial: 'users/list' -%>');
+<% end %>
+<% if cards.include?(11) %>
+  <% selected_package_id = params.include?(:selected_package_id) ? params[:selected_package_id].to_i : 0 %>
+  $('#client_package_id_select').html('<%= j select_tag('client[package_id]', options_for_package(@package_page, selected_package_id), { include_blank: 'Select a Package', class: 'form-control', id: 'client_package_id' }) -%>');
+<% end %>
+<% if cards.include?(12) %>
+  <% presenter = WelcomePresenter.new(package_page: @package_page, upgrade: true) %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<%= image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'img-fluid', style: 'height:40px;' }) -%> <%= I18n.t('tenant.name') -%> Package Upgrade');
+  $('#dash_modal_body').html('<%= j render partial: 'clients/billing/upgrade', locals: { welcome_presenter: presenter } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?(13) %>
+  <% client_onboard_collapsed = local_assigns.include?(:client_onboard_collapsed) && local_assigns[:client_onboard_collapsed].is_a?(Boolean) ? local_assigns[:client_onboard_collapsed] : true %>
+  $('#client_onboard').html('<%= j render partial: 'clients/onboard/edit', locals: { collapsed: client_onboard_collapsed } -%>');
+<% end %>
+
+// OrgPositions (cards: 20 - 29)
+<% if cards.include?(20) %>
+  $('#index_org_positions').html('<%= j render partial: 'clients/org_chart/org_position/index' -%>');
+<% end %>
+<% if cards.include?(21) %>
+  $('#client_body').html('<%= j render partial: 'clients/org_chart/show' -%>');
+<% end %>
+<% if cards.include?(22) %>
+  $('#edit_org_position').html('<%= j render partial: 'clients/org_chart/org_position/edit' -%>');
+<% end %>
+<% if cards.include?(23) %>
+  $('#edit_org_position').html('<%= j render partial: 'clients/org_chart/org_position/new' -%>');
+<% end %>
+<% if cards.include?(25) %>
+  $('#edit_org_position').html('');
+<% end %>
+
+// OrgUsers (cards: 30 - 39)
+<% if cards.include?(30) %>
+  $('#index_org_users').html('<%= j render partial: 'clients/org_chart/org_user/index' -%>');
+<% end %>
+<% if cards.include?(31) %>
+  $('#show_org_group').html('<%= j render partial: 'clients/org_chart/org_user/show' -%>');
+<% end %>
+<% if cards.include?(32) %>
+  $('#edit_org_user').html('<%= j render partial: 'clients/org_chart/org_user/edit' -%>');
+<% end %>
+<% if cards.include?(33) %>
+  $('#edit_org_user').html('<%= j render partial: 'clients/org_chart/org_user/new' -%>');
+<% end %>
+<% if cards.include?(35) %>
+  $('#edit_org_user').html('');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<% if @kpi&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save KPI',
+    'body': '<%= @kpi.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

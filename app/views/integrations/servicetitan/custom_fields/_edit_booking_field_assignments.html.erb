@@ -1,0 +1,66 @@
+<%
+  # app/views/integrations/servicetitan/custom_fields/_edit_booking_field_assignments.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/custom_fields/edit_booking_field_assignments', locals: { presenter: Integrations::Servicetitan::CustomFieldsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::CustomFieldsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::CustomFieldsPresenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Booking Fields</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_servicetitan_custom_fields_path, builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+        <div class="row ml-2 mr-2" data-toggle="sortable" data-draggable=".sortable-tile" data-handle=".drag-handle">
+          <div class="sortable-tile w-100">
+            <div class="card-header pb-0">
+              <div class="row">
+                <div class="col-6 pt-3">
+                  <h6>ServiceTitan Custom Field</h6>
+                </div>
+                <div class="col-3 pt-3 pl-0">
+                  <h6>Booking Use</h6>
+                </div>
+                <div class="col-3 pt-3 pl-0">
+                  <h6>Custom Field</h6>
+                </div>
+              </div>
+            </div>
+
+            <ul class="sortable-lists list-group list-group-flush" id="data_table" data-toggle="sortable" data-group="pages">
+              <%= render partial: 'integrations/servicetitan/custom_fields/client_custom_field', collection: presenter.customer_custom_fields.sort_by { |k, _v| presenter.client_api_integration.booking_fields.dig(k.to_s, 'order').to_i }.to_h, locals: { presenter: } %>
+            </ul>
+          </div>
+        </div>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Booking Fields', id: 'save_booking_fields_button', disable_with: 'Saving...' }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $(document).off('click', '#save_booking_fields_button')
+    $(document).on('click', '#save_booking_fields_button', function(e) {
+      var sortable = Sortable.get(document.getElementById('data_table')).toArray();
+
+      $.each(sortable, function(index, value) {
+        $('#list_group_sort_order_' + value).val(index);
+      });
+    });
+  });
+</script>

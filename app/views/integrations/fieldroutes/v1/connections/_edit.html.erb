@@ -1,0 +1,54 @@
+<%
+  # app/views/integrations/fieldroutes/v1/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/fieldroutes/v1/show"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::fieldroutes::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldroutes::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect <%= I18n.t('tenant.name') -%> to FieldRoutes</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_fieldroutes_v1_connections_path, builder: LooperFormBuilder, method: :patch, data: { turbo: true, turbo_stream: true }, html: { class: 'needs-validation', id: 'contact_form', novalidate: true } do |f| %>
+
+      <%= f.text_field :subdomain, {
+            label:        { title: 'Sub-Domain' },
+            html_options: { value: presenter.client_api_integration.credentials.dig('subdomain').to_s, placeholder: 'Sub-Domain', required: true, autofocus: false },
+            messages:     { note: 'This is the sub-domain used to access your FieldRoutes app (ex: <SUBDOMAIN>.fieldroutes.com).' }
+          } %>
+      <%= f.text_field :auth_key, {
+            label:        { title: 'Auth Key' },
+            html_options: { value: presenter.client_api_integration.credentials.dig('auth_key').to_s, placeholder: 'Auth Key', required: true, autofocus: false },
+            prepends:     [{ button: false, label: '<i class="fa fa-key"></i>' }],
+            messages:     { note: 'This is the authorization key received from FieldRoutes.' }
+          } %>
+      <%= f.password_field :auth_token, {
+            label:        { title: 'Auth Token' },
+            html_options: { value: presenter.client_api_integration.credentials.dig('auth_token').to_s, placeholder: 'Auth Token', required: true, autofocus: false },
+            prepends:     [{ button: false, label: '<i class="fa fa-key"></i>' }],
+            messages:     { note: 'This is the authorization token received from FielsRoutes.' }
+          } %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save Credentials', disable_with: 'Saving Credentials' }]
+          ) %>
+
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,38 @@
+<%
+  # app/views/campaigns/index/starting_this_campaign/_campaigns.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/index/starting_this_campaign/campaigns', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+
+  campaigns_starting_this_campaign = presenter.campaigns_starting_this_campaign(presenter.campaign.id)
+-%>
+<% if campaigns_starting_this_campaign.present? %>
+  <div class="dropdown d-inline-block">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary fa fa-filter" data-toggle="dropdown"></button>
+    <div class="dropdown-menu dropdown-menu-right">
+      <div class="dropdown-arrow"></div>
+      <h6 class="dropdown-header stop-propagation">
+        <span>Select a Campaign</span>
+      </h6>
+      <div class="dropdown-divider"></div>
+      <div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+        <% campaigns_starting_this_campaign.each do |c| %>
+          <%= link_to "<i class=\"fa fa-pencil-alt mr-2\"></i>#{c.name}".html_safe,
+                      campaign_path(c.id),
+                      class:  'dropdown-item',
+                      remote: true,
+                      method: :get %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,27 @@
+<%
+  # app/views/layouts/common/_script_onboard.html.erb
+  #
+  # Example:
+  # 	render partial: "layouts/common/script_onboard"
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  if action_name != 'edit_onboard' && current_user && (current_user.twnumbers.none? || current_user.contacts.none? || current_user.client.onboarding_scheduled.nil?)
+    show_notify  = true
+    corp_contact = current_user.phone.present? ? Contact.find_by(client_id: I18n.t("tenant.#{Rails.env}.client_id"), phone: current_user.phone) : nil
+    corp_contact = corp_contact.nil? && current_user.client.phone.present? ? Contact.find_by(client_id: I18n.t("tenant.#{Rails.env}.client_id"), phone: current_user.client.phone) : nil
+    onboard_path = corp_contact ? edit_client_onboard_path(current_user.client_id, name: corp_contact.fullname, email: corp_contact.email, mobile: corp_contact.phone) : edit_client_onboard_path(current_user.client_id)
+  else
+    show_notify  = false
+  end
+-%>
+<% if show_notify %>
+  $.notify(
+    {message: 'Visit our Onboarding page and get going <i>fast!</i><br><%= current_user.admin? && current_user.client.active? ? link_to('Click here to now!', onboard_path, { style: 'text-decoration:underline;' }) : 'Ask your Administrator now!' -%>'},
+    {type: 'danger'}
+  );
+<% end %>

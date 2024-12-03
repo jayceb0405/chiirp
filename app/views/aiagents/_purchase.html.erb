@@ -1,0 +1,44 @@
+<%
+# app/views/aiagents/_purchase.html.erb
+#
+# Example:
+# 	render partial: "aiagents/purchase"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+
+<p>
+  You have reached your <%= pluralize(current_user.client.aiagent_included_count, 'included AI Agent') %>.
+  You agree to be charged <%= number_to_currency(current_user.client.aiagent_overage_charge) %> per AI Agent over your <%= pluralize(current_user.client.aiagent_included_count, 'included AI Agent') %> each month along with your regular monthly charges.
+  A pro-rated amount of <%= number_to_currency(current_user.client.aiagent_overage_prorated_charge) %> will be charged to your credit card on file now for this AI Agent.
+</p>
+<script>
+  $(function () {
+    $('#dash_modal_title').html('Out of AI Agent Slots');
+    $('#dash_modal_footer').html('<button id="aiagent_purchase_cancel" class="btn btn-secondary">Cancel</button><button id="aiagent_purchase_agree" class="btn btn-info">Agree</button>');
+
+    $('#aiagent_purchase_cancel').off('click');
+    $('#aiagent_purchase_cancel').on('click', function(e){
+      e.preventDefault();
+
+      $('#dash_modal').modal('hide');
+    });
+
+    $('#aiagent_purchase_agree').off('click');
+    $('#aiagent_purchase_agree').on('click', function(e){
+      e.preventDefault();
+
+      $.ajax({
+        method: 'POST',
+        dataType: 'script',
+        url: '<%= aiagents_purchase_path %>',
+        data: { 'accept': true }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,104 @@
+<%
+  # app/views/surveys/screens/types/_info.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/info', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= bootstrap_text_area(
+      field:        'surveys_screen[info][question]',
+      value:        presenter.survey_screen.question,
+      label:        { title: 'Body Text' },
+      html_options: { placeholder: 'Body Text', rows: 5 }
+    ) %>
+<%= bootstrap_text_area(
+      field:        'surveys_screen[info][info]',
+      value:        presenter.survey_screen.info,
+      label:        { title: 'Information' },
+      html_options: { id: "info_screen_#{presenter.survey_screen.id}", placeholder: 'Page Info', rows: 10 }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'surveys_screen[info][actions][redirect_screen_id]',
+      label:        { title: 'Next Screen' },
+      html_options: { id: "survey_screen_redirect_screen_id_#{presenter.survey_screen.id}" },
+      options:      { array: presenter.survey_screen_option_screens_for_select, selected: presenter.survey_screen.actions&.dig('redirect_screen_id').to_i }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'surveys_screen[info][actions][redirect_url]',
+      value:        presenter.survey_screen.actions&.dig('redirect_url').to_s,
+      row:          { id: "survey_screen_redirect_url_#{presenter.survey_screen.id}" },
+      label:        { title: 'Web Page URL' },
+      html_options: { placeholder: 'Web Page URL' }
+    ) %>
+
+<script>
+  $(function () {
+    show_hide($('#survey_screen_redirect_screen_id_<%= presenter.survey_screen.id -%>').val());
+
+    $(document).off('change', '#survey_screen_redirect_screen_id_<%= presenter.survey_screen.id -%>');
+    $(document).on('change', '#survey_screen_redirect_screen_id_<%= presenter.survey_screen.id -%>', function(e) {
+      show_hide($(this).val());
+    });
+
+    function show_hide(val) {
+      if (val == '0') {
+        $('#survey_screen_redirect_url_<%= presenter.survey_screen.id -%>').show();
+      } else {
+        $('#survey_screen_redirect_url_<%= presenter.survey_screen.id -%>').hide();
+      }
+    }
+
+    tinymce.remove('textarea#info_screen_<%= presenter.survey_screen.id -%>');
+    tinymce.init({
+      selector: 'textarea#info_screen_<%= presenter.survey_screen.id -%>',
+      plugins: ['preview', 'code', 'fullscreen', 'table', 'emoticons', 'media', 'image', 'link', 'lists', 'wordcount'],
+      toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist media',
+      promotion: false,
+      skin: false,
+      content_css: false,
+      height: 500,
+      file_picker_types: 'image',
+      images_upload_handler: (function (blobInfo, progress) {
+        return new Promise(function (resolve, reject) {
+          var xhr, formData;
+          xhr = new XMLHttpRequest();
+          xhr.withCredentials = false;
+          xhr.open(
+            "POST",
+            "https://api.cloudinary.com/v1_1/<%= Rails.application.credentials[:cloudinary][:cloud_name] -%>/auto/upload"
+          );
+          xhr.upload.onprogress = function (e) {
+            progress((e.loaded / e.total) * 100);
+          };
+          xhr.onload = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              var response = JSON.parse(xhr.responseText);
+              var url = response.secure_url; //get the url
+              var json = {
+                location: url
+              }; //set it in the format tinyMCE wants it
+              resolve(json.location);
+            }
+          };
+          formData = new FormData();
+          formData.append("file", blobInfo.blob(), blobInfo.filename());
+          formData.append("upload_preset", "MessageEmailAttachment");
+          xhr.send(formData);
+        });
+      })
+    });
+
+    $(document).on('focusin', function(e) {
+      if ($(e.target).closest(".tox-dialog").length) {
+        e.stopImmediatePropagation();
+      }
+    });
+  });
+</script>

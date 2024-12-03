@@ -1,0 +1,176 @@
+<%
+  # app/views/integrations/google/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/overview', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'google' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_google_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_connections', remote: true }) do %>
+            <h2 class="metric-label">Google Connection</h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if presenter.connection_valid? %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_google_calendars_path, { class: 'metric metric-bordered align-items-center', id: 'link_calendars', remote: true }) do %>
+            <h2 class="metric-label">Google Calendars Connected</h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= presenter.user_api_integration.dashboard_calendars.count %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_google_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_admin', remote: true }) do %>
+            <h2 class="metric-label">Google Account Administrator</h2>
+            <p class="metric-value h3">
+              <% if presenter.google_account_admin %>
+                <span class="value text-success">
+                  <%= presenter.google_account_admin.fullname %>
+                </span>
+              <% else %>
+                <span class="value text-danger">
+                  None
+                </span>
+              <% end %>
+            </p>
+          <% end %>
+        </div>
+
+        <% if current_user.access_controller?('integrations', 'google_messages', session) || current_user.access_controller?('integrations', 'google_reviews', session) %>
+
+          <div class="col-4 py-2">
+            <%= link_to(integrations_google_accounts_path, { class: 'metric metric-bordered align-items-center', id: 'link_accounts', remote: true }) do %>
+              <h2 class="metric-label">Google Accounts Selected</h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.active_accounts.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if current_user.access_controller?('integrations', 'google_messages', session) %>
+
+          <div class="col-4 py-2">
+            <%= link_to(integrations_google_locations_path, { class: 'metric metric-bordered align-items-center', id: 'link_locations', remote: true }) do %>
+              <h2 class="metric-label">Google Messages Locations Selected</h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.active_locations_messages.keys.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if current_user.access_controller?('integrations', 'google_reviews', session) %>
+
+          <div class="col-4 py-2">
+            <%= link_to(integrations_google_locations_path, { class: 'metric metric-bordered align-items-center', id: 'link_locations', remote: true }) do %>
+              <h2 class="metric-label">Google Reviews Locations Selected</h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.active_locations_reviews.keys.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+
+          <% presenter.client_api_integration.active_locations_reviews.each do |account, locations| %>
+
+            <% locations.each do |location| %>
+              <% presenter.account = account %>
+              <% presenter.location = location %>
+              <% location_name = truncate(presenter.google_reviews_locations.find { |l| l.dig(:name) == location }&.dig(:title).to_s, length: 30) %>
+
+              <% if 1==2 %>
+              <div class="col-4 py-2">
+                <%= link_to(integrations_google_reviews_path, { class: 'metric metric-bordered align-items-center', id: 'link_reviews', remote: true }) do %>
+                  <h2 class="metric-label text-center">Google Reviews<br><%= location_name -%></h2>
+                  <p class="metric-value h3">
+                    <span class="value text-success">
+                      <%= presenter.total_reviews %>
+                    </span>
+                  </p>
+                <% end %>
+              </div>
+
+              <div class="col-4 py-2">
+                <%= link_to(integrations_google_reviews_path, { class: 'metric metric-bordered align-items-center', id: 'link_reviews', remote: true }) do %>
+                  <h2 class="metric-label text-center">Google Average Star Rating<br><%= location_name -%></h2>
+                  <p class="metric-value h3">
+                    <span class="value text-success" id="average_star_rating_<%= location.split('/').last -%>">
+                    </span>
+                  </p>
+                <% end %>
+              </div>
+              <% end %>
+            <% end %>
+          <% end %>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+
+    <% if 1===2 && current_user.access_controller?('integrations', 'google_reviews', session) %>
+      <% presenter.client_api_integration.active_locations_reviews.each do |account, locations| %>
+
+        <% locations.each do |location| %>
+          <% presenter.account = account %>
+          <% presenter.location = location %>
+
+          $('#average_star_rating_<%= location.split('/').last -%>').starRating({
+            initialRating: <%= presenter.average_rating -%>,
+            starSize: 25,
+            totalStars: 5,
+            useFullStars: false,
+            useGradient: false,
+            emptyColor: 'lightgray',
+            hoverColor: 'gold',
+            activeColor: 'gold',
+            readOnly: true
+          });
+        <% end %>
+      <% end %>
+    <% end %>
+  });
+</script>

@@ -1,0 +1,79 @@
+<%
+  # app/views/integrations/facebook/pages/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/pages/index'
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Facebook Pages</h6>
+  <div class="card-body">
+
+    <% if presenter.user_api_integration.users.present? %>
+      <div id="users_accordion" class="card-expansion">
+
+        <% presenter.user_api_integration.users.map(&:deep_symbolize_keys).each do |fb_user| %>
+          <div class="card card-expansion-item">
+            <div class="card-header border-0" id="fb_user_header_id_<%= fb_user[:id] %>">
+              <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#fb_user_id_<%= fb_user[:id] %>" aria-expanded="false" aria-controls="fb_user_id_<%= fb_user[:id] %>">
+                <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+                <span>Facebook User: <%= fb_user[:name] -%></span>
+              </button>
+            </div>
+            <div class="card-body collapse user_forms p-3" id="fb_user_id_<%= fb_user[:id] %>" aria-labelledby="fb_user_header_id_<%= fb_user[:id] %>" data-parent="#users_accordion">
+              <div class="mt-3 text-center" id="fb_user_id_<%= fb_user[:id] %>_spinner">
+                <div><%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %></div>
+                <div class="ml-3 pb-3">Loading Facebook Users...</div>
+              </div>
+              <div id="fb_user_id_<%= fb_user[:id] %>_pages"></div>
+            </div>
+          </div>
+        <% end %>
+
+      </div>
+    <% else %>
+      <div>Pages not found. Return to Connection and "Login with Facebook" to refresh connection.</div>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_pages').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.user_forms');
+    $(document).on('show.bs.collapse', '.user_forms', function (e) {
+      var fb_user_id = e.target.id.replace('fb_user_id_', '');
+
+      $('#fb_user_id_' + fb_user_id + '_spinner').show();
+      $('#fb_user_id_' + fb_user_id + '_pages').hide();
+
+      if ($(this).is(e.target)) {
+        $.ajax({
+          method: 'GET',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '/integrations/facebook/pages/' + fb_user_id + '/user'
+        });
+      }
+    });
+  });
+</script>

@@ -1,0 +1,40 @@
+<%
+# app/views/devise/invitations/edit.html.erb
+#
+# Devise invitation accept
+#
+# Example:
+# 	accept_user_invitation_path
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'devise/shared/header' %>
+
+<%= form_for resource, as: resource_name, url: invitation_path(resource_name), builder: LooperFormBuilder, html: { class: 'auth-form-noborder needs-validation mb-5', novalidate: true, method: :put } do |f| %>
+  <h4 class="text-left pb-3">Create password</h4>
+  <%= f.hidden_field :invitation_token, readonly: true %>
+
+  <%= f.password_field :password, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'New' },
+        html_options: { id: 'input_password', placeholder: "Password #{@minimum_password_length ? " (min #{@minimum_password_length} chars)" : ''}", minlength: @minimum_password_length, autocomplete: 'off', autofocus: true, required: true },
+        prepends:     []
+      } %>
+  <%= f.password_field :password_confirmation, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'Confirm' },
+        html_options: { id: 'input_password_confirmation', placeholder: "New Password #{@minimum_password_length ? " (min #{@minimum_password_length} chars)" : ''}", minlength: @minimum_password_length, autocomplete: 'off', required: true },
+        prepends:     []
+      } %>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Create' }]
+      ) %>
+<% end -%>

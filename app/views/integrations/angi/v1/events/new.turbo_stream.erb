@@ -1,0 +1,27 @@
+<%
+  # app/views/integrations/angi/v1/events/new.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/angi/v1/events/new'
+  #
+  # Instance Variables:
+  #   (req) @event_id:               (String)
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Angi::V1::Events::Presenter.new(client_api_integration: @client_api_integration)
+
+  presenter.event_from_id = @event_id
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/angi/v1/events/index', locals: { presenter: } %>
+<% end %>
+<%= turbo_stream.rotate_button("collapse_indicator_#{presenter.event_id}") %>
+<%= turbo_stream.collapse_show("edit_event_#{presenter.event_id}") %>
+<%= turbo_stream.update("edit_event_#{presenter.event_id}", partial: 'integrations/angi/v1/events/event_edit', locals: { presenter: }) %>
+
+<%= turbo_stream.bootstrap_init %>

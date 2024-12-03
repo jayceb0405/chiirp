@@ -1,0 +1,24 @@
+<%
+	# app/views/integrations/activeprospect/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/activeprospect/js/show", locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+-%>
+<% if cards.include?('form') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/activeprospect/form' -%>');
+<% end %>
+<% if cards.include?('instructions') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/activeprospect/instructions' -%>');
+<% end %>
+<% if cards.include?('show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/activeprospect/overview' -%>');
+<% end %>
+
+Looper.init();

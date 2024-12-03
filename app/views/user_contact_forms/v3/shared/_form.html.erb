@@ -1,0 +1,121 @@
+<%
+  # app/views/user_contact_forms/v3/shared/_form.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/v3/shared/form', locals: { rendered_by: String }
+  #
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   rendered_by: (String)
+  #     page, frame or modal
+  #
+  rendered_by = %w[page frame modal].include?(local_assigns.dig(:rendered_by).to_s) ? local_assigns[:rendered_by].to_s : 'page'
+  all_fields  = Webhook.internal_key_hash(@user_contact_form.user.client, 'contact', %w[personal phones custom_fields])
+
+  form_fields = {}
+
+  @user_contact_form.form_fields.each do |key, value|
+    if value&.dig('show').to_i == 1
+      form_fields[key] = { 'name' => all_fields.dig(key).to_s }
+
+      value.each do |k, v|
+        form_fields[key][k] = v
+      end
+    end
+  end
+
+  form_fields = form_fields.sort_by { |_key, value| value['order'].to_i }.to_h
+  date_field_ids = []
+
+  path_params = params.dig(:contact_id) ? { contact_id: params[:contact_id].to_s } : {}
+-%>
+<div class="form_div" id="user_contact_form_form">
+  <%= form_tag api_v3_user_contact_form_save_contact_path(@user_contact_form.page_key, path_params) do %>
+    <%= hidden_field_tag 'rendered_by', rendered_by %>
+    <% client_custom_fields = @user_contact_form.user.client.client_custom_fields %>
+
+    <% form_fields.each do |key, value| %>
+      <% custom_field = client_custom_fields.find_by(var_var: key) || @user_contact_form.user.client.client_custom_fields.new(var_name: value['name'], var_var: key, var_type: 'string', var_placeholder: value['name'], var_options: {}) %>
+      <% field_tag = 'client_custom_fields' %>
+
+      <div class="form-group mb-1">
+        <%= contact_custom_field_input(
+              custom_field:,
+              object_name:  field_tag,
+              row:          { class: 'mb-0', columns: [0, 12] },
+              col:          { class: 'mb-0' },
+              form_group:   { class: 'mb-0' },
+              label:        { class: 'mt-0 mb-0', display: custom_field.var_type.casecmp('stars').zero? },
+              html_options: { required: value['required'].to_i == 1 }
+            ) %>
+      </div>
+    <% end %>
+
+    <% if @user_contact_form.ok2text.to_s == '1' %>
+      <div class='input-group'>
+        <label class='switch mr-1'>
+          <%= check_box_tag 'client_custom_fields[ok2text]', '1', true, { class: 'custom-control-input', id: 'ok2text' } %>
+          <span class='slider round'></span>
+        </label>
+        <%= @user_contact_form.ok2text_text.to_s -%>
+      </div>
+    <% end %>
+
+    <% if @user_contact_form.ok2email.to_s == '1' %>
+      <div class="input-group">
+        <label class="switch mr-1">
+          <%= check_box_tag 'client_custom_fields[ok2email]', '1', true, { class: 'custom-control-input', id: 'ok2email' } %>
+          <span class="slider round"></span>
+        </label>
+        <%= @user_contact_form.ok2email_text.to_s -%>
+      </div>
+    <% end %>
+
+    <% if @user_contact_form.selectable_campaign_ids.present? %>
+      <% campaigns = @user_contact_form.user.client.campaigns.where(id: @user_contact_form.selectable_campaign_ids).map { |campaign| [campaign.name, campaign.id] } %>
+      <% campaigns_label = @user_contact_form.selectable_campaign_label.presence || 'Select an Option' %>
+
+      <% if campaigns.present? %>
+        <div class="form-group mt-2 mb-2">
+          <%= select_tag('campaign_id',
+                         options_for_select(campaigns),
+                         {
+                           include_blank: campaigns_label,
+                           class:         'form-control',
+                           style:         'width: 100%;'
+                         }) %>
+        </div>
+      <% end %>
+    <% end %>
+
+    <div class="input-group">
+      <%= submit_tag @user_contact_form.submit_button_text, { id: 'contact_form_submit', class: 'btn btn-info pl-5 pr-5 w-100', style: "background-color:#{@user_contact_form.submit_button_color};border-color:#{@user_contact_form.submit_button_color};" } %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('#contact_form_submit').css({'color':contrastColor('<%= @user_contact_form.submit_button_color.to_s -%>', true)});
+
+    <% date_field_ids.each do |id| %>
+      // date calendar
+      $('#<%= id -%>').flatpickr({
+        nextArrow: '>',
+        prevArrow: '<',
+        dateFormat: 'm/d/Y G:i K',
+        enableTime: 'true',
+        allowInput: 'false',
+        plugins: [
+          new confirmDatePlugin({}),
+        ]
+      });
+    <% end %>
+
+    <% if params.dig(:redirect).to_bool %>
+      window.parent.postMessage({'action':'redirect_frame'}, '*');
+    <% end %>
+  });
+</script>

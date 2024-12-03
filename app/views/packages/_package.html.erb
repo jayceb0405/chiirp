@@ -1,0 +1,34 @@
+<%
+# app/views/packages/_package.html.erb
+#
+# Example:
+#   render partial: 'packages/package', collection: @packages.order( :name )
+#
+# Required Instance Variables:
+#   package
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<tr>
+  <td class="text-left pl-4"><%= package.name -%></td>
+  <td class="text-left"><%= Friendly.new.date(package.created_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) -%></td>
+  <td class="text-center"><%= client_package_count.dig(package.id).to_i -%></td>
+  <td class="text-middle text-right">
+    <%= link_to '',
+                package_onetime_path(package_id: package.id),
+                class: 'btn btn-sm btn-icon btn-secondary far fa-clone',
+                title: 'Create one-time package',
+                data:  { toggle: 'tooltip', turbo: true, turbo_stream: true } %>
+    <%= link_to '',
+                edit_package_path(package),
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to '',
+                '#',
+                class: %w[btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_package] << (client_package_count.dig(package.id).to_i.positive? ? 'disabled' : ''),
+                data:  { id: package.id, name: package.name } %>
+  </td>
+</tr>

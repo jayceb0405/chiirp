@@ -1,0 +1,24 @@
+<%
+  # app/views/dashboards/show_button.html.erb
+  #
+  # Example:
+  #   render 'dashboards/show_button'
+  #
+  # Instance Variables:
+  #   (req) @dashboard_button_type: (String)
+  #   (req) @dashboard_button_id:   (Integer)
+  #
+  # Local Variables:
+  #   none
+  #
+
+  # the following may not be a good idea, as maybe some user shouldn't have access to the client data?
+  # cache_key = @dashboard_button_type.starts_with?('client_') ? current_user.client : current_user
+  presenter = DashboardPresenter.new(user: current_user)
+-%>
+<%# Template Dependency: dashboards/buttons/* %>
+<% cache [current_user, @dashboard_button_type, @dashboard_button_id, presenter.date_range], expires_in: 5.minutes do %>
+  <%= turbo_frame_tag @dashboard_button_type do %>
+    <%= render partial: "dashboards/buttons/#{@dashboard_button_type}", locals: { id: @dashboard_button_id, presenter: } %>
+  <% end %>
+<% end %>

@@ -1,0 +1,35 @@
+<%
+  # app/views/integrations/jobnimbus/webhooks/_event_inner.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/webhooks/event_inner', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<td class="text-left" id="td_webhook_<%= presenter.webhook_event_id -%>">
+  <%= presenter.webhook_name %>
+</td>
+<td class="text-left"><%= presenter.webhook_event.dig(:criteria, :status).to_s -%></td>
+<td class="text-center"><%= presenter.webhook_event_new_icon -%></td>
+<td class="text-center"><%= presenter.webhook_event_updated_icon -%></td>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_campaign&.name.to_s } if presenter.client.campaigns_count.positive? %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_group&.name.to_s } if presenter.client.groups_count.positive? %>
+<td class="text-left"><%= presenter.webhook_event_tag&.name.to_s -%></td>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_stage&.name.to_s } if presenter.client.stages_count.positive? %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_stop_campaigns&.join(', ') } if presenter.client.campaigns_count.positive? %>
+<td class="text-right">
+  <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#webhook_edit_tr_<%= presenter.webhook_event_id -%>">
+    <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+  </button>
+  <%= link_to '', '#', {
+        class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_webhook',
+        style: 'text-decoration: none;',
+        data:  { id: presenter.webhook_event_id, event: presenter.webhook_object, name: presenter.webhook_name }
+      } %>
+</td>

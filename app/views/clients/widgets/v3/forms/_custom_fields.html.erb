@@ -1,0 +1,123 @@
+<%
+  # app/views/clients/widgets/v3/forms/_custom_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/forms/custom_fields', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   widget_presenter: Presenter
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="card-header border-0" id="clients_widget_custom_fields">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#clients_widget_custom_fields_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>SiteChat Data to Collect</span>
+  </button>
+</div>
+
+<div id="clients_widget_custom_fields_body" class="collapse" data-parent="#clients_widget_accordion">
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="card-expansion" id="clients_widget_options_accordion">
+        <div class="row">
+          <div class="col-6 pt-3 pl-4">
+            <h6>Field</h6>
+          </div>
+          <div class="col-3 pt-3">
+            <h6>Include</h6>
+          </div>
+          <div class="col-3 pt-3">
+            <h6>Required</h6>
+          </div>
+        </div>
+
+        <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'clients_widget_custom_fields_form', remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', novalidate: true do |f| %>
+
+          <ul class="sortable-lists list-group list-group-flush" id="data_table" data-toggle="sortable" data-group="pages">
+            <% presenter.form_fields_for_edit.each do |key, value| %>
+              <% key_name = (value.dig('name') || 'Unknown').to_s %>
+              <% key_show = value.dig('show').to_i %>
+              <% key_required = value.dig('required').to_i %>
+              <% key_order = value.dig('order').to_i %>
+
+              <li class="list-group-item align-items-center drag-handle" data-id="<%= key -%>">
+                <div class="row w-100">
+                  <%= hidden_field_tag "clients_widget[form_fields][#{key}][order]", key_order, { id: "list_group_sort_order_#{key}" } %>
+
+                  <div class="col-6">
+                    <span class="drag-indicator"></span>
+                    <%= key_name %>
+                  </div>
+
+                  <div class="col-3">
+                    <%= bootstrap_switch_field(
+                          field:        "clients_widget[form_fields][#{key}][show]",
+                          value:        key_show == 1,
+                          values:       %w[1 0],
+                          row:          { columns: [0, 12] },
+                          col:          { class: 'mb-0' },
+                          form_group:   { class: 'mb-0' },
+                          html_options: { class: 'field_key', id: "fields_#{key}_check_box", disabled: key == 'phone' }
+                        ) %>
+                  </div>
+
+                  <div class="col-3">
+                    <%= bootstrap_switch_field(
+                          field:        "clients_widget[form_fields][#{key}][required]",
+                          value:        key_required == 1,
+                          values:       %w[1 0],
+                          row:          { columns: [0, 12] },
+                          col:          { class: 'mb-0' },
+                          form_group:   { class: 'mb-0' },
+                          html_options: { class: 'field_key_required', id: "fields_#{key}_check_box_required", disabled: key == 'phone' }
+                        ) %>
+                  </div>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Data to Collect', id: 'clients_widget_form_submit', disable_with: 'Saving Data to Collect' }] %>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% unless presenter.widget.new_record? %>
+      $('.field_key_required').on('change', function(e) {
+        if ( $(this).is(':checked') ) {
+          $('#' + $(this).attr('id').replace('_required', '')).prop('checked', true);
+        } else {
+
+        }
+      });
+
+      $('.field_key').on('change', function(e) {
+        if ( $(this).is(':checked') ) {
+
+        } else {
+          $('#' + $(this).attr('id') + '_required').prop('checked', false);
+        }
+      });
+    <% end %>
+
+    $('#clients_widget_custom_fields_form').on('submit', function(e) {
+      var sortable = Sortable.get(document.getElementById('data_table')).toArray();
+
+      $.each(sortable, function(index, value) {
+        $('#list_group_sort_order_' + value).val(index);
+      });
+    });
+  });
+</script>

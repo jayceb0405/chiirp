@@ -1,0 +1,30 @@
+// app/views/integrations/successware/v202311/push_contacts/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/successware/v202311/push_contacts/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   (opt) @push_contact_tag: (Hash)
+//
+// Local Variables:
+//   (req) cards: (Array)
+//
+<% presenter = Integrations::Successware::V202311::PushContactsPresenter.new(client_api_integration: @client_api_integration) %>
+
+<% if cards.include?('push_contacts_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/successware/v202311/push_contacts/index', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('push_contacts_edit') %>
+  $('#edit_push_contact_tag_<%= @push_contact_tag&.dig(:id) -%>').html('<%= j render partial: 'integrations/successware/v202311/push_contacts/edit', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('push_contacts_new') %>
+  $('#no_tags').hide();
+  $('#push_contacts_body').append('<%= j render partial: 'integrations/successware/v202311/push_contacts/push_contact_tag', locals: { presenter: } -%>');
+  $('#edit_push_contact_tag_<%= @push_contact_tag&.dig(:id) -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,32 @@
+<%
+  # app/views/aiagents/_test.html.erb
+  #
+  # Example:
+  #   render partial: "aiagents/test"
+  #
+  # Required Instance Variables:
+  #   @aiagent: (Aiagent)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<!-- aiagents.test -->
+<div class="message">
+  <div class="message-body">
+    <div class="card card-fluid mb-0">
+      <div class="conversations">
+        <ul class="conversation-list">
+          <%= render partial: 'test_message', collection: @session.aiagent_messages %>
+
+          <% if @session.ended? %>
+            <li>AI Agent session ended: <%= @session.ended_reason %>.</li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(".message-body").animate({ scrollTop: $(".message-body").prop('scrollHeight')});
+</script>

@@ -1,0 +1,93 @@
+<%
+  # app/views/clients/groups/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/groups/index'
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #   (opt) @group:  (Group)
+  #
+  # Local Variables:
+  #   (opt) client_presenter: (ClientPresenter)
+  #
+  client_presenter = ClientPresenter.new(client: @client) unless local_assigns.dig(:client_presenter).is_a?(ClientPresenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-user-cog mr-2"></i>Groups <span class="badge"><%= client_presenter.client.groups.count -%></span></span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Group'.html_safe, new_client_group_path(client_presenter.client.id), {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary ml-2',
+              id:    'groups_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th class="text-left align-middle" colspan="3" style="min-width: 240px"> Group </th>
+              <th class="text-left align-middle"> Created </th>
+              <th class="text-center align-middle"> Contacts </th>
+              <th class="text-left align-middle" style="width:100px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% if @group&.new_record? %>
+              <%= render partial: 'clients/groups/group', locals: { client_presenter:, group: @group } %>
+            <% end %>
+
+            <%= render partial: 'clients/groups/group', collection: client_presenter.groups, locals: { client_presenter: } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if client_presenter.client.errors.any? %>
+      ChiirpAlert({
+        'body':triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    $('#groups_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li>Groups provide a method of segmenting your Contacts for future selection.</li>'
+      help_info += '<li>Groups also provide for keeping track of what step in the sales process a Contact is currently positioned.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': 'Groups Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_groups').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_groups').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

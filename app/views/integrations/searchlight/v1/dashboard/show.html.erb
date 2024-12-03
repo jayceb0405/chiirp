@@ -1,0 +1,28 @@
+<%
+  # app/views/integrations/searchlight/v1/dashboard/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/searchlight/v1/dashboard/show'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Searchlight::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<% if presenter.client_api_integration.api_key.present? %>
+  <div class="iframe-container" style="overflow:hidden;padding-top:100%;position:relative;">
+    <iframe src="<%= presenter.iframe_url(cookies[:skin]) -%>" style="height:100%;width:100%;border:0;left:0;top:0;position:absolute;;" scrolling="no" frameborder="0"></iframe>
+  </div>
+<% else %>
+  <p class="p-5 font-weight-bold">SearchLight integration must be configured. (<%= link_to('click to configure now', integrations_searchlight_v1_path) %>)</p>
+<% end %>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_searchlight').addClass('has-active');
+  });
+</script>

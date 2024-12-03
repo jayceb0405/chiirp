@@ -1,0 +1,30 @@
+<%
+  # app/views/integrations/searchlight/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/searchlight/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Searchlight::V1::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SearchLight Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li></li>
+    </ul>
+
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

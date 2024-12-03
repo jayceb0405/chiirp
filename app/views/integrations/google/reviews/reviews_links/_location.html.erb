@@ -1,0 +1,23 @@
+<%
+  # app/views/integrations/google/reviews/reviews_links/_location.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/reviews_links/location', collection: presenter.options_for_selected_locations_reviews(location), as: :location, locals: { presenter: Integrations::Google::Presenter, account: account}
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) account:   (String)
+  #   (req) location:  (Array)
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<%= bootstrap_text_field(
+      field:        "reviews[reviews_links][#{account}][#{location[1]}",
+      value:        presenter.client_api_integration.reviews_links.dig(account, location[1]),
+      label:        { title: location[0] },
+      html_options: { placeholder: 'Paste Your Google Reviews Link Here' },
+      messages:     { note: 'This link is found in your Google My Business Listing.' }
+    ) %>

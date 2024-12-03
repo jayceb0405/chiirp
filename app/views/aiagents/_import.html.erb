@@ -1,0 +1,23 @@
+<%
+# app/views/aiagents/_import.html.erb
+#
+# Example:
+#   render partial: 'aiagents/import'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= form_tag aiagents_import_path, { builder: LooperFormBuilder, remote: true, method: :post } do %>
+  <%= bootstrap_text_field(
+        field:        'share_code',
+        label:        { title: "AI Agent Share Code" },
+        html_options: { placeholder: 'Shared Code', autofocus: true }
+      ) %>
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Import', disable_with: 'Importing' }]
+      ) %>
+<% end %>

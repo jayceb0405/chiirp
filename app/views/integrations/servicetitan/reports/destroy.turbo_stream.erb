@@ -1,0 +1,19 @@
+<%
+  # app/views/integrations/servicetitan/reports/destroy.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/destroy'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Servicetitan::ReportsPresenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update('reports_body', partial: 'integrations/servicetitan/reports/reports', locals: { presenter: }) %>
+
+<%= turbo_stream.bootstrap_init %>

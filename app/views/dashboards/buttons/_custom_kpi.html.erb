@@ -1,0 +1,48 @@
+<%
+  # app/views/dashboards/buttons/_custom_kpi.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/custom_kpi', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  if (client_kpi = presenter.client.client_kpis.find_by(id: local_assigns.dig(:id).to_i))
+    operator           = (client_kpi.operator.presence || '+')
+    criteria_01_result = presenter.custom_kpi_criteria(client_kpi.criteria_01, client_kpi.c_01_in_period)
+    criteria_02_result = presenter.custom_kpi_criteria(client_kpi.criteria_02, client_kpi.c_02_in_period)
+
+    if operator == '/'
+      if criteria_02_result.zero?
+        chart_value = 0
+        stat        = '0'
+      else
+        chart_value = criteria_01_result.to_f.send(operator, criteria_02_result.to_f)
+        stat        = number_to_percentage(chart_value * 100, precision: 0)
+      end
+    else
+      chart_value = 0
+      stat        = criteria_01_result.send(operator, criteria_02_result)
+    end
+  end
+-%>
+<% if client_kpi %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               "custom_kpi_#{client_kpi.id}",
+        stats:            "#{stat} <span class=\" pl-3 small\">(#{criteria_01_result} #{operator == '*' ? 'x' : operator} #{criteria_02_result})</span>",
+        description:      client_kpi.name,
+        description_icon: '',
+        icon:             'fa fa-chart-line',
+        link:             '#',
+        chart_id:         "custom_kpi_chart_#{client_kpi.id}",
+        chart_type:       operator == '/' ? 'circle_progress' : '',
+        chart_value:,
+        background_color: client_kpi.color,
+        button_movable:   true
+      } %>
+<% end %>

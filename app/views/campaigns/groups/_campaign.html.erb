@@ -1,0 +1,23 @@
+<%
+# app/views/campaigns/groups/_campaign.html.erb
+#
+# Example:
+# 	render partial: "campaigns/groups/campaign", collection: @campaign_group.campaigns
+#
+# Instance Variables:
+# 	(req) @campaign_group: (CampaignGroup)
+#
+# Local Variables:
+#   (req) campaign: (Campaign)
+#
+-%>
+<tr>
+  <td class="text-left" colspan="3"> <%= campaign.name -%> </td>
+  <td class="text-right">
+    <%= link_to '', campaign_group_path(campaign.campaign_group_id, campaign_id: campaign.id, confirm: 'remove_campaign'), {
+          class:  'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          remote: true,
+          method: :delete
+        } %>
+  </td>
+</tr>

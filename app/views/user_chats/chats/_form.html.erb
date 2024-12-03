@@ -1,0 +1,67 @@
+<%
+	# app/views/user_chats/chats/_form.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_chats/chats/form"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<!-- user_chats.chats.form -->
+<%= form_tag user_chats_path, { remote: true } do %>
+	<%= hidden_field_tag :id, @user.id %>
+
+	<div class="m-central__messages-textarea" id="team_chat_area">
+		<%= text_area_tag "user_chat[content]",
+			"",
+			{
+				id: "emoji_textarea",
+				class: "form-control",
+				style: "min-height:50px;padding-right:30px;",
+				placeholder: "Type Message..."
+			}
+		%>
+	</div>
+
+	<div class="m-central__messages-footer-actions">
+		<%= submit_tag "Send",
+			data: {	
+				"disable-with": "Sending..."
+			},
+			id: "send_button",
+			class: "btn btn-app",
+			style: "width:auto;"
+		%>
+	</div>
+<% end %>
+
+<script>
+	$(function() {
+		autosize($('#emoji_textarea'));
+
+		$('#emoji_textarea').emojiPicker({
+			width: '300px',
+			height: '200px',
+			button: true,
+			iconBackgroundColor: 'white'
+		});
+
+		$('.emojiPickerIcon').ready(function() {
+			$('.emojiPickerIcon').css("width", "30px");
+			$('.emojiPickerIcon').css("height", "30px");
+			$('.emojiPickerIcon').css("top", "2px");
+			$('.emojiPickerIcon').css("right", "2px");
+			$('.emojiPickerIcon').css("border-top-right-radius", "20px");
+		});
+
+		$('.emojiPickerIconWrap').ready(function() {
+			$('.emojiPickerIconWrap').css('display', 'block');
+			$('#emoji_textarea').css('width', '100%');
+		});
+	});
+</script>
+<!-- /.user_chats.chats.form -->

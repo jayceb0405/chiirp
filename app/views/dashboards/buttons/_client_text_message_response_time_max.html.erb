@@ -1,0 +1,29 @@
+<%
+  # app/views/dashboards/buttons/_client_text_message_response_time_max.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/client_text_message_response_time_max', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) Tag id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  response_time = presenter.text_response_time(:client, :max)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               'client_text_response_time_max',
+        stats:            Friendly.new.duration(response_time, response_time < 3_600).to_s,
+        description:      'Texts Response Time Maximum',
+        description_icon: 'c',
+        icon:             'fa fa-comments',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', last_msg_direction: 'rcvd', last_msg_absolute: 'last', user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         '',
+        button_movable:   true
+      } %>
+<% end %>

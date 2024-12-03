@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+# from source
+# PGDATABASE=funyl_development PGUSER=asdf PGPASSWORD=asdfasdf PGHOST=127.0.0.1 pg_dump -bf dump.sql funyl_development
+
+# import dump.sql from dev database
+# foreman run rails db:drop db:create
+require_relative '../config/environment'
+
+cmd = "cat dump.sql | PGDATABASE=funyl_development PGUSER=#{Rails.application.credentials.postgres&.username} PGPASSWORD=#{Rails.application.credentials.postgres&.password} PGHOST=#{ENV['DB_HOSTNAME'] || 'localhost'} psql"
+system(cmd)
+system('rails db:create db:migrate db_loader:update dev:seed')
+
+# from production database
+# PGDATABASE=funyl_development PGUSER=asdf PGPASSWORD=asdfasdf PGHOST=127.0.0.1 pg_restore -Od funyl_development dump.sql

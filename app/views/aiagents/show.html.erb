@@ -1,0 +1,70 @@
+<%
+# app/views/aiagents/show.html.erb
+#
+# Example:
+# 	render partial: "aiagents/show"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+show_help_page = !current_user.client.aiagent_terms_accepted_at
+# TODO: use the following after we have a video for the help page
+# show_help_page = !current_user.client.aiagent_terms_accepted_at || @aiagents.blank?
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-robot mr-2"></i>AI Agents</h1>
+
+        <div id="aiagents_toolbar" class="btn-toolbar">
+          <% unless show_help_page %>
+            <%= render partial: 'aiagents/toolbar' %>
+          <% end %> 
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="aiagents_body">
+      <% if show_help_page %>
+        <%= render partial: 'aiagents/help' %>
+      <% elsif @aiagent.new_record? && @aiagent.name.to_s.empty? %>
+        <%= render partial: 'aiagents/index' %>
+      <% else %>
+        <%= render partial: 'aiagents/edit' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_aiagents').addClass('has-active');
+
+    $(document).off('click', '.option_aiagent')
+    $(document).on('click', '.option_aiagent', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/aiagents/' + $(this).attr('id') + '/edit'
+      });
+    });
+
+    $(document).off('click', '#button_import_aiagent');
+    $(document).on('click', '#button_import_aiagent', function(e) {
+      e.preventDefault();
+
+      $('#dash_modal').modal('show');
+      $('#dash_modal_title').html('<i class="fa fa-cloud-download-alt"></i> Import Shared AI Agent');
+      $('#dash_modal_body').html('<%= j render partial: 'import' -%>');
+      $('#dash_modal_footer').html('');
+    });
+  });
+</script>

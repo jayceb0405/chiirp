@@ -1,0 +1,68 @@
+<%
+  # app/views/triggeractions/forms/custom_field_action/_client_custom_field.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/custom_field_action/client_custom_field", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<% if presenter.client_custom_field&.var_type == 'string' && (presenter.client_custom_field.var_options.dig(:string_options) || {}).present? %>
+  <div class="client_custom_fields_<%= presenter.triggeraction.id -%>" id="var_options_<%= presenter.triggeraction.id -%>_<%= presenter.client_custom_field.id -%>">
+    <div class="form-row">
+      <div class="col-md-3">
+        <%= label_tag '', 'Select Actions to Take on Response', { class: 'form-group-label' } %>
+      </div>
+      <div class="col-md-9">
+        <%= render partial: 'triggeractions/forms/custom_field_action/string_option', collection: presenter.client_custom_field_string_options_as_array, as: :string_option, locals: { presenter: } %>
+      </div>
+    </div>
+  </div>
+<% elsif presenter.client_custom_field&.var_type == 'numeric' && presenter.client_custom_field.var_options && presenter.client_custom_field.var_options.include?(:numeric_min) && presenter.client_custom_field.var_options.include?(:numeric_max) %>
+  <div class="client_custom_fields_<%= presenter.triggeraction.id -%>" id="var_options_<%= presenter.triggeraction.id -%>_<%= presenter.client_custom_field.id -%>">
+    <div class="form-row">
+      <div class="col-md-3">
+        <%= label_tag '', 'Select Actions to Take on Response', { class: 'form-group-label' } %>
+      </div>
+      <div class="col-md-9">
+        <%= render partial: 'triggeractions/forms/custom_field_action/numeric_range', collection: presenter.client_custom_field_action_numeric_range, as: :range, locals: { presenter: } %>
+      </div>
+    </div>
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Add Response Range', disable_with: 'Adding', disabled: presenter.campaign_disabled? }]
+        ) %>
+  </div>
+<% elsif presenter.client_custom_field&.var_type == 'stars' && presenter.client_custom_field.var_options && presenter.client_custom_field.var_options.include?(:stars_max) %>
+  <div class="client_custom_fields_<%= presenter.triggeraction.id -%>" id="var_options_<%= presenter.triggeraction.id -%>_<%= presenter.client_custom_field.id -%>">
+    <div class="form-row">
+      <div class="col-md-3">
+        <%= label_tag '', 'Select Actions to Take on Response', { class: 'form-group-label' } %>
+      </div>
+      <div class="col-md-9">
+        <%= render partial: 'triggeractions/forms/custom_field_action/stars_range', collection: presenter.client_custom_field_action_stars_range, as: :range, locals: { presenter: } %>
+      </div>
+    </div>
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Add Response Range', disable_with: 'Adding', disabled: presenter.campaign_disabled? }]
+        ) %>
+  </div>
+<% elsif presenter.client_custom_field&.var_type == 'currency' && presenter.client_custom_field.var_options && presenter.client_custom_field.var_options.include?(:currency_min) && presenter.client_custom_field.var_options.include?(:currency_max) %>
+  <div class="client_custom_fields_<%= presenter.triggeraction.id -%>" id="var_options_<%= presenter.triggeraction.id -%>_<%= presenter.client_custom_field.id -%>">
+    <div class="form-row">
+      <div class="col-md-3">
+        <%= label_tag '', 'Select Actions to Take on Response', { class: 'form-group-label' } %>
+      </div>
+      <div class="col-md-9">
+        <%= render partial: 'triggeractions/forms/custom_field_action/currency_range', collection: presenter.client_custom_field_action_currency_range, as: :range, locals: { presenter: } %>
+      </div>
+    </div>
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Add Response Range', disable_with: 'Adding', disabled: presenter.campaign_disabled? }]
+        ) %>
+  </div>
+<% end %>

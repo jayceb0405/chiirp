@@ -1,0 +1,93 @@
+<%
+  # app/views/contacts/ext_references/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'contacts/ext_references/index', locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Contacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+-%>
+<div class="card card-fluid">
+
+  <div class="card-header p-1 pl-2">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">External References</h6>
+      <%= link_to '<i class="fa fa-plus"></i>'.html_safe,
+                  '#',
+                  class: 'btn btn-icon btn-light',
+                  id:    'new_ext_reference_button',
+                  style: 'text-decoration: none;' %>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table mb-0">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 240px">Reference</th>
+            <th>Ref ID</th>
+            <th style="width:50px; min-width:50px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="contact_ext_references_tbody">
+          <% if presenter.contact.ext_references.any? %>
+            <%= render partial: 'contacts/ext_references/ext_reference', collection: presenter.contact.ext_references, as: :ext_reference, locals: { presenter: } %>
+          <% else %>
+            <%= render partial: 'contacts/ext_references/ext_reference', locals: { ext_reference: Contacts::ExtReference.new, presenter: } %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    $('#new_ext_reference_button').off('click');
+    $('#new_ext_reference_button').on('click', function(e) {
+      e.preventDefault();
+
+      var uuid = '<%= uuid = SecureRandom.uuid -%>'
+      var new_ext_reference_fields = '<%= j render partial: 'contacts/ext_references/ext_reference', locals: { ext_reference: Contacts::ExtReference.new, presenter:, uuid: } %>'
+      var new_uuid = crypto.randomUUID();
+      new_ext_reference_fields = new_ext_reference_fields.replaceAll(uuid, new_uuid);
+
+      $('#contact_ext_references_tbody').append(new_ext_reference_fields);
+      Looper.init();
+    });
+
+    $(document).off('click', '.button_delete_ext_reference');
+    $(document).on('click', '.button_delete_ext_reference', function(e) {
+      e.preventDefault();
+
+      var ext_reference_id = $(this).data('id');
+      var ext_reference_target = $('#ext_reference_target_' + ext_reference_id).val();
+
+      if (ext_reference_target) {
+        ChiirpAlert({
+          'body':'Deleting "' + ext_reference_target + '" can NOT be un-done. Is it your intention to delete this Phone Number?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it');
+        $(document).on('click', '#button_dump_it', function(e) {
+          $('#ext_reference_tr_' + ext_reference_id).remove();
+        });
+      } else {
+        $('#ext_reference_tr_' + ext_reference_id).remove();
+      }
+    });
+
+  });
+</script>

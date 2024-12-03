@@ -1,0 +1,46 @@
+<%
+  # app/views/clients/lead_sources/_lead_source.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/lead_sources/lead_source', collection: lead_source, locals: { presenter: LeadSourcePresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) lead_source: (Clients::LeadSource)
+  #   (req) presenter:   (LeadSourcePresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::LeadSourcePresenter)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_lead_source_<%= lead_source.id.to_s -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_lead_source_name_<%= lead_source.id -%>"> <%= lead_source.name -%> </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(lead_source.created_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-center align-middle"> <%= lead_source.attributes.key?('contacts_count') ? lead_source.contacts_count.to_s : 0 -%> </td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#edit_lead_source_#{lead_source.id}"
+                   }) %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt lead_source_delete',
+          data:  { id: lead_source.id, name: lead_source.name }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_lead_source" id="edit_lead_source_<%= lead_source.id -%>">
+  <!-- lead_source -->
+</tr>
+
+<script>
+  $(function() {  });
+</script>

@@ -1,0 +1,46 @@
+<%
+  # app/views/surveys/screens/_screen.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/screen', collection: presenter.survey_screens, as: :screen, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @survey_screen: (SurveyScreen)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.survey_screen = screen
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#survey_<%= presenter.survey.id -%>_screen_<%= presenter.survey_screen.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_survey_screen_name_<%= presenter.survey.id -%>_<%= presenter.survey_screen.id -%>">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#survey_screen_<%= presenter.survey.id -%>_<%= presenter.survey_screen.id -%>">
+      <%= presenter.survey_screen.name %>
+    </button>
+  </td>
+  <td class="text-left align-middle"> <%= presenter.survey_screen.screen_type.capitalize -%> </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(presenter.survey_screen.created_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#survey_<%= presenter.survey.id -%>_screen_<%= presenter.survey_screen.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt survey_screen_delete',
+          data:  {
+            surveyId:         presenter.survey.id,
+            screenId:         presenter.survey_screen.id,
+            surveyScreenName: presenter.survey_screen.name
+          }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse survey_screen_edit" id="survey_<%= presenter.survey.id -%>_screen_<%= presenter.survey_screen.id -%>" data-surveyId="<%= presenter.survey.id -%>" data-screenId="<%= presenter.survey_screen.id -%>">
+  <!-- Survey Screen -->
+</tr>

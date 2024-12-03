@@ -1,0 +1,42 @@
+<%
+  # app/views/messages/texts/_hashtag_notes.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/hashtag_notes', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return unless presenter.show_hashtag_notes?
+-%>
+<% if presenter.client.integrations_allowed.include?('fieldroutes') %>
+  <p class="mb-0"><small class="text-muted">'(FR)' fields are only accessible when Campaign is triggered by a FieldRoutes Event.</small></p>
+<% end %>
+
+<% if presenter.client.integrations_allowed.include?('housecall') %>
+  <p class="mb-0"><small class="text-muted">'(HCP)' fields are only accessible when Campaign is triggered by a Housecall Pro Event.</small></p>
+<% end %>
+
+<% if presenter.client.integrations_allowed.include?('jobber') %>
+  <p class="mb-0"><small class="text-muted">'(JB)' fields are only accessible when Campaign is triggered by a Jobber Event.</small></p>
+<% end %>
+
+<% if presenter.client.integrations_allowed.include?('jobnimbus') %>
+  <p class="mb-0"><small class="text-muted">'(JN)' fields are only accessible when Campaign is triggered by a JobNimbus Event.</small></p>
+<% end %>
+
+<% if presenter.client.integrations_allowed.include?('responsibid') %>
+  <p class="mb-0"><small class="text-muted">'(RB)' fields are only accessible when Campaign is triggered by a ResponsiBid Event.</small></p>
+<% end %>
+
+<% if presenter.client.integrations_allowed.include?('servicemonster') %>
+  <p class="mb-0"><small class="text-muted">'(SM)' fields are only accessible when Campaign is triggered by a ServiceMonster Event.</small></p>
+<% end %>
+
+<% if presenter.client.integrations_allowed.include?('servicetitan') %>
+  <p class="mb-0"><small class="text-muted">'(ST)' fields are only accessible when Campaign is triggered by a ServiceTitan Event.</small></p>
+<% end %>

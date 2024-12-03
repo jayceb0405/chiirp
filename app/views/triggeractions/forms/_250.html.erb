@@ -1,0 +1,38 @@
+<%
+  # app/views/triggeractions/forms/_250.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/250", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start an AI Agent Conversation
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[aiagent_id]',
+      label:        { title: 'AI Agent' },
+      html_options: { id: 'aiagent_id', required: true, disabled: presenter.campaign_disabled? },
+      options:      { for_select: options_from_collection_for_select(presenter.client.aiagents.normal, :id, :name, presenter.triggeraction.aiagent_id), blank: 'Choose AI Agent' },
+      messages:     { note: 'Choose the AI Agent to begin a conversation with the contact.' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[send_to]',
+      label:        { title: 'Select Who to Send Message To' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_text_send_to(contact_only: true), selected: presenter.triggeraction.send_to, blank: 'Select a Recipient' },
+      messages:     { note: presenter.triggeraction_note_for_send_to.html_safe }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[from_phone]',
+      row:          { class: 'mb-5' },
+      label:        { title: 'Select Phone Number(s) to Send From (in a "round robin" method)' },
+      html_options: { id: "from_phone_select_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? || presenter.campaign.lock_phone, multiple: true },
+      options:      { for_select: options_for_phone_numbers(client: presenter.client, selected: presenter.triggeraction.from_phone, options: [['last_number', 'Last Number Used'], ['user_number', 'User\'s Default Number']]) },
+      messages:     { note: "When 'Last Number Used' is selected the previous phone number used will be used again.<br />Actions are #{presenter.campaign_disabled? || presenter.campaign.lock_phone ? '' : 'NOT '}locked to the Campaign default phone number.".html_safe }
+    ) %>

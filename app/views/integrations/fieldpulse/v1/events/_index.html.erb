@@ -1,0 +1,140 @@
+<%
+  # app/views/integrations/fieldpulse/events/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/fieldpulse/events/index', locals: { presenter: Integrations::Fieldpulse::V1::Events::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldpulse::V1::Events::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::Events::Presenter)
+-%>
+<h6 class="card-header d-flex justify-content-between">
+  <span class="my-auto">Events</span>
+  <span>
+    <%= link_to '<i class="fa fa-plus mr-2"></i>New Event'.html_safe, new_integrations_fieldpulse_v1_event_path, { class: 'btn btn-light', data: { turbo: true, turbo_stream: true } } %>
+  </span>
+</h6>
+
+<div class="card-body">
+  <div class="table-responsive">
+    <%= turbo_frame_tag 'fieldpulse_events' do %>
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 240px"> Events </th>
+            <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed? %>
+            <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed? %>
+            <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed? %>
+            <th class="text-left">Tag</th>
+            <th style="width:100px; min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="events_body">
+          <%= render partial: 'integrations/fieldpulse/v1/events/event', collection: presenter.sorted_event_ids, as: :event_id, locals: { presenter: } %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.event_nav_link').removeClass('active');
+    $('#link_events').addClass('active');
+
+    $(document).off('hide.bs.collapse', '.edit_action');
+    $(document).on('hide.bs.collapse', '.edit_action', function (e) {
+      $('#edit_action_' + e.target.id.replace('edit_action_', '')).html('<td colspan="11" class="mt-3 text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Event' } %></td>');
+    });
+
+    $(document).off('change', '.event_type_select');
+    $(document).on('change', '.event_type_select', function(e) {
+      e.stopPropagation();
+
+      displayInputs(e.target.id.replace('event_type_select_', ''));
+    });
+
+    $(document).off('change keyup', '.range_max');
+    $(document).on('change keyup', '.range_max', function(e) {
+      eval(e.target.id.replace('range_max', 'range_slider_total').replaceAll('-', '_')).update({max: e.target.value});
+      eval(e.target.id.replace('range_max', 'range_slider_total_due').replaceAll('-', '_')).update({max: e.target.value});
+    });
+
+    $(document).off('click', '.event_delete');
+    $(document).on('click', '.event_delete', function(e) {
+      e.preventDefault();
+
+      var action_id   = $(this).data('id');
+      var action_name = $(this).data('name');
+
+      ChiirpAlert({
+        'body':'Deleting "' + action_name + '" can NOT be un-done. Is it your intention to delete this Action?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '/integrations/fieldpulse/v1/events/' + action_id
+        });
+      });
+    });
+  });
+
+  function displayInputs(action_id) {
+    $('.event_criteria_row').hide();
+
+    if ($('#event_type_select_' + action_id).val() == 'job') {
+      $('#row_tech_updated_' + action_id).show();
+      $('#row_start_date_updated_' + action_id).show();
+      $('#row_ext_tech_ids_' + action_id).show();
+      $('#row_range_slider_total_' + action_id).show();
+      $('#row_range_max_' + action_id).show();
+    } else {
+      $('#row_tech_updated_' + action_id).hide();
+      $('#row_start_date_updated_' + action_id).hide();
+      $('#row_ext_tech_ids_' + action_id).hide();
+      $('#row_range_slider_total_' + action_id).hide();
+      $('#row_range_max_' + action_id).hide();
+    }
+
+    updateRequestHeaderField(action_id)
+  }
+
+  function updateRequestHeaderField(action_id) {
+    var request_body_appointment_status_change = '<%= presenter.request_body_appointment_status_change -%>';
+    var request_body_subscription_status = '<%= presenter.request_body_subscription_status -%>'
+
+    if ($('#event_type_select_' + action_id).val() == 'appointment_status_change') {
+      $('#request_body_' + action_id).val(JSON.stringify(request_body_appointment_status_change.replace(/&quot;/g, '"')));
+    } else if ($('#event_type_select_' + action_id).val() == 'ar') {
+      // $('#request_body_' + action_id).val(request_body_ar);
+    } else if ($('#event_type_select_' + action_id).val() == 'renewal') {
+      // $('#request_body_' + action_id).val(request_body_renewal);
+    } else if ($('#event_type_select_' + action_id).val() == 'subscription_due_for_service') {
+      // $('#request_body_' + action_id).val(request_body_subscription_due_for_service);
+    } else if ($('#event_type_select_' + action_id).val() == 'subscription_status') {
+      $('#request_body_' + action_id).val(JSON.stringify(request_body_subscription_status.replace(/&quot;/g, '"')));
+    }
+  }
+</script>

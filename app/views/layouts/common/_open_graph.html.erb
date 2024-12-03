@@ -1,0 +1,39 @@
+ <%
+  # app/views/layouts/common/_open_graph.html.erb
+  #
+  # Example:
+  # 	render partial: "layouts/common/open_graph", locals: {  }
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   title:       (String)
+  # 	type:        (String)
+  # 	image:       (String)
+  # 	image_width  (String)
+  # 	image_height (String)
+  # 	description: (String)
+  # 	url:         (String)
+  #
+  title        = (local_assigns.dig(:title) || "#{I18n.t('tenant.name')} - Who will you meet today?").to_s
+  type         = local_assigns.include?(:type) ? local_assigns[:type] : 'website'
+  image        = local_assigns.include?(:image) ? local_assigns[:image] : image_url("tenant/#{I18n.t('tenant.id')}/logo-600.png")
+  image_width  = local_assigns.include?(:image_width) ? local_assigns[:image_width] : '600'
+  image_height = local_assigns.include?(:image_height) ? local_assigns[:image_height] : '600'
+  description  = (local_assigns.dig(:description) || "Text Messaging Sales Platform. Close more with #{I18n.t('tenant.name')}. Capture Connect Close. Streamline your lead collections.").to_s
+  url          = (local_assigns.dig(:url) || request.original_url).to_s
+ -%>
+<meta property="og:title" content="<%= title -%>">
+<meta property="og:type" content="<%= type -%>">
+<meta property="og:description" content="<%= description -%>">
+<meta property="og:image" content="<%= image -%>">
+<meta property="og:image:width" content="<%= image_width -%>">
+<meta property="og:image:height" content="<%= image_height -%>">
+<meta property="og:url" content="<%= url -%>">
+<meta property="fb:app_id" content="1899169686842644">
+<meta property="og:locale" content="en_US">
+<meta property="og:site_name" content="<%= title -%>">

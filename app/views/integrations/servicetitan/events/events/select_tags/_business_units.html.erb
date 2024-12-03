@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_business_units.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/business_units', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[business_unit_ids]',
+      row:          { class: 'event_criteria_row', id: "business_unit_ids_row_#{presenter.event_id}" },
+      label:        { title: "Business Units<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_business_units_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Business Units', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.business_units_for_select, selected: presenter.business_unit_ids },
+      messages:     { note: 'Event actions will trigger when ServiceTitan job business Unit includes any of the selected units.' }
+    ) %>

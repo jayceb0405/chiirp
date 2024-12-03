@@ -1,0 +1,51 @@
+<%
+   # app/views/integrations/common/_overview.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/common/overview', locals: { integration: String }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) integration: (String)
+   #
+   return if local_assigns.dig(:integration).blank?
+   return unless (integration = SystemSettings::Integration.find_by(integration:))
+   return unless integration.description.present? || integration.image_url.present? || integration.youtube_url.present? || integration.website_url.present?
+-%>
+<div class="card-body">
+  <div class="row">
+
+    <% if (integration.youtube_url.present? || integration.image_url.present?) && integration.description.present? %>
+      <div class="col-6 d-flex justify-content-center">
+        <% if integration.youtube_url.present? %>
+          <%= integration.youtube_url.html_safe %>
+        <% else %>
+          <%= image_tag(integration.image_url.html_safe, { class: 'img-fluid' }) %>
+        <% end %>
+      </div>
+      <div class="col-6">
+        <%= simple_format(integration.description.html_safe) %>
+      </div>
+    <% elsif integration.youtube_url.present? %>
+      <div class="col-12">
+        <%= integration.youtube_url.html_safe %>
+      </div>
+    <% elsif integration.image_url.present? %>
+      <div class="col-12">
+        <%= image_tag(integration.image_url.html_safe, { class: 'img-fluid' }) %>
+      </div>
+    <% elsif integration.description.present? %>
+      <div class="col-12">
+        <%= simple_format(integration.description.html_safe) %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if integration.website_url.present? %>
+    <div class="d-flex justify-content-center">
+      <%= link_to "Visit #{integration.company_name}", integration.website_url, { class: 'btn btn-info' } %>
+    </div>
+  <% end %>
+</div>

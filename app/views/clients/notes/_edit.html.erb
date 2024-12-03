@@ -1,0 +1,27 @@
+<%
+  # app/views/clients/notes/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/notes/edit', locals: { presenter: Clients::Notes::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (opt) presenter: (Clients::Notes::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Notes::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.note] } %>
+<td colspan="5">
+
+  <%= form_with model: presenter.note, url: presenter.form_url, builder: LooperFormBuilder, remote: true, class: 'needs-validation', id: "note_form_#{presenter.note.id}", novalidate: true do |f| %>
+    <%= f.text_area :note, {
+          label:        { title: 'Note' },
+          html_options: { value: presenter.note.note, id: "note_#{presenter.note.id}", placeholder: 'Enter a Note', autofocus: true },
+          messages:     { note: 'Enter a note.' }
+        } %>
+
+    <%= f.submit_buttons(buttons: [{ title: 'Save Note', disable_with: 'Saving Note', id: "notesubmit_button_#{presenter.note.id}" }]) %>
+  <% end %>
+</td>

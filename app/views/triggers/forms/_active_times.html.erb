@@ -1,0 +1,144 @@
+<%
+  # app/views/triggers/forms/_active_times.html.erb
+  #
+  # Example:
+  #   render partial: 'triggers/forms/active_times', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<%= label_tag 'data[process_times]', 'Select Active Times & Days to Apply Campaign' %>
+<div class="form-row ml-3 mr-3">
+  <div class="form-group col-6 pr-0">
+    <%= text_field_tag('data[process_times_a]', '', { class: 'form-control', id: "process_times_a_#{presenter.trigger.id}", autocomplete: false }) %>
+  </div>
+  <div class="form-group col-6 pl-0">
+    <%= text_field_tag('data[process_times_b]', '', { class: 'form-control', id: "process_times_b_#{presenter.trigger.id}", autocomplete: false }) %>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="col-6 offset-3 d-flex justify-content-between">
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_sun]', '0' %>
+      <%= check_box_tag 'data[process_sun]', 1, (presenter.trigger.data&.dig(:process_sun).to_i == 1), { class: 'custom-control-input', id: 'process_sun', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_sun', 'Sun', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_mon]', '0' %>
+      <%= check_box_tag 'data[process_mon]', 1, ((presenter.trigger.data&.dig(:process_mon) || 1).to_i == 1), { class: 'custom-control-input', id: 'process_mon', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_mon', 'Mon', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_tue]', '0' %>
+      <%= check_box_tag 'data[process_tue]', 1, ((presenter.trigger.data&.dig(:process_tue) || 1).to_i == 1), { class: 'custom-control-input', id: 'process_tue', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_tue', 'Tue', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_wed]', '0' %>
+      <%= check_box_tag 'data[process_wed]', 1, ((presenter.trigger.data&.dig(:process_wed) || 1).to_i == 1), { class: 'custom-control-input', id: 'process_wed', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_wed', 'Wed', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_thu]', '0' %>
+      <%= check_box_tag 'data[process_thu]', 1, ((presenter.trigger.data&.dig(:process_thu) || 1).to_i == 1), { class: 'custom-control-input', id: 'process_thu', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_thu', 'Thu', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_fri]', '0' %>
+      <%= check_box_tag 'data[process_fri]', 1, ((presenter.trigger.data&.dig(:process_fri) || 1).to_i == 1), { class: 'custom-control-input', id: 'process_fri', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_fri', 'Fri', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'data[process_sat]', '0' %>
+      <%= check_box_tag 'data[process_sat]', 1, (presenter.trigger.data&.dig(:process_sat).to_i == 1), { class: 'custom-control-input', id: 'process_sat', disabled: presenter.campaign_disabled? } %>
+      <%= label_tag 'process_sat', 'Sat', { class: 'custom-control-label' } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#process_times_a_<%= presenter.trigger.id -%>').ionRangeSlider({
+        type: 'double',
+        min: 0,
+        max: 720,
+        from: <%= presenter.trigger.data&.dig(:process_times_a).to_s.split(';')[0].to_i -%>,
+        to: <%= (presenter.trigger.data&.dig(:process_times_a) || '0;480').to_s.split(';')[1].to_i -%>,
+        step: 30,
+        grid: false,
+        grid_num: 3,
+        skin: 'round',
+        disable: <%= presenter.campaign_disabled? -%>,
+        prettify: function(value){
+          if (value == 0) {
+            time = 'am';
+            value = 720;
+          }
+          else if (value < 720) {
+            time = 'am';
+          }
+          else if (value == 720) {
+            time = 'noon';
+          }
+          else if (value == 1440) {
+            time = 'am';
+            value = value - 720;
+          }
+          else {
+            time = 'pm';
+            value = value - 720;
+          }
+          hours = String(parseInt(value / 60, 10));
+          minutes = String(value - (hours * 60));
+          if (minutes.length == 1) {
+            minutes = '0' + minutes;
+          }
+          return hours + ':' + minutes + time;
+        }
+    });
+    $('#process_times_b_<%= presenter.trigger.id -%>').ionRangeSlider({
+        type: 'double',
+        min: 720,
+        max: 1440,
+        from: <%= (presenter.trigger.data&.dig(:process_times_b) || '1020;0').split(';')[0].to_i -%>,
+        to: <%= (presenter.trigger.data&.dig(:process_times_b) || '0;1440').split(';')[1].to_i -%>,
+        step: 30,
+        grid: false,
+        grid_num: 3,
+        skin: 'round',
+        disable: <%= presenter.campaign_disabled? -%>,
+        prettify: function(value){
+          if (value == 0) {
+            time = 'am';
+            value = 720;
+          }
+          else if (value < 720) {
+            time = 'am';
+          }
+          else if (value == 720) {
+            time = 'noon';
+          }
+          else if (value == 1440) {
+            time = 'am';
+            value = value - 720;
+          }
+          else {
+            time = 'pm';
+            value = value - 720;
+          }
+          hours = String(parseInt(value / 60, 10));
+          minutes = String(value - (hours * 60));
+          if (minutes.length == 1) {
+            minutes = '0' + minutes;
+          }
+          return hours + ':' + minutes + time;
+        }
+    });
+  });
+</script>

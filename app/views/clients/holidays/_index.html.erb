@@ -1,0 +1,112 @@
+<%
+  # app/views/clients/holidays/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/holidays/index'
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (opt) clients_holidays_presenter: (Clients::Holidays::Presenter)
+  #
+  presenter = local_assigns.dig(:clients_holidays_presenter) || Clients::Holidays::Presenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Holidays</span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Holiday'.html_safe, new_clients_holiday_path, {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <ul>
+        <li class="text-muted">Holidays affect Starting Campaigns, Sending Text Messages & Sending Ringless Voicemails when started by Campaign or Message Broadcast.</li>
+      </ul>
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="2" style="min-width: 240px">Holiday</th>
+              <th class="text-left">Date</th>
+              <th class="text-left">Action</th>
+              <th style="width:100px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody id="holidays_body">
+
+            <% if presenter.client.holidays.any? %>
+              <%= render partial: 'clients/holidays/holiday', collection: presenter.client.holidays.order(:occurs_at), as: :holiday, locals: { clients_holidays_presenter: presenter } %>
+            <% else %>
+              <tr id="no_tags">
+                <td colspan="5" class="text-center p-5">
+                  Holidays were NOT found.
+                </td>
+              </tr>
+            <% end %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('.client_menu').removeClass('active');
+    $('#link_holidays').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_holidays').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.edit_holiday_row');
+    $(document).on('show.bs.collapse', '.edit_holiday_row', function (e) {
+
+      if (e.target.id.replace('edit_holiday_row_', '')) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/clients/holidays/' + e.target.id.replace('edit_holiday_row_', '') + '/edit'
+        });
+      }
+    });
+
+    $(document).off('click', '.holiday_delete');
+    $(document).on('click', '.holiday_delete', function(e) {
+      e.preventDefault();
+
+      var holiday_id   = $(this).data('id');
+      var holiday_name = $(this).data('name');
+
+      ChiirpAlert({
+        'body':       'Deleting "' + holiday_name + '" can NOT be un-done. Is it your intention to delete this Holiday?',
+        'buttons':    [{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/clients/holidays/' + holiday_id
+        });
+      });
+    });
+  });
+</script>

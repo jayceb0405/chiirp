@@ -1,0 +1,304 @@
+<%
+  # app/views/integrations/servicemonster/webhooks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/webhooks/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #   (req) @webhook_event:           (Hash)
+  #     {
+  #       id: '',
+  #       actions: { tag_id: 0, group_id: 0, stage_id: 0, campaign_id: 0, assign_user_to_technician: false, assign_user_to_salesrep: false},
+  #       criteria: { event_new: false, commercial: true, order_type: '', residential: true, account_types: [], event_updated: false, account_subtypes: [] },
+  #       line_items: []
+  #     }
+  #
+  # Local Variables:
+  #   (opt) presenter:                (Presenter)
+  #
+  presenter               = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook_event = @webhook_event
+-%>
+<%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, html: { class: 'needs-validation', novalidate: true } do |f| %>
+  <% if presenter.form_webhook_event_id_hidden_field.present? %>
+    <%= hidden_field_tag 'id', presenter.form_webhook_event_id_hidden_field %>
+  <% end %>
+
+  <%= bootstrap_select_tag(
+        field:        'webhook[event]',
+        label:        { title: 'Event' },
+        html_options: { id: "event_#{presenter.webhook_event_id}", required: true },
+        options:      { array: presenter.webhook_events_array, selected: presenter.webhook_object, blank: 'Select a ServiceMonster Event' },
+        messages:     { error: 'ServiceMonster event selection is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:   'webhook[criteria][order_type]',
+        row:     { id: "order_type_#{presenter.webhook_event_id}" },
+        label:   { title: 'Order Type' },
+        options: { array: presenter.order_type_for_select, selected: presenter.webhook_event_order_type }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[criteria][order_type_voided]',
+        value:        presenter.webhook_event_order_type_voided?,
+        values:       [true, false],
+        row:          { id: "order_type_voided_#{presenter.webhook_event_id}" },
+        label:        { title: 'Order Type Voided' },
+        html_options: { id: "webhook_order_type_voided_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger only if the order type selected is voided.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][lead_sources]',
+        row:          { id: "lead_sources_#{presenter.webhook_event_id}" },
+        label:        { title: 'Lead Sources' },
+        html_options: { multiple: true },
+        options:      { for_select: options_for_lead_source(presenter.client, presenter.webhook_event_lead_sources), blank: 'Any Lead Source' },
+        messages:     { note: 'Event actions will trigger when Contact includes any of the selected lead sources.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][line_items]',
+        row:          { id: "line_items_#{presenter.webhook_event_id}" },
+        label:        { title: 'Line Items' },
+        html_options: { multiple: true },
+        options:      { grouped_array: presenter.price_book_grouped_for_select, selected: presenter.webhook_event_line_items, blank: 'Any Line Item' },
+        messages:     { note: 'Event actions will trigger when invoice includes any of the selected line items.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][ext_tech_ids]',
+        row:          { id: "ext_tech_ids_#{presenter.webhook_event_id}" },
+        label:        { title: 'ServiceMonster Technicians' },
+        html_options: { multiple: true },
+        options:      { array: presenter.ext_tech_options_for_select, selected: presenter.webhook_event_ext_tech_ids },
+        messages:     { note: 'Event actions will trigger when event is assigned to any selected technician.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][account_types]',
+        row:          { id: "account_types_#{presenter.webhook_event_id}" },
+        label:        { title: 'Account Types' },
+        html_options: { multiple: true },
+        options:      { array: presenter.account_types_for_select, selected: presenter.webhook_event_account_types },
+        messages:     { note: 'Event actions will trigger when the account type matches selected types.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][account_subtypes]',
+        row:          { id: "account_subtypes_#{presenter.webhook_event_id}" },
+        label:        { title: 'Account SubTypes' },
+        html_options: { multiple: true },
+        options:      { array: presenter.account_subtypes_for_select, selected: presenter.webhook_event_account_subtypes },
+        messages:     { note: 'Event actions will trigger when the account sub-type matches selected sub-types.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][order_groups]',
+        row:          { id: "order_groups_#{presenter.webhook_event_id}" },
+        label:        { title: 'Order Groups' },
+        html_options: { multiple: true },
+        options:      { array: presenter.order_groups_for_select, selected: presenter.webhook_event_order_groups },
+        messages:     { note: 'Event actions will trigger when the order group matches selected groups.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][order_subgroups]',
+        row:          { id: "order_subgroups_#{presenter.webhook_event_id}" },
+        label:        { title: 'Order SubGroups' },
+        html_options: { multiple: true },
+        options:      { array: presenter.order_subgroups_for_select, selected: presenter.webhook_event_order_subgroups },
+        messages:     { note: 'Event actions will trigger when the order sub-group matches selected sub-groups.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:    'webhook[criteria][appointment_status]',
+        row:      { id: "appointment_status_#{presenter.webhook_event_id}" },
+        label:    { title: 'Appointment Status' },
+        options:  { array: presenter.appointment_status_for_select, selected: presenter.webhook_event_appointment_status, blank: 'Select a ServiceMonster Appointment Status' },
+        messages: { note: 'Event actions will trigger when this is the selected Appointment status.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[criteria][job_types]',
+        row:          { id: "job_types_#{presenter.webhook_event_id}" },
+        label:        { title: 'Appointment Types' },
+        html_options: { multiple: true },
+        options:      { array: presenter.job_types_for_select, selected: presenter.webhook_event_job_types },
+        messages:     { note: 'Event actions will trigger when the appointment type matches selected types.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[criteria][residential]',
+        value:        presenter.webhook_event_residential?,
+        values:       [true, false],
+        row:          { id: "residential_#{presenter.webhook_event_id}" },
+        label:        { title: 'Residential Accounts' },
+        html_options: { id: "webhook_residential_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger when the account is a Residential account.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[criteria][commercial]',
+        value:        presenter.webhook_event_commercial?,
+        values:       [true, false],
+        row:          { id: "commercial_#{presenter.webhook_event_id}" },
+        label:        { title: 'Commercial Accounts' },
+        html_options: { id: "webhook_commercial_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger when the account is a Commercial account.' }
+      ) %>
+  <%= bootstrap_number_field(
+        field:        'webhook[criteria][range_max]',
+        value:        presenter.webhook_event_range_max,
+        row:          { id: "range_max_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'Maximum Total Range' },
+        html_options: { id: "webhook_range_max_#{presenter.webhook_event_id.tr('-', '_')}", min: 0, step: 1000 },
+        prepends:     [{ button: false, label: '$' }]
+      ) %>
+  <%= bootstrap_range_slider(
+        field:        'webhook[criteria][total]',
+        row:          { id: "range_slider_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'Total Range' },
+        range_slider: { id: "webhook_range_slider_total_#{presenter.webhook_event_id.tr('-', '_')}", type: 'double', min: 0, max: presenter.webhook_event_range_max, from: presenter.webhook_event_total_min, to: presenter.webhook_event_total_max, step: 1, grid: true, grid_num: 10, prefix: '$', separator: ',' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[criteria][event_new]',
+        value:        presenter.webhook_event_new,
+        values:       [true, false],
+        row:          { id: "job_event_new_#{presenter.webhook_event_id}" },
+        label:        { title: 'First Event' },
+        html_options: { id: "webhook_event_new_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger on receipt of first event.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[criteria][event_updated]',
+        value:        presenter.webhook_event_updated,
+        values:       [true, false],
+        row:          { id: "job_event_updated_#{presenter.webhook_event_id}" },
+        label:        { title: 'Subsequent Events' },
+        html_options: { id: "webhook_event_updated_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger on receipt of all subsequent events.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:    'webhook[criteria][tech_updated]',
+        value:    presenter.webhook_event_tech_updated,
+        values:   [true, false],
+        row:      { id: "tech_updated_#{presenter.webhook_event_id}" },
+        label:    { title: 'Technician Changed' },
+        messages: { note: 'Event actions will trigger on receipt of all subsequent "Job Scheduled" notifications received where the technician has changed.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:    'webhook[criteria][start_date_updated]',
+        value:    presenter.webhook_event_start_date_updated,
+        values:   [true, false],
+        row:      { id: "start_date_updated_#{presenter.webhook_event_id}" },
+        label:    { title: 'Start Date Changed' },
+        messages: { note: 'Event actions will trigger on receipt of all subsequent "Job Scheduled" notifications received where the scheduled start date has changed.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:    'webhook[criteria][status_updated]',
+        value:    presenter.webhook_event_status_updated,
+        values:   [true, false],
+        row:      { id: "status_updated_#{presenter.webhook_event_id}" },
+        label:    { title: 'Status Changed' },
+        messages: { note: 'Event actions will trigger on receipt of all events where the appointment status has changed.' }
+      ) %>
+
+  <fieldset class="border rounded p-2 mt-3 mb-2">
+    <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+    <%= bootstrap_switch_field(
+          field:        'webhook[actions][assign_user_to_technician]',
+          value:        presenter.webhook_event.dig(:actions, :assign_user_to_technician).to_bool,
+          values:       [true, false],
+          row:          { id: "assign_user_to_technician_#{presenter.webhook_event_id}" },
+          label:        { title: 'Assign Contact to Employee (Technician)' },
+          html_options: { id: "webhook_actions_assign_user_to_technician_#{presenter.webhook_event_id}" },
+          messages:     { note: "Employee must be matched to a #{I18n.t('tenant.name')} User." }
+        ) %>
+    <%= bootstrap_switch_field(
+          field:        'webhook[actions][assign_user_to_salesrep]',
+          value:        presenter.webhook_event.dig(:actions, :assign_user_to_salesrep).to_bool,
+          values:       [true, false],
+          row:          { id: "assign_user_to_salesrep_#{presenter.webhook_event_id}" },
+          label:        { title: 'Assign Contact to Employee (Sales Rep)' },
+          html_options: { id: "webhook_actions_assign_user_to_salesrep_#{presenter.webhook_event_id}" },
+          messages:     { note: "Employee must be matched to a #{I18n.t('tenant.name')} User." }
+        ) %>
+
+    <%= render partial: 'campaigns/action_fields', locals: {
+          client: presenter.client,
+          campaign: presenter.webhook_event_campaign, campaign_id_field: 'webhook[actions][campaign_id]',
+          group: presenter.webhook_event_group, group_id_field: 'webhook[actions][group_id]',
+          tag: presenter.webhook_event_tag, tag_id_field: 'webhook[actions][tag_id]',
+          stage: presenter.webhook_event_stage, stage_id_field: 'webhook[actions][stage_id]',
+          stop_campaign_ids: presenter.webhook_event_stop_campaign_ids, stop_campaign_ids_field: 'webhook[actions][stop_campaign_ids]',
+          first_trigger_types: [115, 120, 125, 130, 135, 139, 140, 145, 147]
+        } %>
+  </fieldset>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: "Save Actions for #{presenter.webhook_name.titleize} Event", disable_with: "Saving Actions for #{presenter.webhook_name.titleize} Event" }]
+      ) %>
+<% end %>
+
+<script>
+  $(function () {
+    appointmentStatusDisplay('<%= presenter.webhook_event_id -%>');
+    assignUserDisplay('<%= presenter.webhook_event_id -%>');
+    jobEventNewDisplay('<%= presenter.webhook_event_id -%>');
+    jobEventUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+    lineItemsDisplay('<%= presenter.webhook_event_id -%>');
+    orderTypeDisplay('<%= presenter.webhook_event_id -%>');
+    orderTypeVoidedDisplay('<%= presenter.webhook_event_id -%>');
+    orderGroupDisplay('<%= presenter.webhook_event_id -%>');
+    rangeSliderDisplay('<%= presenter.webhook_event_id -%>');
+    startDateUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+    statusUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+    techniciansDisplay('<%= presenter.webhook_event_id -%>');
+    techUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+
+    $(document).off('change', '#event_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#event_<%= presenter.webhook_event_id -%>', function(e) {
+      e.preventDefault();
+
+      appointmentStatusDisplay('<%= presenter.webhook_event_id -%>');
+      assignUserDisplay('<%= presenter.webhook_event_id -%>');
+      jobEventNewDisplay('<%= presenter.webhook_event_id -%>');
+      jobEventUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+      lineItemsDisplay('<%= presenter.webhook_event_id -%>');
+      orderTypeDisplay('<%= presenter.webhook_event_id -%>');
+      orderTypeVoidedDisplay('<%= presenter.webhook_event_id -%>');
+      orderGroupDisplay('<%= presenter.webhook_event_id -%>');
+      rangeSliderDisplay('<%= presenter.webhook_event_id -%>');
+      startDateUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+      statusUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+      techniciansDisplay('<%= presenter.webhook_event_id -%>');
+      techUpdatedDisplay('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_actions_assign_user_to_technician_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_actions_assign_user_to_technician_<%= presenter.webhook_event_id -%>', function(e) {
+      assignUserTechnicianToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_actions_assign_user_to_salesrep_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_actions_assign_user_to_salesrep_<%= presenter.webhook_event_id -%>', function(e) {
+      assignUserSalesRepToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_residential_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_residential_<%= presenter.webhook_event_id -%>', function(e) {
+      residentialToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_commercial_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_commercial_<%= presenter.webhook_event_id -%>', function(e) {
+      commercialToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_event_new_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_event_new_<%= presenter.webhook_event_id -%>', function(e) {
+      eventNewToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_event_updated_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_event_updated_<%= presenter.webhook_event_id -%>', function(e) {
+      eventUpdatedToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change keyup', '#webhook_range_max_<%= presenter.webhook_event_id.tr('-', '_') -%>');
+    $(document).on('change keyup', '#webhook_range_max_<%= presenter.webhook_event_id.tr('-', '_') -%>', function(e) {
+      eval(e.target.id.replace('webhook_range_max', 'webhook_range_slider_total')).update({max: e.target.value});
+    });
+  });
+</script>

@@ -1,0 +1,37 @@
+<%
+  # app/views/triggers/forms/_130.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/130", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions on a specific date
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Start on a Specific Date...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will fire thier first Trigger on the Campaign Start Date specified below.</li>
+      </ul>
+    </small>
+  </div>
+</div>
+
+<%= bootstrap_calendar_field(
+      field:        'data[start_campaign_specific_date]',
+      value:        presenter.trigger_start_campaign_specific_date,
+      label:        { title: 'Campaign Start Date' },
+      html_options: { id: 'start_campaign_specific_date_date', disabled: presenter.campaign_disabled? },
+      flatpickr:    { include_time: true, mode: 'single', min_date: Time.current.in_time_zone(presenter.client.time_zone).strftime('%m/%d/%Y %H:%M %p') }
+    ) %>
+
+<%= render partial: 'triggers/forms/repeat', locals: { presenter: } %>

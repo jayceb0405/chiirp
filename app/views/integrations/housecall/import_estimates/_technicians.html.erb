@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/housecall/import_estimates/_technicians.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/housecall/import_estimates/technicians', locals: { presenter: Integrations::Housecall::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Housecall::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Housecall::Presenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'import_estimate[ext_tech_ids]',
+      row:          { id: 'import_estimate_row_ext_tech_ids' },
+      label:        { title: "Housecall Pro Technicians<span class=\"ml-2\">#{link_to '', integrations_housecall_import_estimates_refresh_technicians_path, { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Technicians', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.ext_tech_options_for_select, selected: [] },
+      messages:     { note: 'Import estimates assigned to any of the selected technicians.' }
+    ) %>

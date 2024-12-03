@@ -1,0 +1,25 @@
+<%
+  # app/views/clients/companies/index.html.erb
+  #
+  # Example:
+  # 	render 'clients/companies/index'
+  #
+  # Instance Variables:
+  # 	(req) @user_settings: (Users::Setting)
+  #
+  # Local Variables:
+  #   (req) list_type: (String)
+  #
+  presenter = Clients::CompaniesPresenter.new(@user_settings)
+  presenter.list_type = local_assigns.dig(:list_type).to_s.downcase
+-%>
+<div class="section-container" id="clients_list">
+  <%= render partial: 'clients/companies/index', locals: { presenter: } %>
+</div>
+
+<script>
+  $(function() {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_companies').addClass('has-active');
+  });
+</script>

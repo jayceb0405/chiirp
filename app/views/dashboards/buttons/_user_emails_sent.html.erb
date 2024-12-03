@@ -1,0 +1,28 @@
+<%
+  # app/views/dashboards/buttons/_user_emails_sent.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/user_emails_sent', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  user_email_messages_sent            = Messages::Message.emails_sent_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count
+  user_email_messages_sent_successful = Messages::Message.emails_delivered_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count
+-%>
+<%= render partial: 'dashboards/dash_button', locals: {
+      id:               'user_texts_sent',
+      stats:            "#{user_email_messages_sent} / #{user_email_messages_sent_successful}",
+      description:      'Emails Sent',
+      description_icon: 'u',
+      icon:             'fa fa-envelope',
+      link:             presenter.client.my_contacts_allowed ? my_contacts_path : '#',
+      chart_id:         'user_texts_sent_chart',
+      chart_value:      (user_email_messages_sent.to_f.positive? ? (user_email_messages_sent_successful.to_f / user_email_messages_sent).round(2) : 0.0),
+      button_movable:   true
+    } %>

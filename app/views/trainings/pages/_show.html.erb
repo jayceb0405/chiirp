@@ -1,0 +1,38 @@
+<%
+  # app/views/trainings/pages/_show.html.erb
+  # 
+  # Example:
+  #   render partial: 'trainings/pages/show', locals: { trainings_presenter: TrainingsPresenter }
+  # 
+  # Required Instance Variables:
+  #   tp.training:      (Training)
+  #   tp.training_page: (TrainingPage)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training, training_page: @training_page)
+-%>
+<div class="card-header border-0">
+  <div class="d-flex justify-content-between">
+    <h6><%= tp.training_page.title -%></h6>
+  </div>
+</div>
+
+<div class="card-body text-center">
+  <%= tp.training_page.header.html_safe %>
+
+  <% if tp.training_page.video_link.present? %>
+
+      <% if tp.training_page.video_link.include?('<iframe') || tp.training_page.video_link.include?('<script') %>
+        <div class="embed-responsive embed-responsive-16by9">
+          <%= tp.training_page.video_link.html_safe %>
+        </div>
+      <% else %>
+        <% # this code supports data entered prior to 2020-09-23 or any link that only includes a URL %>
+        <iframe class="embed-responsive-item" src="<%= tp.training_page.video_link -%>" frameborder="0" scrolling="no" allowfullscreen></iframe>
+      <% end %>
+  <% end %>
+
+  <%= tp.training_page.footer.html_safe %>
+</div>

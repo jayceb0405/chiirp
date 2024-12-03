@@ -1,0 +1,73 @@
+// app/assets/stylesheets/common/screen_breakpoints.scss
+
+// screen breakpoints
+$breakpoint-screen-xl-min: 1200px;
+$breakpoint-screen-lg-min: 992px;
+$breakpoint-screen-md-min: 768px;
+$breakpoint-screen-sm-min: 576px;
+$breakpoint-screen-sx-min: 0px;
+
+// bootstrap size notation
+// 1 = 0.25rem
+// 2 = 0.50rem
+// 3 = 1.00rem
+// 4 = 1.50rem
+// 5 = 3.00rem
+@media (min-width: $breakpoint-screen-xl-min) { // -xl (1200px)
+}
+@media (min-width: $breakpoint-screen-lg-min) { // -lg (992px)
+}
+@media (min-width: $breakpoint-screen-md-min) { // -md (768px)
+}
+@media (min-width: $breakpoint-screen-sm-min) { // -sm (576px)
+}
+@media (min-width: $breakpoint-screen-sx-min) { // -xs (0px)
+}
+
+// ipad pro 12.9 landscape (1366)
+@media (max-width: 1600px) {
+}
+
+@media (max-width: 1200px) {
+}
+
+// ipad pro 12.9 (1024)
+// ipad 2, 1 mini, 4 mini landscape (1024)
+// ipad 10.5, 11 landscape (1112)
+@media (min-width: 992px) and (max-width:1199px) {
+}
+
+@media (max-width: 991px) {
+}
+
+// iphone Xr, Xs max landscape (896)
+// iphone X, Xs landscape (812)
+// ipad 2, 1 mini, 4 mini (768)
+// ipad pro 10.5, 11 (834)
+@media (min-width: 768px) and (max-width: 991px) {
+}
+
+// iphone 6, 6s, 7, 8 landscape (667)
+// iphone 6+, 6s+, 7+, 8+ landscape (736)
+@media (max-width: 767px) {
+}
+
+// iphone 5, 5s, 5c, SE landscape (568)
+@media (max-width: 575px) {
+}
+
+// iphone 4, 4s landscape (480)
+@media (max-width: 480px) {
+}
+
+// iphone 6+, 6s+, 7+, 8+, Xr, Xs max (414)
+@media (max-width: 414px) {
+}
+
+// iphone 6, 6s, 7, 8, X, Xs (375)
+@media (max-width: 375px) {
+}
+
+// iphone 4, 5 (320)
+@media (max-width: 320px) {
+}

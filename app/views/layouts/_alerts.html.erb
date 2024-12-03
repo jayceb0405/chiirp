@@ -1,0 +1,58 @@
+<%
+  # app/views/layouts/_alerts.html.erb
+  #
+  # Example:
+  # 	render partial: "layouts/alerts", locals: { models: [] }
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  # 	alert_type: (String)
+  # 	models:     (Array)
+  #
+  available_alert_types  = %w[success warning error]
+  available_alert_titles = ['Yea...', 'Careful...', 'Oops...']
+  alert_type    = local_assigns.include?(:alert_type) && available_alert_types.include?(local_assigns[:alert_type].to_s) ? local_assigns[:alert_type].to_s : 'success'
+  alert_title   = available_alert_titles[available_alert_types.index(alert_type)]
+  alert_message = []
+  alert_message << flash.notice unless notice.nil?
+  alert_message << flash.alert unless alert.nil?
+  alert_message << resource.errors.full_messages.join('<br />') if defined?(resource) && resource && !resource.errors.empty?
+  flash.discard
+
+  if local_assigns.include?(:models) && local_assigns[:models].is_a?(Array) && local_assigns[:models].present?
+
+    local_assigns[:models].each do |m|
+      if m&.errors&.any?
+        alert_type    = 'error'
+        alert_title   = available_alert_titles[available_alert_types.index(alert_type)]
+        alert_message << m.errors.full_messages.join('<br />')
+        m.errors.clear
+      end
+    end
+  end
+
+  alert_message = alert_message.reject(&:empty?).join('<br />')
+
+  # don't show this message
+  alert_message = '' if alert_message.casecmp('you are already signed in.').zero?
+# logger.debug "alert_message: #{alert_message.inspect} - File: #{__FILE__} - Line: #{__LINE__} - Calling: { File: #{caller_locations(1..1).first.path} - Line: #{caller_locations(1..1).first.lineno} }"
+-%>
+<% unless alert_message.empty? %>
+  <script>
+    $(document).ready(function() {
+      var alert_message = "<%= alert_message.html_safe -%>"
+
+      ChiirpAlert({
+        'title':      '<%= alert_title -%>',
+        'body':       alert_message,
+        'type':       'warning',
+        'persistent': true
+      });
+    });
+  </script>
+<% end %>

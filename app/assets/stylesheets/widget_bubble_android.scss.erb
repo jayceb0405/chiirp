@@ -1,0 +1,73 @@
+// app/assets/stylesheets/mobile/widget_bubble.scss.erb
+body {
+  font-family: "Montserrat";
+  font-weight: normal;
+  font-size: 16px;
+}
+.container {
+  height: 80px;
+  width: 309px;
+}
+.bubble {
+  height: 50px;
+  width: 269px;
+  padding: 15px 20px;
+  display: none;
+  background-image: -webkit-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+  background-image:    -moz-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+  background-image:     -ms-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+  background-image:      -o-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+  background-image:         linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+  border-radius: 10px;
+  box-shadow: inset 0 1px 1px hsla(0,0%,100%,.5),
+              3px 3px 0 hsla(0,0%,0%,.1);
+  color: #333;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+}
+.bubble:after, .bubble:before {
+  border-bottom: 10px solid transparent;
+  border-right: 20px solid transparent;
+  bottom: 2px;
+  content: '';
+  position: absolute;
+  right: 25px;
+}
+.bubble:before {
+  border-right: 20px solid hsla(0,0%,0%,.1);
+  bottom: -1px;
+  right: 21px;
+}
+.inner_bubble {
+  display: flex;
+  flex-wrap: wrap;
+  position: relative;
+  top: -30px;
+
+  span {
+    vertical-align: middle;
+    display: inline-block;
+    line-height: normal;
+  }
+}
+.bubble_text {
+  height: 60px;
+  line-height: 60px;
+  overflow: hidden;
+}
+.avatar {
+  margin-right: 10px;
+  margin-top: auto;
+}
+.close_button {
+  font-size: 18px;
+  color: #b2bbc2;
+  background-color: transparent;
+  border: 0;
+  position: relative;
+  left: 265px;
+  top: -15px;
+  text-decoration: none;
+  cursor: pointer;
+}

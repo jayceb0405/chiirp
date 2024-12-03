@@ -1,0 +1,34 @@
+<%
+  # app/views/integrations/servicemonster/webhooks/_event_inner.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/webhooks/event_inner', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter:               (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<td class="text-left" colspan="3" id="td_webhook_<%= presenter.webhook_event_id -%>">
+  <%= presenter.webhook_name_with_type %>
+</td>
+<%= tag.td(class: 'text-center') { (presenter.webhook_event_active? ? '<i class="fa fa-link text-success"></i>' : ' <i class="fa fa-link text-danger"></i>').html_safe } %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_line_item_names } %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_campaign&.name.to_s } if presenter.campaigns_allowed? %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_group&.name.to_s } if presenter.groups_allowed? %>
+<td class="text-left"><%= presenter.webhook_event_tag&.name.to_s -%></td>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_stage&.name.to_s } if presenter.stages_allowed? %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_stop_campaigns.join(', ') } if presenter.campaigns_allowed? %>
+<td class="text-right">
+  <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#webhook_edit_tr_<%= presenter.webhook_event_id -%>">
+    <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+  </button>
+  <%= link_to '', '#', {
+        class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_webhook',
+        style: 'text-decoration: none;',
+        data:  { id: presenter.webhook_event_id, event: presenter.webhook_object, name: presenter.webhook_name }
+      } %>
+</td>

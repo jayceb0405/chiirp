@@ -1,0 +1,19 @@
+// app/views/snippets/js/_flatpickr.js.erb
+//
+// Example:
+//   render partial: 'snippets/js/flatpickr', locals: { element: String }
+//
+<%
+  element     = (local_assigns.dig(:element) || 'flatpickr').to_s.downcase
+  enable_time = local_assigns.dig(:enable_time).to_bool
+%>
+const fp_<%= element -%> = flatpickr("#<%= element -%>", {
+  nextArrow: '>',
+  prevArrow: '<',
+  dateFormat: '<%= enable_time ? 'm/d/Y G:i K' : 'm/d/Y' -%>',
+  enableTime: '<%= enable_time ? 'true' : 'false' -%>',
+  allowInput: 'false',
+  plugins: [
+    new confirmDatePlugin({}),
+  ]
+});

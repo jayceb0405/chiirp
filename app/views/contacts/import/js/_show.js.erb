@@ -1,0 +1,27 @@
+<%
+  # app/views/contacts/import/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'contacts/import/show', locals: { cards: [], header: [] }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   cards: Array
+  #
+  presenter = Contacts::Import::Presenter.new(current_user)
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  header    = local_assigns.include?(:header) && local_assigns[:header].is_a?(Array) ? local_assigns[:header] : []
+-%>
+
+<% if cards.include?('import_actions') %>
+  $("#import_actions").html('<%= j render partial: 'contacts/import/form_actions', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('header_designer') %>
+  $("#header_designer").html('<%= j render partial: 'contacts/import/header_designer', locals: { header:, presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,40 @@
+<%
+# app/views/layouts/looper/common/footer/_show.html.erb
+#
+# Example:
+#   render partial: 'layouts/looper/common/footer/show'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<footer class="app-footer">
+  <ul class="list-inline d-flex justify-content-between">
+    <span>
+      <li class="list-inline-item">
+        <%= link_to(I18n.t('tenant.name'), "https://#{I18n.t("tenant.#{Rails.env}.sales_host")}/", class: 'pr-2 text-muted', target: 'blank') -%>
+      </li>
+      <li class="list-inline-item">
+        <%= link_to_if(I18n.t('tenant.facebook').present?, '', "https://www.facebook.com/#{I18n.t('tenant.facebook')}/", class: 'fab fa-facebook pr-2 text-muted', target: 'blank') -%>
+      </li>
+      <li class="list-inline-item">
+        <%= link_to_if(I18n.t('tenant.twitter').present?, '', "https://www.twitter.com/#{I18n.t('tenant.twitter')}/", class: 'fab fa-twitter pr-2 text-muted', target: 'blank') -%>
+      </li>
+      <li class="list-inline-item">
+        <%= link_to_if(I18n.t('tenant.linkedin').present?, '', "https://www.linkedin.com/#{I18n.t('tenant.linkedin')}/", class: 'fab fa-linkedin text-muted', target: 'blank') -%>
+      </li>
+    </span>
+
+    <span>
+      <% unless I18n.t('tenant.id').downcase == 'chiirp' %>
+        <li class="list-inline-item text-muted">
+          Powered by <%= image_tag('tenant/chiirp/logo.svg', { class: 'img-fluid pl-2 pr-2', style: 'height:20px;' }) -%>Chiirp
+        </li>
+      <% end %>
+    </span>
+  </ul>
+  <div class="copyright"> Copyright &copy; <%= Time.current.year -%>. All rights reserved. </div>
+</footer>

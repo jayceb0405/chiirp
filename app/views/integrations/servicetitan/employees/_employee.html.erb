@@ -1,0 +1,27 @@
+<%
+  # app/views/integrations/servicetitan/employees/_employee.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicetitan/employees/employee", collection: @client_api_integration.employees, as: :employee, locals: { presenter: Integrations::Servicetitan::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::Presenter)
+-%>
+<tr>
+  <td class="text-left align-middle"><%= employee.dig(:name) -%> <small>(<%= employee.dig(:id) -%>)</small><br></td>
+  <td class="text-left align-middle"><%= employee.dig(:phone) -%></td>
+  <td class="text-left align-middle"><%= employee.dig(:email) -%></td>
+  <td class="text-left align-bottom">
+    <%= bootstrap_select_tag(
+          field:   "employees[#{employee.dig(:id)}]",
+          row:     { class: 'mb-0', columns: [0, 12] },
+          label:   { title: "Select a matching #{I18n.t('tenant.name')} User." },
+          options: { for_select: options_from_collection_for_select(presenter.client.users, 'id', 'fullname', presenter.client_api_integration.employees&.dig(employee.dig(:id).to_s)), blank: 'Select a User' }
+        ) %>
+  </td>
+</tr>

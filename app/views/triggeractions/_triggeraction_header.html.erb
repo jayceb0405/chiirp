@@ -1,0 +1,56 @@
+<%
+  # app/views/triggeractions/_triggeraction_header.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/triggeraction_header", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= link_to "<span data-toggle=\"tooltip\" title=\"Edit\">#{presenter.triggeraction_name} #{presenter.triggeraction_schedule_string}<small>#{render partial: 'snippets/spinning_logo', locals: { comment: 'Deleting Action...', hidden: true, id: "triggeraction_delete_spinner_#{presenter.triggeraction.id}", inline: true, size: 30 }}</small></span><span class=\"ml-2\" id=\"triggeraction_analysis_results_#{presenter.triggeraction.id}\"></span>".html_safe,
+            '#',
+            class: 'h6 mr-auto prevent-default text-dark d-inline-block',
+            style: 'text-decoration:none;',
+            data:  {
+              toggle: 'collapse',
+              target: "##{presenter.triggeraction_form_id}"
+            } %>
+<%= link_to '<span data-toggle="tooltip" title="Edit"><i class="fa fa-pencil-alt"></i></span>'.html_safe,
+            '#',
+            class: 'btn btn-icon btn-light prevent-default',
+            style: 'text-decoration:none;',
+            data:  {
+              toggle: 'collapse',
+              target: "##{presenter.triggeraction_form_id}"
+            } %>
+
+<% unless presenter.triggeraction.new_record? || presenter.campaign_disabled? %>
+  <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe,
+              '#',
+              class: 'btn btn-icon btn-light prevent-default',
+              style: 'text-decoration:none;',
+              id:    "delete_triggeraction_#{presenter.triggeraction.id}",
+              title: 'Delete',
+              data:  {
+                toggle: 'tooltip'
+              } %>
+<% end %>
+
+<script>
+  $(function() {
+    <%= render partial: 'triggeractions/js/analysis_results', locals: { triggeraction: presenter.triggeraction } %>
+
+    <% unless presenter.triggeraction.new_record? || presenter.campaign_disabled? %>
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     "#delete_triggeraction_#{presenter.triggeraction.id}",
+            alert:       { body: "Deleting \"#{presenter.triggeraction.type_name.squish}\" can NOT be un-done. Is it your intention to delete this action?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: trigger_triggeraction_path(presenter.trigger, presenter.triggeraction), element: "triggeraction_delete_spinner_#{presenter.triggeraction.id}" }
+          } %>
+    <% end %>
+  });
+</script>

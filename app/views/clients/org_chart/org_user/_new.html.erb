@@ -1,0 +1,19 @@
+<%
+# app/views/clients/org_chart/org_user/_new.html.erb
+#
+# Example:
+#   render partial: "clients/org_chart/org_user/new"
+#
+# Required Instance Variables:
+#   @client: (Client)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-2">
+  <legend class="w-auto mb-0"><h6>Add a New Organization Member</h6></legend>
+  <%= form_with model: @org_user, url: client_org_users_path(@client), builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+    <%= render partial: 'clients/org_chart/org_user/form_fields', locals: { f: } %>
+  <% end %>
+</fieldset>

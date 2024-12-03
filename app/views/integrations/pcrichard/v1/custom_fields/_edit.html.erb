@@ -1,0 +1,97 @@
+<%
+  # app/views/integrations/pcrichard/v1/custom_fields/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/v1/custom_fields/edit', locals: ( presenter: Presenter)
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Custom Fields Used by PC Richard</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_tag integrations_pcrichard_v1_custom_fields_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[option_01]',
+              label:    { title: 'Model Option # 1' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('option_01'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save model option # 1.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[option_02]',
+              label:    { title: 'Model Option # 2' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('option_02'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save model option # 2.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[option_03]',
+              label:    { title: 'Model Option # 3' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('option_03'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save model option # 3.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[option_04]',
+              label:    { title: 'Model Option # 4' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('option_04'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save model option # 4.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[option_05]',
+              label:    { title: 'Model Option # 5' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('option_05'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save model option # 5.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[option_06]',
+              label:    { title: 'Model Option # 6' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('option_06'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save model option # 6.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[installation_charge]',
+              label:    { title: 'Installation Charge' },
+              options:  { array: (presenter.string_custom_fields + presenter.numeric_custom_fields + presenter.currency_custom_fields).sort, selected: presenter.custom_field_option('installation_charge'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save installation charge.' }
+            ) %>
+        <% bootstrap_select_tag(
+             field:    'custom_fields[receipt_notes]',
+             label:    { title: 'Receipt Notes' },
+             options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('receipt_notes'), blank: 'Select a Custom Field' },
+             messages: { note: 'Select a Custom Field to save receipt notes.' }
+           ) %>
+        <%= bootstrap_select_tag(
+              field:    'custom_fields[internal_notes]',
+              label:    { title: 'Internal Notes' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_option('internal_notes'), blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save internal notes.' }
+            ) %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Custom Field Assignments', disable_with: 'Saving Custom Field Assignments' }]
+            ) %>
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_custom_fields').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

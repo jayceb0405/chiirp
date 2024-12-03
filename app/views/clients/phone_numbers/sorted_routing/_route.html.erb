@@ -1,0 +1,21 @@
+<%
+  # app/views/clients/phone_numbers/sorted_routing/_route.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/phone_numbers/sorted_routing/route', collection: routes, as: route, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client:   (Client)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Clients::PhoneNumbers::Presenter.new(client: @client)
+-%>
+<li class="list-group-item align-items-center drag-handle" data-id="<%= route[1] -%>">
+  <div class="row w-100">
+    <%= hidden_field_tag "twnumber[sorted_routing][#{route[1]}]", route_counter, { id: "twnumber_routing_order_#{presenter.twnumber.id}_#{route[1]}" } %>
+    <span class="drag-indicator"></span>
+    <%= route[0] %>
+  </div>
+</li>

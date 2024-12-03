@@ -1,0 +1,29 @@
+<%
+# app/views/devise/passwords/new.html.erb
+#
+# Example:
+# 	/users/password/new
+# 	new_user_password_path
+# 	new_user_password_url
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'devise/shared/header' %>
+
+<%= form_for resource, as: resource_name, url: password_path(resource_name), builder: LooperFormBuilder, html: { class: 'auth-form-noborder needs-validation', novalidate: true, method: :post } do |f| %>
+  <h4 class="text-left pb-3">Forgot password?</h4>
+
+  <%= f.text_field :email, {
+        row:          { columns: [3, 9] },
+        label:        { title: 'Email' },
+        html_options: { placeholder: 'Email', autocomplete: 'email', required: true, autofocus: true }
+      } %>
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Email instructions' }]
+      ) %>
+<% end %>

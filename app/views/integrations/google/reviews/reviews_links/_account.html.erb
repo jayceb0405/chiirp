@@ -1,0 +1,25 @@
+<%
+  # app/views/integrations/google/reviews/reviews_links/_account.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/reviews_links/account', collection: presenter.options_for_selected_location(account), as: :account, , locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) account:   (String)
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<%= bootstrap_info_field(
+      row:   { class: 'font-weight-bold' },
+      label: { title: account[0] }
+    ) %>
+<%= bootstrap_info_field(
+      info:  'Review Links',
+      row:   { class: 'font-weight-bold' },
+      label: { title: 'Locations' }
+    ) %>
+<%= render partial: 'integrations/google/reviews/reviews_links/location', collection: presenter.options_for_selected_locations_reviews(account[1]), as: :location, locals: { presenter:, account: account[1] } %>

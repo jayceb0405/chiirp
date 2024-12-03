@@ -1,0 +1,33 @@
+<%
+  # app/views/integrations/jobber/v20231115/push_contacts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobber/v20231115/_edit', locals: { presenter: Integrations::Jobber::V20231115::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jobber::V20231115::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jobber::V20231115::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Push Contacts to Jobber</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_jobber_v20231115_push_contacts_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+      <%= render partial: 'integrations/common/push_leads/edit', locals: { integration: 'jobber', presenter: } %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_push_contacts').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

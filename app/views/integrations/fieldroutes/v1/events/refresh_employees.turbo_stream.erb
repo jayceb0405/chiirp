@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/fieldroutes/v1/events/refresh_employees.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/fieldroutes/v1/events/refresh_employees'
+  #
+  # Instance Variables:
+  #   (req) @event_id:               (String)
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Fieldroutes::V1::Events::Presenter.new(client_api_integration: @client_api_integration)
+
+  presenter.event_from_id = @event_id
+-%>
+<%= turbo_stream.update "event_ext_tech_ids_#{presenter.event_id}" do %>
+  <%= render partial: 'integrations/fieldroutes/v1/events/select_tags/employees', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

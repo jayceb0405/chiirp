@@ -1,0 +1,137 @@
+<%
+  # app/views/user_contact_forms/v3/frame/show.html.erb
+  # 
+  # Example:
+  #   render 'user_contact_forms/v3/frame/show'
+  # 
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  rendered_by = %w[page frame modal].include?(local_assigns.dig(:rendered_by).to_s) ? local_assigns[:rendered_by].to_s : 'page'
+  form_html = render partial: "user_contact_forms/v3/shared/form", locals: { rendered_by: rendered_by }
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <title><%= @user_contact_form.title -%></title>
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  
+  <%= javascript_include_tag 'contact_form' %>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+  <!-- FlatPickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <!-- Star Rating -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/css/star-rating-svg.css">
+  <script src="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/jquery.star-rating-svg.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,500,700&display=swap' type='text/css'>
+  
+  <style>
+    body {
+      background-image: url("<%= @user_contact_form.background_image.attached? ? cl_image_path( @user_contact_form.background_image.key, secure: true ) : '' -%>");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: "Montserrat", sans-serif;
+    }
+    .rounded {
+      border-radius: 25px !important;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 24px;
+    }
+    .switch input { 
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    input:checked + .slider {
+      background-color: <%= @user_contact_form.submit_button_color -%>;
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    input:checked + .slider:before {
+      -webkit-transform: translateX(20px);
+      -ms-transform: translateX(20px);
+      transform: translateX(20px);
+    }
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 24px;
+    }
+    .slider.round:before {
+      border-radius: 50%;
+    }
+  </style>
+</head>
+<body style="background-color:<%= @user_contact_form.body_bg_color.to_s -%>;">
+  <%= @user_contact_form.template.gsub('#{form}', form_html).html_safe %>
+
+  <script>
+    $(document).ready( function() {
+      <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+      
+      var tenantHeight = parseInt(window.getComputedStyle(document.body, null).height) + 50;
+      var tenantWidth  = parseInt(window.getComputedStyle(document.body, null).width) + 80;
+      window.parent.postMessage('{"action":"setatt_quicklead_frame","width":"' + (tenantWidth) + '","height":"' + (tenantHeight) + '"}', '*');
+    });
+  </script>
+</body>
+</html>

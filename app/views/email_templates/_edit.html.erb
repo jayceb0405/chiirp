@@ -1,0 +1,278 @@
+<%
+  # app/views/email_templates/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "email_templates/edit"
+  #
+  # Required Instance Variables:
+  #   @email_template: (EmailTemplate)
+  #
+  # Required Local Variables:
+  #   none
+  #
+
+  client ||= @email_template.client
+  presenter ||= EmailTemplatesPresenter.new
+
+  email_message_note = ['This field is hashtag aware. Click "#" to access data fields.']
+  email_message_note << "Use the \#{custom_email_section} hashtag as a placeholder for text that can be inserted from other areas, such as Campaign Builder."
+  email_message_note << "'(FR)' fields are only accessible when Campaign is triggered by a FieldRoutes Event." if @email_template.client&.integrations_allowed&.include?('fieldroutes')
+  email_message_note << "'(HCP)' fields are only accessible when Campaign is triggered by a Housecall Pro Event." if @email_template.client&.integrations_allowed&.include?('housecall')
+  email_message_note << "'(JB)' fields are only accessible when Campaign is triggered by a Jobber Event." if @email_template.client&.integrations_allowed&.include?('jobber')
+  email_message_note << "'(JN)' fields are only accessible when Campaign is triggered by a JobNimbus Event." if @email_template.client&.integrations_allowed&.include?('jobnimbus')
+  email_message_note << "'(RB)' fields are only accessible when Campaign is triggered by a ResponsiBid Event." if @email_template.client&.integrations_allowed&.include?('responsibid')
+  email_message_note << "'(SM)' fields are only accessible when Campaign is triggered by a ServiceMonster Event." if @email_template.client&.integrations_allowed&.include?('servicemonster')
+  email_message_note << "'(ST)' fields are only accessible when Campaign is triggered by a ServiceTitan Event." if @email_template.client&.integrations_allowed&.include?('servicetitan')
+  email_message_note  = email_message_note.join('<br />')
+-%>
+<!-- email_templates.form -->
+<%= render partial: 'layouts/alerts', locals: { models: [@email_template] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @email_template.name -%></span>
+
+      <% unless @email_template.new_record? %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_email_template_delete'
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: @email_template, builder: LooperFormBuilder, remote: true, id: 'email_template_form' do |f| %>
+      <%= f.text_field :name, {
+            label:        { title: 'Email Template Name' },
+            html_options: { id: 'email_template_name', minlength: 2, placeholder: 'Email Template Name', required: true },
+            messages:     { error: 'Must be minimum of 2 characters.' }
+          } %>
+
+      <% if @email_template.client_id.present? && current_user.client.share_email_templates_allowed %>
+        <%= f.copy_field :share_code, {
+              label: { title: 'Email Template Share Code' }
+            } %>
+      <% end %>
+
+      <%= f.text_field :subject, {
+            label:        { title: 'Subject' },
+            html_options: { id: 'email_template_subject', minlength: 2, placeholder: 'Subject', required: true },
+            messages:     { note: 'This field is hashtag aware. Must be minimum of 2 characters.' }
+          } %>
+
+      <% if current_user.team_member? && @email_template.v2? %>
+        <%= f.switch :make_template, {
+              label:      { title: 'Global Template' },
+              checkboxes: [{ id: "email_template_make_global_#{@email_template.id}", checked: @email_template.global?, values: %w[true false], disabled: @email_template.global? }],
+              messages:   { note: 'Should all clients be able to use this template? This cannot be undone.' }
+            } %>
+        <%= f.select :category, {
+              row:          { id: "email_template_category_row_#{@email_template.id}" },
+              label:        { title: 'Category' },
+              html_options: { id: 'select_category', mobile: browser.device.mobile? },
+              choices:      { for_select: presenter.categories, blank: 'Choose Category', dynamic: true },
+              messages:     { note: 'Select the category this email template belongs in.' }
+            } %>
+
+        <%# This partial allows handling images. Images are now automated and this isn't needed. %>
+        <%# Keeping for now in case the automation doesn't work correctly. %>
+        <%# <% unless @email_template.new_record? %>
+        <%#   <div id="email_template_thumbnail">
+        <%#     <%= render partial: 'email_templates/thumbnail' %>
+        <%#   </div>
+        <%# <% end %>
+      <% end %>
+
+      <% if @email_template.version == 1 %>
+        <%= bootstrap_text_area(
+              field:        'email_template[content]',
+              value:        f.object.content,
+              row:          { columns: [0, 12] },
+              messages:     { note: email_message_note.html_safe },
+              html_options: { id: 'email_template_content' }
+            ) %>
+      <% else %>
+        <%= f.hidden_field :css, id: 'email_template_css_field' %>
+        <%= f.hidden_field :html, id: 'email_template_html_field' %>
+
+        <div class="row">
+          <div class="col-12">
+          <%# style="height: 100vh; overflow: auto;" %>
+            <%= render partial: 'integrations/stripo/show', locals: { css_element_id: 'email_template_css_field', form_element_id: 'email_template_form', html_element_id: 'email_template_html_field', save_element_id: 'save_button', user: current_user } %>
+          </div>
+        </div>
+      <% end %>
+
+      <%= f.submit_buttons(
+            buttons: [{ id: 'save_button', title: 'Save Email Template', disable_with: 'Saving Email Template' }]
+          ) %>
+    <% end -%>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    <% unless @email_template.new_record? %>
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     '#button_email_template_delete',
+            alert:       { body: "Deleting \"#{@email_template.name}\" can NOT be un-done. Is it your intention to delete this Email Template?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: email_template_path(@email_template.id) }
+          } %>
+    <% end %>
+
+    // provide #hashtag variable selector
+    <% if @email_template.client %>
+      MultiTypeahead('#email_template_subject', <%= options_for_hashtag(client:, include_estimate_hashtags: true, include_invoice_hashtags: true, include_job_hashtags: true, include_subscriptions_hashtags: true).to_json.html_safe %>, '#', false);
+    <% end %>
+
+    <% if @email_template.version == 1 %>
+      tinymce.remove('textarea#email_template_content');
+      tinymce.init({
+        selector: 'textarea#email_template_content',
+        plugins: ['preview', 'code', 'fullscreen', 'table', 'emoticons', 'media', 'image', 'link', 'lists', 'wordcount'],
+        toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright alignjustify | link image | bullist numlist hashtag_menu',
+        toolbar_mode: "wrap",
+        promotion: false,
+        skin: false,
+        content_css: false,
+        height: 500,
+        menubar: true,
+        inline: false,
+        link_target_list: false,
+        object_resizing : false,
+        file_picker_types: 'file',
+        image_advtab: false,
+        file_picker_callback: function(callback, value, meta) {
+          var input = document.createElement('input');
+          input.setAttribute('type', 'file');
+          input.setAttribute('accept', 'image/* audio/* video/*');
+
+          input.onchange = function() {
+            var file = this.files[0];
+
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function () {
+              var id = 'blobid' + (new Date()).getTime();
+              var blobCache =  tinymce.activeEditor.editorUpload.blobCache;
+              var base64 = reader.result.split(',')[1];
+              var blobInfo = blobCache.create(id, file, base64);
+
+              var xhr, formData;
+              xhr = new XMLHttpRequest();
+              xhr.withCredentials = false;
+
+              xhr.open('POST', 'https://api.cloudinary.com/v1_1/<%= Rails.application.credentials[:cloudinary][:cloud_name] -%>/auto/upload');
+
+              xhr.onload = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                  var response = JSON.parse(xhr.responseText);
+                  var url = response.secure_url; //get the url
+                  var json = {location: url}; //set it in the format tinyMCE wants it
+                  callback(json.location, { title: 'attachment_' + file.name });
+                }
+              };
+
+              formData = new FormData();
+              formData.append('file', blobInfo.blob(), blobInfo.filename());
+              formData.append('upload_preset', 'MessageEmailAttachment');
+
+              xhr.send(formData);
+            };
+          };
+
+          input.click();
+        },
+        images_upload_handler: (function (blobInfo, progress) {
+          return new Promise(function (resolve, reject) {
+            var xhr, formData;
+            xhr = new XMLHttpRequest();
+            xhr.withCredentials = false;
+            xhr.open(
+              "POST",
+              "https://api.cloudinary.com/v1_1/<%= Rails.application.credentials[:cloudinary][:cloud_name] -%>/auto/upload"
+            );
+            xhr.upload.onprogress = function (e) {
+              progress((e.loaded / e.total) * 100);
+            };
+            xhr.onload = function () {
+              if (xhr.readyState == 4 && xhr.status == 200) {
+                var response = JSON.parse(xhr.responseText);
+                var url = response.secure_url; //get the url
+                var json = {
+                  location: url
+                }; //set it in the format tinyMCE wants it
+                resolve(json.location);
+              }
+            };
+            formData = new FormData();
+            formData.append("file", blobInfo.blob(), blobInfo.filename());
+            formData.append("upload_preset", "MessageEmailAttachment");
+            xhr.send(formData);
+          });
+        }),
+        setup: function (editor) {
+          editor.ui.registry.addMenuButton('hashtag_menu', {
+            text: '#',
+            fetch: function (callback) {
+              var items = []
+
+              $.each(<%= options_for_hashtag_string(client:, include_yield_tag: true, include_estimate_hashtags: true, include_invoice_hashtags: true, include_job_hashtags: true, include_subscriptions_hashtags: true).html_safe -%>, function( index, value ) {
+                items.push(
+                  {
+                    type: 'menuitem',
+                    text: value.name,
+                    onAction: function () {
+                      editor.insertContent('#' + value.username);
+                    }
+                  }
+                );
+              });
+              callback(items);
+            }
+          });
+
+        }
+      });
+      // $(document).on('shown.bs.modal', '#training_page_footer_modal', function () {
+        //   tinymce.execCommand('mceAddEditor', false, 'training_page_footer');
+      // });
+
+      // $(document).on('hidden.bs.modal', '#training_page_footer_modal', function () {
+        //   tinymce.execCommand('mceRemoveEditor', false, 'training_page_footer');
+      // });
+
+      // $(document).on('focusin', function(e) {
+        //   if ($(e.target).closest(".tox-dialog").length) {
+          //     e.stopImmediatePropagation();
+      //   }
+      // });
+
+      // $('#training_page_footer_submit').on('click', function(e) {
+        //   $('#training_page_footer_modal').modal('hide');
+      // });
+    <% elsif current_user.team_member? && @email_template.v2? && !@email_template.global? %>
+      $(document).off('click', '#email_template_make_global_<%= @email_template.id -%>');
+      $(document).on('click', '#email_template_make_global_<%= @email_template.id -%>', function(e) {
+        displayGlobalAttributes();
+      });
+
+      displayGlobalAttributes();
+    <% end %>
+
+  });
+
+  function displayGlobalAttributes() {
+    if ($('#email_template_make_global_<%= @email_template.id -%>').is(':checked')) {
+      $('#email_template_category_row_<%= @email_template.id -%>').show();
+      $('#email_template_thumbnail').show();
+    } else {
+      $('#email_template_category_row_<%= @email_template.id -%>').hide();
+      $('#email_template_thumbnail').hide();
+    }
+  }
+</script>

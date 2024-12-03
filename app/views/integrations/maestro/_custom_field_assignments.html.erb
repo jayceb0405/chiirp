@@ -1,0 +1,122 @@
+<%
+  # app/views/integrations/maestro/_custom_field_assignments.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/maestro/custom_field_assignments"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  custom_field_string_hash = @client_api_integration.client.client_custom_fields.where( var_type: "string" ).order( :var_name ).pluck(:var_name, :id)
+  custom_field_date_hash   = @client_api_integration.client.client_custom_fields.where( var_type: "date" ).order( :var_name ).pluck(:var_name, :id)
+  status                   = @client_api_integration.custom_field_assignments.include?("status") ? @client_api_integration.custom_field_assignments["status"].to_i : 0
+  checked_in               = @client_api_integration.custom_field_assignments.include?("checked_in") ? @client_api_integration.custom_field_assignments["checked_in"].to_i : 0
+  guest_type               = @client_api_integration.custom_field_assignments.include?("guest_type") ? @client_api_integration.custom_field_assignments["guest_type"].to_i : 0
+  client_code              = @client_api_integration.custom_field_assignments.include?("client_code") ? @client_api_integration.custom_field_assignments["client_code"].to_i : 0
+  room_number              = @client_api_integration.custom_field_assignments.include?("room_number") ? @client_api_integration.custom_field_assignments["room_number"].to_i : 0
+  arrival_date             = @client_api_integration.custom_field_assignments.include?("arrival_date") ? @client_api_integration.custom_field_assignments["arrival_date"].to_i : 0
+  departure_date           = @client_api_integration.custom_field_assignments.include?("departure_date") ? @client_api_integration.custom_field_assignments["departure_date"].to_i : 0
+-%>
+<div class="container-body">
+  <%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+  <h4>Maestro Custom Field Assignments</h4>
+
+  <%= form_tag integrations_maestro_custom_field_assignments_update_path, { builder: LooperFormBuilder, method: :put, remote: true } do %>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[status]", "Status", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[status]",
+            options_for_select( custom_field_string_hash, status ),
+            { include_blank: "Select a Custom String Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[checked_in]", "Checked In", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[checked_in]",
+            options_for_select( custom_field_string_hash, checked_in ),
+            { include_blank: "Select a Custom String Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[guest_type]", "Guest Type", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[guest_type]",
+            options_for_select( custom_field_string_hash, guest_type ),
+            { include_blank: "Select a Custom String Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[client_code]", "Client Code", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[client_code]",
+            options_for_select( custom_field_string_hash, client_code ),
+            { include_blank: "Select a Custom String Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[room_number]", "Room Number", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[room_number]",
+            options_for_select( custom_field_string_hash, room_number ),
+            { include_blank: "Select a Custom String Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[arrival_date]", "Arrival Date", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[arrival_date]",
+            options_for_select( custom_field_date_hash, arrival_date ),
+            { include_blank: "Select a Custom Date Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="form-row mb-2">
+      <%= label_tag "custom_field_assignments[departure_date]", "Departure Date", class: "col-5 pl-0 mt-auto mb-auto form-group-label" %>
+      <div class="col-7 input-group pr-0 mb-0">
+        <%= select_tag( "custom_field_assignments[departure_date]",
+            options_for_select( custom_field_date_hash, departure_date ),
+            { include_blank: "Select a Custom Date Field",
+              class: "form-control"
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <%= submit_tag "Save Custom Field Assignments", data: { "disable-with": "Saving Custom Field Assignments..." }, class: 'btn btn-app mt-2' %>
+  <% end %>
+</div>

@@ -1,0 +1,57 @@
+<%
+# app/views/layouts/looper/common/_user.html.erb
+#
+# Example:
+#   render partial: 'layouts/looper/common/user'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<% if @phone_number_assigned && @contact_created && @user_phone_defined && (current_user.team_member? || current_user.access_controller?('users', 'allowed', session)) %>
+  <%= link_to 'View profile', edit_client_user_path(current_user.client_id, current_user), { class: 'dropdown-item' } %>
+<% end %>
+
+<%= link_to 'Version history', system_settings_version_history_path, { class: 'dropdown-item' } %>
+<%= link_to "Switch to #{cookies[:skin] == 'dark' ? 'light' : 'dark'} mode", '#', { id: 'night_mode_button', class: 'dropdown-item' } %>
+
+<% if controller_name != 'sessions' && user_signed_in? && !session.include?(:agency_user_token) %>
+  <%= link_to 'Change password', edit_user_registration_path, { class: 'dropdown-item' } %>
+<% end %>
+
+<div class="dropdown-divider"></div>
+
+<% if controller_name != 'sessions' %>
+  <% if user_signed_in? %>
+    <% if session.include?(:agency_user_token) %>
+      <% if (agency_user = current_user.agency_user_logged_in_as(session)) %>
+        <%= link_to "Return to #{agency_user.fullname}", client_notes_path(current_user.client), { class: 'dropdown-item asdf', remote: true, method: :get } %>
+      <% else %>
+        <%= link_to 'Logout', user_logout_path(current_user), { class: 'dropdown-item' } %>
+      <% end %>
+    <% else %>
+      <%= link_to 'Logout', user_logout_path(current_user), { class: 'dropdown-item' } %>
+    <% end %>
+  <% else %>
+    <%= link_to 'Login', new_user_session_path, { class: 'dropdown-item' } %>
+  <% end %>
+<% end %>
+
+<div style="text-align:center;font-size:0.75em;">Version: <%= APP_VERSION %></div>
+
+<script>
+  $(function() {
+    $(document).off('click', '#night_mode_button');
+    $(document).on('click', '#night_mode_button', function(e) {
+      e.preventDefault()
+      const skin = Looper.skin === 'dark' ? 'default' : 'dark'
+
+      Looper.setSkin(skin)
+
+      location.reload()
+    });
+  });
+</script>

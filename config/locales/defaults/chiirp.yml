@@ -1,0 +1,138 @@
+chiirp:
+  attempt:
+    one: "%{count} attempt"
+    other: "%{count} attempts"
+  doorkeeper:
+    scopes:
+      write: "Write access"
+      public: "Publish access"
+    authorizations:
+      buttons:
+        authorize: 'Authorize'
+        deny: 'Deny'
+      error:
+        title: 'An error has occurred'
+      new:
+        title: 'Authorization required'
+        prompt: 'Authorize %{client_name} to use your account?'
+        able_to: 'This application will be able to'
+      show:
+        title: 'Authorization code'
+      form_post:
+        title: 'Submit this form'
+    errors:
+      messages:
+        # Common error messages
+        invalid_request:
+          unknown: 'The request is missing a required parameter, includes an unsupported parameter value, or is otherwise malformed.'
+          missing_param: 'Missing required parameter: %{value}.'
+          request_not_authorized: 'Request need to be authorized. Required parameter for authorizing request is missing or invalid.'
+        invalid_redirect_uri: "The requested redirect uri is malformed or doesn't match client redirect URI."
+        unauthorized_client: 'The client is not authorized to perform this request using this method.'
+        access_denied: 'The resource owner or authorization server denied the request.'
+        invalid_scope: 'The requested scope is invalid, unknown, or malformed.'
+        invalid_code_challenge_method: 'The code challenge method must be plain or S256.'
+        server_error: 'The authorization server encountered an unexpected condition which prevented it from fulfilling the request.'
+        temporarily_unavailable: 'The authorization server is currently unable to handle the request due to a temporary overloading or maintenance of the server.'
+
+        # Configuration error messages
+        credential_flow_not_configured: 'Resource Owner Password Credentials flow failed due to Doorkeeper.configure.resource_owner_from_credentials being unconfigured.'
+        resource_owner_authenticator_not_configured: 'Resource Owner find failed due to Doorkeeper.configure.resource_owner_authenticator being unconfigured.'
+        admin_authenticator_not_configured: 'Access to admin panel is forbidden due to Doorkeeper.configure.admin_authenticator being unconfigured.'
+
+        # Access grant errors
+        unsupported_response_type: 'The authorization server does not support this response type.'
+        unsupported_response_mode: 'The authorization server does not support this response mode.'
+
+        # Access token errors
+        invalid_client: 'Client authentication failed due to unknown client, no client authentication included, or unsupported authentication method.'
+        invalid_grant: 'The provided authorization grant is invalid, expired, revoked, does not match the redirection URI used in the authorization request, or was issued to another client.'
+        unsupported_grant_type: 'The authorization grant type is not supported by the authorization server.'
+
+        invalid_token:
+          revoked: "The access token was revoked"
+          expired: "The access token expired"
+          unknown: "The access token is invalid"
+        revoke:
+          unauthorized: "You are not authorized to revoke this token"
+
+        forbidden_token:
+          missing_scope: 'Access to this resource requires scope "%{oauth_scopes}".'
+  image:
+    one: "%{count} image"
+    other: "%{count} images"
+  email_address:
+    address_unknown: "Unknown Email Address"
+    domain_does_not_accept_email: "This domain is not configured to accept email"
+    domain_invalid: "Invalid Domain Name"
+    domain_no_localhost: "localhost is not allowed for your domain name"
+    domain_unknown: "Domain name not registered"
+    exceeds_size: "Address too long"
+    incomplete_domain: "Domain name is incomplete"
+    invalid_address: "Invalid Email Address"
+    invalid_host: "Invalid Host/Domain Name"
+    invalid_mailbox: "Invalid Mailbox"
+    ip_address_forbidden: "IP Addresses are not allowed"
+    ip_address_no_localhost: "Localhost IP addresses are not allowed"
+    ipv4_address_invalid: "This is not a valid IPv4 address"
+    ipv6_address_invalid: "This is not a valid IPv6 address"
+    local_size_long: "Mailbox name too long"
+    local_size_short: "Mailbox name too short"
+    local_invalid: "Recipient is not valid"
+    not_allowed: "Address is not allowed"
+    server_not_available: "The remote email server is not available"
+  tenant:
+    development:
+      app_host: "dev.chiirp.com"
+      bandwidth:
+        subaccount_id: 46_683
+      client_id: 1
+      client_id_leads: 1
+      cloudinary_cname: "res.cloudinary.com"
+      key_user: kevin@kevinneubert.com
+      phone_number: "8025001302"
+      sales_host: www.chiirp.com
+      time_zone: "Eastern Time (US & Canada)"
+      support_email: "chiirp_support@kevinneubert.com"
+      support_hours: "11am-7pm EST/EDT (Mon-Fri)"
+    production:
+      app_host: "app.chiirp.com"
+      bandwidth:
+        subaccount_id: 46_901
+      client_id: 5
+      client_id_leads: 1232
+      cloudinary_cname: "media.chiirp.com"
+      key_user: kevin@kevinneubert.com
+      phone_number: "8017539312"
+      sales_host: www.chiirp.com
+      time_zone: "Mountain Time (US & Canada)"
+      support_email: "support@chiirp.com"
+      support_hours: "8am-4pm PST/PDT (Mon-Fri)"
+    staging:
+      app_host: "newui-dev.chiirp.com"
+      bandwidth:
+        subaccount_id: 46_683
+      client_id: 1
+      client_id_leads: 1
+      cloudinary_cname: "res.cloudinary.com"
+      key_user: kevin@kevinneubert.com
+      phone_number: "8025001302"
+      sales_host: www.chiirp.com
+      time_zone: "Eastern Time (US & Canada)"
+      support_email: "chiirp_support@kevinneubert.com"
+      support_hours: "11am-7pm EST/EDT (Mon-Fri)"
+    app_protocol: "https"
+    domain: "chiirp.com"
+    facebook: "chiirp"
+    facebook_support_url: "https://www.facebook.com/groups/1205858082902946"
+    firstpromoter: "chiirp"
+    google: ""
+    id: "chiirp"
+    linkedin: "chiirp"
+    name: "Chiirp"
+    oncehub: "chiirp_onboarding"
+    show_training_videos: true
+    training_videos: "https://www.chiirp.com/trainingvideos"
+    twitter: "chiirping"
+    youtube: "UC9ES3c_5wU1l2-iCxxWbXNA"
+    zapier_url: https://zapier.com/developer/public-invite/22685/latest/

@@ -1,0 +1,32 @@
+<%
+  # app/views/users/_edit_mobile.html.erb
+  #
+  # Example:
+  #   render partial: 'users/edit_mobile', locals: { user: User }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   user: (User)
+  #
+  user = local_assigns.dig(:user)
+  return unless user.is_a?(User)
+-%>
+<div class="mx-3">
+  <h6>Stay Informed</h6>
+  <p>
+    <%= I18n.t('tenant.name') -%> sends notifications and updates to you with information about your contacts and account.
+    Stay up to date and informed by providing your mobile phone number to receive these notifications.
+  </p>
+
+</div>
+
+<%= form_with(model: user, url: user_path(user.id, redirect_to: dashboards_path), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', novalidate: true }) do |f| %>
+  <%= f.telephone_field :phone, {
+        label:        { title: 'My Mobile Number' },
+        html_options: { value: number_to_phone(user.phone), id: 'input_phone', placeholder: 'Phone Number', required: true },
+        messages:     { note: "#{I18n.t('tenant.name')} sends notifications and updates to this number. Must be 10 characters." }
+      } %>
+  <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+<% end %>

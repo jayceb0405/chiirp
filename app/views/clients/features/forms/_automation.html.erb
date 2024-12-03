@@ -1,0 +1,105 @@
+<%
+  # app/views/clients/features/forms/_automation.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/features/forms/automation', locals: { presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || ClientPresenter.new(client: @client)
+-%>
+<h6 class="card-header">Automation</h6>
+<%= form_with model: presenter.client, url: clients_feature_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'features_form', novalidate: true } do |f| %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Broadcast Actions for All Allowed' },
+        checkboxes: [{ field: 'my_contacts_group_actions_all_allowed', checked: presenter.client.my_contacts_group_actions_all_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :quick_leads_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum QuickPage Forms Permitted' },
+        html_options: { value: presenter.client.quick_leads_count.to_i, min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 QuickPage forms.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'QuickPage Sharing Allowed' },
+        checkboxes: [{ field: 'share_quick_leads_allowed', checked: presenter.client.share_quick_leads_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :campaigns_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Campaigns Permitted' },
+        html_options: { value: presenter.client.campaigns_count, min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 campaigns.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Campaign Sharing Allowed' },
+        checkboxes: [{ field: 'share_funnels_allowed', checked: presenter.client.share_funnels_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :surveys_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: "Maximum #{Surveys::Survey.title.pluralize} Permitted" },
+        html_options: { min: 0, step: 1 },
+        messages:     { note: "Must be minimum of 0 #{Surveys::Survey.title.downcase.pluralize}." }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: "#{Surveys::Survey.title} Sharing Allowed" },
+        checkboxes: [{ field: 'share_surveys_allowed', checked: presenter.client.share_surveys_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :widgets_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum SiteChat Buttons Permitted' },
+        html_options: { value: presenter.client.widgets_count.to_i, min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 SiteChat buttons.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'SiteChat Sharing Allowed' },
+        checkboxes: [{ field: 'share_widgets_allowed', checked: presenter.client.share_widgets_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :trackable_links_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Trackable Links Permitted' },
+        html_options: { value: presenter.client.trackable_links_count.to_i, min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 trackable links.' }
+      } %>
+  <%= f.number_field :max_email_templates, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Email Templates Permitted <small class="text-muted">(-1=&#8734;)</small>'.html_safe },
+        html_options: { value: presenter.client.max_email_templates.to_i, min: -1, step: 1 },
+        messages:     { note: 'Must be minimum of -1 Email Templates.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Email Templates Sharing Allowed' },
+        checkboxes: [{ field: 'share_email_templates_allowed', checked: presenter.client.share_email_templates_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :import_contacts_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Contacts Imported' },
+        html_options: { min: 0, max: 30_000, step: 1_000 },
+        messages:     { note: 'Must be in increments of 1000.' }
+      } %>
+  <%= f.select :integrations_allowed, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Integrations Accessible' },
+        html_options: { id: 'integrations_allowed', multiple: true, mobile: browser.device.mobile? },
+        choices:      { array: options_for_integrations, selected: presenter.client.integrations_allowed }
+      } %>
+  <%= f.select :training, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Training Accessible' },
+        html_options: { id: 'training_accessible', multiple: true, mobile: browser.device.mobile? },
+        choices:      { array: Training.pluck(:menu_label, :id), selected: presenter.client.training }
+      } %>
+  <%= f.submit_buttons buttons: [{ title: 'Save Automation Features', disable_with: 'Saving Automation Features' }] %>
+<% end %>

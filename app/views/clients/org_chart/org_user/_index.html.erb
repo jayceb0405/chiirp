@@ -1,0 +1,88 @@
+<%
+# app/views/clients/org_chart/org_user/_index.html.erb
+#
+# Example:
+#   render partial: "clients/org_chart/org_user/index"
+#
+# Required Instance Variables:
+#   @client:              (Client)
+#   @org_positions:       (OrgPositions)
+#   @available_org_users: (OrgUsers)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<h6 class="mt-2 mb-2">Available Organization Members</h6>
+
+<div class="list-group list-group-flush list-group-divider" id="org_users_table" style="min-height:50px;">
+
+  <% @available_org_users.each do |org_user| %>
+    <% org_user_id = "#{org_user[:table]}_#{org_user[:id]}" %>
+
+    <div class="list-group-item pl-3" id="<%= org_user_id -%>">
+      <%= hidden_field_tag "organization[#{org_user_id}]", org_user[:id], { id: "list_group_sort_order_#{org_user_id}" } %>
+      <div class="list-group-item-body d-sm-flex justify-content-sm-between" id="org_position_col_<%= org_user_id -%>">
+        <div>
+          <i class="fa fa-grip-vertical dash-button__handle list-group-handle mr-2"></i>
+          <%= Friendly.new.fullname(org_user[:firstname], org_user[:lastname]) %> (<%= number_to_phone(org_user[:phone]) -%> / <%= org_user[:email] -%>)
+        </div>
+
+        <div>
+          <% if org_user[:table] == 'orguser' %>
+            <%= link_to '<i class="fa fa-pencil-alt"></i>'.html_safe, edit_client_org_user_path(@client, org_user[:id]),
+                        class:  'btn btn-sm btn-icon btn-secondary',
+                        remote: true,
+                        method: :get %>
+            <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#',
+                        class: 'btn btn-sm btn-icon btn-secondary button_delete_orguser',
+                        data:  { clientid: @client.id, orguserid: org_user[:id], username: Friendly.new.fullname(org_user[:firstname], org_user[:lastname]) } %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    $(document).on('hide.bs.collapse', '#card_expansion_users', function(e) {
+      $('#new_org_user_button').addClass('d-none');
+      $('#new_group_button').addClass('d-none');
+    })
+    $(document).on('show.bs.collapse', '#card_expansion_users', function(e) {
+
+      <% if @org_positions.any? %>
+        $('#new_org_user_button').removeClass('d-none');
+        $('#new_group_button').removeClass('d-none');
+      <% end %>
+    })
+
+    $(document).off('click', '.button_delete_orguser');
+    $(document).on('click', '.button_delete_orguser', function(e) {
+      e.preventDefault();
+
+      var client_id   = $(this).data('clientid');
+      var org_user_id = $(this).data('orguserid');
+      var user_name   = $(this).data('username');
+
+      ChiirpAlert({
+        'body':'Deleting "' + user_name + '" can NOT be un-done. Is it your intention to delete this Org User?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/client/' + client_id + '/org_users/' + org_user_id
+        });
+      });
+    });
+  });
+</script>

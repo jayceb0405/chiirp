@@ -1,0 +1,43 @@
+<%
+  # app/views/integrations/servicetitan/reports/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/edit', locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<td colspan="11" class="p-3">
+  <%= form_with model: presenter.client_api_integration, url: integrations_servicetitan_report_path(presenter.report_id), builder: LooperFormBuilder, method: :patch, data: { turbo: true, turbo_stream: true }, class: 'needs-validation', novalidate: true do |f| %>
+
+    <%= bootstrap_text_field(
+          field:        'report[name]',
+          value:        presenter.report_name,
+          label:        { title: 'Report name' },
+          html_options: { required: true }
+        ) %>
+    <span id="report_categories_<%= presenter.report_id -%>">
+      <%= render partial: 'integrations/servicetitan/reports/select_tags/report_categories', locals: { presenter: } %>
+    </span>
+    <span id="report_reports_<%= presenter.report_id -%>">
+      <%= render partial: 'integrations/servicetitan/reports/select_tags/report_reports', locals: { presenter: } %>
+    </span>
+    <span id="report_criteria_<%= presenter.report_id -%>">
+      <%= render partial: 'integrations/servicetitan/reports/criteria/index', locals: { presenter: } %>
+    </span>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [
+            { title: 'Save Report & Process Results', disable_with: 'Saving & Queuing Report for Processing' },
+            { title: 'Save Report & Show Results', disable_with: 'Saving & Preparing Report' },
+            { title: 'Save Report', disable_with: 'Saving Report' }
+          ]
+        ) %>
+  <% end %>
+</td>

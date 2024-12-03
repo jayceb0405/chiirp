@@ -1,0 +1,60 @@
+<%
+  # app/views/integrations/pcrichard/v1/models/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/v1/models/show', locals { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Current PC Richard Models</span>
+      <span>
+        <%= bootstrap_submit_buttons(
+              buttons: [{ id: 'update_model_custom_fields', title: 'Update Model Custom Fields', disable_with: 'Updating Model Custom Fields' }]
+            ) %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <table class="table table-no-bordered table-striped">
+        <thead>
+          <tr>
+            <th>Model #</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= render partial: 'integrations/pcrichard/v1/models/model', collection: presenter.currently_supported_models, as: :model, locals: { presenter: } %>
+        </tbody>
+      </table>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_models').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '#update_model_custom_fields');
+    $(document).on('click', '#update_model_custom_fields', function (e) {
+
+      $.ajax({
+        type: 'PATCH',
+        dataType: 'script',
+        url: '<%= integrations_pcrichard_v1_models_path -%>'
+      });
+    });
+  });
+</script>

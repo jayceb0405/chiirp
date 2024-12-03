@@ -1,0 +1,47 @@
+<%
+  # app/views/integrations/google/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+// Accounts
+<% if cards.include?('accounts_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/accounts/show', locals: { presenter: } -%>');
+<% end %>
+
+// Connection
+<% if cards.include?('connections_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/connections/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Calendar
+<% if cards.include?('calendars_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/calendar/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/instructions/show', locals: { presenter: } -%>');
+<% end %>
+
+// Locations
+<% if cards.include?('locations_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/locations/show', locals: { presenter: } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/overview', locals: { calendar_presenter: presenter } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

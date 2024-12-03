@@ -1,0 +1,127 @@
+<%
+  # app/views/central/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'central/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  return unless local_assigns.dig(:cards).is_a?(Array)
+
+  central_presenter         = CentralPresenter.new(client: current_user.client, user: current_user, contact: @contact, session:) if %w[active_contacts contact_options_menu contact_profile conversation message_dropdown].intersect?(cards)
+  central_presenter.message = @message if %w[message_dropdown].intersect?(cards)
+  contact_presenter         = Contacts::Presenter.new(contact: @contact) if %w[contact_phones new_contact_phone].intersect?(cards)
+-%>
+<% if cards.include?('active_contacts') %>
+  $('#active_contacts').html('<%= j render partial: 'central/sidebar/active_contacts/index', locals: { presenter: central_presenter } %>')
+
+  <% if central_presenter.active_contacts_paused? %>
+    $('#active_contacts_paused_badge').removeClass('d-none');
+  <% else %>
+    $('#active_contacts_paused_badge').addClass('d-none');
+  <% end %>
+
+  <% if central_presenter.active_contacts_group_selected? %>
+    $('#active_contacts_groups_badge').removeClass('d-none');
+  <% else %>
+    $('#active_contacts_groups_badge').addClass('d-none');
+  <% end %>
+<% end %>
+
+<% if cards.include?('active_contacts_only') %>
+  $('#active_contacts_index').html('<%= j render partial: 'central/sidebar/active_contacts/active_contacts', locals: { presenter: central_presenter } %>')
+<% end %>
+
+// ContactPhones
+<% if cards.include?('contact_phones') %>
+  $('#contact_phones').html('<%= j render partial: 'contacts/phones/index', locals: { presenter: contact_presenter } -%>');
+<% end %>
+<% if cards.include?('new_contact_phone') %>
+  $('#contact_phones_tbody').append('<%= j render partial: 'contacts/phones/contact_phone', locals: { contact_phone: @contact_phone, presenter: contact_presenter } -%>')
+<% end %>
+
+<% if cards.include?('contact_profile') %>
+  $('#contact_profile').html('<%= j render partial: 'central/sidebar/contact_profile/show', locals: { presenter: central_presenter } -%>');
+  $('.tooltip').remove();
+<% end %>
+<% if cards.include?('conversation') %>
+  $('#conversation').html('<%= j render partial: 'central/conversation/show', locals: { presenter: central_presenter } -%>');
+
+  <% if @contact.new_record? %>
+    Looper.showSidebar();
+  <% else %>
+    Looper.hideSidebar();
+  <% end %>
+<% end %>
+<% if cards.include?('conversation_append') %>
+
+  <% if @bubble&.dig(:message).present? %>
+    $('#conversation_list_<%= @contact.id -%>').append('<li class="conversation-outbound conversation-faux" id="temp_message"><div class="conversation-message"><div class="<%= message_color_class(@bubble[:msg_type], false) -%> conversation-message-text pr-4"><%= @bubble[:message].squish -%></div><div class="conversation-meta"><%= @bubble.dig(:meta) -%></div></div><div class="conversation-avatar" style="position:relative;right:12px;"><a href="#" class="tile tile-circle bg-muted"><i class="<%= Messages::Message.message_icon(@bubble[:msg_type]) -%>"></i></a></div></li>');
+  <% else %>
+    $('#conversation_list_<%= @contact.id -%>').append('<li class="conversation-outbound conversation-faux" id="temp_message"><div class="conversation-message"><div class="<%= message_color_class(@bubble[:msg_type], false) -%> conversation-message-text pr-4"><div class="spinner-border spinner-border-sm" role="status"></div><span class="sr-only"> Sending...</span></div></div><div class="conversation-avatar" style="position:relative;right:12px;"><a href="#" class="tile tile-circle bg-muted"><i class="<%= Messages::Message.message_icon(@bubble[:msg_type]) -%>"></i></a></div></li>');
+  <% end %>
+
+  var msgBody = document.getElementById('central_conversation_body');
+  msgBody.scrollTop = msgBody.scrollHeight;
+<% end %>
+<% if cards.include?('edit_tag') %>
+  $('#edit_contacttag_<%= @contacttag.id -%>_td').html('<%= j render partial: 'tags/contact/edit' -%>');
+<% end %>
+<% if cards.include?('index_aiagent_sessions') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-filter"></i> AI Agent Sessions for <%= @contact.fullname_or_phone -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'aiagents/contact/index' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('index_campaigns') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-filter"></i> Campaigns for <%= @contact.fullname_or_phone -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'campaigns/contact/index' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('index_tasks') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-tasks"></i> Tasks for <%= @contact.fullname_or_phone -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'tasks/index', locals: { contact: @contact } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('message_form_clear') %>
+  msgFormClear();
+
+  $('.email_message_fields').trigger('clear');
+<% end %>
+<% if cards.include?('tags') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-user-tag"></i> Tags for <%= @contact.fullname_or_phone -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'tags/contact/index' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+// message dropdown
+<% if cards.include?('message_dropdown') %>
+  $('#message_dropdown_<%= @message.id -%>').html('<%= j render partial: 'central/conversation/message_dropdown', locals: { presenter: central_presenter } -%>');
+<% end %>
+
+// Contact options menu
+<% if cards.include?('contact_options_menu') %>
+  $('#contact_options_menu_div').html('<%= j render partial: 'central/common/contact_options_menu', locals: { presenter: central_presenter, include_conversation_key: true, include_badges: true } -%>');
+  $('#contact_options_menu_div_<%= @contact.id -%>').html('<%= j render partial: 'central/common/contact_options_menu', locals: { presenter: central_presenter, include_conversation_key: true, include_badges: true } -%>');
+<% end %>
+
+if ('<%= local_assigns.dig(:active_tab).to_s -%>' == 'active_contacts') {
+  $('#button_active_contacts').click();
+} else if ('<%= local_assigns.dig(:active_tab).to_s -%>' == 'contact_profile') {
+  $('#button_contact_profile').click();
+}
+
+<%# stop aigent button/message %>
+<% if cards.include?('remove_stop_aiagent') %>
+  $('#stop_aiagent_button').remove();
+  $('#aiagent_active_message').remove();
+<% end %>
+
+Looper.init();

@@ -1,0 +1,62 @@
+<%
+# app/views/integrations/servicetitan/jobs/_business_unit.html.erb
+#
+# Example:
+#   render partial: "integrations/servicetitan/jobs/business_unit"
+#
+# Instance Variables:
+#   (req) @servicetitan_business_units: (Array)
+#   (opt) @business_unit_id: (Integer)
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= bootstrap_select_tag(
+      field:        'business_unit_id',
+      label:        { title: "Select a Business Unit<span class=\"ml-2\">#{link_to '', edit_integrations_servicetitan_contact_booking_path(@contact, commit: 'refresh_business_units'), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', remote: true, title: 'Refresh Business Units', data: { toggle: 'tooltip' } }}</span>" },
+      html_options: { id: 'business_unit_select', required: true },
+      options:      { for_select: options_for_select(@servicetitan_business_units, @business_unit_id), blank: 'Business Units' },
+      messages:     { note: @form_type == 'message_central' ? 'Required to select a Time Slot' : 'Required.' }
+    ) %>
+
+<script>
+  $(function () {
+
+    var getTechnician = function() {
+      $.ajax({
+        type: 'GET',
+        url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+        dataType: 'script',
+        data: {
+          commit: 'get_technician',
+          business_unit_id: $('#business_unit_select').val(),
+          form_type: '<%= @form_type %>',
+          technician_ids: <%= @technician_ids.to_json.html_safe %>
+        }
+      });
+    };
+
+    $('#business_unit_select').on('change', function(e) {
+      getTechnician();
+
+      <% unless @form_type == 'aiagents' %>
+        if ($('#business_unit_select').val() && $('#job_type_select').val()) {
+          $.ajax({
+            type: 'GET',
+            dataType: 'script',
+            url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+            data: {
+              commit: 'get_availability',
+              business_unit_id: $('#business_unit_select').val(),
+              job_type_id: $('#job_type_select').val(),
+              ext_tech_id: $('#technician_select').val()
+            }
+          });
+        }
+      <% end %>
+    });
+
+    if ($('#business_unit_select').val() != 0) getTechnician();
+  });
+</script>

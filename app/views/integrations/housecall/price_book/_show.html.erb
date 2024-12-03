@@ -1,0 +1,130 @@
+<%
+  # app/views/integrations/housecall/price_book/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/price_book/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Housecall Pro Price Book <small>(<span id="line_items_header"><%= @client_api_integration.price_book.length -%></span> line items)</small></span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= bootstrap_switch_field(
+            field:        'merge',
+            value:        true,
+            values:       [true, false],
+            row:          { columns: [0, 12] },
+            label:        { title: 'Merge line items into existing line items.' },
+            html_options: { id: 'merge_line_items' }
+          ) %>
+
+      <div class="row fileinput-dropzone mb-3 dz-clickable" id="import_file_dropzone" style="">
+        <div class="text-center dz-clickable" id="import_file_cloud_container">
+          <i class="fa fa-cloud-upload-alt text-primary display-3"></i>
+        </div>
+        <div class="text-center" id="import_file_spinner_container" style="display:none;">
+          <div class="spinner-border text-primary" role="status"></div>
+          <div class="ml-3">Loading...</div>
+        </div>
+        <span class="text-muted" id="import_file_upload_text">Drag and drop or Click to Upload (.csv, .xlsx)</span>
+        <h6 class="text-center" id="import_file_text"></h6>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('.nav-link').removeClass('active');
+    $('#link_price_book').addClass('active');
+    $('#breadcrumb').show();
+
+    // disable auto discover
+    Dropzone.autoDiscover = false;
+
+    $('#import_file_dropzone').dropzone( {
+      method: 'PATCH',
+      url: '<%= integrations_housecall_price_book_path -%>',
+      init: function() {
+        this.on('sending', function(file, xhr, formData){
+          formData.append('merge_line_items', $('#merge_line_items').is(':checked'));
+        });
+      },
+      maxFiles: 1,
+      maxFilesize: 150,
+      paramName: 'import_file',
+      addRemoveLinks: false,
+      acceptedFiles: 'text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.csv,.xlsx',
+      previewsContainer: '#import_file_cloud_container',
+      clickable: '#import_file_dropzone, #import_file_container, #import_file_cloud_container',
+      headers: {
+        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+      },
+      dictMaxFilesExceeded: 'The maximum number of files is limited to {{maxFiles}}.',
+      dragover: function() {
+        $('#import_file_dropzone').addClass('hover');
+      },
+      dragleave: function() {
+        $('#import_file_dropzone').removeClass('hover');
+      },
+      drop: function() {
+        $('#import_file_dropzone').removeClass('hover');
+      },
+      maxfilesreached: function(file) {
+        console.log('The maximum number of files is reached.');
+        console.log(file);
+      },
+      maxfilesexceeded: function(file) {
+        console.log('The maximum number of files is exceeded.');
+        console.log(file);
+        this.removeFile(file);
+      },
+      sending: function(file, response) {
+        $('#import_file_cloud_container').hide();
+        $('#import_file_upload_text').hide();
+        $('#import_file_spinner_container').show();
+      },
+      success: function(file, response) {
+        this.removeFile(file);
+
+        if (response.filename.length > 0) {
+          $('#import_file_spinner_container').hide();
+          $('#import_file_cloud_container').show();
+          $('#import_file_upload_text').show();
+          $('#import_file_text').html(response.message);
+          $('#line_items_header').html(response.total_line_items);
+        } else {
+          $('#import_file_spinner_container').hide();
+          $('#import_file_cloud_container').show();
+          $('#import_file_upload_text').show();
+          $('#import_file_text').html('Unable to Read File');
+        }
+        $('.dz-error-mark').hide();
+        $('.dz-success-mark').hide();
+      },
+      error: function(file, response) {
+        this.removeFile(file);
+
+        if (response) {
+          $('#import_file_spinner_container').hide();
+          $('#import_file_cloud_container').show();
+          $('#import_file_upload_text').show();
+          $('#import_file_text').html(response.error);
+        }
+      }
+    });
+  });
+</script>

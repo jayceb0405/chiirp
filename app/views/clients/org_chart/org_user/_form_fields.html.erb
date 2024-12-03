@@ -1,0 +1,58 @@
+<%
+# app/views/clients/org_chart/org_user/_form_fields.html.erb
+#
+# Example:
+#   render partial: 'clients/org_chart/org_user/form_fields', locals: { f: f }
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="row">
+  <div class="col-3">
+    <%= f.text_field :firstname, {
+          row:          { columns: [0, 12] },
+          label:        { title: 'First Name' },
+          html_options: { placeholder: 'First Name', required: true },
+          messages:     { note: 'Required' }
+        } %>
+  </div>
+  <div class="col-3">
+    <%= f.text_field :lastname, {
+          row:          { columns: [0, 12] },
+          label:        { title: 'Last Name' },
+          html_options: { placeholder: 'Last Name' }
+        } %>
+  </div>
+  <div class="col-3">
+    <%= f.text_field :phone, {
+          row:          { columns: [0, 12] },
+          label:        { title: 'Phone' },
+          html_options: { placeholder: 'Phone' }
+        } %>
+  </div>
+  <div class="col-3">
+    <%= f.text_field :email, {
+          row:          { columns: [0, 12] },
+          label:        { title: 'Email' },
+          html_options: { placeholder: 'Email' }
+        } %>
+  </div>
+</div>
+
+<%= f.submit_buttons buttons: [
+      { title: 'Save', disable_with: 'Saving...' },
+      { title: 'Cancel', id: 'cancel_button' }
+    ] %>
+
+<script>
+  $(function() {
+    $('#cancel_button').on('click', function (e) {
+      e.preventDefault();
+      $('#edit_org_user').html('');
+    });
+  });
+</script>

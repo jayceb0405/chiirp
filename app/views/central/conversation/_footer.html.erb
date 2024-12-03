@@ -1,0 +1,50 @@
+<%
+  # app/views/central/conversation/_footer.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/footer', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+  return if presenter.contact.new_record?
+-%>
+<%= form_tag messages_path, { id: 'text_message_form', remote: true, multipart: true } do %>
+
+  <% case presenter.current_phone_number %>
+  <% when 'all' %>
+    <div class="media mb-1 flex-column flex-xl-row">
+      <%= hidden_field_tag :contact_id, presenter.contact.id %>
+    </div>
+  <% when 'email' %>
+    <div class="media mb-1 flex-column flex-xl-row">
+      <% email_presenter = Messages::Email::Presenter.new(contact: presenter.contact) -%>
+      <%= render partial: 'messages/email_message_fields', locals: { presenter: email_presenter } %>
+    </div>
+  <% when 'fb' %>
+    <div class="media mb-1 flex-column flex-xl-row">
+      <%= render partial: 'messages/fb_message_fields', locals: { presenter: } %>
+    </div>
+  <% when 'ggl' %>
+    <div class="media mb-1 flex-column flex-xl-row">
+      <%= render partial: 'messages/ggl_message_fields', locals: { presenter: } %>
+    </div>
+  <% when 'widget' %>
+    <div class="media mb-1 flex-column flex-xl-row">
+      <%= hidden_field_tag :contact_id, presenter.contact.id %>
+    </div>
+  <% else %>
+    <% messages_text_presenter = Messages::Text::Presenter.new(contact: presenter.contact, user: current_user) %>
+    <% messages_text_presenter.file_type = 'user' %>
+    <% messages_text_presenter.disabled = !presenter.contact.ok2text.to_bool %>
+    <% messages_text_presenter.include_estimate_hashtags = false %>
+    <% messages_text_presenter.include_invoice_hashtags = false %>
+    <% messages_text_presenter.include_job_hashtags = false %>
+    <% messages_text_presenter.include_subscription_hashtags = false %>
+    <%= render partial: 'messages/texts/message', locals: { presenter: messages_text_presenter } %>
+  <% end %>
+<% end %>

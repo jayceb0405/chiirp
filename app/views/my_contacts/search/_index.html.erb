@@ -1,0 +1,138 @@
+<%
+  # app/views/my_contacts/search/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/search/index', locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+-%>
+<div class="list-group list-group-reflow list-group-flush list-group-divider">
+  <div class="list-group-header d-block">
+    <% if presenter.user.controller_action_settings?('contacts_search') %>
+      <%= bootstrap_select_tag(
+            field:        'saved_search',
+            row:          { class: 'mb-0', columns: [0, 12] },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            label:        { class: 'mb-0', title: 'Saved Searches' },
+            html_options: { data: { remote: true, method: :get, url: my_contacts_path } },
+            options:      { for_select: options_for_select(presenter.user.controller_action_settings_options('contacts_search'), session[:contacts_search].to_i), blank: 'Select a Saved Search' }
+          ) %>
+    <% end %>
+  </div>
+
+  <%= form_tag my_contacts_search_path(id: presenter.user_setting.id, broadcast: presenter.broadcast), { builder: LooperFormBuilder, remote: true, method: :post } do %>
+
+    <div class="list-group-header d-block pt-0">
+      <%= bootstrap_select_tag(
+            field:        'data[show_user_ids]',
+            row:          { class: 'mb-0', columns: [0, 12] },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            label:        { class: 'mb-0', title: 'Belonging to' },
+            html_options: { id: 'show_user_ids', multiple: true, count_selected_text: 'users', sp_size: 1 },
+            options:      { for_select: options_for_users(user: presenter.user, client: presenter.client, controller: presenter.controller_name, selected: presenter.user_setting.data.dig(:show_user_ids)) }
+          ) %>
+
+      <%= bootstrap_text_field(
+            field:        'data[search_string]',
+            value:        presenter.user_setting.data.dig(:search_string).to_s,
+            row:          { columns: [0, 12] },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            label:        { class: 'mb-0', title: 'Search Contacts' },
+            html_options: { id: 'data_string_search', placeholder: 'Search Text' },
+            prepends:     [{ button: false, label: '<i class="fa fa-search"></i>'.html_safe }]
+          ) %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [
+              { title: 'Clear All Filters', disable_with: 'Clearing All Filters' },
+              { title: 'Search', id: 'submit_tag_search_01', disable_with: 'Searching' }
+            ]
+          ) %>
+    </div>
+
+    <div class="table-responsive mt-2" id="search_table">
+      <table class="table">
+
+        <tbody>
+          <%= render partial: 'my_contacts/search/contacts', locals: { collapsed: presenter.collapsed_contacts, all_contacts_allowed: presenter.all_contacts_allowed, presenter: } %>
+          <%= render partial: 'my_contacts/search/tags', locals: { collapsed: presenter.collapsed_tags, presenter: } %>
+          <%= render partial: 'my_contacts/search/campaigns', locals: { collapsed: presenter.collapsed_campaigns, presenter: } %>
+          <%= render partial: 'my_contacts/search/groups', locals: { collapsed: presenter.collapsed_groups, presenter: } %>
+          <%= render partial: 'my_contacts/search/stages', locals: { collapsed: presenter.collapsed_stages, presenter: } %>
+          <%= render partial: 'my_contacts/search/lead_sources', locals: { collapsed: presenter.collapsed_lead_sources, presenter: } %>
+          <%= render partial: 'my_contacts/search/text_messages', locals: { collapsed: presenter.collapsed_texts, presenter: } %>
+          <%= render partial: 'my_contacts/search/trackable_links', locals: { collapsed: presenter.collapsed_trackable_links, presenter: } %>
+          <%= render partial: 'my_contacts/search/custom_fields', locals: { collapsed: presenter.collapsed_custom_fields, presenter: } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="list-group-header d-block">
+      <%= bootstrap_text_field(
+            field:        'search_name',
+            row:          { class: 'border-top', columns: [0, 12] },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            html_options: { id: 'name_field', placeholder: 'Saved Search Name' }
+          ) %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [
+              { title: 'Save & Search', id: 'name_button', disable_with: 'Searching' },
+              { title: 'Delete Saved Search', disable_with: 'Deleting Saved Search', disabled: session[:contacts_search].to_i.zero? || presenter.user_setting.name == 'Last Used' }
+            ]
+          ) %>
+
+      <div class="border-top mt-2"></div>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [
+              { title: 'Search', id: 'submit_tag_search_02', disable_with: 'Searching' }
+            ]
+          ) %>
+    </div>
+  <% end %>
+<!--
+  <div class="list-group-item active" data-toggle="sidebar" data-sidebar="show">
+    <a href="#" class="stretched-link">Search</a>
+  </div>
+ -->
+</div>
+
+<script>
+  $(function () {
+    // keep multi-select fields from overflowing table
+    $('.search_td').css('maxWidth', $('#search_table').css('width'));
+
+    $('#data_string_search').on('keyup keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#submit_tag_search_01').click();
+      }
+    });
+
+    $('[data-toggle="tooltip"], .tooltip').tooltip( {
+      placement: 'bottom',
+      container: 'body'
+    });
+
+    $('#name_field').on('keyup', function() {
+
+      if ($('#name_field').val() != null) {
+        $('#name_button').removeAttr('disabled');
+      } else {
+        $('#name_button').attr('disabled', true);
+      }
+    });
+  });
+</script>

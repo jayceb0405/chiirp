@@ -1,0 +1,20 @@
+<%
+  # app/views/integrations/thumbtack/v2/events/edit.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/thumbtack/v2/events/edit'
+  #
+  # Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #   @event:                  (Hash)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Thumbtack::V2::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update "edit_event_#{@event.dig(:event_id)}" do %>
+  <%= render partial: 'integrations/thumbtack/v2/events/edit', locals: { presenter:, event: @event } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

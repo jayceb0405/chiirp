@@ -1,0 +1,111 @@
+<%
+  # app/views/contacts/import/_header_designer.html.erb
+  #
+  # Example:
+  #   render partial: 'contacts/import/header_designer', locals: { header: Array, presenter: Contacts::Import::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) header:    (Array)
+  #   (req) presenter: (Contacts::Import::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Import::Presenter)
+
+  header = [local_assigns.dig(:header) || []].flatten
+-%>
+<%= label_tag '', "Match File Columns to #{I18n.t('tenant.name')} Data", { class: 'form-group-label mb-0 text-muted' } %>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th style="width:50% !important;">File Columns</th>
+      <th style="width:50% !important;"><%= I18n.t('tenant.name') -%> Data</th>
+    </tr>
+  </thead>
+  <tbody>
+
+    <% header.each_with_index do |key, index| %>
+      <tr>
+        <td style="width:50% !important;">
+          <div class="font-weight-bold mb-2"><%= key -%></div>
+          <div class="text-monospace example-data">
+            <% presenter.spreadsheet_data_example.pluck(index).each.with_index do |example, index| %>
+              <div class="<%= index.zero? ? 'first-row' : '' %><%= index == 5 ? 'last-row' : '' %>" style="<%= index.zero? ? 'display: none;' : '' %>"><%= example %></div>
+            <% end %>
+          </div>
+        </td>
+        <td style="width:50% !important;">
+          <div class="form-group">
+            <%= select_tag "header_fields[#{index}]",
+                           options_for_select(presenter.import_fields, @matching_fields[key]),
+                           {
+                             include_blank: 'Do Not Import',
+                             class:         'form-control',
+                             style:         'width: 100%;'
+                           } %>
+          </div>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<%= bootstrap_switch_field(
+      field: 'header_row',
+      value: true,
+      label: { title: 'First Row is Header?' }
+    ) %>
+<script>
+  $(document).ready( function() {
+    // handle form submission
+    $(document).off('submit', '#form_contact_import');
+    $(document).on('submit', '#form_contact_import', function (e) {
+      var form = $('#form_contact_import');
+
+      var missing_phone = true;
+      $("select[name^='header_fields']").each(function(i){
+        if ($(this).val().startsWith('phone_') ) missing_phone = false
+      });
+
+      if (missing_phone) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':       'No phone numbers have been mapped. Are you sure you want to continue with the import?',
+          'buttons':    <%= raw([{ label: 'Cancel', id: 'button_cancel' }, { label: 'Import Anyway', id: 'button_import_anyway' }].to_json) -%>,
+          'type':       'warning',
+          'persistent': true
+        });
+
+        $(document).off('click', '#button_import_anyway');
+        $(document).on('click', '#button_import_anyway', function(e) {
+          $(document).off('submit', '#form_contact_import');
+          form.submit();
+        });
+
+        $(document).off('click', '#button_cancel');
+        $(document).on('click', '#button_cancel', function(e) {
+          $.rails.enableElement(document.querySelector('input[data-disable-with]'));
+        });
+      }
+    });
+
+    function updateExampleRows(checked) {
+      if (checked) {
+        $('.example-data .first-row').hide();
+        $('.example-data .last-row').show();
+      } else {
+        $('.example-data .first-row').show();
+        $('.example-data .last-row').hide();
+      }
+    }
+
+    // handle example data display
+    $(document).off('change', "input[name='header_row']");
+    $(document).on('change', "input[name='header_row']", function(e){
+      var checked = $(this).prop('checked');
+      updateExampleRows(checked);
+    });
+  });
+</script>

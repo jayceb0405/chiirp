@@ -1,0 +1,228 @@
+<%
+  # app/views/integrations/servicetitan/events/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/index', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<h6 class="card-header d-flex justify-content-between">
+  <span class="my-auto">Events</span>
+  <span>
+    <%= link_to '<i class="fa fa-plus mr-2"></i>New Event'.html_safe, new_integrations_servicetitan_events_event_path, { class: 'btn btn-light', data: { turbo: true, turbo_stream: true } } %>
+  </span>
+</h6>
+
+<div class="card-body">
+  <div class="table-responsive">
+    <%= turbo_frame_tag 'servicetitan_events' do %>
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 240px"> Events </th>
+            <th class="text-left"> Customer </th>
+            <th class="text-left"> Status </th>
+            <th class="text-left"> Job Types </th>
+            <th class="text-left"> Business Units </th>
+            <th class="text-left"> Membership </th>
+            <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed %>
+            <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed %>
+            <th class="text-left">Tag</th>
+            <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed %>
+            <th style="width:100px; min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="events_body">
+          <%= render partial: 'integrations/servicetitan/events/events/action', collection: presenter.sorted_events, as: :action, locals: { presenter: } %>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.event_nav_link').removeClass('active');
+    $('#link_events').addClass('active');
+
+    $(document).off('hide.bs.collapse', '.edit_action');
+    $(document).on('hide.bs.collapse', '.edit_action', function (e) {
+      $('#edit_action_' + e.target.id.replace('edit_action_', '')).html('<td colspan="11" class="mt-3 text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Event' } %></td>');
+    });
+
+    $(document).off('change', '.action_type_select');
+    $(document).on('change', '.action_type_select', function(e) {
+      e.stopPropagation();
+
+      displayInputs(e.target.id.replace('action_type_select_', ''));
+    });
+
+    $(document).off('change', '.new_status_input');
+    $(document).on('change', '.new_status_input', function(e) {
+      e.stopPropagation();
+
+      displayInputs(e.target.id.replace('new_status_input_', ''));
+    });
+
+    $(document).off('change', '.orphaned_estimates_switch');
+    $(document).on('change', '.orphaned_estimates_switch', function(e) {
+      e.stopPropagation();
+
+      displayInputs(e.target.id.replace('orphaned_estimates_switch_', ''));
+    });
+
+    $(document).off('change keyup', '.range_max');
+    $(document).on('change keyup', '.range_max', function(e) {
+      eval(e.target.id.replace('range_max', 'range_slider_total')).update({max: e.target.value});
+    });
+
+    $(document).off('change', '.action_status_input');
+    $(document).on('change', '.action_status_input', function(e) {
+      e.stopPropagation();
+
+      displayInputs(e.target.id.replace('action_status_input_', ''));
+    });
+
+    $(document).off('click', '.action_delete');
+    $(document).on('click', '.action_delete', function(e) {
+      e.preventDefault();
+
+      var action_id   = $(this).data('id');
+      var action_name = $(this).data('name');
+
+      ChiirpAlert({
+        'body':'Deleting "' + action_name + '" can NOT be un-done. Is it your intention to delete this Action?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '/integrations/servicetitan/events/events/' + action_id
+        });
+      });
+    });
+  });
+
+  function displayInputs(action_id) {
+    $('.event_criteria_row').hide();
+
+    if ($('#action_type_select_' + action_id).val() == 'call_completed') {
+      $('#customer_types_row_' + action_id).show();
+      $('#call_directions_row_' + action_id).show();
+      $('#call_types_row_' + action_id).show();
+      $('#call_reason_ids_row_' + action_id).show();
+      $('#campaign_ids_row_' + action_id).show();
+      $('#campaign_name_segment_row_' + action_id).show();
+      $('#campaign_name_segment_location_row_' + action_id).show();
+      $('#call_duration_row_' + action_id).show();
+      $('#membership_row_' + action_id).show();
+      $('#st_customer_row_' + action_id).show();
+      $('#technicians_row_' + action_id).show();
+      $('#tag_ids_include_row_' + action_id).show();
+      $('#tag_ids_exclude_row_' + action_id).show();
+    } else if ($('#action_type_select_' + action_id).val() == 'estimate') {
+      if ($('#orphaned_estimates_switch_' + action_id).is(':checked')) {
+        $('#customer_types_row_' + action_id).show();
+        $('#action_status_row_' + action_id).show();
+        $('#orphaned_estimates_row_' + action_id).show();
+        $('#tag_ids_include_row_' + action_id).show();
+        $('#tag_ids_exclude_row_' + action_id).show();
+        $('#range_slider_row_' + action_id).show();
+        $('#range_max_row_' + action_id).show();
+      } else {
+        $('#customer_types_row_' + action_id).show();
+        $('#action_status_row_' + action_id).show();
+        $('#job_types_row_' + action_id).show();
+        $('#business_unit_ids_row_' + action_id).show();
+        $('#membership_row_' + action_id).show();
+        $('#orphaned_estimates_row_' + action_id).show();
+        $('#technicians_row_' + action_id).show();
+        $('#tag_ids_include_row_' + action_id).show();
+        $('#tag_ids_exclude_row_' + action_id).show();
+        $('#range_slider_row_' + action_id).show();
+        $('#range_max_row_' + action_id).show();
+      }
+    } else if ($('#action_type_select_' + action_id).val() == 'job_scheduled') {
+      $('#customer_types_row_' + action_id).show();
+      $('#job_types_row_' + action_id).show();
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_row_' + action_id).show();
+      $('#technicians_row_' + action_id).show();
+      $('#tag_ids_include_row_' + action_id).show();
+      $('#tag_ids_exclude_row_' + action_id).show();
+    } else if ($('#action_type_select_' + action_id).val() == 'job_rescheduled') {
+      $('#customer_types_row_' + action_id).show();
+      $('#job_types_row_' + action_id).show();
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_row_' + action_id).show();
+      $('#technicians_row_' + action_id).show();
+      $('#tag_ids_include_row_' + action_id).show();
+      $('#tag_ids_exclude_row_' + action_id).show();
+      $('#start_date_changes_only_row_' + action_id).show();
+    } else if ($('#action_type_select_' + action_id).val() == 'job_status_changed') {
+      $('#new_status_row_' + action_id).show();
+      $('#customer_types_row_' + action_id).show();
+      $('#job_types_row_' + action_id).show();
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_row_' + action_id).show();
+      $('#technicians_row_' + action_id).show();
+      $('#tag_ids_include_row_' + action_id).show();
+      $('#tag_ids_exclude_row_' + action_id).show();
+
+      if ($.inArray('canceled', $('#new_status_input_' + action_id).val()) > -1) {
+        $('#job_cancel_reason_ids_row_' + action_id).show();
+      }
+    } else if ($('#action_type_select_' + action_id).val() == 'job_complete') {
+      $('#customer_types_row_' + action_id).show();
+      $('#job_types_row_' + action_id).show();
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_row_' + action_id).show();
+      $('#technicians_row_' + action_id).show();
+      $('#tag_ids_include_row_' + action_id).show();
+      $('#tag_ids_exclude_row_' + action_id).show();
+      $('#range_slider_row_' + action_id).show();
+      $('#range_max_row_' + action_id).show();
+    } else if ($('#action_type_select_' + action_id).val() == 'technician_dispatched') {
+      $('#customer_types_row_' + action_id).show();
+      $('#job_types_row_' + action_id).show();
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_row_' + action_id).show();
+      $('#technicians_row_' + action_id).show();
+      $('#tag_ids_include_row_' + action_id).show();
+      $('#tag_ids_exclude_row_' + action_id).show();
+    } else if ($('#action_type_select_' + action_id).val() == 'membership_expiration') {
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_types_row_' + action_id).show();
+      $('#membership_types_stop_row_' + action_id).show();
+      $('#membership_days_prior_slider_row_' + action_id).show();
+    } else if ($('#action_type_select_' + action_id).val() == 'membership_service_event') {
+      $('#business_unit_ids_row_' + action_id).show();
+      $('#membership_types_row_' + action_id).show();
+      $('#membership_days_prior_slider_row_' + action_id).show();
+      $('#membership_campaign_stop_row_' + action_id).show();
+    }
+  }
+</script>

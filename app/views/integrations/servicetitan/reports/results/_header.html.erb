@@ -1,0 +1,25 @@
+<%
+  # app/views/integrations/servicetitan/reports/results/_header.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/results/header', collection: presenter.client_api_integration.current_report.dig('fields'), as: :header_field, locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) header_field: (Hash)
+  #   (req) presenter:    (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<% case presenter.report_field_data_type(header_field.dig(:name)).to_s.downcase %>
+<% when 'boolean' %>
+  <th class="text-center"><%= header_field.dig(:label).to_s -%></th>
+<% when 'date', 'string', 'time' %>
+  <th class="text-left"><%= header_field.dig(:label).to_s -%></th>
+<% when 'number' %>
+  <th class="text-right"><%= header_field.dig(:label).to_s -%></th>
+<% else %>
+  <th class="text-left">Unknown</th>
+<% end %>

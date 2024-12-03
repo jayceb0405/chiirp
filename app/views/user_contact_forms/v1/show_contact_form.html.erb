@@ -1,0 +1,178 @@
+<%
+# app/views/user_contact_forms/v1/show_contact_form.html.erb
+#
+# Example:
+# 	render "user_contact_forms/v1/show_contact_form"
+#
+# Required Instance Variables:
+# 	@user_contact_form: (UserContactForm)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <title><%= @user_contact_form.title -%></title>
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= javascript_include_tag 'contact_form' %>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+  <!-- FlatPickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <!-- Star Rating -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/css/star-rating-svg.css">
+  <script src="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/jquery.star-rating-svg.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,500,700&display=swap' type='text/css'>
+
+  <style>
+    body {
+      background-image: url("<%= @user_contact_form.background_image.attached? ? cl_image_path(@user_contact_form.background_image.key, secure: true) : '' -%>");
+      background-position: center 100px;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: 'Montserrat', sans-serif;
+    }
+    .rounded {
+      border-radius: 25px !important;
+    }
+  </style>
+</head>
+<body style="background-color:<%= @user_contact_form.body_bg_color.to_s -%>;">
+  <div class="row" style="max-height:200px;min-height:100px;background-color:<%= @user_contact_form.header_bg_color.to_s -%>;">
+    <% if @user_contact_form.logo_image.attached? %>
+      <div class="col-4<%= (@user_contact_form.tag_line.to_s.present? ? ' offset-2' : ' offset-4') -%> text-center">
+        <%= cl_image_tag(@user_contact_form.logo_image.key, { class: 'img-fluid m-2 m-sm-3', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [height: 150, crop: 'scale'], format: 'png' }) %>
+      </div>
+    <% end %>
+    <% if @user_contact_form.tag_line.to_s.present? %>
+      <div class="col-4<%= (@user_contact_form.logo_image.attached? ? '' : ' offset-4') -%> text-center" style="margin-top:auto;margin-bottom:auto;">
+        <span class="align-middle"><%= @user_contact_form.tag_line.to_s %></span>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="container m-3" style="max-width:none;">
+
+    <div class="row mt-5">
+      <div class="col-10 col-sm-6 col-lg-4 offset-1 offset-sm-3 offset-lg-4 border p-5 rounded" style="background-color:<%= @user_contact_form.form_bg_color.to_s -%>;border-color:<%= @user_contact_form.form_bg_color.to_s -%>;">
+        <div class="pl-5 pr-5 text-center">
+          <h2 class="font-weight-bold"><%= @user_contact_form.title -%></h2>
+        </div>
+
+        <% if @user_contact_form.youtube_video.to_s.present? %>
+          <div class="embed-responsive embed-responsive-16by9">
+            <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/<%= (@user_contact_form.youtube_video.to_s.include?('/embed/') ? @user_contact_form.youtube_video.to_s.split('/embed/')[1][0..10] : @user_contact_form.youtube_video.to_s.split('.be/')[1][0..10]) -%>?rel=0" allowfullscreen></iframe>
+          </div>
+        <% end %>
+
+        <div class="text-center pl-5 pr-5 pb-3">
+          <%= @user_contact_form.header_notes.strip %>
+        </div>
+
+        <% date_field_ids = [] %>
+        <%= form_tag save_contact_path(@user_contact_form.page_key), { builder: LooperFormBuilder } do %>
+          <% client_custom_fields = @user_contact_form.user.client.client_custom_fields %>
+
+          <% Webhook.internal_key_hash(@user_contact_form.user.client, 'contact', %w[personal phones custom_fields]).each do |key, name| %>
+
+            <% if @user_contact_form.form_fields.include?(key.to_sym) && @user_contact_form.form_fields[key.to_sym].to_i == 1 %>
+              <% custom_field = client_custom_fields.find_by_var_var(key) || @user_contact_form.user.client.client_custom_fields.new(var_name: name, var_var: key, var_type: 'string', var_placeholder: '', var_options: {}) %>
+              <% required = @user_contact_form.form_fields.include?(:"#{key}_required") && @user_contact_form.form_fields[:"#{key}_required"].to_i == 1 %>
+              <% custom_field.var_name = "#{custom_field.var_name} #{required ? '*' : ''}" %>
+              <% field_tag = 'client_custom_fields' %>
+
+              <div class="form-group mb-3">
+                <%= contact_custom_field_input(
+                      custom_field:,
+                      object_name:  field_tag,
+                      row:          { class: 'mb-0', columns: [4, 8] },
+                      col:          { class: 'mb-0' },
+                      form_group:   { class: 'mb-0' },
+                      label:        { class: 'mt-0 mb-0' },
+                      html_options: { required: }
+                    ) %>
+              </div>
+            <% end %>
+          <% end %>
+
+          <% if @user_contact_form.ok2text.to_s == "1" %>
+            <div class="input-group mt-2">
+              <div class="custom-control custom-switch">
+                <%= check_box_tag 'client_custom_fields[ok2text]', '1', true, { class: 'custom-control-input', id: 'ok2text' } %>
+                <label class="custom-control-label" for="ok2text"><%= @user_contact_form.ok2text_text.to_s -%></label>
+              </div>
+            </div>
+          <% end %>
+
+          <% if @user_contact_form.ok2email.to_s == "1" %>
+            <div class="input-group">
+              <div class="custom-control custom-switch">
+                <%= check_box_tag 'client_custom_fields[ok2email]', '1', true, { class: 'custom-control-input', id: 'ok2email' } %>
+                <label class="custom-control-label" for="ok2email"><%= @user_contact_form.ok2email_text.to_s -%></label>
+              </div>
+            </div>
+          <% end %>
+
+          <div class="text-center pt-3 pb-3">
+            <%= submit_tag @user_contact_form.submit_button_text, { id: 'contact_form_submit', class: 'btn btn-info rounded pl-5 pr-5', style: "background-color:#{@user_contact_form.submit_button_color};border-color:#{@user_contact_form.submit_button_color};" } %>
+          </div>
+        <% end %>
+
+        <div class="text-center">
+          <%= @user_contact_form.footer_notes.strip %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function() {
+      <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+      $('#contact_form_submit').css({'color':contrastColor('<%= @user_contact_form.submit_button_color.to_s -%>', true)});
+
+      <% date_field_ids.each do |id| %>
+        // date calendar
+        $('#<%= id -%>').flatpickr({
+          nextArrow: '>',
+          prevArrow: '<',
+          dateFormat: 'm/d/Y',
+          enableTime: 'false',
+          allowInput: 'true'
+        });
+      <% end %>
+    });
+  </script>
+</body>
+</html>

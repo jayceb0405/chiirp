@@ -1,0 +1,36 @@
+<%
+  # app/views/triggers/forms/_140.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/140", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions on a ContactCustomField date
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Start on a Custom Field Date...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will fire thier first Trigger on the date entered in the selected Custom Field.</li>
+      </ul>
+    </small>
+  </div>
+</div>
+
+<%= bootstrap_select_tag(
+      field:        'data[client_custom_field_id]',
+      label:        { title: 'Custom Field (Date type)' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.client.client_custom_fields.where(var_type: 'date').pluck(:var_name, :id), selected: presenter.trigger.data.dig(:client_custom_field_id).to_i }
+    ) %>
+
+<%= render partial: 'triggers/forms/repeat', locals: { presenter: } %>

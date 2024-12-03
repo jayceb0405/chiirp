@@ -1,0 +1,32 @@
+<%
+  # app/views/triggers/_analyze_icon.html.erb
+  #
+  # Example:
+  # 	render partial: "triggers/analyze_icon", locals: { trigger: Trigger }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) trigger: (Trigger)
+  #
+  return unless local_assigns.dig(:trigger).is_a?(Trigger)
+
+  if trigger.new_record?
+    show_success_icon = false
+    show_failed_icon  = false
+  else
+    show_failed_icon = false
+
+    trigger.campaign.analyze!.each do |result|
+      show_failed_icon = true if result.dig(:trigger_id).to_i == trigger.id
+    end
+
+    show_success_icon = !show_failed_icon
+  end
+-%>
+<% if show_success_icon %>
+  <i class="fa fa-check text-success"></i>
+<% elsif show_failed_icon %>
+  <i class="fa fa-times text-danger"></i>
+<% end %>

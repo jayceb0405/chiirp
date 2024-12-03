@@ -1,0 +1,72 @@
+<%
+  # app/views/surveys/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'surveys/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards:     (Array)
+  #   (opt) option_id: (Integer)
+  #
+  cards     = local_assigns.dig(:cards)
+  presenter = Surveys::Presenter.new(client: current_user.client)
+-%>
+// Surveys
+<% if cards.include?('surveys_index') %>
+  $('#surveys_body').html('<%= j render partial: 'surveys/index', locals: { presenter: } -%>');
+  $('#select_survey_dropdown').html('<%= j render partial: 'surveys/select_survey_dropdown', locals: { presenter: } -%>')
+<% end %>
+<% if cards.include?('survey_edit') %>
+  $('#survey_<%= @survey.id -%>').html('<%= j render partial: 'surveys/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('survey_open_new') %>
+  $('#survey_<%= @survey.id -%>').collapse('show');
+<% end %>
+
+// SurveyScreens
+<% if cards.include?('survey_screens_index') %>
+  $('#surveys_<%= @survey.id -%>').html('<%= j render partial: 'surveys/screens/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('survey_screen_edit') %>
+  $('#survey_<%= @survey.id -%>_screen_<%= @survey_screen.id -%>').html('<%= j render partial: 'surveys/screens/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('survey_screen_open_new') %>
+  $('#survey_<%= @survey.id -%>_screen_<%= @survey_screen.id -%>').collapse('show');
+<% end %>
+<% if cards.include?('tr_survey_screen_option') %>
+  <%
+    presenter.survey        = @survey
+    presenter.survey_screen = @survey_screen
+    option_id               = local_assigns.dig(:option_id).to_i
+  %>
+  $('#tr_survey_screen_option_<%= presenter.survey_screen.id -%>_<%= option_id -%>').html('<%= j render partial: 'surveys/screens/types/question_option_td', locals: { option_id:, presenter: } -%>');
+<% end %>
+<% if cards.include?('first_screen_id_edit') %>
+  <% presenter.survey = @survey %>
+  $('#survey_first_screen_id_span_<%= presenter.survey.id -%>').html('<%= j render partial: 'surveys/edit_first_screen_id', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<% if @survey&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save Survey',
+    'body': '<%= @survey.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+<% if @survey_screen&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save Survey Screen',
+    'body': '<%= @survey_screen.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

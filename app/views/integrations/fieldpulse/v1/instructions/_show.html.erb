@@ -1,0 +1,58 @@
+<%
+  # app/views/integrations/fieldpulse/_instructions.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/fieldpulse/instructions"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldpulse::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">FieldPulse Integration Instructions</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your FieldPulse Account.</li>
+      <li>Your FieldPulse leads will be imported into <%= I18n.t('tenant.name') -%> as soon as they are submitted.</li>
+      <li>As your FieldPulse leads are imported a new Contact is created (if not already found in <%= I18n.t('tenant.name') -%>).</li>
+      <li>Select <%= I18n.t('tenant.name') -%> fields to update from imported FieldPulse fields.</li>
+      <li>Start Campaigns in <%= I18n.t('tenant.name') -%> using the responses selected by your FieldPulse leads.</li>
+    </ul>
+
+    <h6>How To Get Started:</h6>
+    <ul>
+      <li class="font-weight-bold">Save your API Key from FieldPulse</li>
+
+      <li class="font-weight-bold">Assign Fields and select Campaigns</li>
+
+      <li class="font-weight-bold">Relax and Wait for Your Leads to Arrive</li>
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your FieldPulse Account.</li>
+      <li><%= I18n.t('tenant.name') -%> must have permissions to access your FieldPulse forms.</li>
+      <li>After your connection is complete you may select the FieldPulse forms that you wish to use.</li>
+    </ul>
+
+    <h6>Define How Your FieldPulse Fields Match Up With <%= I18n.t('tenant.name') -%></h6>
+    <ul>
+      <li>Your current FieldPulse forms are listed below.</li>
+      <li>Select the <%= I18n.t('tenant.name') -%> fields to save the form data when leads are received.</li>
+      <li>Select a Campaign to start for those selections with options.</li>
+      <li>Please scroll to the bottom and click "Save" to save your changes.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

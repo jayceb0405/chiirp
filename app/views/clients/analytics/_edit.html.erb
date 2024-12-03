@@ -1,0 +1,220 @@
+<%
+  # app/views/clients/analytics/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/analytics/edit', locals: { month: Integer, year: Integer}
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   month: (Integer)
+  #   year:  (Integer)
+  #
+  month = (local_assigns.dig(:month) || Time.current.month).to_i
+  year  = (local_assigns.dig(:year) || Time.current.year).to_i
+
+  analytics_presenter = ClientAnalyticsPresenter.new(current_user, month, year)
+-%>
+<%= render partial: 'layouts/shared/section_header', locals: {
+      heading: '<i class="fa fa-chart-line"></i> Monthly Analytics',
+      options: link_to('', '#', { class: 'btn btn-app fa fa-question text-white pl-2 pr-2 mr-2 rounded-circle', id: 'help_button', style: 'line-height:normal;' })
+    } %>
+<div class="container-body">
+  <div class="collapse app_collapse-inner" id="instructions-collapse">
+    <h3>Help Info</h3>
+    <ul>
+      <li><strong>Startup Revenue:</strong> revenue received from new Clients at startup this month.</li>
+      <li><strong>Monthly Fee Revenue:</strong> revenue received from all existing Clients this month.</li>
+      <li><strong>Credits Charges:</strong> revenue received this month for additional credits purchased beyond normal monthly credits.</li>
+      <li><strong>Additional Charges:</strong> revenue received this month for all other fees charged to Clients.</li>
+      <li><strong>Ad Costs / Client:</strong> this month's ad costs divided by new Clients this month.</li>
+      <li><strong>Commission Costs / Client:</strong> this month's commission costs divided by the total of this month's and last month's new Clients.</li>
+    </ul>
+  </div>
+
+  <h4><%= analytics_presenter.month_name -%>, <%= analytics_presenter.year -%></h4>
+
+  <div class="row">
+    <div class="col-4 text-right pr-1 mt-auto mb-auto">
+      <%= link_to '',
+                  edit_clients_analytics_path(month: month == 1 ? 12 : month - 1, year: month == 1 ? year - 1 : year),
+                  method: :get,
+                  remote: true,
+                  class:  'btn btn-app fa fa-chevron-left',
+                  id:     'arrow_left',
+                  style:  'text-decoration: none;' %>
+    </div>
+    <div class="col-2 text-center pl-1 pr-1">
+      <%= select_month(month,
+                       { use_month_numbers: false },
+                       { class: 'form-control',
+                         id:    'month_select' }) %>
+    </div>
+    <div class="col-2 text-center pl-1 pr-1">
+      <%= select_year(year,
+                      { use_month_numbers: false },
+                      { class: 'form-control',
+                        id:    'year_select' }) %>
+    </div>
+    <div class="col-4 pl-1 mt-auto mb-auto">
+      <%= link_to '',
+                  edit_clients_analytics_path(month: month == 12 ? 1 : month + 1, year: month == 12 ? year + 1 : year),
+                  method: :get,
+                  remote: true,
+                  class:  'btn btn-app fa fa-chevron-right',
+                  id:     'arrow_right',
+                  style:  'text-decoration: none;' %>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-9">
+      <div class="row mt-3">
+        <div class="col-3">New Leads</div>
+        <div class="col-2 text-right"><%= analytics_presenter.new_leads_count -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">New Clients</div>
+        <div class="col-2 text-right"><%= analytics_presenter.new_clients_count -%></div>
+        <div class="col-2 text-right">1 / <%= analytics_presenter.new_clients_per_leads -%> Leads</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">New Clients (active)</div>
+        <div class="col-2 text-right"><%= analytics_presenter.new_clients_active_count -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Clients Lost</div>
+        <div class="col-2 text-right"><%= analytics_presenter.lost_clients_count -%></div>
+        <div class="col-2 text-right"><%= number_to_percentage(analytics_presenter.lost_clients_as_percentage_of_new, precision: 2) -%></div>
+        <div class="col-2 text-right"><%= analytics_presenter.lost_clients_by_month -%> / mo.</div>
+        <div class="col-2 text-right"><%= number_to_percentage(analytics_presenter.lost_clients_as_percentage_of_new_by_month, precision: 2) -%> / mo.</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">All Clients (active)</div>
+        <div class="col-2 text-right"><%= analytics_presenter.total_clients_count -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Startup Revenue</div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.startup_revenue) -%></div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.avg_startup_revenue) -%> / cl.</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Monthly Fee Revenue</div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.monthly_charges) -%></div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.avg_monthly_charges) -%> / cl.</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Credits Charges</div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.credits_charges) -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Additional Charges</div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.added_charges) -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3 border-top">Total Revenue</div>
+        <div class="col-2 text-right border-top"><%= number_to_currency(analytics_presenter.startup_revenue + analytics_presenter.monthly_charges + analytics_presenter.credits_charges + analytics_presenter.added_charges) -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Ads Costs</div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.ad_costs) -%></div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.avg_ad_costs) -%> / cl.</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Commission Costs</div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.total_commission_costs) -%></div>
+        <div class="col-2 text-right"><%= number_to_currency(analytics_presenter.avg_commission_costs) -%> / cl.</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3 border-top">Total Costs</div>
+        <div class="col-2 text-right border-top"><%= number_to_currency(analytics_presenter.total_costs) -%></div>
+        <div class="col-2 text-right border-top"><%= number_to_currency(analytics_presenter.avg_costs) -%> / cl.</div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Gross Profit</div>
+        <div class="col-2 text-right <%= analytics_presenter.gross_profit.positive? ? 'text-success' : 'text-danger' -%>"><%= number_to_currency(analytics_presenter.gross_profit) -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Client Value 1st Month</div>
+        <div class="col-2 text-right <%= analytics_presenter.client_value_first_month.positive? ? 'text-success' : 'text-danger' -%>"><%= number_to_currency(analytics_presenter.client_value_first_month) -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Client Value 2nd Month</div>
+        <div class="col-2 text-right <%= analytics_presenter.client_value_second_month.positive? ? 'text-success' : 'text-danger' -%>"><%= number_to_currency(analytics_presenter.client_value_second_month) -%></div>
+      </div>
+
+      <div class="row mt-3">
+        <div class="col-3">Client Value 3rd Month</div>
+        <div class="col-2 text-right <%= analytics_presenter.client_value_third_month.positive? ? 'text-success' : 'text-danger' -%>"><%= number_to_currency(analytics_presenter.client_value_third_month) -%></div>
+      </div>
+    </div>
+    <div class="col-3">
+      <h4><%= analytics_presenter.month_name -%> Costs</h4>
+
+      <%= form_tag clients_analytics_path, { builder: LooperFormBuilder, remote: true, method: :patch } do %>
+        <%= hidden_field_tag 'month', analytics_presenter.month.to_s %>
+        <%= hidden_field_tag 'year', analytics_presenter.year.to_s %>
+
+        <%= label_tag('costs[ads]', 'Ads', { class: 'form-group-label mb-0 text-muted' }) %>
+        <div class="input-group">
+          <div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-dollar-sign"></i></div></div>
+          <%= number_field_tag('costs[ads]', analytics_presenter.ad_costs, { id: 'costs_ads', class: 'form-control', format: 'dollar', step: 0.01, autocomplete: 'off' }) %>
+        </div>
+
+        <%= label_tag('', 'Commissions', { class: 'mt-3 text-muted' }) %><br>
+
+        <%= label_tag('costs[commission_mid]', 'Mid Month', { class: 'form-group-label mb-0 text-muted' }) %>
+        <div class="input-group">
+          <div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-dollar-sign"></i></div></div>
+          <%= number_field_tag('costs[commission_mid]', analytics_presenter.mid_commission_costs, { id: 'commission_mid', class: 'form-control', step: 0.01, autocomplete: 'off' }) %>
+        </div>
+
+        <%= label_tag('costs[commission_end]', 'End of Month', { class: 'form-group-label mb-0 text-muted' }) %>
+        <div class="input-group">
+          <div class="input-group-prepend"><div class="input-group-text"><i class="fa fa-dollar-sign"></i></div></div>
+          <%= number_field_tag('costs[commission_end]', analytics_presenter.end_commission_costs, { id: 'commission_end', class: 'form-control', step: 0.01, autocomplete: 'off' }) %>
+        </div>
+
+        <%= submit_tag('Save', data: { 'disable-with': 'Saveing...' }, class: 'btn btn-app') %>
+      <% end %>
+    </div>
+</div>
+
+<script>
+  $(function () {
+    $('#help_button').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $('#instructions-collapse').collapse('toggle');
+    });
+
+    $('#month_select, #year_select').on('change', function(e) {
+      e.preventDefault();
+      month = $('#month_select').find(':selected')[0].value
+      year  = $('#year_select').find(':selected')[0].value
+
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path -%>',
+        data: { month: month, year: year }
+      })
+    });
+  });
+</script>

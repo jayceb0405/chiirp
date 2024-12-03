@@ -1,0 +1,90 @@
+<%
+# app/views/aiagents/_form_extract_data.html.erb
+#
+# Example:
+#   render 'form_extract_data', presenter: presenter
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   presenter: (Uiagent::Presenter)
+#
+-%>
+<%= bootstrap_text_area(
+      field:        'agent[ending_prompt]',
+      value:        presenter.agent.ending_prompt,
+      label:        { title: 'Final Text Message' },
+      html_options: { typeahead_client: presenter.agent.client, char_count_client: presenter.agent.client },
+      messages:     { note: 'How would you like to end this conversation if the AI Agent does not send out a final message? This field is hashtag aware.' }
+    ) %>
+
+<div class="card card-expansion-item" id="form_extract_data_outer">
+  <div class="card-header border-0" id="form_extract_data">
+    <button class="btn btn-reset collapsed prevent-default" type="button" data-toggle="collapse" data-target="#fieldset_custom_fields_<%= presenter.agent.id -%>" aria-expanded="false" aria-controls="fieldset_custom_fields_<%= presenter.agent.id -%>">
+      <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+      <span>Custom Fields</span>
+    </button>
+  </div>
+  <div id="fieldset_custom_fields_<%= presenter.agent.id -%>" class="collapse" aria-labelledby="aiagent_edit_accordion" data-parent="#aiagent_edit_accordion">
+    <div class="card-body pt-0">
+
+      <div class="card-expansion" id="clients_widget_options_accordion">
+        <div class="row">
+          <div class="col-6 pt-3 pl-4">
+            <h6>Field</h6>
+          </div>
+          <div class="col-3 pt-3">
+            <h6>Include</h6>
+          </div>
+          <div class="col-3 pt-3">
+            <h6>Required</h6>
+          </div>
+        </div>
+        <ul class="sortable-lists list-group list-group-flush" id="data_table" data-toggle="sortable" data-group="pages">
+          <% presenter.custom_form_fields_for_edit.each do |key, value| %>
+            <% key_name = (value.dig('name') || 'Unknown').to_s %>
+            <% key_show = value.dig('show').to_i %>
+            <% key_required = value.dig('required').to_i %>
+            <% key_order = value.dig('order').to_i %>
+
+            <li class="list-group-item align-items-center drag-handle" data-id="<%= key -%>">
+              <div class="row w-100">
+                <%= hidden_field_tag "agent[custom_fields][#{key}][order]", key_order, { id: "list_group_sort_order_#{key}" } %>
+
+                <div class="col-6">
+                  <span class="drag-indicator"></span>
+                  <%= key_name %>
+                </div>
+
+                <div class="col-3">
+                  <%= bootstrap_switch_field(
+                        field:        "agent[custom_fields][#{key}][show]",
+                        value:        key_show == 1,
+                        values:       %w[1 0],
+                        row:          { columns: [0, 12] },
+                        col:          { class: 'mb-0' },
+                        form_group:   { class: 'mb-0' },
+                        html_options: { class: 'field_key', id: "fields_#{key}_check_box", disabled: key == 'phone' }
+                      ) %>
+                </div>
+
+                <div class="col-3">
+                  <%= bootstrap_switch_field(
+                        field:        "agent[custom_fields][#{key}][required]",
+                        value:        key_required == 1,
+                        values:       %w[1 0],
+                        row:          { columns: [0, 12] },
+                        col:          { class: 'mb-0' },
+                        form_group:   { class: 'mb-0' },
+                        html_options: { class: 'field_key_required', id: "fields_#{key}_check_box_required", disabled: key == 'phone' }
+                      ) %>
+                </div>
+              </div>
+            </li>
+          <% end %>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

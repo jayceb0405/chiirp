@@ -1,0 +1,216 @@
+<%
+  # app/views/integrations/servicetitan/events/events/_edit_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/edit_event', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<td colspan="13" class="p-3">
+  <%= form_tag integrations_servicetitan_events_event_path(presenter.event_id), builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do %>
+    <%= hidden_field_tag 'events[id]', presenter.event_id %>
+
+    <fieldset class="border rounded p-2 my-3">
+      <legend class="w-auto mb-0"><h6>ServiceTitan Criteria</h6></legend>
+
+      <%= bootstrap_select_tag(
+            field:        'events[action_type]',
+            label:        { title: 'ServiceTitan Event' },
+            html_options: { class: 'action_type_select', id: "action_type_select_#{presenter.event_id}" },
+            options:      { array: Integration::Servicetitan::V2::Base::EVENT_TYPE_OPTIONS, selected: presenter.event_type }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:        'events[orphaned_estimates]',
+            row:          { class: 'event_criteria_row', id: "orphaned_estimates_row_#{presenter.event_id}" },
+            value:        presenter.orphaned_estimates?,
+            values:       [true, false],
+            label:        { title: 'Orphaned Estimates' },
+            html_options: { class: 'orphaned_estimates_switch', id: "orphaned_estimates_switch_#{presenter.event_id}" },
+            messages:     { note: 'Event actions will only trigger on ServiceTitan orphaned estimates (estimates not created on a job).' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'events[new_status]',
+            row:          { class: 'event_criteria_row', id: "new_status_row_#{presenter.event_id}" },
+            label:        { title: 'New Status' },
+            html_options: { class: 'new_status_input', id: "new_status_input_#{presenter.event_id}", multiple: true },
+            options:      { array: [%w[InProgress in_progress], %w[Hold hold], %w[Canceled canceled]], selected: presenter.new_status },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Job Status includes any of the selected statuses.' }
+          ) %>
+      <span id="events_job_cancel_reasons_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/job_cancel_reasons', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_select_tag(
+            field:        'events[customer_type]',
+            row:          { class: 'event_criteria_row', id: "customer_types_row_#{presenter.event_id}" },
+            label:        { title: 'Customer Types' },
+            html_options: { multiple: true },
+            options:      { array: [%w[Commercial commercial], %w[Residential residential]], selected: presenter.customer_type },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Customer Type includes any of the selected types.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'events[status]',
+            row:          { class: 'event_criteria_row', id: "action_status_row_#{presenter.event_id}" },
+            label:        { title: 'Estimate Status' },
+            html_options: { class: 'action_status_input', id: "action_status_input_#{presenter.event_id}" },
+            options:      { array: [%w[Open open], %w[Sold sold], %w[Dismissed dismissed]], selected: presenter.status },
+            messages:     { note: 'When a Sold action exists Open or Dismissed actions will NOT be processed.' }
+          ) %>
+      <span id="events_job_types_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/job_types', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_check_box(
+            row:        { class: 'event_criteria_row', id: "st_customer_row_#{presenter.event_id}" },
+            label:      { title: 'ServiceTitan Customers' },
+            checkboxes: [{ field: 'events[st_customer][yes]', label: 'ServiceTitan Customer', checked: presenter.st_customer_yes, values: [true, false] },
+                         { field: 'events[st_customer][no]', label: 'ServiceTitan Non-Customer', checked: presenter.st_customer_no, values: [true, false] }],
+            messages:   { note: 'Event actions will trigger when ServiceTitan Call is received from selected options. No selections will be like selecting both options.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'events[call_directions]',
+            row:          { class: 'event_criteria_row', id: "call_directions_row_#{presenter.event_id}" },
+            label:        { title: 'Call Directions' },
+            html_options: { multiple: true },
+            options:      { array: Integration::Servicetitan::V2::Base::CALL_DIRECTIONS, selected: presenter.call_directions },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Call Direction includes any of the selected directions. No selections will be like selecting all directions.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'events[call_types]',
+            row:          { class: 'event_criteria_row', id: "call_types_row_#{presenter.event_id}" },
+            label:        { title: 'Call Types' },
+            html_options: { multiple: true },
+            options:      { array: Integration::Servicetitan::V2::Base::CALL_TYPES, selected: presenter.call_types },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Call Type includes any of the selected types. No selections will be like selecting all types.' }
+          ) %>
+      <span id="events_call_reasons_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/call_reasons', locals: { presenter: } %>
+      </span>
+      <span id="events_campaigns_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/campaigns', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_text_field(
+            field:    'events[campaign_name][segment]',
+            value:    presenter.campaign_name_segment,
+            row:      { class: 'event_criteria_row', id: "campaign_name_segment_row_#{presenter.event_id}" },
+            label:    { title: 'Campaign Name Segment' },
+            messages: { note: 'Event actions will trigger when ServiceTitan Campaign Name matches the entered segment.' }
+          ) %>
+      <%= bootstrap_check_box(
+            row:        { class: 'event_criteria_row', id: "campaign_name_segment_location_row_#{presenter.event_id}" },
+            label:      { title: 'Campaign Name Segment Location' },
+            checkboxes: [
+              { field: 'events[campaign_name][start]', label: 'Begins With', checked: presenter.campaign_name_start, values: [true, false] },
+              { field: 'events[campaign_name][end]', label: 'Ends With', checked: presenter.campaign_name_end, values: [true, false] },
+              { field: 'events[campaign_name][contains]', label: 'Contains', checked: presenter.campaign_name_contains, values: [true, false] }
+            ]
+          ) %>
+      <%= bootstrap_range_slider(
+            field:        'events[call_duration]',
+            row:          { class: 'event_criteria_row', id: "call_duration_row_#{presenter.event_id}" },
+            label:        { title: 'Call Duration' },
+            range_slider: { type: 'double', min: 0, max: 300, from: presenter.call_duration_from, to: presenter.call_duration_to, step: 1, grid: true, grid_num: 10, postfix: ' seconds' },
+            messages:     { note: 'Event actions will trigger when ServiceTitan call does not exceed the selected length.' }
+          ) %>
+      <span id="events_business_units_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/business_units', locals: { presenter: } %>
+      </span>
+      <span id="events_membership_types_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/membership_types', locals: { presenter: } %>
+      </span>
+      <span id="events_membership_types_stop_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/membership_types_stop', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_select_tag(
+            field:        'events[membership]',
+            row:          { class: 'event_criteria_row', id: "membership_row_#{presenter.event_id}" },
+            label:        { title: 'ServiceTitan Membership Status' },
+            html_options: { multiple: true },
+            options:      { array: [%w[Active active], %w[Inactive inactive]], selected: presenter.membership },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Customer Membership activity includes any of the selected statuses.' }
+          ) %>
+      <span id="events_ext_tech_ids_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/technicians', locals: { presenter: } %>
+      </span>
+      <span id="events_tag_ids_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/servicetitan/events/events/select_tags/tag_ids', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_switch_field(
+            field:    'events[start_date_changes_only]',
+            row:      { class: 'event_criteria_row', id: "start_date_changes_only_row_#{presenter.event_id}" },
+            value:    presenter.start_date_changes_only,
+            values:   [true, false],
+            label:    { title: 'Start Date/Time' },
+            messages: { note: 'Event actions will trigger only when ServiceTitan Job Start Date/Time is changed.' }
+          ) %>
+      <%= bootstrap_number_field(
+            field:        'events[range_max]',
+            value:        presenter.range_max,
+            row:          { class: 'event_criteria_row', id: "range_max_row_#{presenter.event_id}" },
+            label:        { title: 'Maximum Total Range' },
+            html_options: { class: 'range_max', id: "range_max_#{presenter.event_id}", min: 0, step: 1 },
+            prepends:     [{ button: false, label: '$' }]
+          ) %>
+      <%= bootstrap_range_slider(
+            field:        'events[total]',
+            row:          { class: 'event_criteria_row', id: "range_slider_row_#{presenter.event_id}" },
+            label:        { title: 'Total Range' },
+            range_slider: { id: "range_slider_total_#{presenter.event_id}", type: 'double', min: 0, max: presenter.range_max, from: presenter.total_min, to: presenter.total_max, step: 1, grid: true, grid_num: 10, prefix: '$', separator: ',' },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Job Invoice Total is within selected range.' }
+          ) %>
+      <%= bootstrap_range_slider(
+            field:        'events[membership_days_prior]',
+            row:          { class: 'event_criteria_row', id: "membership_days_prior_slider_row_#{presenter.event_id}" },
+            label:        { title: 'Membership Days Prior' },
+            range_slider: { id: "membership_days_prior_slider_total_#{presenter.event_id}", type: 'single', min: 0, max: 90, from: presenter.membership_days_prior, step: 1, grid: true, grid_num: 10, prefix: 'Days ', separator: ',' },
+            messages:     { note: 'Event actions will trigger when ServiceTitan Membership event is scheduled in selected number of days.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'events[membership_campaign_stop_statuses]',
+            row:          { class: 'event_criteria_row', id: "membership_campaign_stop_row_#{presenter.event_id}" },
+            label:        { title: 'Membership Statuses to Stop Campaigns' },
+            html_options: { multiple: true },
+            options:      { array: presenter.membership_statuses_for_select, selected: presenter.membership_campaign_stop_statuses },
+            messages:     { note: 'Campaigns started on membership events will be stopped when the selected statuses are found.' }
+          ) %>
+
+    </fieldset>
+
+    <fieldset class="border rounded p-2 my-3">
+      <legend class="w-auto mb-0"><h6><%= I18n.t('tenant.name') -%> Actions</h6></legend>
+
+      <%= bootstrap_switch_field(
+            field:    'events[assign_contact_to_user]',
+            value:    presenter.assign_contact_to_user,
+            values:   [true, false],
+            label:    { title: 'Assign Contact to Employee' },
+            messages: { note: "Employee must be matched to a #{I18n.t('tenant.name')} User." }
+          ) %>
+
+      <%= render partial: 'campaigns/action_fields', locals: {
+            client: presenter.client,
+            campaign_id: presenter.campaign_id, campaign_id_field: 'events[campaign_id]',
+            stop_campaign_ids: presenter.stop_campaign_ids, stop_campaign_ids_field: 'events[stop_campaign_ids]',
+            group: presenter.group, group_id_field: 'events[group_id]',
+            tag: presenter.tag, tag_id_field: 'events[tag_id]',
+            stage_id: presenter.stage_id, stage_id_field: 'events[stage_id]',
+            first_trigger_types: [115, 120, 125, 130, 133, 134, 135, 140, 143, 144, 145]
+          } %>
+
+    </fieldset>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Save Actions', disable_with: 'Saving Actions' }]
+        ) %>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    displayInputs('<%= presenter.event_id -%>');
+  });
+</script>

@@ -1,0 +1,125 @@
+<%
+  # app/views/integrations/cardx/events/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/cardx/events/index', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">CardX Post Payment Events</span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Event'.html_safe, new_integrations_cardx_event_path, {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="2" style="min-width: 200px">Name</th>
+              <%= content_tag(:th, class: 'text-left') { 'Campaign' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Group' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Tag' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Stage' } %>
+              <%= content_tag(:th, class: 'text-left') { 'Stop Campaign' } %>
+              <th style="min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody id="events_body">
+
+            <% if presenter.events.present? %>
+              <%= render partial: 'integrations/cardx/events/show', collection: presenter.events, as: :event, locals: { presenter: } %>
+            <% else %>
+              <tr id="no_events">
+                <td colspan="8" class="text-center p-5">
+                  Events were NOT found.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_events').addClass('active');
+    $('#breadcrumb').show();
+  });
+
+  $(document).off('show.bs.collapse', '.edit_event');
+  $(document).on('show.bs.collapse', '.edit_event', function (e) {
+
+    if (e.target.id.replace('edit_event_', '')) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '/integrations/cardx/events/' + e.target.id.replace('edit_event_', '') + '/edit'
+      });
+      // .fail(function(){
+      //   ChiirpAlert({
+      //     'body':'Sorry there a',
+      //     'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_event' }].to_json) -%>,
+      //     'type':'danger',
+      //     'persistent':true
+      //   });
+    }
+  });
+
+  $(document).off('hide.bs.collapse', '.edit_event');
+  $(document).on('hide.bs.collapse', '.edit_event', function (e) {
+    $('#edit_event' + e.target.id.replace('edit_event', '')).html('<td colspan="9" class="mt-3 text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Event' } %></td>');
+  });
+
+  $(document).off('click', '.button_delete_event');
+  $(document).on('click', '.button_delete_event', function(e) {
+    e.preventDefault();
+
+    var id    = $(this).data('id');
+
+    if (id) {
+      ChiirpAlert({
+        'body':'Deleting ' + name + ' can NOT be un-done. Is it your intention to delete this Event?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_event' }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_delete_event');
+      $(document).on('click', '#button_dump_it_delete_event', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/integrations/cardx/events/' + id
+        });
+      });
+    } else {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= integrations_cardx_events_path -%>'
+      });
+    }
+  });
+</script>

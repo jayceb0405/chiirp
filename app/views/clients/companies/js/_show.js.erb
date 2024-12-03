@@ -1,0 +1,23 @@
+<%
+  # app/views/clients/companies/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/js/show', locals: { cards: Array, list_type: String }
+  #
+  # Instance Variables:
+  #   (req) @user_settings: (Users::Setting)
+  #
+  # Local Variables:
+  #   (req) cards:     (Array)
+  #   (req) list_type: (String)
+  #
+  return unless local_assigns.dig(:cards).present? && cards.is_a?(Array) && local_assigns.dig(:list_type).present? && @user_settings.is_a?(Users::Setting)
+
+  presenter = Clients::CompaniesPresenter.new(@user_settings)
+  presenter.list_type = list_type.to_s.downcase
+-%>
+<% if cards.include?('index') %>
+  $('#clients_list').html('<%= j render partial: 'clients/companies/index', locals: { presenter: } -%>');
+<% end %>
+
+Looper.init();

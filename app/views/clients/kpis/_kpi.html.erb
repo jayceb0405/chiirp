@@ -1,0 +1,91 @@
+<%
+  # app/views/clients/kpis/_kpi.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/kpis/kpi', collection: presenter.kpis, as: :kpi, locals: { kpi_presenter: presenter }
+  #   render partial: 'clients/kpis/kpi', locals: { kpi_presenter: presenter, kpi: @kpi }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:kpi_presenter) || Clients::KpiPresenter.new(client: @client)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#kpi_<%= kpi.id.to_s -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_kpi_name_<%= kpi.id -%>">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#kpi_<%= kpi.id.to_s -%>">
+      <%= kpi.name -%>
+    </button>
+  </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(kpi.created_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#kpi_#{kpi.id}"
+                   }) %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_kpi_#{kpi.id}",
+          style: 'text-decoration: none;'
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="kpi_<%= kpi.id -%>">
+  <!-- kpi -->
+</tr>
+
+<script>
+  $(function() {
+
+    <% if kpi.new_record? %>
+      $('#button_delete_kpi_<%= kpi.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= clients_kpis_path -%>'
+        });
+      });
+    <% else %>
+      $('#kpi_<%= kpi.id -%>').on('show.bs.collapse', function () {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= edit_clients_kpi_path(kpi.id) -%>'
+        });
+      });
+
+      $('#button_delete_kpi_<%= kpi.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= kpi.name -%>" can NOT be un-done. Is it your intention to delete this KPI?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{kpi.id}" }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_<%= kpi.id -%>');
+        $(document).on('click', '#button_dump_it_<%= kpi.id -%>', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= clients_kpi_path(kpi.id) -%>'
+          });
+        });
+      });
+    <% end %>
+  });
+</script>

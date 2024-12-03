@@ -1,0 +1,21 @@
+<%
+	# app/views/integrations/interest_rates/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/interest_rates/js/show", locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+-%>
+<% if cards.include?('form') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/interest_rates/form' -%>');
+<% end %>
+<% if cards.include?('instructions') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/interest_rates/instructions' -%>');
+<% end %>
+
+Looper.init();

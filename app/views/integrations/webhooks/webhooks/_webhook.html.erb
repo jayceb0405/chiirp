@@ -1,0 +1,41 @@
+<%
+  # app/views/integrations/webhooks/webhooks/_webhook.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/webhooks/webhook', collection: @client_api_integration.webhooks, as: :webhook_id, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) webhook_id: (String)
+  #   (opt) presenter:  (Integrations::Webhooks::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Webhooks::Presenter.new(client_api_integration: @client_api_integration)
+  webhook = @client_api_integration.webhooks.dig(webhook_id)&.symbolize_keys
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#webhook_<%= webhook_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <%= content_tag(:td, class: 'text-left', id: "td_webhook_#{webhook_id}", colspan: '2') { webhook.dig(:type).to_s } %>
+  <%= content_tag(:td, class: 'text-left') { webhook.dig(:url).to_s } %>
+  <td class="text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#webhook_<%= webhook_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_webhook',
+          style: 'text-decoration: none;',
+          data:  { id: webhook_id, name: webhook.dig(:type).to_s }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse webhook_edit_row" id="webhook_<%= webhook_id -%>" data-id="<%= webhook_id -%>" data-new="<%= webhook.blank? -%>">
+  <td colspan="5" class="p-3" id="webhook_td_<%= webhook_id -%>">
+    <!-- webhook editor -->
+  </td>
+</tr>

@@ -1,0 +1,23 @@
+<%
+# app/views/clients/users/common/_user_script_footer.html.erb
+#
+# Example:
+#   render partial: 'clients/users/common/user_script_footer'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_profile').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_profile').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

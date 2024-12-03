@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_campaigns.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/campaigns', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[campaign_ids]',
+      row:          { class: 'event_criteria_row', id: "campaign_ids_row_#{presenter.event_id}" },
+      label:        { title: "Campaigns<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_campaigns_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Campaigns', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: [['No Campaign Assigned', 0]] + presenter.campaigns_for_select, selected: presenter.campaign_ids },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Campaign is any of those selected.' }
+    ) %>

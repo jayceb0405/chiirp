@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/webhooks/apis/edit/_nested_field_options.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/edit/nested_field_options', collection: option, as: :option, locals: { presenter: Integrations::Webhooks::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) option:     (Array/Hash) ex: [key, value]
+  #   (req) parent_key: (String) the key that all of these options are assigned to
+  #   (req) presenter:  (Integrations::Webhooks::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter) && local_assigns.dig(:parent_key).is_a?(String) && local_assigns.dig(:option).is_a?(Array)
+-%>
+<%= bootstrap_select_tag(
+      field:        "keys[#{parent_key}_nested][#{option.first}]",
+      label:        { title: "#{option.first}: #{option.last}" },
+      html_options: { class: 'variable_response_options', data: { key: option.first }, parent_key: },
+      options:      { array: presenter.webhook_match_fields, selected: presenter.webhook.find_internal_key("#{parent_key}:#{option.first}"), prompt: 'Matching Field, Nested Fields or Skip' }
+    ) %>
+
+<span id="nested_field_options_<%= parent_key -%>_<%= presenter.cleaned_option_key(option.first) -%>">
+  <% option_last = if option.last.is_a?(Hash)
+                     option.last
+                   elsif option.last.is_a?(String) && JSON.is_json?(option.last)
+                     JSON.parse(option.last)
+                   else
+                     []
+                   end %>
+  <%= render partial: 'integrations/webhooks/apis/edit/nested_field_options', collection: option_last, as: :option, locals: { presenter:, parent_key: "#{parent_key}:#{option.first}" } if presenter.webhook.find_internal_key(presenter.cleaned_option_key("#{parent_key}:#{option.first}")) == 'nested_fields' %>
+</span>
+
+<span id="variable_response_options_<%= parent_key -%>_<%= presenter.cleaned_option_key(option.first) -%>">
+  <%= render partial: 'integrations/webhooks/apis/edit/variable_response_options', locals: { presenter:, parent_key: "#{parent_key}:#{option.first}", option: } %>
+</span>

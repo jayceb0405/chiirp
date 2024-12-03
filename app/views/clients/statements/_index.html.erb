@@ -1,0 +1,38 @@
+<%
+  # app/views/clients/statements/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/statements/index', locals: { presenter: ClientPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (ClientPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(ClientPresenter)
+
+  presenter.statement_month  = @statement_month
+  presenter.transaction_type = @transaction_type
+-%>
+<td colspan="5" class="px-5">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th class="text-left">Date</th>
+
+          <% if presenter.transaction_type == 'dlc10_charges' %>
+            <th class="text-left">Type</th>
+          <% end %>
+
+          <th class="text-right">Amount</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <%= render partial: 'clients/statements/transaction', collection: presenter.client_transactions, as: :transaction, locals: { presenter: } %>
+      </tbody>
+    </table>
+  </div>
+</td>

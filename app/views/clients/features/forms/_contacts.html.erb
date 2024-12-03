@@ -1,0 +1,21 @@
+<%
+  # app/views/clients/features/forms/_contacts.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/features/forms/contacts', locals: { presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || ClientPresenter.new(client: @client)
+-%>
+<h6 class="card-header">Contacts</h6>
+<%= form_with model: presenter.client, url: clients_feature_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'features_form', novalidate: true } do |f| %>
+  <%= f.submit_buttons buttons: [{ title: 'Save Contacts Features', disable_with: 'Saving Contacts Features' }] %>
+<% end %>

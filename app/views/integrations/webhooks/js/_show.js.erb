@@ -1,0 +1,70 @@
+<%
+  # app/views/integrations/webhooks/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: ClientApiIntegration
+  #
+  # Local Variables:
+  #   (req) cards:     (Array)
+  #   (opt) presenter: (Integrations::Webhooks::Presenter)
+  #
+  presenter = Integrations::Webhooks::Presenter.new(client_api_integration: @client_api_integration) unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+  presenter.webhook = @webhook if @webhook
+-%>
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/webhooks/instructions/show', locals: { presenter: } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/webhooks/overview', locals: { presenter: } -%>');
+<% end %>
+
+// APIs
+<% if cards.include?('apis_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/webhooks/apis/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('apis_list') %>
+  $('#webhook_apis_body').html('<%= j render partial: 'integrations/webhooks/apis/webhook', collection: presenter.apis, as: :webhook, locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('apis_edit') %>
+  $('#webhook_edit_<%= presenter.webhook.id -%>').html('<%= j render partial: 'integrations/webhooks/apis/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('apis_open_new') %>
+  $('#webhook_edit_<%= presenter.webhook.id -%>').collapse('show');
+<% end %>
+<% if cards.include?('apis_form') %>
+  $('#zapier_webhook_form_table_body').append('<%= j render partial: 'integrations/webhooks/apis/edit/form_keyresponse', locals: { key:, response: '', campaign_id: '', response_counter: counter, presenter: } -%>');
+  $('#zapier_webhook_form_add_response').html('<%= j render partial: 'integrations/webhooks/apis/edit/form_add_response', locals: { webhook: @webhook, key:, counter: } -%>');
+<% end %>
+<% if cards.include?('apis_option_key') %>
+  <% if local_assigns.dig(:internal_key) == 'nested_fields' %>
+    $('#nested_field_options_<%= local_assigns.dig(:parent_key).to_s -%>_<%= presenter.cleaned_option_key(local_assigns.dig(:option).first) -%>').html('<%= j render partial: 'integrations/webhooks/apis/edit/nested_field_options', collection: local_assigns.dig(:option).last.is_a?(Hash) ? local_assigns.dig(:option).last : [], as: :option, locals: { presenter:, parent_key: local_assigns.dig(:option).first } -%>');
+  <% else %>
+    $('#nested_field_options_<%= local_assigns.dig(:parent_key).to_s -%>_<%= presenter.cleaned_option_key(local_assigns.dig(:option).first) -%>').html('');
+  <% end %>
+
+  $('#variable_response_options_<%= local_assigns.dig(:parent_key).to_s -%>_<%= presenter.cleaned_option_key(local_assigns.dig(:option).first) -%>').html('<%= j render partial: 'integrations/webhooks/apis/edit/variable_response_options', locals: { presenter:, option:, variable_response:, variable_responses:, reserved_key: } -%>');
+<% end %>
+<% if cards.include?('apis_webhook_count_badge') %>
+  $('#webhook_count_badge').html('<%= "#{presenter.apis.where(testing: '0').count} Live / #{presenter.apis.count} Total" -%>');
+<% end %>
+
+// Webhooks
+<% if cards.include?('webhooks_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/webhooks/webhooks/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('webhooks_open') %>
+  $('#webhook_' + '<%= @webhook_id -%>').collapse('show');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  $('#webhook_td_' + '<%= @webhook_id -%>').html('<%= j render partial: 'integrations/webhooks/webhooks/edit', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

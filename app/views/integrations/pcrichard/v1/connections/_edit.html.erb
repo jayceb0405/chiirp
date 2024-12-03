@@ -1,0 +1,73 @@
+<%
+  # app/views/integrations/pcrichard/v1/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/v1/connections/edit', locals: ( presenter: Presenter)
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to PC Richard</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_tag integrations_pcrichard_v1_connections_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_text_field(
+              field:        'credentials[auth_token]',
+              value:        presenter.client_api_integration.credentials&.dig('auth_token').to_s,
+              label:        { title: 'PC Richard Authorization Token' },
+              html_options: { placeholder: 'PC Richard Authorization Token' },
+              messages:     { note: 'Paste the authorization token provided by PC Richard.' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'leads',
+              value:    integrations_pcrichard_v1_new_leads_url(presenter.client_api_integration.api_key),
+              row:      { class: 'mb-0' },
+              label:    { title: 'New Lead URL' },
+              messages: { note: 'Provide this URL to PC Richard.' }
+            ) %>
+        <%= bootstrap_info_field(
+              row:   { class: 'mb-5' },
+              info:  'The following fields are expected in the JSON body:<br />customerId (String), firstName (String), lastName (String), companyName (String), address01 (String), address02 (String), city (String), state (String), postalCode (String), mobilePhone (String), invoiceNumber (String), requestedAt (iso8601 Date)',
+              label: { title: 'Expected Fields' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'orders',
+              value:    integrations_pcrichard_v1_new_orders_url(presenter.client_api_integration.api_key),
+              row:      { class: 'mb-0' },
+              label:    { title: 'Customer Updates URL' },
+              messages: { note: 'Provide this URL to PC Richard.' }
+            ) %>
+        <%= bootstrap_info_field(
+              row:   { class: 'mb-5' },
+              info:  'The following fields are expected in the JSON body:<br />customerId (String), invoiceNumber (String), modelNumber (String), soldAt (iso8601 Date)',
+              label: { title: 'Expected Fields' }
+            ) %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Auth Token', disable_with: 'Saving Auth Token' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

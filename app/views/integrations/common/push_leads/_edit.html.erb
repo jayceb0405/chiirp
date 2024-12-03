@@ -1,0 +1,19 @@
+<%
+  # app/views/integrations/common/push_leads/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/common/push_leads/edit', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<div id="push_leads_customer_tag_id">
+  <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: presenter.push_leads_customer_tag || presenter.client.tags.new, select_or_add_field_name: 'push_leads[customer][tag_id]', select_or_add_div_id: 'push_leads_customer_tag_id', select_class: 'push_leads_select_tag', legend_string: presenter.push_leads_legend_string_customer } %>
+</div>
+
+<%= bootstrap_submit_buttons buttons: [{ title: 'Save', id: 'save_push_leads_button', disable_with: 'Saving...' }] %>

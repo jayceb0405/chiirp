@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/v1/api_key/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendgrid/v1/api_key/edit', locals: { presenter: Integrations::Sendgrid::V1::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Sendgrid::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Sendgrid::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">API Key</h6>
+  <div class="card-body">
+
+    <%= form_with model: presenter.client_api_integration, url: integrations_sendgrid_v1_api_key_path, builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+      <%= f.password_field :api_key, {
+            label:        { title: 'SendGrid API Key' },
+            html_options: { value: presenter.client_api_integration.api_key, placeholder: 'API Key', required: true, autofocus: true },
+            messages:     { note: '* Required. Copy from SendGrid > Settings > API Keys.' }
+          } %>
+
+      <%= f.submit_buttons buttons: [
+            { title: 'Delete Integration', id: 'delete_integration_button', disable_with: 'Deleting Integration' },
+            { title: 'Save Key', disable_with: 'Saving Key' }
+          ] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_api_key').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '#delete_integration_button');
+    $(document).on('click', '#delete_integration_button', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      ChiirpAlert({
+        'body':'Deleting this integration can NOT be un-done. Is it your intention to delete this SendGrid integration?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Don\'t delete it!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Delete it!', id: 'button_dump_it' }].to_json) -%>,
+        'type':'alert',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it');
+      $(document).on('click', '#button_dump_it', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= integrations_sendgrid_v1_api_key_path -%>'
+        });
+      });
+    });
+  });
+</script>

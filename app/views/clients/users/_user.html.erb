@@ -1,0 +1,42 @@
+<%
+  # app/views/clients/users/_user.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/users/user', collection: users, as: :user, locals: { client_presenter: ClientPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (ClientPresenter)
+  #   (req) user:      (User)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(ClientPresenter) && local_assigns.dig(:user).is_a?(User)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <span class="user-avatar user-avatar-lg"> <%= presenter.user_avatar(user) -%> </span>
+  </td>
+  <td class="align-left align-middle" colspan="2" id="td_user_name_<%= user.id -%>">
+    <%= link_to(user.fullname,
+                edit_client_user_path(user.client_id, user.id),
+                class: 'text-decoration-none text-reset') %>
+  </td>
+  <td class="align-left align-middle"> <%= Friendly.new.date(user.created_at, presenter.client.time_zone, false) -%> </td>
+  <td class="align-left align-middle"> <%= Friendly.new.date(user.current_sign_in_at, presenter.client.time_zone, false) -%> </td>
+  <td class="text-right align-middle">
+    <%= link_to('',
+                edit_client_user_path(user.client_id, user.id),
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                id:    "button_edit_user_#{user.id}",
+                style: 'text-decoration: none;') %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt user_delete',
+          style: 'text-decoration: none;',
+          data:  {
+            userId:   user.id,
+            userName: user.fullname
+          }
+        } %>
+  </td>
+</tr>

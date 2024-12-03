@@ -1,0 +1,97 @@
+<%
+  # app/views/clients/task_actions/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/task_actions/edit'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Task Actions</span>
+      <span>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary ml-3',
+              id:    'task_actions_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="2" style="min-width: 240px"> Task Action </th>
+              <th> Campaign </th>
+              <th> Group </th>
+              <th> Tag </th>
+              <th> Stage </th>
+              <th> Stop Campaigns </th>
+              <th style="width:100px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <%= render partial: 'clients/task_actions/edit_assigned', locals: { client_presenter: cp } %>
+            <%= render partial: 'clients/task_actions/edit_due', locals: { client_presenter: cp } %>
+            <%= render partial: 'clients/task_actions/edit_deadline', locals: { client_presenter: cp } %>
+            <%= render partial: 'clients/task_actions/edit_completed', locals: { client_presenter: cp } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if cp.client.errors.any? %>
+      ChiirpAlert({
+        'body':triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    $('#task_actions_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li>Tasks may be assigned to Users in <%= I18n.t('tenant.name') -%>.</li>'
+      help_info += '<li>Actions may be assigned to the related Contact at 4 points of a Task.</li>'
+      help_info += '<ul>'
+      help_info += '<li>Task Assigned</li>'
+      help_info += '<li>Task Due Date</li>'
+      help_info += '<li>Task Deadline</li>'
+      help_info += '<li>Task Completed</li>'
+      help_info += '</ul>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': 'Task Actions Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_task_actions').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_task_actions').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

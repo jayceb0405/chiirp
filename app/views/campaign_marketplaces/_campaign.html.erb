@@ -1,0 +1,78 @@
+<%
+  # app/views/campaign_marketplaces/_campaign.html.erb
+  #
+  # Example:
+  # 	render partial: "campaign_marketplaces/campaign", collection: @campaigns
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  campaign_share_code = campaign.include?('default_phone') ? CampaignShareCode.find_by(campaign_id: campaign['id']) : CampaignShareCode.find_by(campaign_group_id: campaign['id'])
+
+  if campaign.include?('default_phone')
+    # Campaign
+
+    if (c = Campaign.find_by(id: campaign['id']))
+
+      image_tag = if c.marketplace_image.attached?
+                    cl_image_tag(c.marketplace_image.key, { class: 'img-fluid', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 60, height: 60, crop: 'fit'], format: 'png' })
+                  else
+                    image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'img-fluid', style: 'max-height:60px;' })
+                  end
+    end
+  elsif (cg = CampaignGroup.find_by(id: campaign['id']))
+    # CampaignGroup
+
+    image_tag = if cg.marketplace_image.attached?
+                  cl_image_tag(cg.marketplace_image.key, { class: 'img-fluid', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 60, height: 60, crop: 'fit'], format: 'png' })
+                else
+                  image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'img-fluid', style: 'max-height:60px;' })
+                end
+
+  end
+-%>
+<div class="col-12 col-md-6 col-lg-4 m-0 p-1">
+  <div class="h-100 p-3 bg-light text-center border border-primary rounded">
+    <div class="h-100 mb-0" style="padding-bottom:35px;">
+      <%= image_tag -%>
+      <h2><%= campaign['name'] -%></h2>
+      <p><%= campaign.include?('default_phone') ? 'Campaign' : 'Campaign Package' -%></p>
+      <p><%= campaign['price'].zero? ? 'Free' : number_to_currency(campaign['price'].to_d) %></p>
+      <span><%= campaign['data']['description'] -%></span>
+    </div>
+    <div class="p-2 m-0 text-center" style="position:relative;top:-35px;">
+      <%= link_to (campaign['marketplace_ok'] && campaign['price'].to_d.positive? ? 'Buy' : 'Get').to_s,
+                  '',
+                  method: :get,
+                  remote: true,
+                  class:  'btn btn-info',
+                  id:     "get_campaign_button_#{campaign_share_code.id}",
+                  style:  'text-decoration: none;' %>
+      <% if current_user.team_member? %>
+        <%= link_to (campaign['marketplace_ok'] ? 'Revoke' : 'Approve').to_s,
+                    approve_campaign_path(campaign_share_code.id),
+                    method: :post,
+                    remote: true,
+                    class:  'btn btn-info',
+                    style:  'text-decoration: none;' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+<script>
+  $(function () {
+    $('#get_campaign_button_<%= campaign_share_code.id -%>').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        type: 'GET',
+        url: '<%= campaign_marketplace_path(campaign_share_code.id) -%>',
+        dataType: "script"
+      })
+    });
+  });
+</script>

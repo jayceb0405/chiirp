@@ -1,0 +1,25 @@
+<%
+# app/views/layouts/looper/common/header/_brand.html.erb
+#
+# Example:
+#   render partial: 'layouts/looper/common/header/brand'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="top-bar-brand">
+
+  <% if current_user %>
+    <button class="hamburger hamburger-squeeze mr-2" type="button" data-toggle="aside-menu" aria-label="toggle aside menu">
+      <span class="hamburger-box"><span class="hamburger-inner"></span></span>
+    </button>
+  <% end %>
+
+  <%= link_to root_path do %>
+    <%= image_tag("tenant/#{I18n.t('tenant.id')}/logo-banner-white.svg", { height: 40 }) %>
+  <% end %>
+</div>

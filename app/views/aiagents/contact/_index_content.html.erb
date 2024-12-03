@@ -1,0 +1,55 @@
+<%
+  # app/views/aiagents/contact/_index_content.html.erb
+  #
+  # Example:
+  #   render partial: 'aiagents/contact/index_content'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  start_aiagent_session_button_text = @contact.aiagent_sessions.active.any? ? 'Restart AI Aagent Session' : 'Start AI Aagent Session'
+-%>
+<%= form_tag aiagents_apply_path(@contact), { builder: LooperFormBuilder, remote: true, method: :post } do %>
+  <%= bootstrap_select_tag(
+        field:   'aiagent_id',
+        row:     { columns: [2, 10] },
+        label:   { title: 'AI Agent' },
+        options: { for_select: options_from_collection_for_select(@contact.client.aiagents.normal, :id, :name) }
+      ) %>
+  <%= bootstrap_calendar_field(
+        field:        'run_at',
+        value:        Time.current.in_time_zone(current_user.client.time_zone).strftime('%m/%d/%Y %H:%M %p'),
+        row:          { columns: [2, 10] },
+        label:        { title: 'When?' },
+        html_options: { id: 'contacts-calendar-string', required: true },
+        flatpickr:    { include_time: true, mode: 'single', min_date: Time.current.in_time_zone(current_user.client.time_zone).strftime('%m/%d/%Y %H:%M %p') },
+        messages:     { note: 'A scheduled time must be chosen.' }
+      ) %>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: start_aiagent_session_button_text, disable_with: 'Starting AI Aagent Session' }]
+      ) %>
+<% end %>
+
+<% if @contact.aiagent_sessions.any? %>
+  <div class="table-responsive">
+    <table class="table">
+
+      <thead>
+        <tr>
+          <th colspan="3" style="min-width: 240px"> AI Agent </th>
+          <th> Created </th>
+          <th> Status </th>
+          <th style="width:100px; min-width:100px;"></th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <%= render partial: 'aiagents/contact/session', collection: @contact.aiagent_sessions.order(created_at: :desc) %>
+      </tbody>
+    </table>
+  </div>
+<% end %>

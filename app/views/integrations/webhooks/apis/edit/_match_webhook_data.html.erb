@@ -1,0 +1,19 @@
+<%
+  # app/views/integrations/webhooks/apis/edit/_match_webhook_data.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/edit/match_webhook_data', locals: { presenter: Integrations::Webhooks::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Webhooks::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+  return if presenter.webhook.sample_data.blank?
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-2">
+  <legend class="w-auto mb-0"><h6>Match Webhook Data to <%= I18n.t('tenant.name') -%> Data</h6></legend>
+    <%= render partial: 'integrations/webhooks/apis/edit/sample_data', collection: presenter.webhook.sample_data, as: :option, locals: { presenter: } %>
+</fieldset>

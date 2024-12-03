@@ -1,0 +1,129 @@
+<%
+  # app/views/central/conversation/_message.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/message', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+
+  presenter.message = message
+-%>
+<% if message.attachments.any? %>
+  <li class="conversation-<%= presenter.message_direction -%> conversation-faux" id="<%= presenter.message.id -%>" data-folders="<%= presenter.folder_assignments.to_s -%>">
+
+    <% if presenter.message_direction == 'inbound' %>
+      <div class="conversation-avatar">
+        <a href="#" class="tile tile-circle bg-muted prevent-default"><i class="<%= presenter.message.icon -%> message-icon" data-message-id="<%= presenter.message.id -%>" data-save-class="<%= presenter.message.icon -%>"></i></a>
+      </div>
+    <% else %>
+      <div class="conversation-actions dropdown">
+        <button class="btn btn-sm btn-icon btn-light message_dropdown_button" data-toggle="dropdown" data-messageid="<%= presenter.message.id -%>"><i class="fa fa-fw fa-ellipsis-h"></i></button>
+        <div class="dropdown-menu" id="message_dropdown_<%= presenter.message.id -%>"></div>
+      </div>
+    <% end %>
+
+    <div class="conversation-message">
+      <div class="<%= presenter.message_color_class -%> conversation-message-text has-attachment">
+        <div class="pswp-gallery">
+          <div class="card card-figure">
+
+            <% message.attachments.each do |message_attachment| %>
+              <%= render partial: 'central/conversation/show_attachment', locals: { attachment: message_attachment.contact_attachment } %>
+            <% end %>
+
+          </div>
+        </div>
+      </div>
+      <div class="conversation-meta">
+        <%= presenter.message_meta_data.html_safe %>
+      </div>
+    </div>
+
+    <% if presenter.message_direction == 'outbound' %>
+      <div class="conversation-avatar" style="position:relative;right:12px;">
+        <a href="#" class="tile tile-circle bg-muted prevent-default"><i class="<%= presenter.message.icon -%> message-icon" data-message-id="<%= presenter.message.id -%>" data-save-class="<%= presenter.message.icon -%>"></i></a>
+      </div>
+    <% else %>
+      <div class="conversation-actions dropdown">
+        <button class="btn btn-sm btn-icon btn-light message_dropdown_button" data-toggle="dropdown" data-messageid="<%= presenter.message.id -%>"><i class="fa fa-fw fa-ellipsis-h"></i></button>
+        <div class="dropdown-menu" id="message_dropdown_<%= presenter.message.id -%>"></div>
+      </div>
+    <% end %>
+
+  </li>
+<% end %>
+
+<% if presenter.message_message.present? %>
+  <li class="conversation-<%= presenter.message_direction -%> conversation-faux" id="<%= presenter.message.id -%>" data-folders="<%= presenter.folder_assignments.to_s -%>">
+    <% if presenter.message_direction == 'outbound' %>
+      <div class="conversation-actions dropdown">
+        <button class="btn btn-sm btn-icon btn-light message_dropdown_button" data-toggle="dropdown" data-messageid="<%= presenter.message.id -%>"><i class="fa fa-fw fa-ellipsis-h"></i></button>
+        <div class="dropdown-menu" id="message_dropdown_<%= presenter.message.id -%>"></div>
+      </div>
+    <% end %>
+
+    <% if presenter.message_direction == 'inbound' %>
+      <div class="conversation-avatar">
+
+        <%= if presenter.message.email?
+              link_to("<i class=\"#{presenter.message.icon} message-icon\" data-message-id=\"#{presenter.message.id}\" data-save-class=\"#{presenter.message.icon}\"></i>".html_safe,
+                      messages_message_email_path(presenter.message.id),
+                      class:  'tile tile-circle bg-muted prevent-default',
+                      style:  'text-decoration: none;',
+                      method: :get,
+                      remote: true)
+            end %>
+        <%= unless presenter.message.email?
+              link_to("<i class=\"#{presenter.message.icon} message-icon\" data-message-id=\"#{presenter.message.id}\" data-save-class=\"#{presenter.message.icon}\"></i>".html_safe,
+                      '#',
+                      class: 'tile tile-circle bg-muted prevent-default',
+                      style: 'text-decoration: none;')
+            end %>
+      </div>
+    <% end %>
+
+    <div class="conversation-message">
+      <div class="<%= presenter.message_color_class -%> conversation-message-text pr-4">
+        <%= presenter.message_message.html_safe %>
+      </div>
+      <div class="conversation-meta">
+        <%= presenter.message_meta_data.html_safe %>
+      </div>
+    </div>
+
+    <% if presenter.message_direction == 'outbound' %>
+      <div class="conversation-avatar" style="position:relative;right:12px;">
+
+        <%= if presenter.message.email?
+              link_to("<i class=\"#{presenter.message.icon} message-icon\" data-message-id=\"#{presenter.message.id}\" data-save-class=\"#{presenter.message.icon}\"></i>".html_safe,
+                      messages_message_email_path(presenter.message.id),
+                      class:  'tile tile-circle bg-muted prevent-default',
+                      style:  'text-decoration: none;',
+                      method: :get,
+                      remote: true)
+            end %>
+        <%= unless presenter.message.email?
+              link_to("<i class=\"#{presenter.message.icon} message-icon\" data-message-id=\"#{presenter.message.id}\" data-save-class=\"#{presenter.message.icon}\"></i>".html_safe,
+                      '#',
+                      class: 'tile tile-circle bg-muted prevent-default',
+                      style: 'text-decoration: none;')
+            end %>
+      </div>
+    <% end %>
+
+    <% if presenter.message_direction == 'inbound' %>
+      <div class="conversation-actions dropdown">
+        <button class="btn btn-sm btn-icon btn-light message_dropdown_button" data-toggle="dropdown" data-messageid="<%= presenter.message.id -%>"><i class="fa fa-fw fa-ellipsis-h"></i></button>
+        <div class="dropdown-menu" id="message_dropdown_<%= presenter.message.id -%>"></div>
+      </div>
+    <% end %>
+  </li>
+<% elsif message.attachments.blank? %>
+  <%= sanitize(presenter.message_divider, tags: %w[i li span]) %>
+<% end %>

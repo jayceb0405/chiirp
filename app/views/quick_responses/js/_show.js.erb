@@ -1,0 +1,36 @@
+<%
+  # app/views/quick_responses/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'quick_responses/js/show', locals: { cards: Array, message_id: String }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (opt) cards:      (Array)
+  #   (req) message_id: (String)
+  #
+  return unless local_assigns.dig(:cards).is_a?(Array)
+  return if local_assigns.dig(:message_id).to_s.blank?
+
+  presenter = QuickResponsesPresenter.new(@quick_response)
+  presenter.message_id = message_id
+-%>
+<% if cards.include?('index') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<%= j render(partial: 'quick_responses/index_header', locals: { presenter: }) -%>');
+  $('#dash_modal_body').html('<%= j render(partial: 'quick_responses/index', locals: { presenter: }) -%>');
+  $('#dash_modal_footer').html('');
+  <%# $(window).off('shown.bs.modal');
+  $(window).on('shown.bs.modal', function() {
+
+  }); %>
+<% end %>
+
+<% if cards.include?('edit') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('Edit Quick Response');
+  $('#dash_modal_body').html('<%= j render(partial: 'quick_responses/edit', locals: { presenter: }) -%>');
+  $('#dash_modal_footer').html('<%= j render(partial: 'quick_responses/edit_footer', locals: { presenter: }) -%>');
+<% end %>

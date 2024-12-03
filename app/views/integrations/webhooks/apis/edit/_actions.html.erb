@@ -1,0 +1,31 @@
+<%
+  # app/views/integrations/webhooks/apis/edit/_actions.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/edit/actions', locals: { presenter: Integrations::Webhooks::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Webhooks::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+  return unless presenter.webhook.data_type == 'contact'
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-2">
+  <legend class="w-auto mb-0"><h6>Actions on New Contact</h6></legend>
+
+  <%= render partial: 'campaigns/action_fields', locals: {
+        client:            presenter.client,
+        campaign_id:       presenter.webhook.campaign_id, campaign_id_field: 'webhook[campaign_id]',
+        group:             presenter.webhook.group, group_id_field: 'webhook[group_id]',
+        tag:               presenter.webhook.tag, tag_id_field: 'webhook[tag_id]',
+        stage_id:          presenter.webhook.stage_id, stage_id_field: 'webhook[stage_id]',
+        stop_campaign_ids: presenter.webhook.stop_campaign_ids, stop_campaign_ids_field: 'webhook[stop_campaign_ids]',
+      } %>
+  <%= bootstrap_info_field(
+    row:  { columns: [2, 10] },
+    info: "<small class=\"text-muted\">Selecting an Appointment Campaign to start...<ul><li>Requires that a Webhook Field with a date be mapped to a Date #{I18n.t('tenant.name')} Field.</li><li>Will be processed based on the selected date received.</li></ul></small>"
+    ) %>
+</fieldset>

@@ -1,0 +1,42 @@
+<%
+  # app/views/email_templates/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "email_templates/js/show", locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards[1]
+  #     none
+  #   cards[2]
+  #     none
+  #
+  # Required Local Variables:
+  #   cards: (Array)
+  #
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('edit') %>
+  $('#email_templates_body').html('<%= j render(partial: 'email_templates/edit') -%>');
+<% end %>
+<% if cards.include?('dropdown') %>
+  $('#select_email_templates_dropdown').html('<%= j render partial: 'email_templates/select_email_templates_dropdown' -%>');
+<% end %>
+<% if cards.include?('index') %>
+  $('#email_templates_body').html('<%= j render(partial: 'email_templates/index') -%>');
+<% end %>
+<% if cards.include?('thumbnail') %>
+  $('#email_template_thumbnail').html('<%= j render(partial: 'email_templates/thumbnail') -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<% if @email_template&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save Email Template',
+    'body': '<%= @email_template.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

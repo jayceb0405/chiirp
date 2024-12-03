@@ -1,0 +1,136 @@
+<%
+  # app/views/clients/custom_fields/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/custom_fields/edit'
+  #
+  # Required Instance Variables:
+  #   @client:       (Client)
+  #   @custom_field: (custom_field)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+  cp.custom_field = @custom_field
+-%>
+<td colspan="7">
+  <div class="row">
+    <div class="col-md-2 text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= cp.custom_field.var_name.to_s.first %>
+      </div>
+      <h3 class="card-title mb-4"> <%= cp.custom_field.var_name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+      <%= form_with model: cp.custom_field, url: cp.custom_field.new_record? ? client_custom_fields_path(cp.client.id) : client_custom_field_path(cp.client.id, cp.custom_field.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "custom_field_form_#{cp.custom_field.id}", novalidate: true } do |f| %>
+        <%= f.text_field :var_name, {
+              label:        { title: 'Custom Field Name' },
+              html_options: { minlength: 2, placeholder: 'Custom Field Name', required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.text_field :var_placeholder, {
+              label:        { title: 'Custom Field Place Holder' },
+              html_options: { placeholder: 'Custom Field Place Holder' }
+            } %>
+        <%= f.select :var_type, {
+              label:        { title: 'Custom Field Type' },
+              html_options: { id: "client_custom_field_var_type_#{cp.custom_field.id}", required: true, mobile: browser.device.mobile? },
+              choices:      { array: cp.custom_field_type_options, blank: 'Select a Type', selected: cp.custom_field.var_type },
+              messages:     { note: 'A type must be selected.' }
+            } %>
+        <%= bootstrap_text_field(
+              field:        'client_custom_field[var_options][string_options]',
+              value:        cp.custom_field.var_options.include?(:string_options) ? cp.custom_field.var_options[:string_options] : '',
+              row:          { class: 'var_type_options', id: "client_custom_field_var_type_string_#{cp.custom_field.id}", display: cp.custom_field[:var_type] == 'string' },
+              label:        { title: 'Acceptable values (comma separated, blank for any)' },
+              html_options: { id: 'client_custom_field_string_options' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'client_custom_field[var_options][numeric_min]',
+              value:        (cp.custom_field.var_options.dig(:numeric_min) || 0).to_i,
+              row:          { class: 'var_type_options', id: "client_custom_field_var_type_numeric_min_#{cp.custom_field.id}", display: cp.custom_field[:var_type] == 'numeric' },
+              label:        { title: 'Minimum Acceptable Value' },
+              html_options: { id: 'client_custom_field_numeric_min' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'client_custom_field[var_options][numeric_max]',
+              value:        (cp.custom_field.var_options.dig(:numeric_max) || 0).to_i,
+              row:          { class: 'var_type_options', id: "client_custom_field_var_type_numeric_max_#{cp.custom_field.id}", display: cp.custom_field[:var_type] == 'numeric' },
+              label:        { title: 'Maximum Acceptable Value' },
+              html_options: { id: 'client_custom_field_numeric_max' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'client_custom_field[var_options][stars_max]',
+              value:        (cp.custom_field.var_options.dig(:stars_max) || 5).to_i,
+              row:          { class: 'var_type_options', id: "client_custom_field_var_type_stars_#{cp.custom_field.id}", display: cp.custom_field[:var_type] == 'stars' },
+              label:        { title: 'Maximum Stars' },
+              html_options: { id: 'client_custom_field_stars_max' },
+              prepends:     [{ label: '<i class="fa fa-star"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'client_custom_field[var_options][currency_min]',
+              value:        (cp.custom_field.var_options.dig(:currency_min) || 0).to_i,
+              row:          { class: 'var_type_options', id: "client_custom_field_var_type_currency_min_#{cp.custom_field.id}", display: cp.custom_field[:var_type] == 'currency' },
+              label:        { title: 'Minimum Acceptable Value' },
+              html_options: { id: 'client_custom_field_currency_min' },
+              prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'client_custom_field[var_options][currency_max]',
+              value:        (cp.custom_field.var_options.dig(:currency_max) || 0).to_i,
+              row:          { class: 'var_type_options', id: "client_custom_field_var_type_currency_max_#{cp.custom_field.id}", display: cp.custom_field[:var_type] == 'currency' },
+              label:        { title: 'Maximum Acceptable Value' },
+              html_options: { id: 'client_custom_field_currency_max' },
+              prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }]
+            ) %>
+        <%= f.switch :null, {
+              label:      { title: 'Primary Field' },
+              checkboxes: [{ field: 'var_important', checked: cp.custom_field.var_important, values: %w[true false] }],
+              messages:   { note: "When 'on' this Custom Field will always appear when editing a Contact." }
+            } %>
+        <%= f.switch :null, {
+              row:        { id: "client_custom_field_image_is_valid_#{cp.custom_field.id}", display: cp.custom_field[:var_type] != 'date' },
+              label:      { title: 'Accept an Image as a Valid Response' },
+              checkboxes: [{ field: 'image_is_valid', checked: cp.custom_field[:image_is_valid], values: %w[true false] }]
+            } %>
+        <%= f.submit_buttons buttons: [{ title: 'Save', id: "custom_field_button_#{cp.custom_field.id}", disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(document).ready( function() {
+    $('#client_custom_field_var_type_<%= cp.custom_field.id -%>').on('change', function (e) {
+      $('.var_type_options').hide();
+      $('#client_custom_field_var_type_' + $(this).val() + '_<%= cp.custom_field.id -%>').show();
+
+      if ($(this).val() == 'numeric') {
+        $('#client_custom_field_var_type_numeric_min_<%= cp.custom_field.id -%>').show();
+        $('#client_custom_field_var_type_numeric_max_<%= cp.custom_field.id -%>').show();
+      } else {
+        $('#client_custom_field_var_type_numeric_min_<%= cp.custom_field.id -%>').hide();
+        $('#client_custom_field_var_type_numeric_max_<%= cp.custom_field.id -%>').hide();
+      }
+
+      if ($(this).val() == 'currency') {
+        $('#client_custom_field_var_type_currency_min_<%= cp.custom_field.id -%>').show();
+        $('#client_custom_field_var_type_currency_max_<%= cp.custom_field.id -%>').show();
+      } else {
+        $('#client_custom_field_var_type_currency_min_<%= cp.custom_field.id -%>').hide();
+        $('#client_custom_field_var_type_currency_max_<%= cp.custom_field.id -%>').hide();
+      }
+
+      if ($(this).val() == 'date') {
+        $('#client_custom_field_image_is_valid_<%= cp.custom_field.id -%>').hide();
+      } else {
+        $('#client_custom_field_image_is_valid_<%= cp.custom_field.id -%>').show();
+      }
+    });
+  });
+</script>

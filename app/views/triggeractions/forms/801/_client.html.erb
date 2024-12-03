@@ -1,0 +1,62 @@
+<%
+  # app/views/triggeractions/forms/801/_client.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/forms/801/client', collection: @clients.order(:name), as: :client, locals: { triggeraction: Triggeraction, clients: Array, disabled: Boolean }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # clients: [{ client_id: integer, client_campaign_id: integer, agency_campaign_id: integer, max_monthly_leads: integer, leads_this_month: integer, period_start_date: DateTime.iso8601 }]
+  this_client = clients.find { |c| c['client_id'] == client.id }
+  return if this_client.nil?
+
+  disabled = local_assigns.dig(:disabled).to_bool
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#client_<%= client.id -%>_tr">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left" colspan="2"> <%= client.name -%> </td>
+  <td class="text-center"> <%= this_client['max_monthly_leads'] -%> </td>
+  <td class="text-center"> <%= this_client['leads_this_month'] -%> </td>
+  <td class="text-left"> <%= Friendly.new.date(Chronic.parse(this_client['period_end_date']), client.time_zone, true) -%> </td>
+  <td class="text-middle text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#client_<%= client.id -%>_tr">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="client_<%= client.id -%>_tr">
+  <td colspan="6" id="client_<%= client.id -%>_td">
+    <%= bootstrap_select_tag_campaign(
+          client:,
+          field:        "triggeraction[clients][#{client.id}][client_campaign_id]",
+          label:        { title: 'Client\'s Campaign' },
+          html_options: { disabled: },
+          options:      { selected: this_client['client_campaign_id'], active_only: true, blank: 'Select a Client Campaign' },
+          messages:     { note: "These are your Client's Campaigns. The selected Campaign will start after the Contact is pushed to your Client." }
+        ) %>
+    <%= bootstrap_select_tag_campaign(
+          client:       triggeraction.campaign.client,
+          field:        "triggeraction[clients][#{client.id}][agency_campaign_id]",
+          label:        { title: 'Your Campaign' },
+          html_options: { disabled: },
+          options:      { selected: this_client['agency_campaign_id'], active_only: true, blank: 'Select a Campaign' },
+          messages:     { note: 'These are your Campaigns. The selected Campaign will start after the Contact is pushed to your Client.' }
+        ) %>
+    <%= bootstrap_number_field(
+          field:        "triggeraction[clients][#{client.id}][max_monthly_leads]",
+          value:        this_client['max_monthly_leads'],
+          label:        { title: 'Number of Contacts' },
+          html_options: { min: 0, step: 1, disabled: },
+          messages:     { note: 'This is the maximum number of Contacts you want to send to this Client each month (based on billing date). Must be a minimum of 0.' }
+        ) %>
+  </td>
+</tr>

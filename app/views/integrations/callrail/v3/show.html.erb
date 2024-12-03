@@ -1,0 +1,57 @@
+<%
+  # app/views/integrations/callrail/v3/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: Presenter
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/callrail/logo.svg', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">CallRail Integration (BETA)</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_callrail_v3_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav id="callrail_page_nav" class="page-navs">
+    <%= render partial: 'integrations/callrail/v3/menu', locals: { presenter: } %>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_callrail_v3_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <% if local_assigns.dig(:partial_to_show).to_s.present? && @client_api_integration.is_a?(ClientApiIntegration) %>
+        <%= render partial: partial_to_show, locals: { presenter: } %>
+      <% else %>
+        <%= render partial: 'integrations/callrail/v3/overview', locals: { presenter: } %>
+      <% end %>
+    </div>
+  </div>
+</div>

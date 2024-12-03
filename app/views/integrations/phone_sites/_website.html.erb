@@ -1,0 +1,57 @@
+<%
+  # app/views/integrations/phone_sites/_website.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/phone_sites/website', collection: UserApiIntegrations, as: :user_api_integration
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<tr>
+  <td class="align-left"><%= user_api_integration.name %></td>
+  <td class="align-left" id="api_key_<%= user_api_integration.id -%>"><%= user_api_integration.api_key %></td>
+  <td class="align-middle text-right">
+    <%= link_to '', '#', {
+        class:  "btn btn-sm btn-icon btn-secondary fa #{user_api_integration.live ? 'fa-check text-success' : 'fa-times text-danger'} prevent-default"
+      }
+    %>
+    <%= link_to '', '#', {
+        class:  'btn btn-sm btn-icon btn-secondary fa fa-clipboard',
+        onclick: "event.preventDefault();copyToClipboard('api_key_#{user_api_integration.id}');"
+      }
+    %>
+    <%= link_to '', '#', {
+        class:  'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+        id:     "button_delete_user_api_integration_#{user_api_integration.id}"
+      }
+    %>
+  </td>
+</tr>
+
+<script>
+  $(function() {
+    $('#button_delete_user_api_integration_<%= user_api_integration.id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting Website "<%= user_api_integration.name -%>" can NOT be un-done. Is it your intention to delete this Website?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{user_api_integration.id}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= user_api_integration.id -%>');
+      $(document).on('click', '#button_dump_it_<%= user_api_integration.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= integrations_phone_sites_integration_path(api_key: user_api_integration.api_key) -%>'
+        });
+      });
+    });
+  });
+</script>

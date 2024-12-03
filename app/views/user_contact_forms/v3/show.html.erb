@@ -1,0 +1,124 @@
+<%
+  # app/views/user_contact_forms/v3/show.html.erb
+  # 
+  # Example:
+  #   render 'user_contact_forms/v3/show'
+  # 
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  form_html      = render partial: 'user_contact_forms/v3/shared/form'
+  template_split = @user_contact_form.formatting.dig('template').to_s.split('font-size:').select { |x| x.include?('#{form}') }
+
+  if template_split.empty?
+    font_size = 10
+  else
+    font_size = [[template_split[0][0,6].to_i, 8].max, 24].min
+  end
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+
+  <%= render partial: 'layouts/common/open_graph', locals: { 
+    title: @user_contact_form.title,
+    image: @user_contact_form.logo_image.attached? ? cl_image_path( @user_contact_form.logo_image.key, secure: true ) : '',
+    description: @user_contact_form.tag_line.to_s.present? ? @user_contact_form.tag_line.to_s : ''
+  } %>
+
+  <title><%= @user_contact_form.title -%></title>
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+  
+  <%= javascript_include_tag 'contact_form' %>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- FlatPickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/plugins/confirmDate/confirmDate.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/flatpickr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/plugins/confirmDate/confirmDate.js"></script>
+
+  <!-- Star Rating -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/css/star-rating-svg.css">
+  <script src="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/jquery.star-rating-svg.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,500,700&display=swap' type='text/css'>
+
+  <!-- UserContactForm Styles -->
+  <%= stylesheet_link_tag 'user_contact_form' %>
+
+  <style>
+    body {
+      background-image: url("<%= @user_contact_form.background_image.attached? ? cl_image_path( @user_contact_form.background_image.key, secure: true ) : "" -%>");
+    }
+    .btn {
+      box-shadow: none;
+      font-size: <%= font_size -%>px;
+    }
+    .fa, .fab, .fal, .far, .fas {
+      line-height: 1.4;
+    }
+    .switch {
+      width: <%= 50 - (24 - font_size - 8) -%>px;
+      height: <%= font_size + 8 -%>px;
+    }
+    input:checked + .slider {
+      background-color: lightgrey;
+    }
+    .slider:before {
+      height: <%= font_size + 4 -%>px;
+      width: <%= font_size + 4 -%>px;
+    }
+    .form_div {
+      font-size:<%= font_size -%>px;
+    }
+    .form-control {
+      font-size:<%= font_size -%>px;
+    }
+  </style>
+  <% if @user_contact_form.head_string.present? %>
+    <%= @user_contact_form.head_string.html_safe %>
+  <% end %>
+  <% if @user_api_integration&.trusted_form_script.present? %>
+    <%= @user_api_integration.trusted_form_script.html_safe %>
+  <% end %>
+</head>
+<body style="background-color:<%= @user_contact_form.body_bg_color.to_s -%>;">
+  <%= @user_contact_form.template.gsub('#{form}', form_html).html_safe %>
+  <%= render partial: 'snippets/custom_modal', locals: { id: 'alert_modal' } %>
+  <% if @user_contact_form.script_string.present? %>
+    <%= @user_contact_form.script_string.html_safe %>
+  <% end %>
+</body>
+
+<script>
+  $(function() {
+    <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+  });
+</script>
+</html>

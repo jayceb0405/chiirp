@@ -1,0 +1,33 @@
+<%
+  # app/views/surveys/show/questions/_without_images.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/show/questions/without_images'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<style>
+  input[type="radio"] {
+      -ms-transform: scale(1.5); /* IE 9 */
+      -webkit-transform: scale(1.5); /* Chrome, Safari, Opera */
+      transform: scale(1.5);
+  }
+</style>
+<div class="container">
+  <% @survey_screen.responses.each_with_index do |features, index| %>
+
+    <% if features[1].dig('string').to_s.present? && ((features[1].dig('screen').to_i.positive? && (next_screen = @survey.screens.find_by(id: features[1].dig('screen').to_i))) || features[1].dig('url').to_s.present?) %>
+      <div class="form-check mx-4 my-0 text-left" style="font-size:1.5rem;font-weight:500;">
+        <input class="form-check-input mt-2" type="radio" name="flexRadioDefault" id="radio_<%= index -%>" style="width:19px;" onclick="location.href='<%= (features[1].dig('screen').to_i.positive? && next_screen) ? survey_path(@survey_screen.survey.survey_key, next_screen.screen_key, cid: @cid, rid: @rid, ssid: @survey_screen.id, sel: features[1].dig('string').to_s) : features[1].dig('url').to_s -%>'"/>
+        <label class="form-check-label pl-3 mb-2" for="radio_<%= index -%>">
+          <%= features[1].dig('string').to_s %>
+        </label>
+      </div>
+    <% end %>
+  <% end %>
+</div>

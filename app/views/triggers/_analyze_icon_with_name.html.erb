@@ -1,0 +1,16 @@
+<%
+  # app/views/triggers/_analyze_icon_with_name.html.erb
+  #
+  # Example:
+  #   render partial: 'triggers/analyze_icon_with_name', locals: { trigger: Trigger }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) trigger: (Trigger)
+  #
+  return unless local_assigns.dig(:trigger).is_a?(Trigger)
+-%>
+<%= render partial: 'triggers/analyze_icon', locals: { trigger: } %>
+<%= trigger.new_record? ? 'New Trigger' : trigger.data.dig(:name).to_s -%>

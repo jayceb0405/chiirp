@@ -1,0 +1,66 @@
+<%
+  # /app/views/integrations/webhooks/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/instructions/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: ClientApiIntegration
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Webhooks::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Webhooks::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Webhooks & APIs Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+
+    <h6>APIs (inbound):</h6>
+    <ul>
+      <li>APIs are GETs or POSTs originating from outside of <%= I18n.t('tenant.name') -%>.</li>
+      <li><%= I18n.t('tenant.name') -%> can receive Contact or User data.</li>
+      <li>Data is received by <%= I18n.t('tenant.name') -%> in JSON format.</li>
+      <ul><li>Example: { "firstname": "John", "lastname": "Jones", "phone": "8015551234" }</li></ul>
+      <li>When data is received the following is processed:</li>
+      <ol>
+        <li>The Contact (from external source) ID field is used to locate an existing Contact.</li>
+        <li>If not found, the phone number fields are used to locate an existing Contact.</li>
+        <li>If not found, the email address is used to locate an existing Contact.</li>
+        <li>If not found, a new Contact is created.</li>
+      </ol>
+      <li>Appointment Dates</li>
+      <ul>
+        <li>Dates received may be used by selected Campaigns leading up to an appointment.</li>
+        <li>Date UTC is a date received normalized to Greenwich Mean Time (GMT) also know as Universal Time Coordinated.</li>
+        <li>Date Local is a date received in your local time zone.</li>
+        <li>Date (UNIX) is a date received as a number representing the total seconds since January 1, 1970 also known as a UNIX Time Stamp.</li>
+      </ul>
+      <li>While in testing mode submit your data, then refresh the page and match up your fields with our internal fields.</li>
+      <li>A "Variable Response" field allows you to set actions for different responses.</li>
+      <li class="text-danger">Be sure to turn test mode OFF before submitting data to be saved.</li>
+    </ul>
+
+    <h6>Webhooks (outbound):</h6>
+    <ul>
+      <li>Webhooks are POSTs originating from inside of <%= I18n.t('tenant.name') -%> and triggered by activity.</li>
+      <li><%= I18n.t('tenant.name') -%> can post Contact data through Contact Webhooks.</li>
+      <li>Webhooks can be triggered when...</li>
+      <ol>
+        <li>A new Contact is created.</li>
+        <li>A Contact is updated.</li>
+        <li>A Contact is deleted.</li>
+      </ol>
+      <li>Contact data is POSTed in JSON format to a defined endpoint.</li>
+    </ul>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

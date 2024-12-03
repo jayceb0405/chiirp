@@ -1,0 +1,42 @@
+<%
+  # app/views/system_settings/toasts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'system_settings/toasts/edit'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:toasts_presenter) || SystemSettings::ToastsPresenter.new(user: current_user)
+-%>
+<div class="card card-fluid">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-bell mr-2"></i>User Notifications</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with url: system_settings_toast_path, builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+      <%= f.text_field :content, {
+        label: { title: 'Content' },
+        html_options: { placeholder: 'Message Content', autofocus: true }
+      } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Send Notification', disable_with: 'Sending...' }] %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_toasts').addClass('active');
+  });
+</script>

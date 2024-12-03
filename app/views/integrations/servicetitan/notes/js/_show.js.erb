@@ -1,0 +1,20 @@
+// app/views/integrations/servicetitan/notes/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/servicetitan/notes/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   (req) @client_api_integration: (ClientApiIntegration)
+//
+// Local Variables:
+//   (req) cards: (Array)
+//
+<% presenter = Integrations::Servicetitan::NotesPresenter.new(client_api_integration: @client_api_integration) %>
+
+<% if cards.include?('show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/notes/show', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

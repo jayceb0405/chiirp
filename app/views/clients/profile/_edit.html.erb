@@ -1,0 +1,107 @@
+<%
+  # app/views/clients/profile/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/profile/edit', locals: { client_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Profile</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <div class="media mb-3">
+        <div class="user-avatar user-avatar-xl fileinput-button">
+          <%= form_with(url: clients_avatar_path(cp.client.id), builder: LooperFormBuilder, method: :patch, remote: true, html: { multipart: true, id: 'profile_avatar_form' }) do |f| %>
+            <div class="fileinput-button-label"> Change photo </div>
+            <span id="profile_avatar"><%= cp.client_avatar -%></span>
+            <%= f.file_field :logo_image %>
+            <input id="fileupload_avatar" type="file" name="logo_image">
+          <% end %>
+        </div>
+
+        <div class="media-body pl-3">
+          <h3 class="card-title"> Avatar </h3>
+          <h6 class="card-subtitle text-muted"> Click the current avatar to change your photo. </h6>
+          <p class="card-text">
+            <small>JPG, GIF or PNG 400x400, &lt; 2 MB.</small>
+          </p>
+          <div id="progress-avatar" class="progress progress-xs fade">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      </div>
+
+      <%= form_with(model: cp.client, url: clients_profile_path(cp.client.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'profile_form', novalidate: true }) do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: 'Company Name' },
+              html_options: { id: 'input_name', minlength: 2, placeholder: 'Company Name', required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 5 characters.' }
+            } %>
+        <%= f.text_field :address1, {
+              label:        { title: 'Address Line 1' },
+              html_options: { placeholder: 'Address' }
+            } %>
+        <%= f.text_field :address2, {
+              label:        { title: 'Address Line 2' },
+              html_options: { placeholder: 'Address Line 2' }
+            } %>
+        <%= f.text_field :city, {
+              label:        { title: 'City' },
+              html_options: { placeholder: 'City' }
+            } %>
+        <%= f.select :state, {
+              html_options: { id: 'select_state', mobile: browser.device.mobile? },
+              choices:      { grouped_array: [['United States', us_states_array], ['Canada', canada_states_array]], selected: cp.client.state, blank: 'Select a State' }
+            } %>
+        <%= f.text_field :zip, {
+              label:        { title: 'Zip Code' },
+              html_options: { minlength: 5, maxlength: 5, placeholder: 'Zip Code' },
+              messages:     { note: 'Must be 5 characters.' }
+            } %>
+        <%= f.telephone_field :phone, {
+              label:        { title: 'Phone Number' },
+              html_options: { value: number_to_phone(cp.client.phone), id: 'input_phone', placeholder: 'Phone Number', required: true },
+              messages:     { note: 'Must be 10 characters.' }
+            } %>
+        <span id="vitally">
+          <%= render partial: 'clients/profile/vitally', locals: { presenter: cp } %>
+        </span>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Profile', id: 'upgrade_now', disable_with: 'Saving Profile' }] %>
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_profile').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_profile').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $('#fileupload_avatar').on('change', function(e) {
+      var elem = document.getElementById('profile_avatar_form')
+      Rails.fire(elem, 'submit');
+    });
+  });
+</script>

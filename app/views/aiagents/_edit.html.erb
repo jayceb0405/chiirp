@@ -1,0 +1,211 @@
+<%
+  # app/views/aiagents/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "aiagents/edit"
+  #
+  # Required Instance Variables:
+  #   @aiagent: (Aiagent)
+  #
+  # Required Local Variables:
+  #   none
+  #
+
+  client ||= @aiagent.client
+  presenter = AiagentPresenter.new(@aiagent)
+-%>
+<!-- aiagents.form -->
+<%= render partial: 'layouts/alerts', locals: { models: [@aiagent] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @aiagent.name -%></span>
+
+      <% unless @aiagent.new_record? %>
+        <%= link_to '<i class="fas fa-comment-dots"></i>'.html_safe, aiagent_test_path(@aiagent), {
+              class:  'btn btn-icon btn-light',
+              id:     'button_aiagent_test',
+              remote: true
+            } %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_aiagent_delete'
+            } %>
+      <% end %>
+      <%= render 'help_button' %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with id: 'aiagents_form', url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, model: presenter.agent, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= bootstrap_text_field(
+              field:    'agent[name]',
+              value:    presenter.agent.name,
+              label:    { title: 'Agent Name' },
+              messages: { note: 'Enter any name to identify this agent. This is for your reference only.' },
+              prepends: [{ button: false, label: 'Test' }],
+              appends:  [{ button: true, label: 'Kill', onclick: 'event.preventDefault();' }]
+            ) %>
+
+        <%= bootstrap_select_tag(
+              field:        'agent[action]',
+              label:        { title: 'Task' },
+              html_options: { id: 'agent_action', required: true },
+              options:      { array: presenter.action_type_options_for_select, selected: presenter.agent.action, blank: 'Choose action' },
+              messages:     { note: 'Choose the task this agent will perform.' }
+            ) %>
+
+        <%= bootstrap_select_tag(
+              field:        'agent[aiagent_type]',
+              label:        { title: 'AI Model' },
+              html_options: { id: 'aiagent_type', required: true },
+              options:      { grouped_array: { OpenAI: Aiagent::AIAGENT_TYPES }, selected: presenter.agent.aiagent_type, blank: 'Choose model' },
+              messages:     { note: "Choose which model you would like to use. Each model has it's own strengths, weaknesses, and pricing." }
+            ) %>
+
+        <div id="ai_prefix">
+          <%= bootstrap_switch_field(
+                field:    'agent[show_ai]',
+                label:    { title: 'Include AI Prefix' },
+                value:    presenter.agent.show_ai,
+                values:   %w[1 0],
+                messages: { note: "Prefix messages to customers with 'AI:' to indicate who wrote the message." }
+              ) %>
+        </div>
+
+        <% if current_user.client.share_aiagents_allowed && presenter.agent.persisted? %>
+          <%= f.copy_field :share_code, {
+                label: { title: 'AI Agent Share Code' }
+              } %>
+        <% end %>
+
+        <div id="initial_prompt">
+          <%= bootstrap_text_area(
+                field:        'agent[initial_prompt]',
+                value:        presenter.agent.initial_prompt,
+                label:        { title: 'Initial Text Message' },
+                html_options: { typeahead_client: presenter.agent.client, required: true, char_count_client: presenter.agent.client },
+                messages:     { note: 'What is the first line you would like to send to the customer? This field is hashtag aware.' }
+              ) %>
+        </div>
+
+        <%= render 'aiagents/form_aiagent_training', presenter: presenter %>
+
+        <div class="section-block">
+          <div class="card-expansion" id="aiagent_edit_accordion">
+
+            <div id="form_custom_data"></div>
+
+            <div class="card card-expansion-item" id="form_session_length_outer">
+              <%= render 'form_session_length', presenter: presenter %>
+            </div>
+
+            <div class="card card-expansion-item" id="form_contact_help_outer">
+              <%= render 'aiagents/form_contact_help', presenter: presenter %>
+            </div>
+
+            <div class="card card-expansion-item" id="form_after_actions_outer">
+              <%= render 'aiagents/form_after_actions', presenter: presenter %>
+            </div>
+          </div>
+        </div>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Agent', disable_with: 'Saving Agent' }]
+            ) %>
+      <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    <% unless @aiagent.new_record? %>
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     '#button_aiagent_delete',
+            alert:       { body: "Deleting \"#{@aiagent.name}\" can NOT be un-done. Is it your intention to delete this AI Agent?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: aiagent_path(@aiagent.id) }
+          } %>
+    <% end %>
+
+    var handleChange = function() {
+      $('#agent_action').selectpicker('refresh');
+
+      var ids = <%= presenter.action_type_keys.to_json.html_safe %>;
+      var selection = $('#agent_action').val();
+
+      // hide/disable not needed fields when selection == quick_response
+      if (selection == 'quick_response') {
+        $('#ai_prefix').hide();
+        $('#initial_prompt').hide();
+        $('#form_session_length_outer').hide();
+        $('#form_contact_help_outer').hide();
+        $('#form_after_actions_outer').hide();
+        $('#initial_prompt').find('textarea').prop('disabled', true);
+      } else {
+        $('#ai_prefix').show();
+        $('#initial_prompt').show();
+        $('#form_session_length_outer').show();
+        $('#form_contact_help_outer').show();
+        $('#form_after_actions_outer').show();
+        $('#initial_prompt').find('textarea').prop('disabled', false);
+      }
+
+      // console.log(selection);
+      $('#form_custom_data').html('');
+
+      ids.forEach(function(id) {
+        if (selection == id) {
+          // console.log(selection, id, 1);
+          $.ajax({
+            type: 'GET',
+            url: '<%= @aiagent.new_record? ? new_aiagent_path : edit_aiagent_path(@aiagent) -%>',
+            dataType: 'script',
+            data: { cards: ['form_' + id] }
+          });
+          $('#default_prompt_pre_' + id).show();
+          $('#default_prompt_post_' + id).show();
+        } else {
+          // console.log(selection, id, 2);
+          $('#default_prompt_pre_' + id).hide();
+          $('#default_prompt_post_' + id).hide();
+        }
+      });
+    }
+
+    $('#agent_action').off('change');
+    $('#agent_action').on('change', handleChange);
+    handleChange();
+
+    $('.field_key_required').off('change');
+    $('.field_key_required').on('change', function(e) {
+      if ( $(this).is(':checked') ) {
+        $('#' + $(this).attr('id').replace('_required', '')).prop('checked', true);
+      } else {
+
+      }
+    });
+
+    $('.field_key').off('change');
+    $('.field_key').on('change', function(e) {
+      if ( $(this).is(':checked') ) {
+
+      } else {
+        $('#' + $(this).attr('id') + '_required').prop('checked', false);
+      }
+    });
+
+    $('#aiagents_form').off('submit');
+    $('#aiagents_form').on('submit', function(e) {
+      if ($('#data_table').length == 0) return;
+
+      var sortable = Sortable.get(document.getElementById('data_table')).toArray();
+
+      $.each(sortable, function(index, value) {
+        $('#list_group_sort_order_' + value).val(index);
+      });
+    });
+  });
+</script>

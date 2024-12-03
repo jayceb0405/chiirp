@@ -1,0 +1,149 @@
+<%
+  # app/views/clients/widgets/v3/forms/_window.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/forms/window', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   widget_presenter: Presenter
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="card-header border-0" id="clients_widget_window">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#clients_widget_window_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>SiteChat Window Settings</span>
+  </button>
+</div>
+
+<div id="clients_widget_window_body" class="collapse" data-parent="#clients_widget_accordion">
+  <div class="card-body pt-0">
+
+    <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+
+      <%= f.switch :w_auto_popup, {
+            label:      { title: 'Auto Open SiteChat Window?' },
+            checkboxes: [{ checked: presenter.widget.w_auto_popup, values: %w[true false] }]
+          } %>
+      <%= f.number_field :w_auto_popup_timeout, {
+            label:        { title: 'Seconds Before Auto Open' },
+            html_options: { min: 0, step: 1 },
+            prepends:     [{ button: false, label: '<i class="fas fa-stopwatch"></i>' }]
+          } %>
+      <%= f.select :w_font, {
+            label:        { title: 'Font Style' },
+            html_options: { id: 'clients_widget_w_font', mobile: browser.device.mobile? },
+            choices:      { array: [], prompt: 'Select a Font' }
+          } %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[w_bg_color]',
+            value:        presenter.widget.w_bg_color.to_s,
+            label:        { title: 'Background Color' },
+            html_options: { id: 'w_bg_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[w_header_color]',
+            value:        presenter.widget.w_header_color.to_s,
+            label:        { title: 'Header Color' },
+            html_options: { id: 'w_header_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+      <%= f.switch :w_user_avatar, {
+            label:      { title: 'Show User Avatar in Header?' },
+            checkboxes: [{ checked: presenter.widget.w_user_avatar, values: %w[true false] }]
+          } %>
+      <%= f.select :w_user_id, {
+            label:        { title: 'Users with an Avatar' },
+            html_options: { id: 'w_user_id', mobile: browser.device.mobile? },
+            choices:      { array: presenter.users_with_avatar, selected: presenter.widget.w_user_id }
+          } %>
+      <%= f.text_field :w_title, {
+            label:        { title: 'Header Title' },
+            html_options: { id: 'clients_widget_title', placeholder: 'Widget Title' }
+          } %>
+      <%= f.text_field :w_tag_line, {
+            label:        { title: 'Tag Line' },
+            html_options: { id: 'tag_line', placeholder: 'Tag Line' }
+          } %>
+      <%= f.text_area :w_text_message, {
+            label:        { title: 'Text Message' },
+            html_options: { placeholder: 'Text Message', rows: 3 }
+          } %>
+      <%= f.text_field :w_dd_comment, {
+            label:        { title: 'Dropdown Comment/Question' },
+            html_options: { id: 'w_dd_comment', placeholder: 'Comment/Question' }
+          } %>
+      <%= f.select :w_dd_options, {
+            label:        { title: 'Dropdown Options' },
+            html_options: { multiple: true, mobile: browser.device.mobile? },
+            choices:      { array: [['Create/Select Options', '']] + presenter.widget.w_dd_options, selected: presenter.widget.w_dd_options, dynamic: true }
+          } %>
+      <%= f.switch :w_show_question, {
+            label:      { title: 'Show User Input Text Area' },
+            checkboxes: [{ checked: presenter.widget.w_show_question, values: %w[true false] }]
+          } %>
+      <%= f.text_field :w_def_question, {
+            label:        { title: 'Default Input Text Area Text' },
+            html_options: { id: 'w_def_question', placeholder: 'Question Text' }
+          } %>
+      <%= f.text_field :w_submit_button_text, {
+            label:        { title: 'Submit Button Text' },
+            html_options: { id: 'w_submit_button_text', placeholder: 'Submit' }
+          } %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[w_submit_button_color]',
+            value:        presenter.widget.w_submit_button_color,
+            label:        { title: 'Submit Button Color' },
+            html_options: { id: 'w_submit_button_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[w_footer_color]',
+            value:        presenter.widget.w_footer_color.to_s,
+            label:        { title: 'Footer Color' },
+            html_options: { id: 'w_footer_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Window Settings', id: 'clients_widget_form_submit', disable_with: 'Saving Window Settings' }] %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $(document).off('show.bs.collapse', '#clients_widget_window_body');
+    $(document).on('show.bs.collapse', '#clients_widget_window_body', function (e) {
+
+      if ($('#clients_widget_w_font').children('option').length <= 1) {
+        i = 0
+
+        while ($.isEmptyObject(window.google_fonts)) {
+          setTimeout(function() {
+            i++
+          }, 100);
+
+          if (i >= 500) {
+            return false;
+          }
+        }
+
+        $.each(window.google_fonts, function(i, font) {
+
+          if (font.variants.includes('regular')) {
+            $('#clients_widget_w_font').append('<option class="font-' + font.family.toLowerCase().replace(/ /g,"_") + '" value="' + font.family + '">' + font.family + '</option>');
+          }
+        });
+
+        $('#clients_widget_w_font').selectpicker('val', '<%= presenter.widget.w_font -%>');
+        $('#clients_widget_w_font').selectpicker('refresh');
+      }
+    });
+  });
+</script>

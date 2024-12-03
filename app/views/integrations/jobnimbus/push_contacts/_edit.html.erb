@@ -1,0 +1,33 @@
+<%
+  # app/views/integrations/jobnimbus/push_contacts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/push_contacts/edit', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Push Contacts to JobNimbus</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_jobnimbus_push_contacts_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+      <%= render partial: 'integrations/common/push_leads/edit', locals: { integration: 'jobnimbus', presenter: } %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_push_contacts').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

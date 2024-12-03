@@ -1,0 +1,182 @@
+<%
+  # app/views/integrations/jobber/v20220915/webhooks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobber/v20220915/webhooks/edit', locals: { presenter: Integrations::Jobber::V20220915::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jobber::V20220915::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jobber::V20220915::Presenter)
+
+  presenter.event   = @webhook
+  presenter.webhook = @webhook&.second
+-%>
+<td colspan="9">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.webhook_name.to_s.split.pluck(0).join -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.webhook_name -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <% if presenter.valid_credentials? %>
+
+        <%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, class: 'needs-validation', novalidate: true do |f| %>
+
+          <%= bootstrap_select_tag(
+                field:        'webhook[event]',
+                label:        { title: 'Jobber Event' },
+                html_options: { id: "event_#{presenter.webhook_id}" },
+                options:      { array: presenter.webhook_events_array, selected: presenter.event_name, blank: 'Select a Jobber Event' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][customer_type]',
+                row:          { class: 'event_criteria_row', id: "row_customer_types_#{presenter.webhook_id}" },
+                label:        { title: 'Customer Types' },
+                html_options: { multiple: true },
+                options:      { array: %w[Commercial Residential], selected: presenter.customer_type },
+                messages:     { note: 'Event actions will trigger when Customer Type includes any of the selected types.' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][line_items]',
+                row:          { id: "row_line_items_#{presenter.webhook_id}" },
+                label:        { title: 'Jobber Line Items' },
+                html_options: { multiple: true },
+                options:      { grouped_array: presenter.products_grouped_for_select, selected: presenter.webhook_line_items },
+                messages:     { note: 'Event actions will trigger when quote/job/invoice includes any of the selected line items.' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][status]',
+                row:          { id: "row_status_#{presenter.webhook_id}" },
+                label:        { title: 'Jobber Status' },
+                html_options: { id: "status_#{presenter.webhook_id}", multiple: true },
+                options:      { array: presenter.status_for_select, selected: presenter.webhook_status, blank: 'Select a Jobber Status' },
+                messages:     { note: 'Event actions will trigger when quote/job/invoice/visit status matches any selected status.' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][source]',
+                row:          { id: "row_source_#{presenter.webhook_id}" },
+                label:        { title: 'Jobber Source' },
+                html_options: { id: "source_#{presenter.webhook_id}", multiple: true },
+                options:      { array: presenter.options_for_request_source, selected: presenter.webhook_source, blank: 'Select a Jobber Source' },
+                messages:     { note: 'Event actions will trigger when request source matches any selected source.' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][ext_tech_ids]',
+                row:          { id: "row_ext_tech_ids_#{presenter.webhook_id}" },
+                label:        { title: 'Jobber Technicians' },
+                html_options: { multiple: true },
+                options:      { array: presenter.ext_tech_options_for_select, selected: presenter.webhook_ext_tech_ids },
+                messages:     { note: 'Event actions will trigger when quote/job/visit is assigned to any selected technician.' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][tag_ids_include]',
+                row:          { id: "row_tag_ids_include_#{presenter.webhook_id}" },
+                label:        { title: 'Jobber Client Tags Included' },
+                html_options: { multiple: true },
+                options:      { for_select: options_for_tag(presenter.client, presenter.webhook.dig(:criteria, :tag_ids_include) || [], [], false) },
+                messages:     { note: 'Event actions will trigger if any quote/job/invoice tag matches any selected tag (MUST be exact match).' }
+              ) %>
+          <%= bootstrap_select_tag(
+                field:        'webhook[criteria][tag_ids_exclude]',
+                row:          { id: "row_tag_ids_exclude_#{presenter.webhook_id}" },
+                label:        { title: 'Jobber Client Tags Excluded' },
+                options:      { for_select: options_for_tag(presenter.client, presenter.webhook.dig(:criteria, :tag_ids_exclude) || [], [], false) },
+                html_options: { multiple: true },
+                messages:     { note: 'Event actions will trigger if quote/job/invoice tags do not match any selected tag (MUST be exact match).' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:        'webhook[criteria][event_new]',
+                value:        presenter.webhook_event_new,
+                values:       [true, false],
+                row:          { id: "row_event_new_#{presenter.webhook_id}" },
+                label:        { title: 'First Event' },
+                html_options: { id: "event_new_#{presenter.webhook_id}" },
+                messages:     { note: 'Event actions will trigger only on receipt of first event.' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:        'webhook[criteria][event_updated]',
+                value:        presenter.webhook_event_updated,
+                values:       [true, false],
+                row:          { id: "row_event_updated_#{presenter.webhook_id}" },
+                label:        { title: 'Subsequent Events' },
+                html_options: { id: "event_updated_#{presenter.webhook_id}" },
+                messages:     { note: 'Event actions will trigger on receipt of all subsequent events.' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:    'webhook[criteria][tech_updated]',
+                value:    presenter.webhook_tech_updated,
+                values:   [true, false],
+                row:      { id: "row_tech_updated_#{presenter.webhook_id}" },
+                label:    { title: 'Technician Changed' },
+                messages: { note: 'Event actions will trigger on receipt of all subsequent events received where the technician has changed.' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:    'webhook[criteria][start_date_updated]',
+                value:    presenter.webhook_start_date_updated,
+                values:   [true, false],
+                row:      { id: "row_start_date_updated_#{presenter.webhook_id}" },
+                label:    { title: 'Start Date Changed' },
+                messages: { note: 'Event actions will trigger on receipt of all subsequent events received where the scheduled start date has changed.' }
+              ) %>
+
+          <fieldset class="border rounded p-2 mt-3 mb-2" id="row_actions_fieldset_<%= presenter.webhook_id -%>">
+            <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+            <%= bootstrap_switch_field(
+                  field:    'webhook[actions][assign_user]',
+                  value:    presenter.webhook.dig(:actions, :assign_user).to_bool,
+                  values:   [true, false],
+                  label:    { title: 'Assign Contact to Employee' },
+                  messages: { note: "Employee must be matched to a #{I18n.t('tenant.name')} User." }
+                ) %>
+
+            <%= render partial: 'campaigns/action_fields', locals: {
+                  client: presenter.client,
+                  campaign: presenter.webhook_campaign, campaign_id_field: 'webhook[actions][campaign_id]',
+                  group: presenter.webhook_group, group_id_field: 'webhook[actions][group_id]',
+                  tag: presenter.webhook_tag, tag_id_field: 'webhook[actions][tag_id]',
+                  stage: presenter.webhook_stage, stage_id_field: 'webhook[actions][stage_id]',
+                  stop_campaign_ids: presenter.webhook_stop_campaign_ids, stop_campaign_ids_field: 'webhook[actions][stop_campaign_ids]',
+                  first_trigger_types: [115, 120, 125, 130, 132, 135, 133, 140, 142, 143, 145]
+                } %>
+          </fieldset>
+
+          <%= bootstrap_submit_buttons(
+                buttons: [{ title: "Save Actions for #{presenter.webhook_name.titleize} Event", disable_with: "Saving Actions for #{presenter.webhook_name.titleize} Event" }]
+              ) %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function () {
+    formOptionsController('<%= presenter.webhook_id -%>');
+
+    $(document).off('change', '#event_<%= presenter.webhook_id -%>');
+    $(document).on('change', '#event_<%= presenter.webhook_id -%>', function(e) {
+      e.preventDefault();
+      updateStatusOptions('<%= presenter.webhook_id -%>');
+      formOptionsController('<%= presenter.webhook_id -%>');
+    });
+
+    $(document).off('change', '#event_new_<%= presenter.webhook_id -%>');
+    $(document).on('change', '#event_new_<%= presenter.webhook_id -%>', function(e) {
+      eventNewToggle('<%= presenter.webhook_id -%>');
+    });
+
+    $(document).off('change', '#event_updated_<%= presenter.webhook_id -%>');
+    $(document).on('change', '#event_updated_<%= presenter.webhook_id -%>', function(e) {
+      eventUpdatedToggle('<%= presenter.webhook_id -%>');
+    });
+  });
+</script>

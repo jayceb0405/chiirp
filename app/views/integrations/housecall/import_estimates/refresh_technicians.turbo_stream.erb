@@ -1,0 +1,21 @@
+<%
+  # app/views/integrations/housecall/import_estimates/refresh_technicians.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/import_estimates/refresh_technicians'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update 'import_estimates_ext_tech_ids' do %>
+  <%= render partial: 'integrations/housecall/import_estimates/technicians', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

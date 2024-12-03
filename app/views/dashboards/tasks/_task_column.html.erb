@@ -1,0 +1,45 @@
+<%
+  # app/views/dashboards/tasks/_task_column.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/tasks/task_column', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:   (DashboardPresenter)
+  #   (opt) column_type: (String) options: "past" / "current" / "future"
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  column_type = local_assigns.dig(:column_type).to_s.downcase
+-%>
+<div class="card card-fluid">
+  <div class="card-header card-header-fluid">
+    <div class="d-flex justify-content-between align-items-center">
+      <span class="mr-auto"><%= presenter.tasks_column_header[column_type] %><small> (max: 5)</small></span>
+      <%= link_to('Mark All As Complete', task_complete_path(task_filter: column_type, user_for_tasks: presenter.user_for_tasks),
+                  {
+                    class:  'small',
+                    remote: true,
+                    method: :patch
+                  }) %>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="todo-list">
+
+      <div class="todo-header">
+      </div>
+
+      <%= render partial: 'dashboards/tasks/task', collection: presenter.tasks_collection(column_type), locals: { presenter:, column_type: } %>
+    </div>
+  </div>
+
+  <div class="card-footer">
+    <%= link_to(users_tasks_path(tasks_filter_selected: presenter.tasks_filter_selected[column_type]), { class: 'card-footer-item' }) do %>
+      View all <i class="fa fa-fw fa-angle-right"></i>
+    <% end %>
+  </div>
+</div>

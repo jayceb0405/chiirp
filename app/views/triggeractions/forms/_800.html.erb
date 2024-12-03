@@ -1,0 +1,28 @@
+<%
+  # app/views/triggeractions/forms/_800.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/800", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # create a Client
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[client_name_custom_field_id]',
+      label:        { title: 'Custom Field Where New Client Company Name is Found' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.client.client_custom_fields.where(var_type: 'string').order(:var_name).pluck(:var_name, :id), selected: presenter.triggeraction.client_name_custom_field_id, blank: 'Select Custom Field' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[client_package_id]',
+      label:        { title: 'Free Package Assigned to New Client' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: Package.where(tenant: presenter.client.tenant).where("(package_data ->> 'mo_charge')::numeric = ?", 0).where("(package_data ->> 'setup_fee')::numeric = ?", 0).order(:name).pluck(:name, :id), selected: presenter.triggeraction.client_package_id, blank: 'Select a Package' }
+    ) %>

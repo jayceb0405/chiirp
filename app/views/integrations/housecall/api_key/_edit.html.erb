@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/housecall/api_key/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/api_key/edit', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Housecall Pro Connection</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if presenter.valid_credentials? %>
+        <h6>Housecall Pro is Connected</h6>
+
+        <%= link_to 'Disconnect Housecall Pro',
+                    integrations_housecall_api_key_path,
+                    remote: true,
+                    method: :delete,
+                    class:  'btn btn-info',
+                    data:   {
+                      params: {
+                        'api_key' => true
+                      }.to_param
+                    } %>
+      <% else %>
+        <h6>Housecall Pro is NOT Connected</h6>
+
+        <%= link_to 'Connect Housecall Pro',
+                    integrations_housecall_api_key_path,
+                    remote: false,
+                    method: :patch,
+                    class:  'btn btn-info',
+                    data:   {
+                      params: {
+                        'webhooks' => false
+                      }.to_param
+                    } %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_api_key').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

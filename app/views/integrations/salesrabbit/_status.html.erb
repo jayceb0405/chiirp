@@ -1,0 +1,49 @@
+<%
+  # app/views/integrations/salesrabbit/_status.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/salesrabbit/status", collection: @client_api_integration.statuses
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #   status: (Hash)
+  #   @client_api_integration.status_actions: (Hash)
+  #     {
+  #       status[:id] {
+  #         campaign_id: (Integer)
+  #         group_id:    (Integer)
+  #         stage_id:    (Integer)
+  #         tag_id:      (Integer)
+  #       }
+  #     }
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  campaign_id       = @client_api_integration.status_actions.include?("campaigns") ? @client_api_integration.status_actions["campaigns"][status["id"].to_s].to_i : 0
+  group             = @client_api_integration.status_actions.include?("groups") ? @client_api_integration.client.groups.find_by_id( @client_api_integration.status_actions["groups"][status["id"].to_s].to_i ) : @client_api_integration.client.groups.new
+  stage_id          = @client_api_integration.status_actions.include?("stages") ? @client_api_integration.status_actions["stages"][status["id"].to_s].to_i : 0
+  tag               = @client_api_integration.status_actions.include?("tags") ? @client_api_integration.client.tags.find_by_id( @client_api_integration.status_actions["tags"][status["id"].to_s].to_i ) : @client_api_integration.client.tags.new
+  stop_campaign_ids = @client_api_integration.status_actions.dig("stop_campaign_ids", "#{status["id"]}")
+
+  campaign_id ||= 0
+  group         = @client_api_integration.client.groups.new unless group
+  stage_id    ||= 0
+  tag           = @client_api_integration.client.tags.new unless tag
+-%>
+<tr>
+  <td>
+    <%= status['name'] -%> <small>(<%= status['abbreviation'] -%>)</small><br />
+    <small class="pl-3"><%= status['active'].to_s.downcase == 'true' ? 'Active' : 'Inactive' -%></small>
+  </td>
+  <td>
+    <%= render partial: 'campaigns/action_fields', locals: {
+          client: @client_api_integration.client,
+          campaign_id:, campaign_id_field: "campaign_id[#{status['id'].to_s}]",
+          group:, group_id_field: "group_id[#{status["id"].to_s}]",
+          tag:, tag_id_field: "tag_id[#{status["id"].to_s}]",
+          stage_id:, stage_id_field: "stage_id[#{status['id'].to_s}]",
+          stop_campaign_ids:, stop_campaign_ids_field: "stop_campaign_ids[#{status['id'].to_s}]"
+        } %>
+  </td>
+</tr>

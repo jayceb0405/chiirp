@@ -1,0 +1,64 @@
+<%
+  # app/views/clients/dlc10/v2/phone_numbers/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/phone_numbers/index', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<% if presenter.dlc10_ok_to_edit(current_user) %>
+
+  <%= form_with url: clients_dlc10_phone_number_path(presenter.client.id), builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', novalidate: true do |f| %>
+
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th class="align-middle text-left"> Phone Number </th>
+            <th class="align-middle text-left"> Name </th>
+            <th class="align-middle text-left"> 10DLC Campaign </th>
+            <th class="align-middle text-left"> Shared </th>
+            <th class="align-middle text-left"> Approved </th>
+            <th class="align-middle text-center"> Locked </th>
+          </tr>
+        </thead>
+
+        <tbody id="campaigns_index">
+          <% if presenter.client.dlc10_brand && presenter.dlc10_phone_numbers.any? %>
+            <%= render partial: 'clients/dlc10/v2/phone_numbers/phone_number', collection: presenter.dlc10_phone_numbers.order(:name, :phonenumber), as: :phone_number, locals: { presenter: } -%>
+
+            <tr>
+              <td colspan="6">
+                <%= f.submit_buttons buttons: [
+                      { title: 'Save Campaign / Phone Number Connections', disable_with: 'Saving Campaign / Phone Number Connections' }
+                    ] %>
+              </td>
+            </tr>
+          <% else %>
+            <tr>
+              <td colspan="6">
+                Phone Numbers were not found.
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  <% end %>
+<% else %>
+  <h6>Access NOT permitted!</h6>
+<% end %>
+
+<script>
+  $(function () {
+    $('.nav-dlc10_link').removeClass('active');
+    $('#link_dlc10_phone_numbers').addClass('active');
+  });
+</script>

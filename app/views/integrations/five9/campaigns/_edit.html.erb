@@ -1,0 +1,68 @@
+<%
+# app/views/integrations/five9/campaigns/_edit.html.erb
+#
+# Example:
+#   render partial: 'integrations/five9/campaigns/edit'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Campaigns</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: @user_api_integration, url: integrations_five9_campaigns_path, builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', novalidate: true do |f| %>
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th class="text-left">Five9 Campaigns</th>
+              <th class="text-left">ServiceTitan Campaigns</th>
+            </tr>
+          </thead>
+
+          <tbody id="campaigns_tbody">
+            <tr>
+              <td colspan="2">
+                <div class="text-center mt-3">
+                  <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %>
+                </div>
+                <div class="text-center mb-3">
+                  Retrieving Campaigns from Five9 & from ServiceTitan...
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_campaigns').addClass('active');
+    $('#breadcrumb').show();
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_five9_campaigns_path(tbody: true) -%>'
+    });
+  });
+</script>

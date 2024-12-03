@@ -1,0 +1,60 @@
+<%
+  # app/views/clients/dlc10/v2/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/edit', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter) || @client.is_a?(Client)
+
+  presenter = Clients::Dlc10::V2::Presenter.new(client: @client) unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_dlc10').addClass('has-active');
+    $('.nav-link').removeClass('active');
+    $('#link_dlc10').addClass('active');
+  });
+</script>
+
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">10DLC Brand & Use Cases</span>
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, clients_dlc10_brand_path(presenter.client), { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </h6>
+    <div class="card-body p-0" id="dlc10_body">
+      <nav class="page-navs">
+        <div class="nav-scroller">
+          <div class="nav nav-center nav-tabs">
+            <%= link_to 'Introduction', clients_dlc10_intro_path(presenter.client), { class: 'nav-link nav-dlc10_link', id: 'link_dlc10_intro', remote: true } %>
+            <%= link_to 'My Brand', edit_clients_dlc10_brand_path(presenter.client, brand: true), { class: 'nav-link nav-dlc10_link', id: 'link_dlc10_brand', remote: true } %>
+
+            <% if presenter.dlc10_brand_verified? %>
+              <%= link_to 'Use Case Types', clients_dlc10_campaign_type_path(client_id: presenter.client.id), { class: 'nav-link nav-dlc10_link', id: 'link_dlc10_campaign_types', remote: true } %>
+              <%= link_to 'My Use Cases', clients_dlc10_campaigns_path(client_id: presenter.client.id, campaigns: true), { class: 'nav-link nav-dlc10_link', id: 'link_dlc10_campaigns', remote: true } %>
+              <%= link_to 'My Phone Numbers', clients_dlc10_phone_numbers_path(client_id: presenter.client.id), { class: 'nav-link nav-dlc10_link', id: 'link_dlc10_phone_numbers', remote: true } %>
+            <% end %>
+          </div>
+        </div>
+      </nav>
+
+      <div class="page-inner p-3">
+        <div class="page-section" id="dlc10_page_section">
+          <% if @dlc10_tab.to_s.casecmp?('intro') %>
+            <%= render partial: 'clients/dlc10/v2/intro/show', locals: { presenter: } %>
+          <% else %>
+            <%= render partial: 'clients/dlc10/v2/brand/form', locals: { presenter: } %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

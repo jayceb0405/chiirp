@@ -1,0 +1,29 @@
+<%
+  # app/views/layouts/common/_structured_data.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/common/structured_data', locals: { title: String, description: String }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   title:       (String)
+  #   description: (String)
+  #
+  title        = (local_assigns.dig(:title) || "#{I18n.t('tenant.name')} - Who will you meet today?").to_s
+  description  = (local_assigns.dig(:description) || "Text Messaging Sales Platform. Close more with #{I18n.t('tenant.name')}. Capture Connect Close. Streamline your lead collections.").to_s
+-%>
+<script type="application/ld+json">
+  {
+    "headline": "<%= title -%>",
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "<%= I18n.t('tenant.name') -%>",
+    "description": "<%= description -%>",
+    "applicationCategory": "CommunicationApplication"
+  }
+</script>

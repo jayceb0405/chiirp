@@ -1,0 +1,24 @@
+<%
+  # app/views/trackable_links/_select_trackable_links_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'trackable_links/select_trackable_links_dropdown'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select a Trackable Link</span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% @trackable_links.each do |trackable_link| %>
+    <a href="#" class="dropdown-item option_trackable_link ml-3" id="<%= trackable_link.id -%>"><%= trackable_link.name -%></a>
+  <% end %>
+</div>

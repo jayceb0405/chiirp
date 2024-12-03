@@ -1,0 +1,40 @@
+<%
+  # app/views/integrations/google/calendar/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/google/calendar/edit"
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Calendars Included in <%= I18n.t('tenant.name') -%> Dashboard</h6>
+  <div class="card-body">
+
+    <%= form_with model: @user_api_integration, url: integrations_google_calendars_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', novalidate: true } do |f| %>
+      <%= hidden_field_tag 'user_api_integration[calendar_colors]', presenter.dashboard_calendar_colors.to_json %>
+
+      <%= f.select :dashboard_calendars, {
+            label:        { title: 'Google Calendars' },
+            html_options: { multiple: true, mobile: browser.device.mobile? },
+            choices:      { array: presenter.google_calendar_select_array, selected: presenter.user_api_integration.dashboard_calendars.map { |x| x['id'] } }
+          } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_calendars').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

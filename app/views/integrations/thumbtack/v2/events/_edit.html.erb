@@ -1,0 +1,125 @@
+<%
+  # app/views/integrations/thumbtack/v2/events/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/thumbtack/v2/events/edit', locals: { presenter: Integrations::Thumbtack::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Thumbtack::V2::Presenter)
+  #   (req) event:     (Hash)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Thumbtack::V2::Presenter) && local_assigns.dig(:event).is_a?(Hash)
+
+  presenter.event = event
+-%>
+<td colspan="9">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.event_type.to_s.split.pluck(0).join -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.event_type -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <% if presenter.valid_credentials? %>
+
+        <%= form_with url: presenter.form_url, builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: presenter.form_method, class: 'needs-validation', novalidate: true do |f| %>
+
+          <%= bootstrap_text_field(
+                field:        'event[name]',
+                value:        presenter.event_name,
+                label:        { title: 'Name' },
+                html_options: { id: "event_name_#{presenter.event_id}" }
+              ) %>
+          <%= hidden_field_tag 'event[event_type]', 'lead' %>
+          <%= bootstrap_select_tag(
+                field:        'event[criteria][lead_types]',
+                label:        { title: 'Thumbtack Lead Event' },
+                html_options: { id: "event_#{presenter.event_id}", multiple: true },
+                options:      { array: presenter.event_types_array, selected: presenter.event_lead_types }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:        'event[criteria][event_new]',
+                value:        presenter.event_new,
+                values:       [true, false],
+                row:          { id: "row_event_new_#{presenter.event_id}" },
+                label:        { title: 'First Event' },
+                html_options: { id: "event_new_#{presenter.event_id}" },
+                messages:     { note: 'Event actions will trigger only on receipt of first event.' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:        'event[criteria][event_updated]',
+                value:        presenter.event_updated,
+                values:       [true, false],
+                row:          { id: "row_event_updated_#{presenter.event_id}" },
+                label:        { title: 'Subsequent Events' },
+                html_options: { id: "event_updated_#{presenter.event_id}" },
+                messages:     { note: 'Event actions will trigger on receipt of all subsequent events.' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:    'event[criteria][start_date_updated]',
+                value:    presenter.event_start_date_updated,
+                values:   [true, false],
+                row:      { id: "row_start_date_updated_#{presenter.event_id}" },
+                label:    { title: 'Start Date Changed' },
+                messages: { note: 'Event actions will trigger on receipt of all subsequent events received where the scheduled start date has changed.' }
+              ) %>
+
+          <fieldset class="border rounded p-2 mt-3 mb-2" id="row_actions_fieldset_<%= presenter.event_id -%>">
+            <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+            <%= bootstrap_switch_field(
+                  field:    'event[actions][assign_user]',
+                  value:    presenter.event.dig(:actions, :assign_user).to_bool,
+                  values:   [true, false],
+                  label:    { title: 'Assign Contact to Employee' },
+                  messages: { note: "Employee must be matched to a #{I18n.t('tenant.name')} User." }
+                ) %>
+
+            <%= render partial: 'campaigns/action_fields', locals: {
+                  client: presenter.client,
+                  campaign: presenter.event_campaign, campaign_id_field: 'event[actions][campaign_id]',
+                  group: presenter.event_group, group_id_field: 'event[actions][group_id]',
+                  tag: presenter.event_tag, tag_id_field: 'event[actions][tag_id]',
+                  stage: presenter.event_stage, stage_id_field: 'event[actions][stage_id]',
+                  stop_campaign_ids: presenter.event_stop_campaign_ids, stop_campaign_ids_field: 'event[actions][stop_campaign_ids]',
+                  first_trigger_types: [115, 120, 125, 130, 132, 135, 133, 140, 142, 143, 145]
+                } %>
+          </fieldset>
+
+          <%= bootstrap_submit_buttons(
+                buttons: [{ title: "Save Actions for #{presenter.event_type.titleize} Event", disable_with: "Saving Actions for #{presenter.event_type.titleize} Event" }]
+              ) %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function () {
+    formOptionsController('<%= presenter.event_id -%>');
+
+    $(document).off('change', '#event_<%= presenter.event_id -%>');
+    $(document).on('change', '#event_<%= presenter.event_id -%>', function(e) {
+      e.preventDefault();
+      updateStatusOptions('<%= presenter.event_id -%>');
+      formOptionsController('<%= presenter.event_id -%>');
+    });
+
+    $(document).off('change', '#event_new_<%= presenter.event_id -%>');
+    $(document).on('change', '#event_new_<%= presenter.event_id -%>', function(e) {
+      eventNewToggle('<%= presenter.event_id -%>');
+    });
+
+    $(document).off('change', '#event_updated_<%= presenter.event_id -%>');
+    $(document).on('change', '#event_updated_<%= presenter.event_id -%>', function(e) {
+      eventUpdatedToggle('<%= presenter.event_id -%>');
+    });
+  });
+</script>

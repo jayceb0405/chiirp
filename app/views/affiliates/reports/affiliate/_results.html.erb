@@ -1,0 +1,40 @@
+<%
+  # app/views/affiliates/reports/affiliate/_results.html.erb
+  #
+  # Example:
+  #   render partial: "affiliates/reports/affiliate/results", locals: { presenter: Affiliates::Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @clients:            (Clients)
+  #   (opt) @include_setup_fees: (Boolean)
+  #
+  # Local Variables:
+  #   (req) presenter: (Affiliates::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<div class="table-responsive">
+  <table class="table">
+
+    <thead>
+      <tr>
+        <th colspan="2" style="min-width: 240px"> Client </th>
+        <%= content_tag(:th, class: 'text-right d-none d-md-table-cell') { 'Setup Fees' } if @include_setup_fees %>
+        <th class="text-right d-none d-md-table-cell"> Monthly Charges </th>
+        <th class="text-right d-none d-md-table-cell"> Commission Rate </th>
+        <th class="text-right d-none d-md-table-cell"> Commission </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <%= render partial: 'affiliates/reports/affiliate/client', collection: @clients.order(:name), as: :client, locals: { presenter: } -%>
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td colspan="<%= @include_setup_fees ? '5' : '4' -%>" class="text-left align-middle"> Total </td>
+        <td class="text-right align-middle"> <%= number_to_currency((@client_mo_charges.sum { |t| t.charge.to_d } + (@include_setup_fees ? @client_startup_costs.sum { |t| t.charge.to_d } : 0.0)) * (presenter.affiliate.commission / 100)) -%> </td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

@@ -1,0 +1,52 @@
+<%
+  # app/views/surveys/_survey.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/survey', collection: surveys, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #   (req) survey:    (Survey)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.survey = local_assigns.dig(:survey)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#survey_<%= presenter.survey.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_survey_name_<%= presenter.survey.id -%>">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#survey_<%= presenter.survey.id -%>">
+      <%= presenter.survey.name -%>
+    </button>
+  </td>
+  <td class="text-center align-middle"> <%= presenter.survey.screens.count.to_s -%> </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(presenter.survey.created_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#survey_<%= presenter.survey.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= if presenter.client.surveys.count < presenter.client.surveys_count
+          link_to('', surveys_copy_path(presenter.survey.id),
+                  class:  'btn btn-sm btn-icon btn-secondary fa fa-clone',
+                  remote: true,
+                  method: :patch)
+        end %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt survey_delete',
+          data:  {
+            surveyId:   presenter.survey.id,
+            surveyName: presenter.survey.name
+          }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse survey_edit" id="survey_<%= presenter.survey.id -%>" data-surveyId="<%= presenter.survey.id -%>">
+  <!-- Survey -->
+</tr>

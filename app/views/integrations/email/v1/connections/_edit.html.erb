@@ -1,0 +1,110 @@
+<%
+  # app/views/integrations/email/v1/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/email/v1/connections/edit"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Email::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Outbound Email</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_tag integrations_email_v1_connections_path, builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', id: 'admin_email_integration_form', novalidate: true do %>
+        <%= bootstrap_text_field(
+              field:        'emails[domain]',
+              value:        presenter.client_api_integration.domain,
+              label:        { title: 'Email Domain Name' },
+              html_options: { placeholder: 'example.com', disabled: presenter.connected? },
+              messages:     { note: 'What domain name will your emails come from? This should match the email address you use to log in with. You must own and have access to edit DNS records for this domain name.' },
+              prepends:     { button: true, label: '@', disabled: true }
+            ) %>
+        <% if presenter.connected? %>
+          <div class="d-flex flex-column flex-md-row justify-content-end">
+            <%= link_to 'Disconnect Domain', '#', class: 'btn btn-danger', id: 'delete-domain' %>
+          </div>
+        <% else %>
+          <%= bootstrap_submit_buttons(
+                buttons: [{ title: 'Save Domain', disable_with: 'Saving Domain' }]
+              ) %>
+        <% end %>
+        <div class="d-flex flex-column flex-md-row justify-content-end mt-2">
+          <div class="spinner-border text-primary d-none" id="email_integration_spinner" role="status">
+            <span class="sr-only">Loading...</span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Inbound Email</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      Contacts can send emails to your <%= I18n.t('tenant.name') -%> account by sending an email to the address below.
+    </div>
+
+    <div class="card-body">
+      <%= bootstrap_copy_field(
+            field:    'inbound_username',
+            value:    "#{presenter.client_api_integration.inbound_username}@#{Rails.env.production? ? '' : "#{ENV.fetch('DEV_DOMAIN_PREFIX', '')}dev."}chiirp.io",
+            row:      { class: 'mb-0', columns: [0, 12] },
+            messages: { note: 'Use this address to send emails into your Chiirp account.' }
+          ) %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+
+    $('#admin_email_integration_form').off('submit');
+    $('#admin_email_integration_form').on('submit', function(e) {
+      $('#email_integration_spinner').removeClass('d-none');
+    });
+
+    $('#delete-domain').off('click');
+    $('#delete-domain').on('click', function(e) {
+      e.preventDefault();
+      $('#email_integration_spinner').removeClass('d-none');
+
+      ChiirpAlert({
+        'body':'Disconnecting the domain will halt all email being sent now or in the future. You will need to add the domain again with a new verification. Is it your intention to disconnect this domain?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it' }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it');
+      $(document).on('click', '#button_dump_it', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= integrations_email_v1_connections_path -%>'
+        });
+      });
+    });
+
+  });
+</script>

@@ -1,0 +1,46 @@
+<%
+  # app/views/stages/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'stages/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards:           (Array)
+  #
+  #   card = 'show'
+  #   (req) stage_parent:    (StageParent)
+  #
+  #   card = 'index_stage'
+  #   (req) client:          (Client)
+  #   (req) stage:           (Stage)
+  #   (opt) string_search:   (String)
+  #
+  #   card = 'contact_count'
+  #   (req) new_stage_id:    (Integer)
+  #   (req) new_stage_count: (Integer)
+  #   (req) stage_id:        (Integer)
+  #   (req) stage_count:     (Integer)
+  #
+  return unless local_assigns.dig(:cards).present? && cards.is_a?(Array)
+
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('show') %>
+  $('#stage_parent_body').html('<%= j render partial: 'stages/show', locals: { stage_parent: local_assigns.dig(:stage_parent) } -%>');
+<% end %>
+<% if cards.include?('index_stage') %>
+  $('#stage_<%= local_assigns.dig(:stage).id -%>').html('<%= j render partial: 'stages/contacts', locals: { client: local_assigns.dig(:client), stage: local_assigns.dig(:stage), search_string: local_assigns.dig(:search_string) } -%>');
+<% end %>
+<% if cards.include?('contact_count') %>
+  $('#stage_<%= local_assigns.dig(:stage_id).to_i -%>_contact_count').html('(<%= local_assigns.dig(:stage_count).to_i -%>)');
+  $('#stage_<%= local_assigns.dig(:new_stage_id).to_i -%>_contact_count').html('(<%= local_assigns.dig(:new_stage_count).to_i -%>)');
+<% end %>
+
+$('.tooltip').remove();
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

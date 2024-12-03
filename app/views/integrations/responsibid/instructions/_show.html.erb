@@ -1,0 +1,42 @@
+<%
+  # app/views/integrations/responsibid/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/responsibid/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Responsibid::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">ResponsiBid Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>ResponsiBid integration provides enhanced quote follow-up and 2-way text messaging capabilities at every point of customer communications.</li>
+      <li>A ResponsiBid connection is required.</li>
+      <li>The ResponsiBid Customer ID, phone numbers & email address are used to match a customer received into <%= I18n.t('tenant.name') -%>.</li>
+      <li>A ResponsiBid connection to <%= I18n.t('tenant.name') -%> must be established from Connections in ResponsiBid.</li>
+      <li>Bid data are accessible through hashtag replacement fields in Campaigns that are started by events.</li>
+      <li>Hashtags available are as follows...</li>
+      <ul>
+        <li>Estimate Status</li>
+        <li>Estimate Scheduled Start Date</li>
+        <li>Estimate Scheduled End Date</li>
+        <li>Estimate Scheduled Arrival Window Date</li>
+        <li>Estimate Scheduled Arrival Window Time</li>
+      </ul>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

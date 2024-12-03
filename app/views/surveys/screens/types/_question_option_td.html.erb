@@ -1,0 +1,67 @@
+<%
+  # app/views/surveys/screens/types/_question_option_td.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/types/question_option_td', locals: { option_id: Integer, presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #   (req) option_id: (Integer)
+  #
+  presenter = local_assigns.dig(:presenter)
+  option_id = local_assigns.dig(:option_id)
+-%>
+<td colspan="4" class="pl-5">
+  <%= bootstrap_text_field(
+        field:        "surveys_screen[responses][option_#{option_id}][string]",
+        value:        presenter.survey_screen.responses.dig("option_#{option_id}", 'string').to_s,
+        label:        { title: 'Expected Response' },
+        html_options: { placeholder: 'Expected Response' }
+      ) %>
+
+  <% unless presenter.survey_screen.new_record? %>
+    <%= bootstrap_file_field(
+          file_field:      { field: "surveys_screen[responses][option_#{option_id}][image]", id: "survey_screen_option_#{presenter.survey_screen.id}_#{option_id}_image", name: "surveys_screen[responses][option_#{option_id}][image]", url: surveys_screen_image_path(presenter.survey.id, presenter.survey_screen.id, option_id) },
+          col:             { id: "survey_screen_#{presenter.survey_screen.id}_#{option_id}_image_dropzone" },
+          label:           { title: 'Response Image' },
+          image_container: { id: "survey_screen_#{presenter.survey_screen.id}_#{option_id}_image_container" },
+          image:           presenter.survey_screen.send("question_#{option_id}_image").attached? ? { key: presenter.survey_screen.send("question_#{option_id}_image").key, width: 250, height: 250, class: 'rounded', crop: 'fit', format: 'png' } : {}
+        ) %>
+  <% end %>
+
+  <%= bootstrap_select_tag(
+        field:        "surveys_screen[responses][option_#{option_id}][screen]",
+        label:        { title: 'Next Screen' },
+        html_options: { id: "survey_screen_option_screen_#{presenter.survey_screen.id}_#{option_id}" },
+        options:      { array: presenter.survey_screen_option_screens_for_select, selected: presenter.survey_screen.responses.dig("option_#{option_id}", 'screen').to_i }
+      ) %>
+  <%= bootstrap_text_field(
+        field:        "surveys_screen[responses][option_#{option_id}][url]",
+        value:        presenter.survey_screen.responses.dig("option_#{option_id}", 'url').to_s,
+        row:          { id: "survey_screen_option_url_#{presenter.survey_screen.id}_#{option_id}" },
+        label:        { title: 'Web Page URL' },
+        html_options: { placeholder: 'Web Page URL' }
+      ) %>
+</td>
+
+<script>
+  $(function() {
+    show_hide($('#survey_screen_option_screen_<%= presenter.survey_screen.id -%>_<%= option_id -%>').val());
+
+    $(document).off('change', '#survey_screen_option_screen_<%= presenter.survey_screen.id -%>_<%= option_id -%>');
+    $(document).on('change', '#survey_screen_option_screen_<%= presenter.survey_screen.id -%>_<%= option_id -%>', function(e) {
+      show_hide($(this).val());
+    });
+
+    function show_hide(val) {
+      if (val == '0') {
+        $('#survey_screen_option_url_<%= presenter.survey_screen.id -%>_<%= option_id -%>').show();
+      } else {
+        $('#survey_screen_option_url_<%= presenter.survey_screen.id -%>_<%= option_id -%>').hide();
+      }
+    }
+  });
+</script>

@@ -1,0 +1,42 @@
+<%
+   # app/views/integrations/contractorcommerce/v2/connections/_edit.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/contractorcommerce/v2/connections/edit', locals: { presenter: Integrations::Contractorcommerce::V1::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Contractorcommerce::V1::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Contractorcommerce::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to Contractor Commerce</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= bootstrap_copy_field(
+            field:    'webhook_api_key',
+            value:    integrations_contractorcommerce_v1_webhook_url(presenter.client_api_integration.webhook_api_key).to_s,
+            row:      { class: 'mb-0', columns: [0, 12] },
+            messages: { note: 'Give this address to Contractor Commerce to hook into your Chiirp account.' }
+          ) %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

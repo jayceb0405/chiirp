@@ -1,0 +1,23 @@
+<%
+  # app/views/integrations/servicetitan/reports/refresh_reports.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/refresh_reports'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @report:                 (Hash)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && @report.is_a?(Hash)
+
+  presenter        = Integrations::Servicetitan::ReportsPresenter.new(client_api_integration: @client_api_integration)
+  presenter.report = @report || {}
+-%>
+<%= turbo_stream.update "report_reports_#{presenter.report_id}" do %>
+  <%= render partial: 'integrations/servicetitan/reports/select_tags/report_reports', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

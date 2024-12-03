@@ -1,0 +1,42 @@
+<%
+	# app/views/integrations/calendly/_form.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/calendly/form"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Calendly Embed Script</h6>
+  <div class="card-body">
+
+		<%= form_with model: @user_api_integration, url: integrations_calendly_integration_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+      <%= f.text_area :embed_script, {
+            label: { title: 'Calendly Embed Script' },
+        html_options: { id: 'embed_script', placeholder: 'Embed Script' }
+      } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', id: 'save_embed_script', disable_with: 'Saving' }] %>
+		<% end %>
+	</div>
+</div>
+
+<script>
+	$(function () {
+    $('.nav-link').removeClass('active');
+    $('#embed_connection').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '#save_embed_script');
+    $(document).on('click', '#save_embed_script', function(e) {
+      $('#embed_script').val($('#embed_script').val().replace(/<script/g, '{script'));
+      $('#embed_script').val($('#embed_script').val().replace(/<\/script>/g, '{/script}'));
+    });
+	});
+</script>

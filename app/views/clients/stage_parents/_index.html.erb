@@ -1,0 +1,87 @@
+<%
+  # app/views/clients/stage_parents/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/stage_parents/index'
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (opt) stage_parent: (StageParent)
+  #
+  presenter = local_assigns.dig(:client_stage_parents_presenter) || Clients::StageParents::Presenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-project-diagram mr-2"></i><%= StageParent.title.pluralize -%><span class="badge"><%= presenter.stage_parents_count -%> / <%= presenter.client.stages_count -%></span></span>
+      <span>
+        <%= link_to "<i class=\"fa fa-plus mr-2\"></i>New #{StageParent.title}".html_safe, new_client_stage_parent_path(presenter.client.id), {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+        <%= if presenter.stage_parents_count < presenter.client.stages_count && current_user.client.share_stages_allowed
+              link_to "<i class=\"fa fa-cloud-download-alt mr-2\"></i>Import Shared #{StageParent.title}".html_safe, client_import_stage_parent_show_path(presenter.client), {
+                class:  'btn btn-light ml-2',
+                remote: true,
+                method: :get
+              }
+            end %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px"><%= StageParent.title -%></th>
+              <th class="text-center"> Stages </th>
+              <th class="text-left"> Created </th>
+              <th class="text-right" style="min-width:150px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <%= render partial: 'clients/stage_parents/stage_parent', collection: presenter.stage_parents, as: :stage_parent, locals: { client_stage_parents_presenter: presenter } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if @stage_parent.present? %>
+      $('#stage_parent_<%= @stage_parent.id -%>').collapse('show');
+      $('#stage_parent_<%= @stage_parent.id -%>').html('<%= j render partial: 'clients/stage_parents/edit', locals: { client_stage_parents_presenter: presenter } -%>');
+    <% end %>
+
+    $('#stage_parents_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li><%= StageParent.title -%> provide a method of segmenting your Contacts for future selection.</li>'
+      help_info += '<li><%= StageParent.title -%> also provide for keeping track of what step in the sales process a Contact is currently positioned.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': '<%= StageParent.title -%> Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_stage_parents').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_stage_parents').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

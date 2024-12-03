@@ -1,0 +1,108 @@
+<%
+  # app/views/campaigns/contact/_campaign.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/contact/campaign', collection: presenter.future_campaigns, as: :future_campaign, locals: { future: true, presenter: CampaignsPresenter }
+  #   render partial: 'campaigns/contact/campaign', collection: presenter.contact_campaigns, as: :contact_campaign, locals: { presenter: CampaignsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:       (CampaignsPresenter)
+  #   (req) contact_campaign (Contacts::Campaign)
+  #   (req) future:          (Boolean)
+  #   (req) future_campaign  (Delayed::Job)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CampaignsPresenter)
+
+  future = local_assigns.dig(:future).to_bool
+
+  cc = {}
+
+  if future
+    contact_campaign = nil
+    cc[:counter]     = nil
+    cc[:id]          = "dj#{future_campaign.id}"
+    cc[:completed]   = false
+    cc[:created_at]  = future_campaign.run_at
+
+    cc[:name] = if future_campaign.data&.include?('campaign_id') && future_campaign.data['campaign_id'].to_i.positive? && (campaign = Campaign.find_by(id: future_campaign.data['campaign_id'].to_i))
+                  campaign.name
+                else
+                  'Unknown'
+                end
+  else
+    cc[:counter]    = contact_campaign_counter
+    cc[:id]         = contact_campaign.id
+    cc[:name]       = contact_campaign.campaign.name
+    cc[:completed]  = contact_campaign.completed && presenter.contact_delayed_jobs.exclude?(contact_campaign.id)
+    cc[:created_at] = contact_campaign.created_at
+  end
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <% unless future %>
+      <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#campaign_history_<%= cc[:id] -%>_tr">
+        <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+      </button>
+    <% end %>
+  </td>
+  <td class="align-left align-middle" colspan="2">
+
+    <% if future %>
+      <%= cc[:name] -%>
+    <% else %>
+      <button type="button" class="btn" data-toggle="collapse" data-target="#campaign_history_<%= cc[:id] -%>_tr">
+        <%= cc[:name] -%>
+      </button>
+    <% end %>
+  </td>
+  <td class="align-left align-middle"> <%= Friendly.new.date(cc[:created_at], presenter.client.time_zone, true) -%> </td>
+  <td class="align-left align-middle"> <%= if cc[:completed]
+                                             'completed'
+                                           else
+                                             # contact_campaign&.completed ? 'in progress' : 'future'
+                                             'in progress'
+                                           end -%> </td>
+  <td class="text-right align-middle">
+    <% unless cc[:completed] %>
+      <%= link_to '', '#', {
+            class: 'btn btn-sm btn-icon btn-secondary fa fa-hand text-danger',
+            id:    "button_delete_campaign_#{cc[:id]}",
+            title: 'Stop Campaign',
+            data:  {
+              toggle: 'tooltip'
+            }
+          } %>
+    <% end %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="campaign_history_<%= cc[:id] -%>_tr">
+  <td colspan="6" id="campaign_history_<%= cc[:id] -%>_td">
+    <!-- Campaign History -->
+  </td>
+</tr>
+
+<script>
+  $(function() {
+
+    <% unless future %>
+      $('#campaign_history_<%= cc[:id] -%>_tr').off('show.bs.collapse');
+      $('#campaign_history_<%= cc[:id] -%>_tr').on('show.bs.collapse', function () {
+        $.ajax({
+          type: 'GET',
+          dataType: "script",
+          url: '<%= index_contact_campaign_actions_path(cc[:id]) -%>'
+        });
+      });
+    <% end %>
+
+    <%= render partial: 'snippets/js/confirm_alert', locals: {
+          element:     "#button_delete_campaign_#{cc[:id]}",
+          alert:       { body: "Deleting Campaign \"#{cc[:name]}\" can NOT be un-done. Is it your intention to delete this Campaign?", type: 'danger', persistent: true },
+          ajax_action: { type: 'DELETE', url: stop_campaign_path(cc[:id], contact_id: @contact) }
+        } %>
+  });
+</script>

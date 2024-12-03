@@ -1,0 +1,66 @@
+<%
+  # app/views/system_settings/index.html.erb
+  #
+  # Example:
+  #   render "system_settings/index"
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (opt) nav_item: (String)
+  #
+  nav_item_path = case local_assigns.dig(:nav_item).to_s.downcase
+                  when 'integrations_index', 'integrations_edit'
+                    '/system_settings/integrations/index'
+                  when 'toasts'
+                    '/system_settings/toasts/edit'
+                  when 'phone_numbers'
+                    '/system_settings/phone_numbers/new'
+                  else
+                    '/system_settings/versions/index'
+                  end
+  Rails.logger.info "nav_item_path: #{nav_item_path.inspect} - File: #{__FILE__} - Line: #{__LINE__} - Calling: { File: #{caller_locations(1..1).first.path} - Line: #{caller_locations(1..1).first.lineno} }"
+-%>
+<% if current_user.super_admin? %>
+  <div class="page">
+    <div class="page-inner">
+
+      <header class="page-title-bar">
+        <div class="d-flex justify-content-between">
+          <h1 class="page-title"><i class="fa fa-cogs"></i> System Settings </h1>
+        </div>
+      </header>
+
+      <div class="page-section">
+        <div class="card card-fluid card-margins-mobile">
+
+          <div class="card-header nav-scroller">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item"><%= link_to 'Versions', system_settings_versions_path, { class: 'nav-link', id: 'link_versions', remote: true } %></li>
+              <li class="nav-item"><%= link_to 'Integrations', system_settings_integrations_path, { class: 'nav-link', id: 'link_integrations', remote: true } %></li>
+              <li class="nav-item"><%= link_to 'Notifications', edit_system_settings_toast_path, { class: 'nav-link', id: 'link_toasts', remote: true } %></li>
+              <li class="nav-item"><%= link_to 'New Phone Numbers', new_system_settings_phone_number_path, { class: 'nav-link', id: 'link_phone_numbers', remote: true } %></li>
+            </ul>
+          </div>
+
+          <div class="card-body" id="system_settings_body">
+            <%= render partial: nav_item_path %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(function () {
+      $('.menu-item').removeClass('has-active');
+      $('#aside_menu_item_system_settings').addClass('has-active');
+
+      <% if local_assigns.dig(:nav_item).to_s.casecmp?('integrations_edit') && local_assigns.dig(:integration_id).to_i.positive? %>
+        $('#integration_<%= local_assigns[:integration_id].to_i -%>').collapse('show');
+        $("#integration_<%= local_assigns[:integration_id].to_i -%>").animate({ scrollTop: $("#integration_<%= local_assigns[:integration_id].to_i -%>").prop('scrollHeight')});
+      <% end %>
+    });
+  </script>
+<% end %>

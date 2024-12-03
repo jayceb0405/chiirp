@@ -1,0 +1,16 @@
+<%
+  # /app/views/integrations/fieldpulse/v1/instructions/show.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Fieldpulse::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/fieldpulse/v1/instructions/show', locals: { presenter: } %>
+<% end %>

@@ -1,0 +1,19 @@
+<%
+  # /app/views/my_contacts/create.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (opt) user_setting: (Users::Setting)
+  #   (opt) broadcast:    (Boolean)
+  #
+  # Local Variables:
+  #
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast = @broadcast
+-%>
+<%= turbo_stream.hide_modal('dash_modal') %>
+
+<%= turbo_stream.update 'contacts_list' do %>
+  <%= render 'my_contacts/broadcast/show', presenter:, run_create_js: true %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

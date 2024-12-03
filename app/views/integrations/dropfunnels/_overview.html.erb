@@ -1,0 +1,30 @@
+<%
+  # app/views/integrations/dropfunnels/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/dropfunnels/overview'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'dropfunnels' } %>
+
+  <div class="card-body">
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

@@ -1,0 +1,27 @@
+<%
+	# app/views/integrations/phone_sites/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/phone_sites/js/show"
+	# 
+	# Required Instance Variables:
+	#   none
+	# 
+	# Required Local Variables:
+	# 	cards: (Array)
+	# 
+-%>
+<% if cards.include?('instructions') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/phone_sites/instructions' -%>');
+<% end %>
+<% if cards.include?('edit') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/phone_sites/edit' -%>');
+<% end %>
+<% if cards.include?('forms') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/phone_sites/edit_forms' -%>');
+<% end %>
+<% if cards.include?('overview') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/phone_sites/overview' -%>');
+<% end %>
+
+Looper.init();

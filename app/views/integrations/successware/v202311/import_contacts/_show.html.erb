@@ -1,0 +1,106 @@
+<%
+  # app/views/integrations/successware/202311/import_contacts/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/successware/V202311/import_contacts/show", locals: { presenter: Integrations::Successware::V202311::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Successware::V202311::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Successware::V202311::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Contacts from Successware</span>
+      <span class="my-auto text-success small" id="contact_imports_remaining_count"><%= presenter.contact_imports_remaining_string(current_user.id) -%></span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_successware_v202311_import_contacts_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+        <%= f.check_box nil, {
+              label:      { title: 'Client Type' },
+              checkboxes: [
+                { field: 'filter[is_company][commercial]', label: 'Companies', checked: true, values: [true, false] },
+                { field: 'filter[is_company][residential]', label: 'Residential', checked: true, values: [true, false] }
+              ]
+            } %>
+        <%= f.check_box nil, {
+              label:      { title: 'Customer Balance' },
+              checkboxes: [
+                { field: 'actions[eq_0][import]', label: 'Balance = $0.00', checked: true, values: [true, false] },
+                { field: 'actions[below_0][import]', label: 'Balance < $0.00', checked: true, values: [true, false] },
+                { field: 'actions[above_0][import]', label: 'Balance > $0.00', checked: true, values: [true, false] }
+              ]
+            } %>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions on Contacts w/ Balance = $0.00</h6></legend>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: 0, campaign_id_field: 'actions[eq_0][campaign_id]',
+                group: 0, group_id_field: 'actions[eq_0][group_id]',
+                tag: 0, tag_id_field: 'actions[eq_0][tag_id]',
+                stage_id: 0, stage_id_field: 'actions[eq_0][stage_id]',
+                stop_campaign_ids: [], stop_campaign_ids_field: 'actions[eq_0][stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions on Contacts w/ Balance &lt; $0.00</h6></legend>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: 0, campaign_id_field: 'actions[below_0][campaign_id]',
+                group: 0, group_id_field: 'actions[below_0][group_id]',
+                tag: 0, tag_id_field: 'actions[below_0][tag_id]',
+                stage_id: 0, stage_id_field: 'actions[below_0][stage_id]',
+                stop_campaign_ids: [], stop_campaign_ids_field: 'actions[below_0][stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions on Contacts w/ Balance > $0.00</h6></legend>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: 0, campaign_id_field: 'actions[above_0][campaign_id]',
+                group: 0, group_id_field: 'actions[above_0][group_id]',
+                tag: 0, tag_id_field: 'actions[above_0][tag_id]',
+                stage_id: 0, stage_id_field: 'actions[above_0][stage_id]',
+                stop_campaign_ids: [], stop_campaign_ids_field: 'actions[above_0][stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons(
+              buttons: [
+                { title: 'Import & Process Actions', disable_with: 'Queuing Imports & Action Processes...' }
+              ]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_import_contacts').addClass('active');
+    $('#breadcrumb').show();
+
+    $('.action_fields').on('changed.campaigns.action_fields', function(e, fieldName, value, name) {
+      // import[campaign_id_0] => campaign_0_name
+      console.log(e);
+      console.log(fieldName);
+      console.log(value);
+      console.log(name);
+      var elId = fieldName.replace('actions[', '').replace('_ids', '').replace('_id', '').replace('[]', '').replace(/]/g, '').replace('[', '_') + '_name';
+      console.log(fieldName, elId)
+
+      $('#' + elId).html(name);
+    });
+  });
+</script>

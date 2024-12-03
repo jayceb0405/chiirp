@@ -1,0 +1,109 @@
+<%
+  # app/views/tasks/_index_content.html.erb
+  #
+  # Example:
+  #   render partial: 'tasks/index_content'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   task:    (Task or Integer)
+  #   contact: (Contact or Integer)
+  #
+  tp = TasksPresenter.new(user: current_user, task: local_assigns.dig(:task), contact: local_assigns.dig(:contact))
+-%>
+<div class="board board-list">
+  <div class="tasks">
+    <div class="task-header">
+      <h1 class="task-title mr-auto">On Going Tasks<small class="badge">(<%= tp.user_tasks_count -%>)</small></h1>
+
+      <div class="card-header-control">
+        <div class="dropdown">
+          <button type="button" class="btn btn-icon btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-arrow"></div>
+            <div class="dropdown-scroll perfect-scrollbar">
+              <%= link_to 'Add Task', new_task_path(contact_id: tp.contact.id || 0), { class: 'dropdown-item', remote: true, method: :get }  %>
+              <div class="dropdown-divider"></div>
+              <h6 class="dropdown-header stop-propagation">
+                <span>Sort By...</span>
+              </h6>
+              <%= link_to '<span class="text">Name (asc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'name', dir: 'asc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('name', 'asc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Name (desc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'name', dir: 'desc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('name', 'desc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">User Assigned (asc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'user', dir: 'asc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('user', 'asc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">User Assigned (desc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'user', dir: 'desc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('user', 'desc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Contact (asc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'contact', dir: 'asc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('contact', 'asc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Contact (desc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'contact', dir: 'desc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('contact', 'desc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Due Date (asc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'due_at', dir: 'asc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('due_at', 'asc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Due Date (desc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'due_at', dir: 'desc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('due_at', 'desc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Completed (asc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'completed_at', dir: 'asc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('completed_at', 'asc')}", remote: true, method: :get }  %>
+              <%= link_to '<span class="text">Completed (desc)</span>'.html_safe, tasks_path(tasks_sort: { col: 'completed_at', dir: 'desc' }), { class: "dropdown-item #{tp.tasks_sort_order_selected('completed_at', 'desc')}", remote: true, method: :get }  %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group mb-0">
+        <%= select_tag('tasks_filter_user',
+            options_for_select(tp.tasks_filter_user_options, tp.tasks_filter_user), {
+              class: 'form-control',
+              data: {
+                toggle: 'selectpicker',
+                width: '100%',
+                remote: true,
+                method: :get,
+                url: tasks_path(contact_id: tp.contact.id.to_i.positive? ? tp.contact.id.to_i : 0)
+              }
+            }
+          )
+        %>
+      </div>
+
+      <div class="form-group ml-2 mb-0">
+        <%= select_tag('tasks_filter_selected',
+            options_for_select(tp.tasks_filter_selected_options, tp.tasks_filter_selected), {
+              class: 'form-control',
+              data: {
+                toggle: 'selectpicker',
+                width: '100%',
+                remote: true,
+                method: :get,
+                url: tasks_path(contact_id: tp.contact.id.to_i.positive? ? tp.contact.id.to_i : 0)
+              }
+            }
+          )
+        %>
+      </div>
+    </div>
+
+    <div class="task-body">
+      <%= render partial: 'snippets/paginate', locals: {
+        page_label:  'Tasks per page',
+        per_page:    tp.per_page,
+        object:      tp.user_tasks,
+        path_params: { controller: 'tasks', action: 'index' },
+        div_class:   'justify-content-end',
+        options:     [10,25,50,100]
+      } %>
+
+      <%= render partial: 'tasks/task', collection: tp.user_tasks, locals: { tasks_presenter: tp } %>
+
+      <%= render partial: 'snippets/paginate', locals: {
+        page_label:  'Tasks per page',
+        per_page:    tp.per_page,
+        object:      tp.user_tasks,
+        path_params: { controller: 'tasks', action: 'index' },
+        div_class:   'justify-content-end',
+        options:     [10,25,50,100]
+      } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {  });
+</script>

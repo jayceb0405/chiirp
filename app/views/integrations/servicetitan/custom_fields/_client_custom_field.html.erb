@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/servicetitan/custom_fields/_client_custom_field.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/custom_fields/client_custom_field', collection: ClientCustomField.where(client_id: @client_api_integration.client_id, id: @client_api_integration.booking_fields.keys.map(&:to_i)), locals: { presenter: Integrations::Servicetitan::CustomFieldsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:           (Integrations::Servicetitan::CustomFieldsPresenter)
+  #   (req) client_custom_field: (Array)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::CustomFieldsPresenter)
+-%>
+<li class="list-group-item align-items-center drag-handle" data-id="<%= client_custom_field[0] -%>">
+  <div class="row w-100">
+    <%= hidden_field_tag "booking_fields[#{client_custom_field[0]}][order]", presenter.client_api_integration.booking_fields.dig(client_custom_field[0].to_s, 'order').to_i, { id: "list_group_sort_order_#{client_custom_field[0]}" } %>
+    <%= hidden_field_tag "booking_fields[#{client_custom_field[0]}][name]", client_custom_field[1] %>
+
+    <div class="col-6">
+      <span class="drag-indicator"></span>
+      <%= client_custom_field[1] %>
+    </div>
+
+    <div class="col-3">
+      <%= render partial: 'snippets/radio_field', locals: {
+            field:   "booking_fields[#{client_custom_field[0]}][use]",
+            row:     { columns: [0, 12] },
+            col:     { class: 'mb-0' },
+            label:   { class: 'mt-0 mb-0' },
+            buttons: [
+              { label: 'Required', value: 'req', id: "req_#{client_custom_field[0]}", checked: presenter.client_api_integration.booking_fields.dig(client_custom_field[0].to_s, 'use').to_s == 'req' },
+              { label: 'Included', value: 'inc', id: "inc_#{client_custom_field[0]}", checked: presenter.client_api_integration.booking_fields.dig(client_custom_field[0].to_s, 'use').to_s == 'inc' },
+              { label: 'Unused', value: 'hid', id: "hid_#{client_custom_field[0]}", checked: presenter.client_api_integration.booking_fields.dig(client_custom_field[0].to_s, 'use').to_s == 'hid' }
+            ]
+          } %>
+    </div>
+
+    <div class="col-3">
+      <%= bootstrap_select_tag(
+            field:        "booking_fields[#{client_custom_field[0]}][client_custom_field_id]",
+            row:          { columns: [0, 12] },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            label:        { class: 'mt-0 mb-0' },
+            html_options: { id: 'booking_field_select' },
+            options:      { for_select: options_for_client_custom_fields(presenter.client_api_integration.client, presenter.client_api_integration.booking_fields.dig(client_custom_field[0].to_s, 'client_custom_field_id').to_i), blank: 'Select Custom Fields' }
+          ) %>
+    </div>
+
+  </div>
+</li>

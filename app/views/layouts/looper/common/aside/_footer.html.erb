@@ -1,0 +1,17 @@
+<%
+# app/views/layouts/common/aside/_footer.html.erb
+#
+# Example:
+#   render partial: 'layouts/common/aside/footer'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<footer class="aside-footer border-top p-2 text-center">
+  <div class="text-center small pt-1 d-compact-menu-none">&copy; <%= I18n.t('tenant.name') -%></div>
+  <div class="small d-compact-menu-none pt-2"><%= Time.current.year -%> All Rights Reserved.</div>
+</footer>

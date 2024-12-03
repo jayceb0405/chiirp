@@ -1,0 +1,79 @@
+<%
+	# app/views/integrations/phone_sites/_instructions.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/phone_sites/instructions"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">PhoneSites Integration Instructions</h6>
+  <div class="card-body">
+  	<h6>General:</h6>
+		<ul>
+			<li>Connect your <%= I18n.t("tenant.name") -%> account to your PhoneSites Account.</li>
+			<li>Your PhoneSites leads will be imported into <%= I18n.t("tenant.name") -%> as soon as they are submitted.</li>
+			<li>As your PhoneSites leads are imported a new Contact is created (if not already found in <%= I18n.t("tenant.name") -%>).</li>
+			<li>Select <%= I18n.t("tenant.name") -%> fields to update from imported PhoneSites fields.</li>
+			<li>Start a Campaign in <%= I18n.t("tenant.name") -%> using the responses selected by your PhoneSites leads.</li>
+		</ul>
+
+		<h6>How To Get Started:</h6>
+		<ul>
+			<li class="font-weight-bold">Create an API Key and Load it into PhoneSites</li>
+			<ol>
+				<li>Click "API Keys" in the menu bar above.</li>
+				<li>Click the "+ New API Key" button in the upper right to create a new API Key.</li>
+				<li>Copy your API Key & paste it into your PhoneSites Website 3rd Party Integration.</li>
+				<li>Complete a PhoneSites Website form (the form fields will be sent to <%= I18n.t("tenant.name") -%>.</li>
+			</ol>
+
+			<li class="font-weight-bold">Assign Fields and select a Campaign</li>
+			<ol>
+				<li>Click "Websites" in the menu bar above.</li>
+				<li>Click each Website and select matching fields in <%= I18n.t("tenant.name") -%>.</li>
+				<li>Select a Campaign to start on each new Contact received.</li>
+				<li>Switch the Website to "Live".</li>
+				<li>Be sure to click "Save" at the bottom to save your selections.</li>
+			</ol>
+
+			<li class="font-weight-bold">Relax and Wait for Your Leads to Arrive</li>
+		</ul>
+
+		<h6>API Keys:</h6>
+		<ul>
+			<li>Create an API Key in <%= I18n.t("tenant.name") -%> for each of your PhoneSites Websites.</li>
+			<li>Copy your API Key & paste it into your <%= link_to( "PhoneSites (click here)", "https://www.phonesites.com/dashboard", { target: "_blank" } ) -%> Website 3rd Party Integration.</li>
+			<li>After your API Key is saved in PhoneSites you will begin receiving your leads.</li>
+			<li>Your API Key will be in test mode until you create a test lead in PhoneSites and match the PhoneSites fields to <%= I18n.t("tenant.name") -%> fields.</li>
+		</ul>
+
+		<h6>Define How Your PhoneSites Fields Match Up With <%= I18n.t("tenant.name") -%></h6>
+		<ul>
+			<li>Your current PhoneSites Websites are listed.</li>
+			<li>Select the <%= I18n.t("tenant.name") -%> fields to save the form data when leads are received (External Reference ID is used to track multi-page websites - DO NOT USE).</li>
+			<li>Select a Campaign to start on each new Contact received.</li>
+			<li>Switch the Website to "Live".</li>
+			<li>Please scroll to the bottom and click "Save" to save your changes.</li>
+		</ul>
+
+		<h6>Notes:</h6>
+		<ul>
+			<li>Do NOT assign data to be saved in the External Reference ID field in <%= I18n.t('tenant.name') -%>.</li>
+			<li>If a Campaign does not start on a new Contact try turning live mode off and run through a test again.</li>
+			<li>When a PhoneSites Website is changed always run through a test again in <%= I18n.t('tenant.name') -%>.</li>
+		</ul>
+	</div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

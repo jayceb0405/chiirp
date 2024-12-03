@@ -1,0 +1,31 @@
+<%
+  # app/views/clients/companies/rows/_statistics.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/rows/statistics', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+
+  last_payment      = client.client_transactions.where(setting_key: 'mo_charge').order(created_at: :desc).first
+  last_user_sign_in = client.users.where.not(current_sign_in_at: nil).order(current_sign_in_at: :desc).first
+-%>
+<tr>
+  <%= presenter.company_cell(client) %>
+  <td class="align-middle"><%= Friendly.new.date(client.created_at, client.time_zone, false) -%></td>
+  <td class="align-middle text-center"><%= client.active? ? presenter.success_html : presenter.fail_html %></td>
+  <td class="align-middle text-center"><%= client.unlimited ? presenter.success_html : presenter.fail_html %></td>
+  <td class="align-middle text-center"><%= client.current_mo_charge.to_d.positive? ? presenter.success_html : presenter.fail_html %></td>
+  <td class="align-middle text-left"><%= last_payment ? Friendly.new.date(last_payment.created_at, current_user.client.time_zone, false) : 'None' %></td>
+  <td class="align-middle text-center"><%= client.mo_charge_retry_count.zero? ? presenter.success_html : presenter.fail_html %></td>
+  <td class="align-middle text-center"><%= client.users.count %> / <%= client.max_users_count %></td>
+  <td class="align-middle text-left"><%= last_user_sign_in && !last_user_sign_in.current_sign_in_at.nil? ? Friendly.new.date(last_user_sign_in.current_sign_in_at, current_user.client.time_zone, false) : 'Never' %></td>
+  <td class="align-middle text-center"><%= client.phone_numbers %> / <%= client.current_max_phone_numbers %></td>
+  <td class="align-middle text-right"><%= number_to_currency(client.current_mo_charge.to_d) %></td>
+  <%= render partial: 'clients/companies/rows/action_buttons', locals: { client: } %>
+</tr>

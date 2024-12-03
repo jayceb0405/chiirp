@@ -1,0 +1,27 @@
+<%
+	# app/views/package_campaigns/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: 'package_campaigns/js/show', locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	# 	cards:                       (Array)
+	# 		cards[1]
+	# 			@package:          (Package)
+	# 			@package_campaigns (Campaigns)
+	# 		cards[2]
+	# 			@package:          (Package)
+	# 			@package_campaign  (Campaigns)
+	# 
+-%>
+<% if cards.include?(1) %>
+	$('#package_campaigns_index').html('<%= j render partial: 'package_campaigns/index' -%>');
+<% end %>
+<% if cards.include?(2) %>
+	$('#package_campaign_edit').html('<%= j render partial: 'package_campaigns/edit' -%>');
+<% end %>
+
+Looper.init();

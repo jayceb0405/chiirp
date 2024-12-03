@@ -1,0 +1,33 @@
+<%
+  # app/views/integrations/servicemonster/webhooks/_event_outer.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/webhooks/event_outer', collection: Servicemonsterpro.webhooks, as: :webhook_event, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) webhook_event:           (Hash)
+  #     {
+  #       id: '',
+  #       actions: { tag_id: 0, group_id: 0, stage_id: 0, campaign_id: 0, :assign_user_to_technician=>false, :assign_user_to_salesrep=>false},
+  #       criteria: { event_new: false, commercial: true, order_type: '', residential: true, account_types: [], event_updated: false, account_subtypes: [] },
+  #       line_items: []
+  #     }
+  #   (opt) collapse:                (Boolean)
+  #   (opt) presenter:               (Presenter)
+  #
+  presenter               = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook_event = webhook_event
+  tr_class                = (%w[row-details bg-light webhook_edit_row] << (local_assigns.dig(:collapse).nil? || local_assigns.dig(:collapse).to_bool ? 'collapse' : '')).join(' ')
+-%>
+<tr id="webhook_event_listing_<%= presenter.webhook_event_id -%>">
+  <%= render partial: 'integrations/servicemonster/webhooks/event_inner', locals: { presenter: presenter } %>
+</tr>
+
+<tr class="<%= tr_class -%>" id="webhook_edit_tr_<%= presenter.webhook_event_id -%>" data-id="<%= presenter.webhook_event_id -%>">
+  <td colspan="11" class="p-3" id="webhook_edit_td_<%= presenter.webhook_event_id -%>">
+    <%= bootstrap_spinning_logo(message: 'Loading Event') %>
+  </td>
+</tr>

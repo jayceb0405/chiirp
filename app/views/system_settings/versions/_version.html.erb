@@ -1,0 +1,31 @@
+<%
+# app/views/system_settings/versions/_version.html.erb
+#
+# Example:
+# 	render partial: "system_settings/versions/version", collection: @versions.order( :key )
+#
+# Required Instance Variables:
+# 	@version
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#version_<%= version.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="version_header_<%= version.id -%>"> <%= version.header -%> </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(version.start_date, I18n.t("tenant.#{Rails.env}.time_zone"), true) -%> </td>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#version_<%= version.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse version_edit" id="version_<%= version.id -%>">
+  <!-- Version -->
+</tr>

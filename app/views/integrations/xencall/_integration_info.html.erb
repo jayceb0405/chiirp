@@ -1,0 +1,87 @@
+<%
+	# app/views/integrations/xencall/_integration_info.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/xencall/integration_info"
+	# 
+	# Optional Instance Variables:
+	# 	none
+	# 
+	# Required Instance Variables:
+	#   none
+	# 
+  servicetitan_client_api_integration = current_user.client.client_api_integrations.find_by( target: "servicetitan" )
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Xencall Integration Instructions</h6>
+  <div class="card-body">
+  	<h6>General:</h6>
+		<ul>
+			<li>Xencall integration easily adds <%= I18n.t("tenant.name") -%> Contacts to Xencall Channels.</li>
+			<li>A Xencall CRM designation is required (issued by Xencall).</li>
+			<li>Tags applied in <%= I18n.t("tenant.name") -%> will add Contacts to associated Xencall Channels.</li>
+		</ul>
+
+    <h6>CRM Designation:</h6>
+    <ul>
+      <li>Assigned by Xencall.</li>
+      <li>Example: https://xxxx.xencall.com</li>
+      <li>Copy & Paste the designation, as shown by 'xxxx' from the url.</li>
+    </ul>
+
+    <h6>Custom Fields:</h6>
+    <ul>
+      <li>Created in Xencall.</li>
+      <li>Used to pass data between <%= I18n.t("tenant.name") -%> and Xencall.</li>
+      <ul>
+        <li>Xencall custom field ids are usually Custom_1, Custom_2, etc.</li>
+      </ul>
+      <li>Create your custom field in Xencall then enter the Xencall field id here.</li>
+      <li>The text may include a placeholder that will be included in the string.</li>
+      <ul>
+        <li>Include #{id} to include the Contact id.</li>
+        <li>If integrating with ServiceTitan use #{st_id} to include the ServiceTitan customer id.</li>
+        <li>Example: http://www.your_domain.com/#{id}</li>
+        <li>Example to link back to your Contact: <%= central_url( contact_id: "xxxx" ).gsub("xxxx", '#{id}') -%></li>
+      </ul>
+    </ul>
+
+    <% if servicetitan_client_api_integration && servicetitan_client_api_integration.api_key.present? %>
+      <h6>ServiceTitan Integration:</h6>
+      <ul>
+        <li><%= I18n.t("tenant.name") -%> can enhance your Xencall / ServiceTitan integration.</li>
+        <li>When you schedule an appointment in Xencall a webhook can be configured by Xencall to pass that appointment information to <%= I18n.t("tenant.name") -%>.</li>
+        <li><%= I18n.t("tenant.name") -%> can then package that appointment into a booking and submit it to ServiceTitan.</li>
+        <li>A few Xencall custom fields are required (each configured as dropdowns with options that match your ServiceTitan configuration)...</li>
+        <ul>
+          <li>Business Units</li>
+          <li>Job Types</li>
+          <li>Technicians</li>
+          <li>Campaigns</li>
+          <li>Tag Types</li>
+        </ul>
+        <li>The job location is assumed to be the address as defined for the Contact in <%= I18n.t("tenant.name") -%>.</li>
+        <li>A Xencall Unlimited Text custom field is also required for job description information.</li>
+        <li>All of these custom fields MUST be selected before an appointment can be sent to ServiceTitan.</li>
+      </ul>
+    <% end %>
+
+    <h6>Channel Assignments</h6>
+    <ul>
+      <li>Assigned by Xencall.</li>
+      <li>Find the channels in Xencall by going to <strong>Manage</strong> > <strong>Leads</strong> > <strong>Channels</strong> and then clicking on the desired channel.</li>
+      <li>Click the <strong>Configuration</strong> tab and copy only the Channel ID from the url to your clipboard.</li>
+      <li>Example: https://xxxx.xencall.com/lead-api/channel-id</li>
+      <li>Copy & Paste the channel id, as shown by 'channel-id' from the url.</li>
+      <li><%= I18n.t("tenant.name") -%> supports an unlimited number of Channel => Tag assignments.</li>
+      <li>If your Xencall CRM does not have the Channel Management app installed you can do so by going to client.xencall.com, log in and install Channel Management from the App Garage.</li>
+    </ul>
+	</div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

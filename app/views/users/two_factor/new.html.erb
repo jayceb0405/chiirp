@@ -1,0 +1,52 @@
+<%
+# app/views/users/two_factor/new.html.erb
+#
+# Devise Login
+#
+# Example:
+# 	render partial: 'users/two_factor/new'
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'devise/shared/header' %>
+
+<%= form_for @user, url: method_user_two_factor_path, builder: LooperFormBuilder, html: { class: 'auth-form-noborder needs-validation mb-5', novalidate: true } do |f| %>
+  <h4 class="text-left pb-3">2-step authentication method</h4>
+
+  <% unless flash[:notice].blank? %>
+    <div class="text-info">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <% unless flash[:alert].blank? %>
+    <div class="text-danger">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <%= f.radio_button :otp_method, {
+        row:     { columns: [0, 12] },
+        buttons: [
+          { label: 'Email', value: 'email', id: 'email_radio_button', checked: true },
+          { label: "Text message to xxx-xxx-#{@user.phone.last(4)}", value: 'sms', id: 'sms_radio_button', checked: false }
+        ]
+      } %>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Send' }]
+      ) %>
+<% end %>
+
+<script>
+  $(function() {
+    if (typeof window.ReactNativeWebView !== 'undefined') {
+      window.ReactNativeWebView.postMessage('user_login');
+    }
+  });
+</script>

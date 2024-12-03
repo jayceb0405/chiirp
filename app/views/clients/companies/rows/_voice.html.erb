@@ -1,0 +1,24 @@
+<%
+  # app/views/clients/companies/rows/_voice.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/rows/voice', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+-%>
+<tr>
+  <%= presenter.company_cell(client) %>
+  <td class="align-middle"><%= Friendly.new.date(client.created_at, client.time_zone, false) -%></td>
+  <td class="align-middle text-center"><%= client.phone_calls_allowed ? presenter.success_html : presenter.fail_html %></td>
+  <td class="align-middle text-center"><%= number_to_currency(client.phone_call_credits.to_d, unit: '') %></td>
+  <td class="align-middle text-center"><%= client.voice_recordings.count %> / <%= client.max_voice_recordings %></td>
+  <td class="align-middle text-center"><%= client.rvm_allowed ? presenter.success_html : presenter.fail_html %></td>
+  <td class="align-middle text-center"><%= number_to_currency(client.rvm_credits.to_d, unit: '') %></td>
+  <%= render partial: 'clients/companies/rows/action_buttons', locals: { client: } %>
+</tr>

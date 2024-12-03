@@ -1,0 +1,20 @@
+<%
+# app/views/layouts/common/_tag_manager_body.html.erb
+#
+# Example:
+# 	render partial: "layouts/common/tag_manager_body"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<% if Rails.env.production? %>
+  <!-- layouts.common.tag_manager_body -->
+  <noscript>
+    <iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5533X3D" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+  </noscript>
+  <!-- /.layouts.common.tag_manager_body -->
+<% end %>

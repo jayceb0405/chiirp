@@ -1,0 +1,52 @@
+<%
+  # app/views/integrations/five9/dispositions/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/dispositions/edit', locals: { disposition: Hash }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  disposition = local_assigns.dig(:disposition)
+  return unless disposition.is_a?(Hash)
+-%>
+<td colspan="8">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= disposition[:name].to_s.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= disposition[:name] -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with url: integrations_five9_disposition_path(disposition[:name].tr(' ', '_')), builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation card-body d-flex flex-column', novalidate: true do |f| %>
+        <%= hidden_field_tag 'disposition[name]', disposition[:name] %>
+        <%= bootstrap_text_field(
+              field:        'disposition[name]',
+              value:        disposition[:name],
+              label:        { title: 'Disposition Name' },
+              html_options: { disabled: true }
+            ) %>
+        <%= render partial: 'campaigns/action_fields', locals: { 
+              client: @client_api_integration.client,
+              campaign_id: disposition[:campaign_id].to_i, campaign_id_field: 'disposition[campaign_id]',
+              stop_campaign_ids: presenter.agent.stop_campaign_ids, stop_campaign_ids_field: 'disposition[stop_campaign_ids]',
+              group_id: disposition[:group_id], group_id_field: 'disposition[group_id]',
+              tag_id: disposition[:tag_id], tag_id_field: 'disposition[tag_id]',
+              stage_id: disposition[:stage_id], stage_id_field: 'disposition[stage_id]'
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(document).ready( function() {  });
+</script>

@@ -1,0 +1,33 @@
+<%
+  # app/views/clients/analytics/ratio/_new_leads_startup.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/analytics/ratio/new_leads_startup', locals: { month: Integer, year: Integer}
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   month: (Integer)
+  #   year:  (Integer)
+  #
+  month = (local_assigns.dig(:month) || Time.current.month).to_i
+  year  = (local_assigns.dig(:year) || Time.current.year).to_i
+
+  analytics_presenter = ClientAnalyticsPresenter.new(current_user, month, year)
+-%>
+<%= render partial: 'layouts/shared/section_header', locals: {
+      heading: '<i class="fa fa-chart-line"></i> Startup Revenue per New Lead <small>(ratio)</small>',
+      options: ''
+    } %>
+<div class="container-body">
+  <h4>Ending <%= analytics_presenter.month_name -%>, <%= analytics_presenter.year -%></h4>
+
+  <%= line_chart analytics_presenter.new_leads_startup_by_month_ratio_graph_data,
+                 thousands: ',',
+                 prefix:    '$',
+                 colors:    ['#800080'],
+                 messages:  { empty: 'No data' } %>
+
+  <%= render partial: 'clients/analytics/chart_type_switch', locals: { chart_type: 'ratio', chart_name: 'new_leads_startup_ratio' } %>
+</div>

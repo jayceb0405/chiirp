@@ -1,0 +1,71 @@
+<%
+  # app/views/integrations/servicetitan/employees/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicetitan/employees/show"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:servicetitan_presenter) || Integrations::Servicetitan::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">ServiceTitan Technician Links</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if Integration::Servicetitan::V2::Base.new(presenter.client_api_integration).valid_credentials? %>
+        <%= form_with model: presenter.client_api_integration, url: integrations_servicetitan_employees_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+          <div class="text-center mb-3">
+            ServiceTitan technician data is updated every 7 days.
+            Last Updated: <%= Friendly.new.date(presenter.servicetitan_technicians_last_updated, presenter.client.time_zone, true) -%>.
+            <span id="refresh_now_button">
+              <%= link_to 'Refresh Now', integrations_servicetitan_employees_refresh_path, {
+                    class:   'ml-2 btn btn-sm btn-secondary',
+                    onclick: "$('#refresh_now_button').html('#{image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo', style: 'max-height:25px'}')",
+                    data:    {
+                      turbo:        true,
+                      turbo_stream: true
+                    }
+                  } %>
+            </span>
+          </div>
+
+          <table class="table table-no-bordered table-striped">
+            <thead>
+              <tr>
+                <th class="text-left align-middle">ServiceTitan Technicians</th>
+                <th class="text-left align-middle">Phone</th>
+                <th class="text-left align-middle">Email</th>
+                <th class="text-left align-middle"><%= I18n.t('tenant.name') -%> User</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= render partial: 'integrations/servicetitan/employees/employee', collection: presenter.servicetitan_technicians, as: :employee, locals: { presenter: } %>
+            </tbody>
+          </table>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Users', disable_with: 'Saving Users' }] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_employees').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

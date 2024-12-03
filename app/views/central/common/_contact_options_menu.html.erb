@@ -1,0 +1,185 @@
+<%
+  # app/views/central/common/_contact_options_menu.html.erb
+  #
+  # Example:
+  #   render partial: 'central/common/contact_options_menu', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:                (CentralPresenter)
+  #   (opt) include_conversation_key: (Boolean)
+  #   (opt) include_badges:           (Boolean)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+  return if presenter.contact.new_record?
+-%>
+<%= link_to('<i class="fa fa-pencil-alt mr-2"></i>Edit Contact'.html_safe,
+            edit_contact_path(presenter.contact.id),
+            class:  'dropdown-item',
+            style:  'text-decoration: none;',
+            method: :get,
+            remote: true) %>
+
+<%= if presenter.integration_allowed?('calendly')
+      link_to('<i class="fa fa-calendar-alt mr-2"></i>Schedule an Appointment'.html_safe,
+              integrations_calendly_integration_appointment_path(presenter.contact.id),
+              class:  'dropdown-item',
+              style:  'text-decoration: none;',
+              method: :get,
+              remote: true)
+    end %>
+<%= if current_user.access_controller?('campaigns', 'allowed', session)
+      link_to("<i class=\"fa fa-filter mr-2\"></i>Campaigns <span class=\"badge badge-warning\" id=\"contact_campaigns_badge\">#{local_assigns.dig(:include_badges).to_bool && presenter.contact_campaigns_count.positive? ? presenter.contact_campaigns_count : ''}</span>".html_safe,
+              central_campaigns_path(presenter.contact.id),
+              class:  'dropdown-item',
+              style:  'text-decoration: none;',
+              method: :get,
+              remote: true)
+    end %>
+
+<%= link_to('<i class="fa fa-robot mr-2"></i>AI Agent Sessions'.html_safe,
+            central_aiagent_sessions_path(presenter.contact.id),
+            class:  'dropdown-item',
+            style:  'text-decoration: none;',
+            method: :get,
+            remote: true) %>
+
+<%= link_to('<i class="fa fa-user-tag mr-2"></i>Tags'.html_safe,
+            central_tags_path(presenter.contact.id),
+            class:  'dropdown-item',
+            remote: true,
+            method: :get) %>
+
+<%= link_to("<i class=\"fa fa-tasks mr-2\"></i>Tasks <span class=\"badge badge-warning\" id=\"contact_tasks_badge\">#{local_assigns.dig(:include_badges).to_bool && presenter.contact_tasks_count.positive? ? presenter.contact_tasks_count : ''}</span>".html_safe,
+            central_tasks_path(contact_id: presenter.contact.id),
+            class:  'dropdown-item',
+            style:  'text-decoration: none;',
+            method: :get,
+            remote: true) %>
+
+<%= link_to("<i class=\"fa fa-sticky-note mr-2\"></i>Notes <span class=\"badge badge-warning\" id=\"contact_notes_badge\">#{local_assigns.dig(:include_badges).to_bool && presenter.contact_notes_count.positive? ? presenter.contact_notes_count : ''}</span>".html_safe,
+            contact_notes_path(presenter.contact.id),
+            class:  'dropdown-item',
+            style:  'text-decoration: none;',
+            method: :get,
+            remote: true) %>
+
+<%= link_to("<i class=\"fa fa-person-running mr-2\"></i>Scheduled Actions <span class=\"badge badge-warning\" id=\"contact_messages_badge\">#{local_assigns.dig(:include_badges).to_bool && presenter.contact_scheduled_action_count.positive? ? presenter.contact_scheduled_action_count : ''}</span>".html_safe,
+            contact_scheduled_actions_path(presenter.contact.id),
+            class:  'dropdown-item',
+            style:  'text-decoration: none;',
+            method: :get,
+            remote: true) %>
+
+<%= link_to('<i class="fa fa-eye-slash mr-2"></i>Sleep'.html_safe,
+            contact_sleep_path(presenter.contact.id),
+            class:  'dropdown-item',
+            method: :post,
+            remote: true) %>
+
+<%= if local_assigns.dig(:include_conversation_key).to_bool
+      link_to('<i class="fa fa-key mr-2"></i>Conversation Color Key'.html_safe,
+              '',
+              class: 'dropdown-item color_key_button',
+              style: 'text-decoration: none;',
+              id:    'color_key_button')
+    end %>
+
+<% if local_assigns.dig(:include_badges).to_bool %>
+
+  <% if presenter.servicetitan_contact_api_integration || presenter.housecallpro_contact_api_integration || presenter.maestro_contact_api_integration || presenter.sunbasedata_api_integration&.api_key.present? || presenter.xencall_contact_api_integration %>
+    <div class="dropdown-divider"></div>
+  <% end %>
+
+  <%= if presenter.servicetitan_contact_api_integration
+        link_to("#{image_tag('integrations/servicetitan/logo.png', { class: 'mr-2', style: 'height:20px;' })}Book Service".html_safe,
+                edit_integrations_servicetitan_contact_booking_path(presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :get,
+                remote: true)
+      end %>
+
+  <%= if presenter.housecallpro_contact_api_integration
+        link_to("#{image_tag('integrations/housecallpro/logo_black.svg', { class: 'mr-2', style: 'height:20px;width:14px;' })}HouseCall Pro (Edit Data)".html_safe,
+                edit_integrations_housecallpro_contact_path(presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :get,
+                remote: true)
+      end %>
+
+  <%= if presenter.show_housecall_customer_data?(user: current_user)
+        link_to("#{image_tag('integrations/housecallpro/logo_black.svg', { class: 'mr-2', style: 'height:20px;width:14px;' })}HouseCall Pro (Customer Data)".html_safe,
+                edit_integrations_housecall_contact_path(presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :get,
+                remote: true)
+      end %>
+
+  <%= if presenter.maestro_contact_api_integration
+        link_to("#{image_tag('integrations/maestro_icon_w.ico', { class: 'mr-2', style: 'height:14px;' })}Maestro".html_safe,
+                integrations_maestro_contact_edit_path(presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :get,
+                remote: true)
+      end %>
+
+  <%= if presenter.sunbasedata_api_integration&.api_key.present?
+        link_to("#{image_tag('integrations/sunbasedata-logo-white.png', { class: 'mr-2', style: 'height:14px;' })}SunBase Data".html_safe,
+                integrations_sunbasedata_integration_path(contact_id: presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :post,
+                remote: true)
+      end %>
+
+  <%= if presenter.xencall_contact_api_integration
+        link_to("#{image_tag('integrations/xencall_logo_white.png', { class: 'mr-2', style: 'height:14px;' })}Xencall".html_safe,
+                integrations_xencall_contact_edit_path(presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :get,
+                remote: true)
+      end %>
+
+  <%= if presenter.pcrichard_contact_api_integration
+        link_to("#{image_tag('integrations/pcrichard/logo-condensed.svg', { class: 'mr-2', style: 'height:16px;' })}PC Richard".html_safe,
+                edit_integrations_pcrichard_v1_model_submissions_path(presenter.contact.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :get,
+                remote: true)
+      end %>
+<% end %>
+
+<% if current_user.team_member? || current_user.agency_user_logged_in_as(session)&.team_member? %>
+    <div class="dropdown-divider"></div>
+    <%= link_to('<i class="fas fa-scroll mr-2"></i>Raw Posts'.html_safe,
+                raw_posts_path(contact_id: presenter.contact.id),
+                class: 'dropdown-item',
+                style: 'text-decoration: none;',
+                data:  { turbo: true, turbo_stream: true }) %>
+<% end %>
+
+<script>
+  $(function() {
+    $('.color_key_button').on('click', function(e) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    });
+
+    $('.color_key_button').tooltip({
+      html: true,
+      placement: 'left',
+      title: '<%= presenter.color_key_text.html_safe %>',
+      container: 'body',
+      boundary: 'viewport',
+      template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner tooltip-big"></div></div>'
+    });
+  });
+</script>

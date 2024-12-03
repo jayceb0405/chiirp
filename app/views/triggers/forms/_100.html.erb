@@ -1,0 +1,16 @@
+<%
+  # app/views/triggers/forms/_100.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/100", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # a text message received
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>

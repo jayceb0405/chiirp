@@ -1,0 +1,63 @@
+<%
+  # app/views/clients/widgets/v3/forms/_button.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/forms/button', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   widget_presenter: Presenter
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="card-header border-0" id="clients_widget_button">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#clients_widget_button_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>SiteChat Button Settings</span>
+  </button>
+</div>
+
+<div id="clients_widget_button_body" class="collapse" data-parent="#clients_widget_accordion">
+  <div class="card-body pt-0">
+
+    <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[b_bg_color]',
+            value:        presenter.widget.b_bg_color,
+            label:        { title: 'Button Color' },
+            html_options: { id: 'b_bg_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+      <%= f.select :b_icon, {
+            label:        { title: 'Button Icon' },
+            html_options: { id: 'b_icon', mobile: browser.device.mobile? },
+            choices:      { for_select: presenter.button_icons_options(presenter.widget.b_icon) }
+          } %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[b_icon_color]',
+            value:        presenter.widget.b_icon_color,
+            label:        { title: 'Button Icon Color' },
+            html_options: { id: 'b_icon_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+
+      <% unless presenter.widget.new_record? %>
+        <%= render partial: 'snippets/f_file_field', locals: {
+              form:            f,
+              file_field:      { field: 'button_image', id: 'button_image_input', name: 'clients_widget[button_image]', url: presenter.button_image_path },
+              col:             { id: 'button_image_dropzone' },
+              label:           { title: 'Button Image' },
+              image_container: { id: 'button_image_container' },
+              image:           presenter.widget.button_image.attached? ? { key: presenter.widget.button_image.key, width: 50, height: 50, crop: 'fit', format: 'png' } : {}
+            } %>
+      <% end %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Button Settings', id: 'clients_widget_form_submit', disable_with: 'Saving Button Settings' }] %>
+    <% end %>
+
+  </div>
+</div>

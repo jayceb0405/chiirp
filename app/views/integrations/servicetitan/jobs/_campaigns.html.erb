@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/servicetitan/jobs/_campaigns.html.erb
+  #
+  # Example:
+  # 	render partial: "integrations/servicetitan/jobs/campaigns"
+  #
+  # Instance Variables:
+  # 	(req) @servicetitan_campaigns: (Array)
+  #   (opt) @campaign_id: (Integer)
+  #   (opt) @field_name: (String)
+  #
+  # Local Variables:
+  #   none
+  #
+  servicetitan_campaign_id = defined?(@client_api_integration_for_five9) ? (@client_api_integration_for_five9&.campaigns || {}).dig((RedisCloud.redis.get("contact:#{@contact.id}:five9_booking_campaign_name") || '').to_s).to_i : @campaign_id
+  @field_name ||= 'campaign_id'
+-%>
+<%= bootstrap_select_tag(
+      field:        @field_name,
+      label:        { title: "Select a Campaign<span class=\"ml-2\">#{link_to '', edit_integrations_servicetitan_contact_booking_path(@contact, commit: 'refresh_campaigns'), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', remote: true, title: 'Refresh Campaigns', data: { toggle: 'tooltip' } }}</span>" },
+      html_options: { id: 'campaign_select', required: true },
+      options:      { for_select: options_for_select(@servicetitan_campaigns, servicetitan_campaign_id), blank: 'Campaigns' },
+      messages:     { note: 'Required' }
+    ) %>

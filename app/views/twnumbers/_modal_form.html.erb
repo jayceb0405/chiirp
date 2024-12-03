@@ -1,0 +1,76 @@
+<%
+  # app/views/twnumbers/_modal_form.html.erb
+  #
+  # Example:
+  #   render partial: "twnumbers/modal_form"
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (opt) referer: (String)
+  #
+  local     = params.dig(:local).nil? ? true : params.dig(:local).to_bool
+  toll_free = params.dig(:toll_free).nil? ? false : params.dig(:toll_free).to_bool
+  referer   = local_assigns.dig(:referer).presence || 'phone_numbers'
+-%>
+<div class="card card-fluid">
+
+  <div class="card-body">
+    <%= form_tag client_twnumbers_path(@client.id, referer:), { builder: LooperFormBuilder, remote: true, class: 'needs-validation card-body d-flex flex-column', id: 'twnumber_modal_form', novalidate: true } do |f| %>
+      <%= bootstrap_text_field(
+            field:        'area_code',
+            value:        params.dig(:area_code).to_s,
+            row:          { columns: [4, 8] },
+            label:        { title: 'Enter Area Code to Search' },
+            html_options: { placeholder: 'Area Code' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'phone_number',
+            value:        params.dig(:phone_number).to_s,
+            row:          { columns: [4, 8] },
+            label:        { title: 'Enter Pattern to Search for' },
+            html_options: { placeholder: 'Number Contains' },
+            messages:     { note: 'Valid characters are *, 0-9, a-z, and A-Z.<br />Use * to match any character.'.html_safe }
+          ) %>
+      <%= bootstrap_check_box(
+            row:        { columns: [4, 8] },
+            label:      { title: 'Local/Toll Free Numbers' },
+            checkboxes: [
+              { field: 'local', label: 'Local Numbers', id: 'check_box_local', value: local, values: [true, false] },
+              { field: 'toll_free', label: 'Toll Free Numbers', id: 'check_box_toll_free', value: toll_free, values: [true, false] }
+            ]
+          ) %>
+
+      <% if defined?(@available_phone_numbers) %>
+        <div class="table-responsive">
+          <table class="table">
+
+            <thead>
+              <tr>
+                <th colspan="2" style="min-width: 240px"> Phone Number </th>
+                <th> City </th>
+                <th> State </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <%= render partial: 'twnumbers/available_phone_numbers', collection: @available_phone_numbers, as: :number, locals: { referer: } -%>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [{ title: 'Search', disable_with: 'Searching' }, { title: 'Close', id: 'button_modal_close', disable_with: 'Close' }]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $('#button_modal_close').on('click', function(e) {
+    e.preventDefault();
+    $('#dash_modal').modal('toggle');
+  });
+</script>

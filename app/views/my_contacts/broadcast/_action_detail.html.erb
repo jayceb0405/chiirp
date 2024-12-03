@@ -1,0 +1,85 @@
+<%
+# app/views/my_contacts/broadcast/_action_detail.html.erb
+#
+# Example:
+# 	render partial: 'my_contacts/broadcast/action_detail'
+#
+# Instance Variables:
+# 	(req) action: (DelayedJob)
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="pl-2">
+  <% case @action.process.gsub(%r{^group_}, '') %>
+  <% when 'send_text' %>
+    Send Text message: <%= @action.data.dig('message') %>
+
+  <% when 'send_email' %>
+    Send Email Message:
+    <% email_template = current_user.client.email_templates.find_by(id: @action.data.dig('email_template_id')) %>
+    <% if email_template %>
+      <br>Template: <%= email_template.name %>
+    <% end %>
+    <br>Subject: <%= @action.data.dig('email_template_subject') %>
+    <% if @action.data.dig('email_template_yield').present? %>
+      <br>Message: <%= @action.data.dig('email_template_yield') %>
+    <% end %>
+
+  <% when 'start_campaign' %>
+    Start Campaign: <%= current_user.client.campaigns.find_by(id: @action.data.dig('apply_campaign_id') || @action.data.dig('campaign_id'))&.name %>
+
+  <% when 'add_stage' %>
+    Add to Stage: <%= current_user.client.stages.find_by(id: @action.data.dig('add_stage_id'))&.name %>
+
+  <% when 'add_group' %>
+    Add to Group: <%= current_user.client.groups.find_by(id: @action.data.dig('add_group_id'))&.name %>
+
+  <% when 'add_tag' %>
+    Add Tag: <%= current_user.client.tags.find_by(id: @action.data.dig('add_tag_id'))&.name %>
+
+  <% when 'assign_lead_source' %>
+    Assign to Lead Source: <%= current_user.client.lead_sources.find_by(id: @action.data.dig('lead_source_id'))&.name %>
+
+  <% when 'send_rvm' %>
+    Send Ringless Voicemail: <%= current_user.client.voice_recordings.find_by(id: @action.data.dig('voice_recording_id'))&.recording_name %>
+
+  <% when 'assign_user' %>
+    Assign to User: <%= current_user.client.users.find_by(id: @action.data.dig('user_id'))&.fullname %>
+
+  <% when 'stop_campaign' %>
+    <% if @action.data.dig('stop_campaign_id')&.start_with?('group_') %>
+      Stop Campaign Group: <%= current_user.client.campaign_groups.find_by(id: @action.data.dig('stop_campaign_id').gsub('group_', ''))&.name.presence || '' %>
+    <% else %>
+      Stop Campaign: <%= @action.data.dig('stop_campaign_id').present? ? current_user.client.campaigns.find_by(id: @action.data.dig('stop_campaign_id'))&.name.presence || '' : '' %>
+    <% end %>
+
+  <% when 'remove_stage' %>
+    Remove from Stage: <%= current_user.client.stages.find_by(id: @action.data.dig('remove_stage_id'))&.name %>
+
+  <% when 'remove_group' %>
+    Remove from Group: <%= current_user.client.groups.find_by(id: @action.data.dig('remove_group_id'))&.name %>
+
+  <% when 'remove_tag' %>
+    Remove Tag: <%= current_user.client.tags.find_by(id: @action.data.dig('remove_tag_id'))&.name %>
+
+  <% when 'ok2text_on' %>
+    Turn OK to Text ON
+
+  <% when 'ok2text_off' %>
+    Turn OK to Text OFF
+
+  <% when 'contact_sleep' %>
+    Set contacts to sleep
+
+  <% when 'contact_awake' %>
+    Unset contacts from sleep
+
+  <% when 'contact_delete' %>
+    Delete contacts
+
+  <% else %>
+    <%= @action.data.dig('action')&.titleize %>
+  <% end %>
+</div>

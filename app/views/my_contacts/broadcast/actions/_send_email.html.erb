@@ -1,0 +1,29 @@
+<%
+  # app/views/my_contacts/broadcast/actions/_send_email.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/broadcast/actions/send_email', locals: { presenter: Clients::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+
+  presenter.contact = current_user.contacts.new(ok2text: 1, ok2email: 1)
+  email_presenter   = Messages::Email::Presenter.new(contact: presenter.contact, show_calendar: false, show_submit: false)
+-%>
+<div class="media mb-2">
+  <%= render partial: 'messages/email_message_fields', locals: { presenter: email_presenter } %>
+</div>
+
+<%= render partial: 'my_contacts/broadcast/actions/show_calendar', locals: { presenter: } %>
+<%= render partial: 'my_contacts/broadcast/actions/show_processing', locals: { presenter: } %>
+
+<script>
+  $(function() {
+    updateTimeToComplete();
+  });
+</script>

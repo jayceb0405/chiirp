@@ -1,0 +1,19 @@
+<%
+  # /app/views/triggeractions/forms/_300.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/300", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # apply a Tag
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<div id="triggeraction_link_tag" class="pb-2">
+  <%= render partial: 'tags/select_or_add', locals: { user: presenter.user, tag: presenter.triggeraction_tag, select_or_add_field_name: 'triggeraction[tag_id]', select_or_add_div_id: 'triggeraction_link_tag', disabled: presenter.campaign_disabled? } %>
+</div>

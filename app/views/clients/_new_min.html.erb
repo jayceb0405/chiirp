@@ -1,0 +1,80 @@
+<%
+  # app/views/clients/_new_min.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/new_min'
+  #
+  # Instance Variables:
+  #   (req) @client:         (Client)
+  #   (req) @package:        (Package)
+  #   (req) @package_page:   (PackagePage)
+  #
+  # Instance Variables:
+  #   (opt) @user:           (User)
+  #
+  @user             = defined?(@user) ? @user : @client.users.new
+  charge_card_amt   = if (@package.first_payment_delay_days + @package.first_payment_delay_months).zero?
+                        @package.promo_months.positive? ? @package.promo_mo_charge.to_d : @package.mo_charge.to_d
+                      else
+                        0
+                      end
+  charge_card_amt += @package.setup_fee.to_d
+-%>
+<div>
+  <%= render partial: 'layouts/alerts', locals: { models: [@client, @user] } %>
+
+  <%= form_with model: @client, builder: LooperFormBuilder, id: 'client_form', local: true, remote: false do |form| %>
+    <%= hidden_field_tag :self_create, true %>
+    <%= hidden_field_tag :package_id, @package.id %>
+    <%= hidden_field_tag :package_page_id, @package_page.id %>
+    <%= hidden_field_tag 'user[firstname]', @user.firstname, { id: 'user_firstname' } %>
+    <%= hidden_field_tag 'user[lastname]', @user.lastname, { id: 'user_lastname' } %>
+    <%= hidden_field_tag 'user[email]', @user.email, { id: 'user_email' } %>
+    <%= hidden_field_tag 'client[name]', @client.name, { id: 'client_name' } %>
+    <%= hidden_field_tag 'client[phone]', @client.phone, { id: 'client_phone' } %>
+    <%= hidden_field_tag 'client[card_token]', '', { id: 'card_token' } %>
+    <%= hidden_field_tag 'client[time_zone]', '', { id: 'time_zone' } %>
+
+    <h4 class="pb-2 mb-0">My Billing Info</h4>
+
+    <p class="pl-3 mb-0"><%= @user.fullname -%></p>
+
+    <% if @package.requires_credit_card? %>
+
+      <% if (@package.first_payment_delay_days + @package.first_payment_delay_months).positive? %>
+        <p class="pl-3 mb-t mb-0">
+
+        <% if @package.setup_fee.to_d.positive? %>
+          Your card will ONLY be charged a <%= number_to_currency(@package.setup_fee.to_d) -%> setup fee now.
+        <% else %>
+          Your card will ONLY be charged <%= number_to_currency(@package.promo_months.positive? ? @package.promo_mo_charge.to_d : @package.mo_charge.to_d) -%> after your trial period.
+        <% end %>
+
+        </p>
+      <% else %>
+        <p class="pl-3 mb-t mb-0">Your card will be charged <%= number_to_currency(charge_card_amt) -%> now.</p>
+      <% end %>
+
+      <!-- credit card processing -->
+      <fieldset class="border rounded p-2 mt-3 mb-2">
+        <legend class="w-auto mb-0"><h6>Credit Card Info</h6></legend>
+        <%= render partial: 'layouts/credit_card', locals: {
+              card_token_id:      'card_token',
+              submit_button_id:   'client_form_submit',
+              submit_button_text: 'Create My Account',
+              zipcode_field:      { name: 'client[zip]', val: @client.zip },
+              package:            @package.name
+            } %>
+      </fieldset>
+      <!-- /.credit card processing -->
+    <% else %>
+      <%= form.submit 'Create My Account', class: 'btn btn-app btn-client-form-submit' %>
+    <% end %>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    $('#time_zone').selectpicker('val', jstz.convert_tz_to_rails(Intl.DateTimeFormat().resolvedOptions().timeZone))
+  });
+</script>

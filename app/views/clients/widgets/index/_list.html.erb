@@ -1,0 +1,43 @@
+<%
+  # app/views/clients/widgets/index/_list.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/index/list', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-cog mr-2"></i>SiteChat <span class="badge"><%= presenter.widgets.count -%> / <%= presenter.client.widgets_count -%></span></span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th class="text-left"> SiteChat </th>
+              <th class="text-left d-none d-md-table-cell"> Created </th>
+              <th class="text-center d-none d-md-table-cell"> Version </th>
+              <th style="width:200px; min-width:200px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <%= render partial: 'clients/widgets/index/widget', collection: presenter.widgets, as: :widget, locals: { widget_presenter: presenter } -%>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

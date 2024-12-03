@@ -1,0 +1,21 @@
+<%
+   # app/views/clients/users/update_vitally.turbo_stream.erb
+   #
+   # Example:
+   #   render partial: 'clients/users/update_vitally'
+   #
+   # Instance Variables:
+   #   @user: (User)
+   #
+   # Local Variables:
+   #   none
+   #
+   return unless @user.is_a?(User)
+
+   presenter = Users::Presenter.new(user: @user)
+-%>
+<%= turbo_stream.update 'vitally' do %>
+  <%= render partial: 'clients/users/vitally', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

@@ -1,0 +1,65 @@
+<%
+# app/views/integrations/dropfunnels/show.html.erb
+#
+# Example:
+# 	render "integrations/dropfunnels/show"
+#
+# Required Instance Variables:
+# 	@user_api_integrations: (UserApiIntegrations)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/dropfunnels/logo.png', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-4 mb-0" id="show_user_fullname">DropFunnels Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_dropfunnels_integration_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'API Key', integrations_dropfunnels_api_key_path, { class: 'nav-link', id: 'link_api_key', remote: true } %>
+        <%= link_to 'Lead Create', integrations_dropfunnels_lead_create_path, { class: 'nav-link', id: 'link_lead_create', remote: true } %>
+        <%= link_to 'Two Step Lead Create', integrations_dropfunnels_two_step_lead_create_path, { class: 'nav-link', id: 'link_two_step_lead_create', remote: true } %>
+        <% link_to 'Member Create', integrations_dropfunnels_member_create_path, { class: 'nav-link', id: 'link_member_create', remote: true } %>
+        <%= link_to 'Product Purchased Main', integrations_dropfunnels_product_purchased_main_path, { class: 'nav-link', id: 'link_product_purchased_main', remote: true } %>
+        <%= link_to 'Product Purchased Order Bump', integrations_dropfunnels_product_purchased_order_bump_path, { class: 'nav-link', id: 'link_product_purchased_order_bump', remote: true } %>
+        <%= link_to 'Product Purchased Order Upsell', integrations_dropfunnels_product_purchased_order_upsell_path, { class: 'nav-link', id: 'link_product_purchased_order_upsell', remote: true } %>
+        <% link_to 'Submit Quiz', integrations_dropfunnels_submit_quiz_path, { class: 'nav-link', id: 'link_submit_quiz', remote: true } %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_dropfunnels_integration_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <% if local_assigns.dig(:partial_to_show).to_s.present? && @client_api_integration.is_a?(ClientApiIntegration) %>
+        <% presenter = Campaigns::Presenter.new(current_user) %>
+        <%= render partial: partial_to_show, locals: { presenter: } %>
+      <% else %>
+        <%= render partial: 'integrations/dropfunnels/overview', locals: { presenter: } %>
+      <% end %>
+    </div>
+  </div>
+</div>

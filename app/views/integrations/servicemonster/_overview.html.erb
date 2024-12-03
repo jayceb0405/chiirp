@@ -1,0 +1,104 @@
+<%
+  # app/views/integrations/servicemonster/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/overview', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter:               (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'servicemonster' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicemonster_path, { class: 'metric metric-bordered align-items-center', id: 'link_overview', remote: true }) do %>
+            <h2 class="metric-label">Valid SM Token</h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <% if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+          <div class="col-4 py-2">
+            <%= link_to(edit_integrations_servicemonster_push_leads_path, { class: 'metric metric-bordered align-items-center', id: 'link_push_leads', remote: true }) do %>
+              <h2 class="metric-label"> Push Contacts Tag </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= (presenter.push_leads_customer_tag || Tag.new(name: 'Not Selected'))&.name %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_servicemonster_webhooks_path, { class: 'metric metric-bordered align-items-center', id: 'link_webhooks', remote: true }) do %>
+              <h2 class="metric-label"> Events Configured </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.webhook_events_count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_servicemonster_employees_path, { class: 'metric metric-bordered align-items-center', id: 'link_employees', remote: true }) do %>
+              <h2 class="metric-label"> Employees Matched </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client_api_integration.employees.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+        <% if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) && presenter.contact_imports_remaining.to_i.positive? %>
+          <div class="col-4 py-2">
+            <%= link_to(integrations_servicemonster_update_contacts_path, { class: 'metric metric-bordered align-items-center', id: 'link_update_contacts', remote: true }) do %>
+              <h2 class="metric-label"> Accounts Awaiting Import </h2>
+              <p class="metric-value h3">
+                <span class="value text-success" id="contact_imports_remaining_count">
+                  <%= presenter.contact_imports_remaining %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

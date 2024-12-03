@@ -1,0 +1,21 @@
+<%
+  # app/views/clients/statements/printable.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/statements/printable'
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #   (req) @statement_month: (String) "Month (Integer):Year (Integer)" ex: "9:2023"
+  #   (req) @transaction_type: (String/Array)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client.is_a?(Client)
+
+  presenter = ClientPresenter.new(client: @client)
+  presenter.statement_month  = @statement_month
+  presenter.transaction_type = @transaction_type
+-%>
+<%= render partial: 'clients/statements/show', locals: { presenter:, printable: true } %>

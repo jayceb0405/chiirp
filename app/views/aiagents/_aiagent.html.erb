@@ -1,0 +1,36 @@
+<%
+# app/views/aiagents/_aiagent.html.erb
+#
+# Example:
+#   render partial: "aiagents/aiagent", collection: @aiagents
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+presenter = AiagentPresenter.new(aiagent)
+-%>
+<tr>
+  <td class="text-left align-middle">
+    <%= link_to aiagent.name,
+                edit_aiagent_path(aiagent),
+                class:  'text-decoration-none text-reset',
+                remote: true,
+                method: :get %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= presenter.action_friendly_name -%> </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(aiagent.created_at, aiagent.client.time_zone, true) -%> </td>
+  <td class="text-middle align-middle text-right">
+    <%= link_to '',
+                edit_aiagent_path(aiagent),
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_aiagent',
+                data:  { id: aiagent.id, name: aiagent.name } %>
+  </td>
+</tr>

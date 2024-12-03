@@ -1,0 +1,96 @@
+<%
+  # app/views/clients/custom_fields/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/custom_fields/index'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="mdi mdi-format-columns mr-2"></i>Custom Fields <span class="badge"><%= cp.client.client_custom_fields.count -%> / <%= cp.client.custom_fields_count -%></span></span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Custom Field'.html_safe, new_client_custom_field_path(cp.client.id), {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary ml-2',
+              id:    'custom_fields_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px"> Name </th>
+              <th> Type </th>
+              <th> Variable </th>
+              <th> Created </th>
+              <th style="min-width:150px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% if @custom_field&.new_record? %>
+              <%= render partial: 'clients/custom_fields/custom_field', locals: { client_presenter: cp, custom_field: @custom_field } %>
+            <% end %>
+
+            <%= render partial: 'clients/custom_fields/custom_field', collection: cp.custom_fields, locals: { client_presenter: cp } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if cp.client.errors.any? %>
+      ChiirpAlert({
+        'body':triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    $('#custom_fields_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li>Custom fields provide a method of segmenting your Contacts for future selection.</li>'
+      help_info += '<li>Custom fields also provide for keeping track of what step in the sales process a Contact is currently positioned.</li>'
+      help_info += '</ul>'
+
+      ChiirpAlert({
+        'title': 'custom_fields Help Info',
+        'body': help_info,
+        'type': 'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_custom_fields').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_custom_fields').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

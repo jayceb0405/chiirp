@@ -1,0 +1,21 @@
+// app/views/integrations/servicetitan/import_estimates/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/servicetitan/import_estimates/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   (req) @client_api_integration: (ClientApiIntegration)
+//
+// Local Variables:
+//   (req) cards: (Array)
+//
+<% presenter = Integrations::Servicetitan::ImportEstimatesPresenter.new(@client_api_integration) %>
+
+// Import Estimates
+<% if cards.include?('show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/import_estimates/show', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

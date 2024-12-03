@@ -1,0 +1,56 @@
+<%
+  # app/views/aiagents/_test_message.html.erb
+  #
+  # Example:
+  #   render partial: "aiagents/test_message"
+  #
+  # Required Instance Variables:
+  #   @aiagent: (Aiagent)
+  #
+  # Required Local Variables:
+  #   test_message (Hash)
+  #
+
+  client ||= @aiagent.client
+  presenter = AiagentPresenter.new(@aiagent)
+  css_class = case test_message.role.to_sym
+              when :assistant
+                'conversation-outbound'
+              when :function
+                'conversation-function'
+              when :user
+                'conversation-inbound'
+              end
+-%>
+<% if test_message.role == 'system' %>
+  <li>
+    <%= simple_format(test_message.content) %>
+  </li>
+<% else %>
+  <li class="<%= css_class %>">
+    <% if css_class == 'conversation-inbound' %>
+      <div class="conversation-avatar">
+        <span class="tile tile-circle bg-muted prevent-default" style="text-decoration: none;" href="#"><i class="fa fa-comment message-icon"></i></span>
+      </div>
+    <% end %>
+    <% if test_message.content.present? && test_message.role.to_sym != :function %>
+      <div class="conversation-message">
+        <div class="<%= test_message.role == 'user' ? 'color_is_textin' : 'color_is_textoutaiagent'%> conversation-message-text pr-4">
+          <%= simple_format(test_message.content) %>
+        </div>
+      </div>
+
+      <% if css_class == 'conversation-outbound' %>
+        <div class="conversation-avatar" style="position:relative;right:12px;">
+          <span class="tile tile-circle bg-muted prevent-default" style="text-decoration: none;" href="#"><i class="fa fa-comment message-icon"></i></span>
+        </div>
+      <% end %>
+    <% end %>
+  </li>
+  <% if test_message.function_name.present? %>
+    <li class="function">
+      <span class="name"><%= test_message.function_name %></span>
+      <span class="params"><%= test_message.function_params %></span>
+    </li>
+  <% end %>
+<% end %>

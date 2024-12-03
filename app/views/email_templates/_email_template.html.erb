@@ -1,0 +1,39 @@
+<%
+# app/views/email_templates/_email_template.html.erb
+#
+# Example:
+#   render partial: "email_templates/email_template", collection: @email_templates
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<tr>
+  <td class="text-left align-middle">
+    <% if email_template.global? %>
+      <i data-toggle="tooltip" title="This Email Template is usable by all clients" class="fas fa-globe-americas"></i>
+    <% end %>
+    <%= link_to email_template.name,
+                edit_email_template_path(email_template),
+                class:  'text-decoration-none text-reset',
+                remote: true,
+                method: :get %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= email_template.subject %> </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(email_template.created_at, email_template.client&.time_zone || 'Eastern Time (US & Canada)', true) -%> </td>
+  <td class="text-center align-middle d-none d-md-table-cell"> v<%= email_template.version %> </td>
+  <td class="text-middle align-middle text-right">
+    <%= link_to '',
+                edit_email_template_path(email_template),
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_email_template',
+                data:  { id: email_template.id, name: email_template.name } %>
+  </td>
+</tr>

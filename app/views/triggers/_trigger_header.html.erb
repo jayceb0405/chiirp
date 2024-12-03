@@ -1,0 +1,98 @@
+<%
+  # app/views/triggers/_trigger_header.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/trigger_header", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+-%>
+<%= link_to "<span data-toggle=\"tooltip\" title=\"Edit\">#{presenter.trigger_name}</span><span class=\"ml-2\" id=\"trigger_analysis_results\"></span>".html_safe,
+            '#',
+            class: 'h6 mr-auto prevent-default text-dark',
+            style: 'text-decoration:none;',
+            data:  {
+              toggle: 'collapse',
+              target: "##{presenter.trigger_form_id}_c"
+            } %>
+<%= link_to '<span data-toggle="tooltip" title="Edit"><i class="fa fa-pencil-alt"></i></span>'.html_safe,
+            '#',
+            class: 'btn btn-icon btn-light prevent-default',
+            style: 'text-decoration:none;',
+            data:  {
+              toggle: 'collapse',
+              target: "##{presenter.trigger_form_id}_c"
+            } %>
+
+<% unless presenter.trigger.new_record? %>
+  <% if presenter.trigger.step_numb > 1 && !presenter.campaign_disabled? %>
+    <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe,
+                '#',
+                class: 'btn btn-icon btn-light',
+                style: 'text-decoration:none;',
+                id:    "delete_trigger_#{presenter.trigger.id}",
+                title: 'Delete',
+                data:  {
+                  toggle: 'tooltip'
+                } %>
+
+    <% if presenter.trigger.step_numb > 2 && !presenter.campaign_disabled? %>
+      <%= link_to '<i class="fa fa-arrow-up"></i>'.html_safe,
+                  '#',
+                  class:   'btn btn-icon btn-light',
+                  style:   'text-decoration:none;',
+                  onclick: "upTrigger_#{presenter.trigger.id}(event);" %>
+    <% end %>
+
+    <% if presenter.trigger.step_numb < presenter.campaign.triggers.count && !presenter.campaign_disabled? %>
+      <%= link_to '<i class="fa fa-arrow-down"></i>'.html_safe,
+                  '#',
+                  class:   'btn btn-icon btn-light',
+                  style:   'text-decoration:none;',
+                  onclick: "downTrigger_#{presenter.trigger.id}(event);" %>
+    <% end -%>
+  <% end -%>
+<% end %>
+
+<script>
+  $(function() {
+    <%= render partial: 'triggers/js/analysis_results', locals: { trigger: presenter.trigger } %>
+
+    <% if !presenter.trigger.new_record? && presenter.trigger.step_numb > 1 %>
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     "#delete_trigger_#{presenter.trigger.id}",
+            alert:       { body: "Deleting \"#{presenter.trigger.data.dig(:name)}\" can NOT be un-done. Is it your intention to delete this Trigger?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: campaign_trigger_path(presenter.campaign.id, presenter.trigger.id) }
+          } %>
+    <% end %>
+  });
+
+  <% if !presenter.trigger.new_record? && presenter.trigger.step_numb > 1 %>
+    function downTrigger_<%= presenter.trigger.id -%>(e) {
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_campaign_trigger_path(presenter.campaign.id, presenter.trigger.id) -%>',
+        data: { d: 'd' }
+      });
+    }
+
+    function upTrigger_<%= presenter.trigger.id -%>(e) {
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_campaign_trigger_path(presenter.campaign.id, presenter.trigger.id) -%>',
+        data: { d: 'u' }
+      });
+    }
+  <% end %>
+</script>

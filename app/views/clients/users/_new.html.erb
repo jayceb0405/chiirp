@@ -1,0 +1,34 @@
+<%
+  # app/views/clients/users/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/users/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (ClientPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Users::Presenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Profile</span>
+      <span>
+        <%= link_to 'All Users', client_users_path(presenter.client.id), {
+              class: 'btn btn-light'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_with model: presenter.user, url: client_users_path(presenter.client.id), method: :post, builder: LooperFormBuilder, local: true, class: 'needs-validation', id: 'profile_form', novalidate: true do |f| %>
+        <%= render partial: 'clients/users/common/user_fields', locals: { form: f, presenter: } %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<%= render partial: 'clients/users/common/user_script_footer' %>

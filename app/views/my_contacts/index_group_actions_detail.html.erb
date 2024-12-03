@@ -1,0 +1,17 @@
+<%
+   # app/views/my_contacts/index_group_actions_detail.html.erb
+   #
+   # Example:
+   #   render partial: 'my_contacts/index_group_actions_detail'
+   #
+   # Instance Variables:
+   #   @action: (Hash)
+   #
+   # Local Variables:
+   #   none
+   #
+   return if @action.nil?
+-%>
+<%= turbo_frame_tag "action_detail_#{@action[:id]}" do %>
+  <%= render partial: 'my_contacts/broadcast/action_detail' %>
+<% end %>

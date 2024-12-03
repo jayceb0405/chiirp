@@ -1,0 +1,96 @@
+<%
+  # app/views/clients/org_chart/org_position/_index.html.erb
+  #
+  # Example:
+  #   render partial: "clients/org_chart/org_position/index"
+  #
+  # Required Instance Variables:
+  #   @client:       (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  org_positions = @client.org_positions.order(:level)
+-%>
+<%= form_with url: client_org_position_path(@client, 0), builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+  <div class="list-group list-group-flush list-group-divider" id="data_table">
+
+    <% if org_positions.any? %>
+      <% org_positions.each do |org_position| %>
+
+        <div class="list-group-item" id="<%= org_position.id -%>">
+          <%= hidden_field_tag "org_position[#{org_position.id}]", org_position.level, { id: "list_group_sort_order_#{org_position.id}" } %>
+          <div class="list-group-item-body d-sm-flex justify-content-sm-between" id="org_position_col_<%= org_position.id -%>" style="padding-left:<%= org_position.level * 20 -%>px;">
+            <div>
+              <i class="fa fa-grip-vertical dash-button__handle list-group-handle mr-2"></i>
+              <%= org_position.title %>
+            </div>
+
+            <div>
+              <%= link_to '<i class="fa fa-pencil-alt"></i>'.html_safe, edit_client_org_position_path(@client, org_position.id),
+                          class:  'btn btn-sm btn-icon btn-secondary',
+                          remote: true,
+                          method: :get %>
+              <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#',
+                          class: 'btn btn-sm btn-icon btn-secondary button_delete_position',
+                          data:  { clientid: @client.id, orgposition: org_position.id, orgtitle: org_position.title } %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    <% else %>
+      <div class="pl-5 pt-3">Click + to start creating your organizational structure.</div>
+    <% end %>
+  </div>
+
+  <% if org_positions.any? %>
+    <%= f.submit_buttons(
+          buttons: [{ title: 'Save Positions', disable_with: 'Saving' }]
+        ) %>
+  <% end %>
+<% end %>
+
+<script>
+  $(function() {
+    $('#data_table').sortable({
+      handle: '.list-group-handle',
+      animation: 150,
+      dataIdAttr: 'id',
+      ghostClass: 'list-group-ghost',
+      onUpdate: function (e) {
+        $.each($('#data_table').sortable('toArray'), function(index, value) {
+          $('#list_group_sort_order_' + value).val(index);
+          $('#org_position_col_' + value).css('padding-left', (index * 20));
+        });
+      }
+    });
+
+    $(document).off('click', '.button_delete_position');
+    $(document).on('click', '.button_delete_position', function(e) {
+      e.preventDefault();
+
+      var client_id    = $(this).data('clientid');
+      var org_position = $(this).data('orgposition');
+      var org_title    = $(this).data('orgtitle');
+
+      ChiirpAlert({
+        'body':'Deleting "' + org_title + '" can NOT be un-done. Is it your intention to delete this Org Position?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/client/' + client_id + '/org_positions/' + org_position
+        });
+      });
+    });
+  });
+</script>

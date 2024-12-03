@@ -1,0 +1,51 @@
+<%
+  # app/views/affiliates/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  cards     = local_assigns.dig(:cards)
+  presenter = Affiliates::Presenter.new(affiliate: @affiliate)
+-%>
+// Affiliates
+<% if cards.include?('affiliates_index') %>
+  $('#affiliates_body').html('<%= j render partial: 'affiliates/index/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('affiliate_edit') %>
+  $('#affiliate_<%= presenter.affiliate.id -%>').html('<%= j render partial: 'affiliates/index/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('affiliate_open_new') %>
+  $('#affiliate_<%= presenter.affiliate.id -%>').collapse('show');
+  $('#affiliate_<%= presenter.affiliate.id -%>').html('<%= j render partial: 'affiliates/index/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('affiliate_show') %>
+  $('#dash_modal').modal({ backdrop: 'static' });
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-handshake mr-2"></i>Affiliate');
+  $('#dash_modal_body').html('<%= j render partial: 'affiliates/show/show', locals: { presenter: } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+// Reports
+<% if cards.include?('affiliates_report_index') %>
+  $('#affiliates_body').html('<%= j render partial: 'affiliates/reports/index', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<% if presenter.affiliate&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save Affiliate',
+    'body': '<%= presenter.affiliate.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

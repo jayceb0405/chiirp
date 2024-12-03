@@ -1,0 +1,57 @@
+<%
+  # app/views/my_contacts/index.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/index', locals: { broadcast: Boolean, page_number: Integer }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (opt) broadcast:   (Boolean)
+  #   (opt) page_number: (Integer)
+  #
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast   = local_assigns.dig(:broadcast).to_bool
+  presenter.page_number = local_assigns.dig(:page_number).to_i
+-%>
+<div class="page has-sidebar has-sidebar-expand-xl">
+  <div class="page-inner page-inner-fill p-0">
+    <div class="message" id="contacts_list">
+      <%= render partial: 'my_contacts/broadcast/show', locals: { presenter: } %>
+    </div>
+  </div>
+
+  <div class="page-sidebar">
+    <header class="sidebar-header d-sm-none">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a class="prevent-default" href="#" onclick="Looper.toggleSidebar()"><i class="breadcrumb-icon fa fa-angle-double-right mr-2"></i>Back</a>
+        </li>
+      </ol>
+    </header>
+
+    <ul class="nav nav-tabs nav-fill" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="button_contact_profile" data-toggle="tab" href="#contact_profile" role="tab" aria-controls="contact_profile" aria-selected="true"><i class="fa fa-search mr-2"></i>Search</a>
+      </li>
+    </ul>
+
+    <div class="sidebar-section-fill">
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="contacts_search" role="tabpanel" aria-labelledby="contacts_search">
+          <%= render partial: 'my_contacts/search/index', locals: { presenter: } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    var broadcast = '<%= presenter.broadcast -%>';
+    $('.menu-item').removeClass('has-active');
+
+    $('#aside_menu_item_my_contacts').addClass('has-active');
+  });
+</script>

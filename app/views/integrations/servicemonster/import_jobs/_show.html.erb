@@ -1,0 +1,179 @@
+<%
+  # app/views/integrations/servicemonster/import_jobs/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/import_jobs/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integrations: (UserApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto my-auto">Import Orders from ServiceMonster</h6>
+      <span class="text-muted" id="job_imports_remaining"><%= presenter.job_imports_remaining -%></span>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>Import all of your ServiceMonster orders into <%= I18n.t('tenant.name') -%>.</p>
+
+    <%= form_with url: integrations_servicemonster_import_jobs_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+      <%= bootstrap_select_tag(
+            field:    'import_job[order_type]',
+            label:    { title: 'Order Type' },
+            options:  { array: presenter.order_type_for_select, selected: '' },
+            messages: { note: 'Import jobs with selected order type.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[line_items]',
+            label:        { title: 'Line Items' },
+            html_options: { multiple: true },
+            options:      { grouped_array: presenter.price_book_grouped_for_select, selected: '', blank: 'Any Line Item' },
+            messages:     { note: 'Import jobs that include selected line items.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[ext_tech_ids]',
+            label:        { title: 'ServiceMonster Technicians' },
+            html_options: { multiple: true },
+            options:      { array: presenter.ext_tech_options_for_select, selected: '' },
+            messages:     { note: 'Import jobs assigned to any selected technician.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[account_types]',
+            label:        { title: 'Account Types' },
+            html_options: { multiple: true, count_selected_text: 'string' },
+            options:      { array: presenter.account_types_for_select, selected: '' },
+            messages:     { note: 'Import jobs with selected account types.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[account_sub_types]',
+            label:        { title: 'Account SubTypes' },
+            html_options: { multiple: true, count_selected_text: 'string' },
+            options:      { array: presenter.account_subtypes_for_select, selected: '' },
+            messages:     { note: 'Import jobs with selected account subtype' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[order_groups]',
+            label:        { title: 'Order Groups' },
+            html_options: { multiple: true },
+            options:      { array: presenter.order_groups_for_select, selected: '' },
+            messages:     { note: 'Import jobs where the order group matches selected groups.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[order_subgroups]',
+            label:        { title: 'Order SubGroups' },
+            html_options: { multiple: true },
+            options:      { array: presenter.order_subgroups_for_select, selected: '' },
+            messages:     { note: 'Import jobs where the order sub-group matches selected sub-groups.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[appointment_status]',
+            label:        { title: 'Appointment Status' },
+            html_options: { multiple: true },
+            options:      { array: presenter.appointment_status_for_select, selected: '' },
+            messages:     { note: 'Import jobs where the appointment status matches one of the selected status.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'import_job[job_types]',
+            label:        { title: 'Appointment Types' },
+            html_options: { multiple: true },
+            options:      { array: presenter.job_types_for_select, selected: '' },
+            messages:     { note: 'Import jobs with any of the selected appointment types.' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:        'import_job[residential]',
+            value:        true,
+            values:       [true, false],
+            label:        { title: 'Residential Accounts' },
+            html_options: { id: 'webhook_residential' },
+            messages:     { note: 'Import residential accounts.' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:        'import_job[commercial]',
+            value:        true,
+            values:       [true, false],
+            label:        { title: 'Commercial Accounts' },
+            html_options: { id: 'webhook_commercial' },
+            messages:     { note: 'Import commercial accounts.' }
+          ) %>
+      <%= bootstrap_number_field(
+            field:        'import_job[range_max]',
+            value:        10_000,
+            label:        { title: 'Maximum Total Range' },
+            html_options: { id: 'webhook_range_max', min: 0, step: 1000 },
+            prepends:     [{ button: false, label: '$' }]
+          ) %>
+      <%= bootstrap_range_slider(
+            field:        'import_job[total]',
+            label:        { title: 'Total Range' },
+            range_slider: { id: 'webhook_range_slider_total', type: 'double', min: 0, max: 10_000, from: 0, to: 10_000, step: 100, grid: true, grid_num: 10, prefix: '$', separator: ',' }
+          ) %>
+      <%= bootstrap_calendar_field(
+            field:        'import_job[start_period]',
+            value:        '',
+            row:          { class: 'mb-0' },
+            label:        { title: 'Job Scheduled Start Period' },
+            html_options: { id: 'import_job_start_period' },
+            flatpickr:    { include_time: true, mode: 'range' },
+            messages:     { note: 'Select a period of time in which the Job was scheduled to start.' }
+          ) %>
+      <%= bootstrap_calendar_field(
+            field:        'import_job[end_period]',
+            value:        '',
+            row:          { class: 'mb-0' },
+            label:        { title: 'Job Scheduled End Period' },
+            html_options: { id: 'import_job_end_period' },
+            flatpickr:    { include_time: true, mode: 'range' },
+            messages:     { note: 'Select a period of time in which the Job was scheduled to end.' }
+          ) %>
+
+      <fieldset class="border rounded p-2 mt-3 mb-2">
+        <legend class="w-auto mb-0"><h6>Specific Actions</h6></legend>
+        <%= render partial: 'campaigns/action_fields', locals: {
+              client: presenter.client,
+              campaign_id_field: 'import_job[actions][campaign_id]',
+              group_id_field: 'import_job[actions][group_id]',
+              tag_id_field: 'import_job[actions][tag_id]',
+              stage_id_field: 'import_job[actions][stage_id]',
+              stop_campaign_ids_field: 'import_job[actions][stop_campaign_ids]',
+              first_trigger_types: [115, 120, 125, 130, 135, 139, 140, 145, 147]
+            } %>
+      </fieldset>
+
+      <%= f.submit_buttons buttons: [{ title: 'Import Jobs', id: 'import_jobs_button', disable_with: 'Preparing to Import Jobs...', disabled: presenter.job_imports_remaining.present? }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('.nav-link').removeClass('active');
+    $('#link_import_jobs').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('change', '#webhook_residential');
+    $(document).on('change', '#webhook_residential', function(e) {
+      if (!$('#webhook_residential').is(':checked')) {
+        $('#webhook_commercial').prop('checked', true);
+      }
+    });
+
+    $(document).off('change', '#webhook_commercial');
+    $(document).on('change', '#webhook_commercial', function(e) {
+      if (!$('#webhook_commercial').is(':checked')) {
+        $('#webhook_residential').prop('checked', true);
+      }
+    });
+
+    $(document).off('change keyup', '#webhook_range_max');
+    $(document).on('change keyup', '#webhook_range_max', function(e) {
+      eval(e.target.id.replace('webhook_range_max', 'webhook_range_slider_total')).update({max: e.target.value});
+    });
+  });
+</script>

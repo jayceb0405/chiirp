@@ -1,0 +1,86 @@
+<%
+  # app/views/clients/users/common/_user_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/users/common/user_fields', locals: { form: Form, presenter: Users::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) form:      (Form)
+  #   (req) presenter: (Users::Presenter)
+  #
+  return unless local_assigns.dig(:form).is_a?(LooperFormBuilder) && local_assigns.dig(:presenter).is_a?(Users::Presenter)
+-%>
+<%= form.text_field :firstname, {
+      label:        { title: 'First Name' },
+      html_options: { id: 'input_firstname', minlength: 2, placeholder: 'First Name', required: true },
+      messages:     { note: 'Must be minimum of 2 characters.' }
+    } %>
+<%= form.text_field :lastname, {
+      label:        { title: 'Last Name' },
+      html_options: { id: 'input_lastname', minlength: 2, placeholder: 'Last Name', required: true },
+      messages:     { note: 'Must be minimum of 2 characters.' }
+    } %>
+<%= form.telephone_field :phone, {
+      label:        { title: 'Mobile Phone Number' },
+      html_options: { value: number_to_phone(presenter.user.phone), id: 'user_phone_number', placeholder: 'Phone Number', required: true },
+      messages:     { note: "#{I18n.t('tenant.name')} sends text messages to this number when sending messages to User. Must be 10 characters." }
+    } %>
+<%= form.email_field :email, {
+      label:        { title: 'Email Address' },
+      html_options: { id: 'user_email', placeholder: 'Email', required: true },
+      messages:     { note: 'Must not be empty.' }
+    } %>
+<%= form.text_field :ext_ref_id, {
+      label:        { title: 'External Reference ID' },
+      html_options: { id: 'input_ext_ref_id', placeholder: 'Reference ID' }
+    } %>
+
+<% if presenter.user.access_controller?('stages', 'allowed', session) %>
+  <%= form.select :default_stage_parent_id, {
+        label:        { title: "Default #{StageParent.title}" },
+        html_options: { mobile: browser.device.mobile? },
+        choices:      { array: presenter.default_stage_parent_array, selected: presenter.user.default_stage_parent_id },
+        messages:     { note: "The selected #{StageParent.title} will replace the #{StageParent.title.pluralize} list in My #{StageParent.title.pluralize}." }
+      } %>
+<% end %>
+
+<% if current_user.access_controller?('central', 'allowed', session) %>
+  <%= form.switch :submit_text_on_enter, {
+        label:      { title: 'Press Enter to Send Text' },
+        checkboxes: [{ field: 'submit_text_on_enter', checked: presenter.user.submit_text_on_enter, values: [true, false] }],
+        messages:   { note: 'Control+Enter for line break.' }
+      } %>
+<% end %>
+
+<% if current_user.admin? && presenter.user.new_record? %>
+  <%= bootstrap_check_box(
+        checkboxes: [{ field: 'send-invite', label: 'Send Invitation', id: 'send_invite', value: false, values: [true, false] }]
+      ) %>
+<% end %>
+
+<% if current_user.admin? && presenter.user.locked_at.present? %>
+  <%= form.switch :locked, {
+        label:      { title: 'Locked?' },
+        checkboxes: [{ field: 'locked', checked: !presenter.user.locked_at.nil?, values: [true, false] }],
+        messages:   { note: 'User will not be able to sign in if this is checked.' }
+      } %>
+<% end %>
+
+<% if form.object.new_record? %>
+  <%= form.radio_button :all_phone_numbers, {
+        label:   { title: 'Phone Number Access' },
+        buttons: [
+          { id: 'all_phone_numbers_true', label: 'Allow Access to all Phone Numbers', value: 'true', checked: true },
+          { id: 'all_phone_numbers_false', label: 'Select the Phone Numbers Later', value: 'false' }
+        ]
+      } %>
+<% end %>
+
+<span id="vitally">
+  <%= render partial: 'clients/users/vitally', locals: { presenter: } %>
+</span>
+
+<%= form.submit_buttons buttons: [{ title: "Save Profile#{form.object.new_record? ? ' & Update Permissions' : ''}", disable_with: 'Saving Profile' }] %>

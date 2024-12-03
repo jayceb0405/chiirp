@@ -1,0 +1,88 @@
+<%
+  # app/views/trackable_links/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "trackable_links/edit"
+  #
+  # Required Instance Variables:
+  #   @trackable_link: (TrackableLink)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @trackable_link.new_record? && @trackable_link.name.to_s.empty?
+-%>
+<!-- trackable_links.form -->
+<%= render partial: 'layouts/alerts', locals: { models: [@trackable_link] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @trackable_link.name -%></span>
+
+      <% unless @trackable_link.new_record? %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_trackable_link_delete'
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: @trackable_link, builder: LooperFormBuilder, remote: true do |f| %>
+      <%= f.text_field :name, {
+            label:        { title: 'Trackable Link Name' },
+            html_options: { id: 'trackable_link_name', minlength: 2, placeholder: 'Trackable Link Name', required: true },
+            messages:     { note: 'Must be minimum of 2 characters.' }
+          } %>
+      <%= f.text_field :original_url, {
+            label:        { title: 'What do you want to link to?' },
+            html_options: { id: 'trackable_link_original_url', placeholder: 'Destination Link', typeahead_client: @trackable_link.client },
+            messages:     { note: "This field is hashtag aware. Press '#' to access data fields." }
+          } %>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Actions</h6></legend>
+        <%= render partial: 'campaigns/action_fields', locals: {
+              client: @trackable_link.client,
+              campaign_id: @trackable_link.campaign_id, campaign_id_field: 'trackable_link[campaign_id]',
+              group: @trackable_link.group, group_id_field: 'trackable_link[group_id]',
+              tag: @trackable_link.tag, tag_id_field: 'trackable_link[tag_id]',
+              stage_id: @trackable_link.stage_id, stage_id_field: 'trackable_link[stage_id]',
+              stop_campaign_ids: @trackable_link.stop_campaign_ids, stop_campaign_ids_field: 'trackable_link[stop_campaign_ids]'
+            } %>
+      </fieldset>
+
+      <% unless @trackable_link.new_record? %>
+        <fieldset class="border p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Statistics</h6></legend>
+          <% short_code_count = TrackableLink.contacts_delivered(@trackable_link.id, 30.days.ago.beginning_of_day, Time.current).uniq.count %>
+          <% hit_count = TrackableLink.contacts_clicked(@trackable_link.id, 30.days.ago.beginning_of_day, Time.current).uniq.count %>
+          <p class="pt-0 pb-0 pl-3">
+            Deliveries: <%= short_code_count -%><br>
+            Clicks: <%= hit_count -%> (<%= short_code_count.positive? ? ((hit_count.to_f / short_code_count).round(1) * 100) : '0' -%>%)<br>
+          </p>
+        </fieldset>
+      <% end %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save Trackable Link', disable_with: 'Saving Trackable Link' }]
+          ) %>
+    <% end -%>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    <% unless @trackable_link.new_record? %>
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     '#button_trackable_link_delete',
+            alert:       { body: "Deleting \"#{@trackable_link.name}\" can NOT be un-done. Is it your intention to delete this Trackable Link?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: trackable_link_path(@trackable_link.id) }
+          } %>
+    <% end %>
+  });
+</script>

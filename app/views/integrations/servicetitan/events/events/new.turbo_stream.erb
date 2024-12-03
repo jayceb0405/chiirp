@@ -1,0 +1,22 @@
+<%
+  # app/views/integrations/servicetitan/events/events/new.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/new'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @event_id:               (Integer)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Servicetitan::EventsPresenter.new(@client_api_integration)
+-%>
+<%= turbo_stream.update('events_body', partial: 'integrations/servicetitan/events/events/action', collection: presenter.sorted_events, as: :action, locals: { presenter: }) %>
+<% presenter.event = presenter.actions.find { |event_id, _event| event_id == @event_id } # must be in this location to reset presenter.event after listing all existing events %>
+<%= turbo_stream.rotate_button("collapse_indicator_#{@event_id}") %>
+<%= turbo_stream.collapse_show("edit_event_#{@event_id}") %>
+<%= turbo_stream.update("edit_event_#{@event_id}", partial: 'integrations/servicetitan/events/events/edit_event', locals: { presenter: }) %>

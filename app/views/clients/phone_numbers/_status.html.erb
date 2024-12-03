@@ -1,0 +1,29 @@
+<%
+# app/views/clients/phone_numbers/_status.html.erb
+#
+# Example:
+#   render partial: 'clients/phone_numbers/status', locals: { twnumber: Twnumber }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) twnumber: (Twnumber)
+#
+-%>
+<% if twnumber.vendor_id.present? %>
+  <%= link_to '', '#', {
+        class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+        data:  {
+          toggle: 'collapse',
+          target: "#twnumber_#{twnumber.id}"
+        }
+      } %>
+  <%= link_to '', '#', {
+        class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+        id:    "button_delete_twnumber_#{twnumber.id}",
+        style: 'text-decoration: none;'
+      } %>
+<% else %>
+  Pending<div class="spinner-border text-primary spinner-border-sm ml-1" role="status"></div>
+<% end %>

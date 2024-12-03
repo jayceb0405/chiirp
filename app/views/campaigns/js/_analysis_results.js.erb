@@ -1,0 +1,25 @@
+<%
+  # /app/views/campaigns/js/_analysis_results.js.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/js/analysis_results', locals: { campaign: Campaign }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) campaign: Campaign
+  #
+  return unless local_assigns.dig(:campaign).is_a?(Campaign)
+-%>
+$('#campaign_analysis_results').html('<%= j render partial: 'campaigns/analyze_icon', locals: { campaign: } -%>');
+$('#campaign_analysis_results').tooltip('dispose');
+$('#campaign_analysis_results').tooltip({
+  html: true,
+  placement: 'right',
+  container: 'body',
+  title: '<div class="text-left"><%= j render partial: 'campaigns/show/analysis_info', locals: { campaign: } -%></div>',
+  template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner tooltip-big"></div></div>'
+});
+$('#campaign_analyzed_<%= campaign.id -%>').html('<%= j render partial: 'campaigns/analyze_icon_with_name', locals: { campaign: } -%>');
+$('#campaign_analysis_results_help').html('<%= j render partial: 'campaigns/show/analysis_info', locals: { campaign: } -%>');

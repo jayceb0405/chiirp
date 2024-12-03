@@ -1,0 +1,60 @@
+<%
+  # /app/views/integrations/servicetitan/reports/criteria/_string.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/criteria/string', locals: { presenter: Integrations::Servicetitan::ReportsPresenter, criteria: Hash }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) criteria: (Hash)
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter) && local_assigns.dig(:criteria).is_a?(Hash)
+-%>
+<%= hidden_field_tag "report[criteria][#{criteria.dig(:name)}][data_type]", criteria.dig(:dataType).to_s %>
+
+<% if criteria.dig(:acceptValues, :values).present? %>
+  <%= bootstrap_select_tag(
+        field:        "report[criteria][#{criteria.dig(:name)}][string]",
+        label:        { title: criteria.dig(:label) },
+        html_options: { required: criteria.dig(:isRequired).to_bool },
+        options:      { array: criteria.dig(:acceptValues, :values).map(&:reverse), selected: presenter.criteria_value(criteria.dig(:name), 'string'), blank: 'Nothing selected' },
+        messages:     { note: 'Select a value.' }
+      ) %>
+<% else %>
+  <%= bootstrap_text_field(
+        field:        "report[criteria][#{criteria.dig(:name)}][string]",
+        value:        presenter.criteria_value(criteria.dig(:name), 'string'),
+        label:        { title: criteria.dig(:label) },
+        html_options: { required: criteria.dig(:isRequired).to_bool },
+        messages:     { note: 'Enter a value.' }
+      ) %>
+<% end %>
+
+<!--
+  criteria example: (without acceptable values (text_field)
+  {
+    :name=>"ShowInactiveCustomers",
+    :label=>"Show Inactive Customers",
+    :dataType=>"Boolean",
+    :isArray=>false,
+    :isRequired=>false,
+    :acceptValues=>nil
+  }
+
+  criteria example: (with acceptable values (select_tag))
+  {
+    :name=>"FilterStatus",
+    :label=>"Status",
+    :dataType=>"String",
+    :isArray=>false,
+    :isRequired=>true,
+    :acceptValues=>{
+      :fields=>[{:name=>"Value", :label=>"Value"}, {:name=>"Name", :label=>"Name"}],
+      :dynamicSetId=>nil,
+      :values=>[["E", "Exported"], ["P", "Posted and Exported"], ["N", "Pending, Posted and Exported"]]
+    }
+  }
+-->

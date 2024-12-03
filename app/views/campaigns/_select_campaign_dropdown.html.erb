@@ -1,0 +1,32 @@
+<%
+  # app/views/campaigns/_select_campaign_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/select_campaign_dropdown', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select a Campaign</span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% presenter.campaign_array_grouped.each_with_index do |group, index| %>
+    <% if index.positive? %>
+      <div class="dropdown-divider"></div>
+    <% end %>
+    <div class="dropdown-header"><%= group[0] -%></div>
+
+    <% group[1].each do |campaign| %>
+      <a href="#" class="dropdown-item option_campaign ml-3" id="campaign_analyzed_<%= campaign[1] -%>"><%= "#{campaign[2] ? '<i class="fa fa-check text-success mr-2">' : '<i class="fa fa-times text-danger mr-2">'}</i>#{campaign[0]}".html_safe -%></a>
+    <% end %>
+  <% end %>
+</div>

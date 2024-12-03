@@ -1,0 +1,101 @@
+<%
+  # app/views/integrations/outreach/webhooks/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/outreach/webhooks/index'
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: ClientApiIntegration
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Outreach Webhooks</h6>
+      <div class="card-header-control">
+        <div class="dropdown">
+          <button type="button" class="btn btn-icon btn-light" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-arrow"></div>
+            <%= link_to('Create New Webhook', new_integrations_outreach_webhook_path, { class: 'dropdown-item', remote: true, method: :get }) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 200px">Outreach Webhook</th>
+            <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed %>
+            <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed %>
+            <th class="text-left">Tag</th>
+            <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed %>
+            <%= content_tag(:th, class: 'text-left') { 'Stop Campaigns' } if presenter.campaigns_allowed %>
+            <th style="min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr class="row-details bg-light collapse" id="webhook_new">
+            <td colspan="<%= 9 - (presenter.campaigns_allowed ? 0 : 2) - (presenter.groups_allowed ? 0 : 1) - (presenter.stages_allowed ? 0 : 1) -%>" class="p-3" id="webhook_edit_new">
+              <!-- edit Webhook -->
+            </td>
+          </tr>
+
+          <%= render partial: 'integrations/outreach/webhooks/webhook', collection: presenter.outreach_webhooks, as: :webhook, locals: { presenter: presenter } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_webhooks').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '.button_delete_webhook');
+    $(document).on('click', '.button_delete_webhook', function(e) {
+      e.preventDefault();
+
+      var id    = $(this).data('id');
+      var name  = $(this).data('name');
+
+      if (id) {
+        ChiirpAlert({
+          'body':'Deleting ' + name + ' can NOT be un-done. Is it your intention to delete this Webhook?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_delete_webhook" }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_delete_webhook');
+        $(document).on('click', '#button_dump_it_delete_webhook', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '/integrations/outreach/webhooks/' + id
+          });
+        });
+      } else {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= integrations_outreach_webhooks_path -%>'
+        });
+      }
+    });
+  });
+</script>

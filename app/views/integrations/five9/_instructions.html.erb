@@ -1,0 +1,43 @@
+<%
+# app/views/integrations/five9/_instructions.html.erb
+#
+# Example:
+#   render partial: "integrations/five9/instructions"
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Five9 Integration Instructions</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your Five9 Account.</li>
+    </ul>
+
+    <h6>Lists:</h6>
+    <ul>
+      <li>Applying a Tag to a Contact in <%= I18n.t('tenant.name') -%> can add that Contact to your List in Five9.</li>
+      <li>Create a List in Five9 then select that List here.</li>
+      <li>Select a Tag that will (when applied) add the Contact to the List in Five9.</li>
+    </ul>
+
+    <h6>Lead Sources:</h6>
+    <ul>
+      <li>A Tag is used to define how a lead (Contact) was aquired.</li>
+      <li>The Tags used to define Lead Sources may be selected.</li>
+      <li>When Contact data is sent to Five9 the most recent Lead Source Tag will be sent as well.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

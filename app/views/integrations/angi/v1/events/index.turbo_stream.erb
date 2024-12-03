@@ -1,0 +1,23 @@
+<%
+  # app/views/integrations/angi/v1/events/index.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/angi/v1/events/index'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Angi::V1::Events::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/angi/v1/events/index', locals: { presenter: } %>
+<% end %>
+<%= turbo_stream.remove_class('.nav-link', 'active') %>
+<%= turbo_stream.append_class('link_job_events', 'active') %>
+
+<%= turbo_stream.bootstrap_init %>

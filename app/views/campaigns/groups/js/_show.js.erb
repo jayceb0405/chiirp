@@ -1,0 +1,31 @@
+<%
+# app/views/campaigns/groups/js/_show.js.erb
+#
+# Example:
+#   render partial: 'campaigns/groups/js/show', locals: { cards: Array }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) cards: (Array)
+#
+-%>
+<% if cards.include?('edit') %>
+  $('#campaign_group_name_<%= @campaign_group.id -%>').html('<%= @campaign_group.name -%>');
+  $('#edit_campaign_group_<%= @campaign_group.id -%>_td').html('<%= j render partial: 'campaigns/groups/edit' -%>');
+<% end %>
+<% if cards.include?('index') %>
+  $('#dash_modal').modal({ backdrop: 'static' });
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-object-group mr-2"></i>Campaign Groups');
+  $('#dash_modal_body').html('<%= j render partial: 'campaigns/groups/index' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('index_table_body') %>
+  $('#campaign_groups_table_body').html('<%= j render partial: 'campaigns/groups/index_body' -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

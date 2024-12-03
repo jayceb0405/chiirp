@@ -1,0 +1,93 @@
+<%
+  # app/views/central/index.html.erb
+  #
+  # Example:
+  #   render 'central/index.html.erb'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (opt) active_tab: (String)
+  #
+  presenter  = CentralPresenter.new(client: current_user.client, user: current_user, contact: @contact, session:)
+  active_tab = (@contact.nil? || @contact&.new_record? ? 'active_contacts' : 'contact_profile') unless %w[active_contacts contact_profile].include?(local_assigns.dig(:active_tab).to_s)
+-%>
+<div class="page has-sidebar has-sidebar-expand-xl">
+  <div class="page-inner page-inner-fill p-0">
+    <div class="message" id="conversation">
+      <%= render partial: 'central/conversation/show', locals: { presenter: } %>
+    </div>
+  </div>
+
+  <div class="page-sidebar">
+    <header class="sidebar-header d-sm-none">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a class="prevent-default" href="#" onclick="Looper.toggleSidebar()"><i class="breadcrumb-icon fa fa-angle-double-right mr-2"></i>Back</a>
+        </li>
+      </ol>
+    </header>
+
+    <ul class="nav nav-tabs nav-fill" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link" id="button_active_contacts" data-toggle="tab" href="#active_contacts" role="tab" aria-controls="active_contacts" aria-selected="false">Active Contacts <span class="badge badge-warning<%= presenter.active_contacts_group_selected? ? '' : ' d-none' -%>" id="active_contacts_groups_badge">G</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="button_contact_profile" data-toggle="tab" href="#contact_profile" role="tab" aria-controls="contact_profile" aria-selected="true">Contact Profile</a>
+      </li>
+    </ul>
+
+    <div class="sidebar-section-fill">
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="active_contacts" role="tabpanel" aria-labelledby="active_contacts">
+          <div class="d-flex justify-content-center mt-5">
+            <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %>
+          </div>
+        </div>
+
+        <div class="tab-pane fade" id="contact_profile" role="tabpanel" aria-labelledby="contact_profile">
+          <!-- CONTACT PROFILE -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    <% if browser.device.mobile? && (@contact.nil? || @contact&.new_record?) %>
+      Looper.toggleSidebar()
+    <% end %>
+
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_central').addClass('has-active');
+
+    $(document).off('click', '#button_active_contacts');
+    $(document).on('click', '#button_active_contacts', function(e) {
+      $.ajax({
+        type:     'GET',
+        dataType: 'script',
+        url:      '<%= central_active_contacts_path -%>'
+      })
+    });
+
+    $(document).off('click', '#button_contact_profile');
+    $(document).on('click', '#button_contact_profile', function(e) {
+      if ($('#contact_id').val()) {
+        $.ajax({
+          method: 'GET',
+          dataType: 'script',
+          url: '/central/contact_profile/' + $('#contact_id').val()
+        });
+      }
+    });
+
+    if ('<%= active_tab -%>' == 'active_contacts') {
+      $('#button_active_contacts').click();
+    } else {
+      $('#button_contact_profile').click();
+    }
+  });
+</script>

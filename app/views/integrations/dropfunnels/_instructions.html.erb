@@ -1,0 +1,52 @@
+<%
+	# app/views/integrations/dropfunnels/_instructions.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/dropfunnels/instructions"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">DropFunnels Integration Instructions</h6>
+  <div class="card-body">
+  	<h6>General:</h6>
+		<ul>
+			<li>Connect your <%= I18n.t("tenant.name") -%> account to your DropFunnels Account.</li>
+			<li>Your DropFunnels leads will be imported into <%= I18n.t("tenant.name") -%> as soon as they are submitted.</li>
+			<li>As your DropFunnels leads are imported a new Contact is created (if not already found in <%= I18n.t("tenant.name") -%>).</li>
+		</ul>
+
+		<h6>How To Get Started:</h6>
+		<ul>
+			<li class="font-weight-bold">Copy your API Key and Load it into DropFunnels</li>
+			<ol>
+				<li>Click "API Keys" in the menu bar above.</li>
+				<li>Click the "+ New API Key" button in the upper right to create a new API Key.</li>
+				<li>Copy your API Key & paste it into your DropFunnels Website 3rd Party Integration.</li>
+				<li>Complete a DropFunnels Website form (the form fields will be sent to <%= I18n.t("tenant.name") -%>.</li>
+			</ol>
+
+			<li class="font-weight-bold">Select Actions to Complete in <%= I18n.t("tenant.name") -%></li>
+			<ol>
+				<li>Select a Campaign to start when a Contact is received from DropFunnels.</li>
+				<li>Select a Group to add a Contact to when received from DropFunnels.</li>
+				<li>Select a Tag to apply when a Contact is received from DropFunnels.</li>
+				<li>Select a Stage to place a Contact in when s/he is received from DropFunnels.</li>
+			</ol>
+
+			<li class="font-weight-bold">Relax and Wait for Your Leads to Arrive</li>
+		</ul>
+	</div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,173 @@
+<%
+  # app/views/clients/analytics/show.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/analytics/show'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  links = [
+    {
+      type: 'h',
+      name: 'Analytics'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'Monthly',
+      id:   'monthly_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'New Leads<br />vs New Clients',
+      id:   'new_clients_leads_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'New Leads<br />vs Startup Revenue',
+      id:   'startup_new_leads_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'New Clients<br />vs Startup Revenue',
+      id:   'startup_new_clients_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'New Leads<br />vs Ad Costs',
+      id:   'new_leads_ad_costs_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'New Clients<br />vs Ad Costs',
+      id:   'new_clients_ad_costs_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'New Clients<br />vs 1/2 Commissions',
+      id:   'new_clients_commissions_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'Startup Revenue<br />vs Costs',
+      id:   'startup_costs_link'
+    },
+    {
+      type: (current_user.team_member? ? 'l' : 'x'),
+      name: 'Gross Revenue<br />vs Costs',
+      id:   'revenue_costs_link'
+    }
+  ]
+-%>
+<div class="section-container" id="analytics">
+  <%= render partial: 'clients/analytics/edit', locals: { month: Time.current.month, year: Time.current.year } -%>
+</div>
+
+<script>
+  $(function() {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_analytics').addClass('has-active');
+
+    $('#monthly_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path -%>'
+      });
+    });
+
+    $('#new_clients_leads_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'new_clients_leads') -%>'
+      });
+    });
+
+    $('#startup_new_leads_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'new_leads_startup') -%>'
+      });
+    });
+
+    $('#startup_new_clients_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'new_clients_startup') -%>'
+      });
+    });
+
+    $('#new_leads_ad_costs_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'new_leads_ad_costs') -%>'
+      });
+    });
+
+    $('#new_clients_ad_costs_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'new_clients_ad_costs') -%>'
+      });
+    });
+
+    $('#new_clients_commissions_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'new_clients_commissions') -%>'
+      });
+    });
+
+    $('#startup_costs_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'startup_costs') -%>'
+      });
+    });
+
+    $('#revenue_costs_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_analytics_path(show: 'revenue_costs') -%>'
+      });
+    });
+  });
+</script>

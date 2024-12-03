@@ -1,0 +1,37 @@
+<%
+# app/views/users/tasks/_edit.html.erb
+#
+# Example:
+#   render partial: 'users/tasks/edit'
+#
+# Required Instance Variables:
+#   @user: (User)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Tasks</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body" id="user_tasks">
+      <%= render partial: 'tasks/index', locals: { user: @user } %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_tasks').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_tasks').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

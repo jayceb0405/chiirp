@@ -1,0 +1,14 @@
+<%
+  # /app/views/integrations/servicetitan/balance_updates/show.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Servicetitan::BalanceUpdatesPresenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/servicetitan/balance_updates/show', locals: { presenter: } %>
+<% end %>

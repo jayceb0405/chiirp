@@ -1,0 +1,31 @@
+<%
+	# app/views/integrations/salesrabbit/_user.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/salesrabbit/user", collection: @client_api_integration.users
+	# 
+	# Required Instance Variables:
+	# 	@client_api_integration: (ClientApiIntegration)
+	# 	status: (Hash)
+	# 	@client_api_integration.users_users: (Hash)
+	# 		{ user_id => s_user_id, user_id => s_user_id, etc }
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	tenant_user_id = @client_api_integration.users_users.invert.include?(user["id"]) ? @client_api_integration.users_users.invert[user["id"].to_s].to_i : 0
+-%>
+<tr>
+	<td>
+		<%= user['firstName'] -%> <%= user['lastName'] -%> <small>(<%= user['id'] -%>)</small><br />
+		<small class="pl-3"><%= user['active'].to_s.downcase == 'true' ? 'Active' : 'Inactive'  -%></small>
+	</td>
+	<td>
+  	<%= bootstrap_select_tag(
+  	  field: "users_users[#{user['id'].to_s}]",
+  	  row: { columns: [0, 12] },
+  	  options: { for_select: options_from_collection_for_select(@client_api_integration.client.users, 'id', 'fullname', tenant_user_id), blank: 'Select a User' },
+  	  messages: { note: "Select a matching #{I18n.t('tenant.name')} User."}
+  	) %>
+	</td>
+</tr>

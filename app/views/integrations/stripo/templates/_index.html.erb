@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/stripo/templates/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/stripo/templates/index', locals: { presenter: Integrations::Stripo::Presenter}
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Stripo::Presenter)
+-%>
+<div class="card-deck-xl card-margins-mobile" id="email_templates_top">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-envelope mr-2"></i>Email Styles <span class="badge"><%= presenter.email_templates.count -%></span></span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="row">
+        <div class="col-12">
+          <span class="h6">Jump To Category</span>
+          <p>
+            <% presenter.email_template_categories.each do |category| %>
+              <a type="button" class="btn btn-light btn-sm" href="#<%= category -%>">
+                <%= category -%>
+              </a>
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <div class="row">
+        <%= render partial: 'integrations/stripo/templates/template', collection: presenter.email_templates, as: :email_template, locals: { presenter: } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $(document).off('click', '.email_template_select')
+    $(document).on('click', '.email_template_select', function(e) {
+      e.preventDefault();
+
+      var email_template_id = $(this).data('id');
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/integrations/stripo/html_css/' + email_template_id,
+        success: function(result) {
+          initPlugin({ html: $.parseJSON(result)[0], css: $.parseJSON(result)[1] });
+          $('#dash_modal').modal('hide');
+        }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,22 @@
+<%
+  # app/views/integrations/housecall/contacts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/housecall/contacts/edit"
+  #
+  # Instance Variables:
+  #   (req) @contact: (Contact)
+  #
+  # Local Variables:
+  #   none
+  #
+  client_api_integration = @client.client_api_integrations.find_by(target: 'housecall', name: '')
+  Integration::Housecallpro::V1::Base.new(client_api_integration).valid_credentials?
+  contact_ext_reference = @contact.ext_references.find_by(target: 'housecallpro')
+  hcp_client = Integrations::HousecallPro::Base.new(client_api_integration.credentials)
+
+  housecall_customer = hcp_client.customer(contact_ext_reference&.ext_id)
+-%>
+<div class="container-body">
+  <%= housecall_customer %>
+</div>

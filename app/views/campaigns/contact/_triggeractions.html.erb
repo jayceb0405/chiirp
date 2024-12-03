@@ -1,0 +1,26 @@
+<%
+  # app/views/campaigns/contact/_triggeractions.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/contact/triggeractions'
+  #
+  # Instance Variables:
+  #   @contact_campaign: (Contacts::Campaign)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = CampaignsPresenter.new(contact: @contact_campaign.contact, contact_campaign: @contact_campaign)
+-%>
+<% if presenter.contact_campaign_triggeractions.any? %>
+  <% current_trigger_id = 0 %>
+  <% presenter.contact_campaign_triggeractions.sort_by(&:created_at).each do |cct| %>
+    <% unless cct.trigger.id == current_trigger_id %>
+      <div class="row ml-3">T: <%= cct.trigger.data[:name] -%> (<%= presenter.contact_campaign.completed ? "completed: #{Friendly.new.date(presenter.contact_campaign.updated_at, presenter.client.time_zone, true)}" : "scheduled: #{Friendly.new.date(presenter.contact_campaign.created_at, presenter.client.time_zone, true)}" -%>)</div>
+    <% end %>
+    <div class="row ml-5">A: <%= cct.triggeraction.type_name -%> (<%= cct.outcome -%>: <%= Friendly.new.date(cct.updated_at, presenter.client.time_zone, true) -%><%= cct.outcome.to_s.casecmp?('scheduled') && (delayed_job = cct.delayed_jobs.find_by(triggeraction_id: cct.triggeraction_id)) ? " for: #{Friendly.new.date(delayed_job.run_at, presenter.client.time_zone, true)}" : '' -%>)</div>
+    <% current_trigger_id = cct.trigger.id %>
+  <% end %>
+<% else %>
+  <div class="row ml-3">Transactions not found</div>
+<% end %>

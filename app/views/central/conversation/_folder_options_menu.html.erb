@@ -1,0 +1,56 @@
+<%
+  # app/views/central/conversation/_folder_options_menu.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/folder_options_menu', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+  return if presenter.contact.new_record?
+-%>
+<div class="dropdown-menu dropdown-menu-right">
+  <div class="dropdown-arrow mr-n1"></div>
+
+  <span id="message_folder_links" style="display:none;">
+
+    <% if presenter.folders.present? %>
+      <% presenter.folders.each do |folder| %>
+        <%= link_to("<i class=\"fa fa-plus mr-2\"></i>Add to #{folder.name.titleize}".html_safe,
+                    '#',
+                    class: 'dropdown-item multi_folder_assignment_apply',
+                    style: 'text-decoration:none;',
+                    data:  { folder_id: folder.id }) %>
+      <% end %>
+      <div class="dropdown-divider"></div>
+    <% end %>
+  </span>
+
+  <% if presenter.folders.present? %>
+    <%= link_to('<i class="fa fa-check mr-2"></i>Show All Messages'.html_safe,
+                '#',
+                class: 'dropdown-item folder_display',
+                style: 'text-decoration: none;',
+                data:  { folder_id: '0' }) %>
+
+    <% presenter.folders.each do |folder| %>
+      <%= link_to("<i class=\"fa fa-check text-white mr-2\"></i>Show #{folder.name.titleize}".html_safe,
+                  '#',
+                  class: 'dropdown-item folder_display',
+                  style: 'text-decoration: none;',
+                  data:  { folder_id: folder.id }) %>
+    <% end %>
+  <% else %>
+    <div class="dropdown-item-text">Edit Contact to select Message Folders</div>
+  <% end %>
+
+  <div class="dropdown-divider"></div>
+  <%= link_to("<i class=\"fa fa-pencil-alt mr-2\"></i>Add/Edit #{Folder.title.pluralize}".html_safe,
+              client_folders_path(presenter.client.id),
+              class: 'dropdown-item',
+              style: 'text-decoration: none;') %>
+</div>

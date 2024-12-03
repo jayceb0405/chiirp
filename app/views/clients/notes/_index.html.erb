@@ -1,0 +1,91 @@
+<%
+  # app/views/clients/notes/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/notes/index', locals: { presenter: Clients::Notes::Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @note: (Note)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Clients::Notes::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Notes::Presenter)
+-%>
+<div class="table-responsive">
+  <table class="table">
+
+    <thead>
+      <tr>
+        <th colspan="2" style="min-width: 240px">User</th>
+        <th class="text-left">Created</th>
+        <th class="text-left">Note</th>
+        <th style="width:100px; min-width:100px;"></th>
+      </tr>
+    </thead>
+
+    <tbody id="notes_body">
+
+      <% if presenter.notes.any? %>
+        <%= render partial: 'clients/notes/note', collection: presenter.notes, as: :note, locals: { presenter: } %>
+      <% else %>
+        <tr id="no_notes">
+          <td colspan="5" class="text-center p-5">
+            Notes were NOT found.
+          </td>
+        </tr>
+      <% end %>
+
+    </tbody>
+  </table>
+</div>
+
+<script>
+  $(function () {
+    $(document).off('hide.bs.modal', '#dash_modal');
+    $(document).on('hide.bs.modal', '#dash_modal', function (e) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '/users/<%= current_user.agency_user_logged_in_as(session)&.id -%>/return'
+      });
+    })
+
+    $(document).off('show.bs.collapse', '.edit_note_row');
+    $(document).on('show.bs.collapse', '.edit_note_row', function (e) {
+
+      if (e.target.id.replace('edit_note_row_', '')) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/clients/<%= presenter.client.id -%>/notes/' + e.target.id.replace('edit_note_row_', '') + '/edit'
+        });
+      }
+    });
+
+    $(document).off('click', '.note_delete');
+    $(document).on('click', '.note_delete', function(e) {
+      e.preventDefault();
+
+      var note_id   = $(this).data('id');
+
+      ChiirpAlert({
+        'body':       'Deleting a note can NOT be un-done. Is it your intention to delete this Note?',
+        'buttons':    [{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/clients/<%= presenter.client.id -%>/notes/' + note_id
+        });
+      });
+    });
+  });
+</script>

@@ -1,0 +1,42 @@
+<%
+  # app/views/integrations/google/reviews/reviews_links/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/reviews_links/show', locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Reviews Links</h6>
+  <div class="card-body">
+    <ul>
+      <li>When this link is saved texts and emails may be sent to your Contacts with your Google Reviews link.</li>
+      <li>Learn how to get your <%= link_to 'Google Reviews link here', 'https://support.google.com/business/answer/7035772?hl=en', target: '_blank', rel: 'noopener' -%>.</li>
+    </ul>
+
+    <% if Integration::Google.valid_token?(presenter.user_api_integration) %>
+
+      <%= form_with model: presenter.client_api_integration, url: integrations_google_reviews_reviews_links_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= render partial: 'integrations/google/reviews/reviews_links/account', collection: presenter.options_for_accounts, as: :account, locals: { presenter: } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving', disabled: presenter.google_accounts.blank? }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-reviews-link').removeClass('active');
+    $('#link_reviews_links').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

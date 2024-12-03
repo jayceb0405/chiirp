@@ -1,0 +1,46 @@
+<%
+	# app/views/user_chats/users/_user.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_chats/users/user", collection: @users
+	# 
+	# Required Instance Variables:
+	# 	@users:           (Users)
+	# 	@users_last_chat: (Hash)
+	# 
+	# Required Local Variables:
+	#   user: (User)
+	# 
+	indicator_style = user[:last_chat] && user[:last_chat].read_at.nil? ? "" : "display:none;"
+-%>
+<tr>
+	<td>
+		<div class="m-central__contact-msg-header">
+			<span class="m-central__contact-msg-username">
+				<%= link_to user_chat_path( user[:user].id ),
+					method: :get,
+					remote: true,
+					style: "text-decoration: none;" do %>
+					<i class="fa fa-comment-alt"></i>
+					<span class="navbar-notify" style="display:initial;"><span class="navbar-notify__indicator" id="user_chats_user_indicator_<%= user[:user].id -%>" style="<%= indicator_style -%>"></span></span>
+					<%= user[:user].fullname %>
+				<% end %>
+			</span>
+
+			<% if user[:last_chat].created_at && !user[:last_chat].created_at.to_s.empty? %>
+				<span class="m-central__contact-msg-date">
+					<small><%= Friendly.new.date( user[:last_chat].created_at, user[:user].client.time_zone, false ) %></small>
+				</span>
+			<% end %>
+		</div>
+		<div class="m-central__contact-msg-message">
+
+			<% if user[:last_chat] && user[:last_chat].content && !user[:last_chat].content.to_s.empty? %>
+				<small><%= user[:last_chat].content %></small>
+			<% else %>
+				<small>No content.</small>
+			<% end %>
+
+		</div>
+	</td>
+</tr>

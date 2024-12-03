@@ -1,0 +1,23 @@
+<%
+   # app/views/integrations/servicetitan/reports/_reports.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/reports/reports', locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<% if presenter.sorted_reports.present? %>
+  <%= render partial: 'integrations/servicetitan/reports/report', collection: presenter.sorted_reports, as: :report, locals: { presenter: } %>
+<% else %>
+  <tr id="no_reports">
+    <td colspan="5" class="text-center p-5">
+      Reports were NOT found.
+    </td>
+  </tr>
+<% end %>

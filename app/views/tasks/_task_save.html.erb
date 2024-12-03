@@ -1,0 +1,97 @@
+<%
+  # app/views/tasks/_task.html.erb
+  #
+  # Example:
+  #   render partial: "tasks/task", collection: @tasks
+  #
+  # Required Instance Variables:
+  #   task:          (Task)
+  #   @user_setting: (Users::Setting)
+  #
+  # Optional Instance Variables:
+  #   @contact: (Contact)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  contact_id = @contact && !@contact.new_record? ? @contact.id : 0
+-%>
+<tr>
+  <td class="text-left p-2">
+    <div class="input-group mb-0">
+      <div class="custom-control custom-checkbox rows pr-1">
+        <%= check_box_tag task.id, '1', false, { class: 'custom-control-input' } %>
+        <%= label_tag task.id, '', { class: 'custom-control-label' } %>
+      </div>
+      <%= link_to '', task_path(task),
+                  method: :delete,
+                  class:  'fa fa-trash-alt text-dark pr-1 mr-0',
+                  remote: true,
+                  style:  'text-decoration: none;',
+                  title:  'Delete',
+                  data:   {
+                    confirm_swal: "Delete #{task.name}?",
+                    text_swal:    'Are you sure?',
+                    icon_swal:    'error',
+                    toggle:       'tooltip',
+                    params:       { contact_id: contact_id }.to_param
+                  } %>
+      <%= link_to_if !task.completed_at, '', complete_task_path(task),
+                     method: :post,
+                     class:  'fa fa-check text-success pr-1 mr-0',
+                     remote: true,
+                     style:  'text-decoration: none;',
+                     title:  'Mark as Completed',
+                     data:   {
+                       toggle: 'tooltip',
+                       params: { contact_id: contact_id }.to_param
+                     } %>
+      <%= link_to_if !task.completed_at, '', edit_task_path(task),
+                     method: :get,
+                     class:  'fa fa-pencil-alt text-dark pr-1 mr-0',
+                     remote: true,
+                     style:  'text-decoration: none;',
+                     title:  'Edit',
+                     data:   {
+                       toggle: 'tooltip',
+                       params: { contact_id: contact_id }.to_param
+                     } %>
+      <% if task.completed_at %>
+        <%= task.name %>
+      <% else %>
+        <%= link_to task.name, edit_task_path(task),
+                    method: :get,
+                    remote: true,
+                    style:  'text-decoration: none;',
+                    data:   {
+                      params: { contact_id: contact_id }.to_param
+                    } %>
+      <% end %>
+    </div>
+  </td>
+  <td class="text-left p-2">
+    <%= task.user ? link_to(task.user.fullname, client_user_path(task.client_id, task.user_id)) : 'Unassigned' %>
+  </td>
+
+  <% if contact_id == 0 %>
+    <td class="text-left p-2">
+      <%= if task.contact
+            task.client.message_central_allowed ? link_to(task.contact.fullname, central_path(contact_id: task.contact_id)) : task.contact.fullname
+          else
+            'Unassigned'
+          end %>
+    </td>
+  <% end %>
+
+  <td class="text-left p-2">
+    <%= Friendly.new.date(task.due_at.in_time_zone(task.client.time_zone), task.client.time_zone, true) if task.due_at %>
+    <%= -%>
+  </td>
+
+  <% if @user_setting.data[:all_tasks].to_i == 1 %>
+    <td class="text-left p-2">
+      <%= Friendly.new.date(task.completed_at.in_time_zone(task.client.time_zone), task.client.time_zone, true) if task.completed_at %>
+      <%= -%>
+    </td>
+  <% end %>
+</tr>

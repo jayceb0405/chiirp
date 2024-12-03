@@ -1,0 +1,44 @@
+<%
+# app/views/integrations/salesrabbit/_leads.html.erb
+#
+# Example:
+# 	render partial: "integrations/salesrabbit/leads"
+#
+# Required Instance Variables:
+# 	@client_api_integration: (ClientApiIntegration)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Import Existing SalesRabbit Leads</h6>
+  <div class="card-body">
+
+    <% if @client_api_integration.api_key.present? && @client_api_integration.statuses.present? %>
+      Select Lead Statuses to Import
+
+      <%= form_with model: @client_api_integration, url: integrations_salesrabbit_leads_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+        <% @client_api_integration.statuses.each do |s| %>
+          <%= bootstrap_switch_field(
+                field:  "statuses[#{s['name']}]",
+                value:  params.dig(:statuses, s[:name]).to_i,
+                values: [1, 0],
+                label:  { title: "#{s['name']} <small>(#{s['abbreviation']})</small>".html_safe }
+              ) %>
+        <% end %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Import Leads', disable_with: 'Importing Leads' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_leads').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

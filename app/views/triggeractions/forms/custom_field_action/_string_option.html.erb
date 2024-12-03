@@ -1,0 +1,47 @@
+<%
+  # app/views/triggeractions/forms/custom_field_action/_string_option.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/custom_field_action/string_option", collection: string_option, as: :string_option, locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+
+  string_option_uuid = SecureRandom.uuid
+-%>
+<fieldset class="border p-2 mb-2 rounded">
+  <legend class="w-auto mb-0">Response: <%= string_option %></legend>
+
+  <% if string_option == "invalid" %>
+    <ul>
+      <li>An Invalid Response Range will usually only happen with imported or manually entered data.</li>
+      <li>It may also happen if all available ranges have not been defined.</li>
+    </ul>
+  <% elsif string_option == "empty" %>
+    <ul>
+      <li>An Empty Response Range will usually only happen when a field is already empty and a response outside of acceptable Custom Field ranges is received.</li>
+      <li>It may also happen if "Clear Custom Field on invalid response" is switched on when saving the response.</li>
+    </ul>
+  <% elsif string_option == "image" %>
+    <ul>
+      <li>An Image Response Range will only happen when a Custom Field is set to accept an image as a valid response.</li>
+      <li>Any additional acceptable text response received with the image will be processed in place of the image response.</li>
+    </ul>
+  <% end %>
+
+  <%= render partial: 'campaigns/action_fields', locals: {
+        client: presenter.client,
+        campaign_id: presenter.triggeraction.response_range.dig(string_option, 'campaign_id'), campaign_id_field: "triggeraction[response_range][#{string_option}][campaign_id]",
+        group: presenter.client_custom_field_action_string_option_group(string_option), group_id_field: "triggeraction[response_range][#{string_option}][group_id]",
+        tag: presenter.client_custom_field_action_string_option_tag(string_option), tag_id_field: "triggeraction[response_range][#{string_option}][tag_id]",
+        stage_id: @triggeraction.response_range.dig(string_option, 'stage_id'), stage_id_field: "triggeraction[response_range][#{string_option}][stage_id]",
+        stop_campaign_ids: presenter.client_custom_field_action_string_option_stop_campaign_ids(string_option), stop_campaign_ids_field: "triggeraction[response_range][#{string_option}][stop_campaign_ids]",
+        exclude_campaign_ids: [presenter.campaign.id],
+        disabled: presenter.campaign_disabled?
+      } %>
+</fieldset>

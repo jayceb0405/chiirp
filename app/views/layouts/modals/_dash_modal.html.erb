@@ -1,0 +1,37 @@
+<%
+# app/views/layouts/modals/_dash_modal.html.erb
+#
+# Example:
+#   render partial: 'layouts/modals/dash_modal'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="modal fade" id="dash_modal" data-controller="turbo-modal" tabindex="-1" role="dialog" aria-labelledby="modal_dash_aria_label" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" id="dash_modal_dialog" style="max-width:900px;" role="document">
+    <div class="modal-content" id="dash_modal_content">
+      <div class="modal-header border-bottom mb-3" id="dash_modal_header">
+        <!-- dash_modal_header -->
+        <%= yield(:header) %>
+        <h5 class="modal-title" id="dash_modal_title">
+          <!-- dash_modal_title -->
+          <%= yield(:title) %>
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">×</button>
+      </div>
+      <div class="modal-body" id="dash_modal_body">
+        <!-- dash_modal_body -->
+        <%= yield(:body) %>
+        <%= yield %>
+      </div>
+      <div class="modal-footer" id="dash_modal_footer">
+        <!-- dash_modal_footer -->
+        <%= yield(:footer) %>
+      </div>
+    </div>
+  </div>
+</div>

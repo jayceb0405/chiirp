@@ -1,0 +1,69 @@
+<%
+# app/views/clients/widgets/show.html.erb
+#
+# Example:
+# 	render partial: "clients/widgets/show"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-cog mr-2"></i>SiteChat Editor</h1>
+
+        <div class="btn-toolbar">
+          <%= if current_user.client.client_widgets.count < current_user.client.widgets_count
+                link_to '<i class="fa fa-plus mr-2"></i>New SiteChat'.html_safe, new_client_widget_path, {
+                  class:  'btn btn-light',
+                  id:     'button_new_client_widget',
+                  remote: true,
+                  method: :get
+                }
+              end %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit SiteChat</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_client_widget_dropdown">
+              <%= render partial: 'clients/widgets/select_client_widget_dropdown' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="client_widgets_body">
+
+      <% if @client_widget.new_record? && @client_widget.widget_name.to_s.empty? %>
+        <%= render partial: 'clients/widgets/index' %>
+      <% else %>
+        <%= render partial: 'clients/widgets/edit' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_sitechat').addClass('has-active');
+
+    $(document).on('click', '.option_client_widget', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/client_widgets/' + $(this).attr('id') + '/edit'
+      });
+    });
+  });
+</script>

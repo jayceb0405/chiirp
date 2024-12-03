@@ -1,0 +1,19 @@
+<%
+  # app/views/campaigns/index/starting_this_campaign/jobber/v20220915/_jobber.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/index/starting_this_campaign/jobber/v20220915/jobber', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+-%>
+<% if presenter.jobber_events_starting_this_campaign(presenter.campaign.id).present? %>
+  <%= link_to "<i>#{image_tag('integrations/jobber/logo-only-black.svg', { style: 'height:20px;' })}</i>".html_safe,
+              "#{presenter.jobber_integrations_path}?card=webhooks",
+              class: 'btn btn-sm btn-icon btn-secondary' %>
+<% end %>

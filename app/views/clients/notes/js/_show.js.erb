@@ -1,0 +1,48 @@
+<%
+  # app/views/clients/notes/js/_show.js.erb
+  #
+  # Example:
+  # 	render partial: 'clients/notes/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Parameters:
+  # 	(opt) cards: (Array)
+  #
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  presenter = Clients::Notes::Presenter.new(client: @client)
+  presenter.note = @note if @note.present?
+-%>
+// open/close modal
+<% if cards.include?('dash_modal_hide') %>
+  $('#dash_modal').modal('hide');
+<% end %>
+<% if cards.include?('dash_modal_show') %>
+  $('#dash_modal').modal('show');
+<% end %>
+
+// list notes for Client
+<% if cards.include?('index') %>
+  $('#dash_modal_title').html('<%= j render partial: 'clients/notes/index_title', locals: { presenter: } -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'clients/notes/index', locals: { presenter: } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+// show a new Note to create
+<% if cards.include?('new') %>
+  $('#notes_body').prepend('<%= j render partial: 'clients/notes/note', locals: { note: presenter.note, presenter: } -%>');
+  $('#edit_note_row_<%= @note.id -%>').collapse('show');
+  $('#edit_note_row_<%= @note.id -%>').html('<%= j render partial: 'clients/notes/edit', locals: { presenter: } -%>');
+<% end %>
+
+// edit a Note
+<% if cards.include?('edit') %>
+  $('#edit_note_row_<%= @note.id -%>').html('<%= j render partial: 'clients/notes/edit', locals: { presenter: } -%>');
+<% end %>
+
+$('.tooltip').remove();
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

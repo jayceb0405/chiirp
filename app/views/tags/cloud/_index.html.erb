@@ -1,0 +1,41 @@
+<%
+  # app/views/tags/cloud/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'tags/cloud/index', locals: { contact: Contact }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   contact: (Contact)
+  #
+  tp = TagsPresenter.new(contact: local_assigns.dig(:contact))
+  return if tp.contact.new_record?
+-%>
+<div class="card card-reflow">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-user-tag mr-3"></i>Tags</h6>
+      <div class="card-header-control">
+        <%= link_to '<i class="fa fa-pencil-alt"></i>'.html_safe, central_tags_path(tp.contact.id), {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="list-group list-group-bordered list-group-reflow">
+  <% if tp.contacttags? %>
+    <%= render partial: 'tags/cloud/contacttag', collection: tp.contacttags, locals: { contact: tp.contact, tags_presenter: tp } -%>
+  <% else %>
+    <div class="list-group-item justify-content-between align-items-center">
+      <span>
+        Tags not found.
+      </span>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,109 @@
+<%
+  # app/views/groups/_group_name_field.html.erb
+  #
+  # render partial: 'groups/group_name_field'
+  #
+  # Required Instance Variables:
+  #   @group: (Group)
+  #
+  # Required Local Variables:
+  #   select_or_add_field_name: (String)
+  #   select_or_add_div_id:     (String)
+  #   exclude_groups:           (Array)
+  #
+  # Optional Local Variables:
+  #   disabled:                 (Boolean)
+  #
+  select_or_add_field_name = (local_assigns.dig(:select_or_add_field_name) || 'group_id').to_s
+  select_or_add_div_id     = (local_assigns.dig(:select_or_add_div_id) || 'client_group').to_s
+  exclude_groups           = [local_assigns.dig(:exclude_groups) || []].flatten
+  disabled                 = local_assigns.dig(:disabled).to_bool
+  button_text              = @group.new_record? ? 'Creat' : 'Sav'
+  autofocus                = local_assigns.dig(:autofocus).to_bool
+-%>
+<%= bootstrap_text_field(
+      # field:        "group[#{select_or_add_field_name}][name]",
+      field:        "group[name]",
+      value:        @group.name,
+      label:        { class: 'pl-4', title: 'Create a New Group' },
+      html_options: { id: "group_text_field_#{select_or_add_div_id}", placeholder: 'Group Name', disabled: },
+      appends:      [{ button: true, label: 'New', id: "group_text_new_#{select_or_add_div_id}", display: !@group.new_record?, disabled: }, { button: true, label: "#{button_text}e", id: "group_text_submit_#{select_or_add_div_id}", disabled: }]
+    ) %>
+
+<script>
+  $(function () {
+    $('#group_text_field_<%= select_or_add_div_id -%>').keydown(function(e) {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        $('#group_text_submit_<%= select_or_add_div_id -%>').click();
+        return false;
+      }
+    });
+
+    $(document).off('click', '#group_text_new_<%= select_or_add_div_id -%>');
+    $(document).on('click', '#group_text_new_<%= select_or_add_div_id -%>', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      var params = {
+        'group[name]': $('#group_text_field_<%= select_or_add_div_id -%>').val(),
+        select_or_add_field_name: '<%= select_or_add_field_name -%>',
+        select_or_add_div_id: '<%= select_or_add_div_id -%>',
+        exclude_groups: '<%= exclude_groups -%>',
+        autofocus: '<%= autofocus.to_s -%>',
+        disabled: '<%= disabled.to_s -%>'
+      }
+
+      $.ajax({
+        type: 'GET',
+        dataType: 'turbo_stream',
+        accepts: {
+          'turbo_stream': 'text/vnd.turbo-stream.html'
+        },
+        converters: {
+          'text turbo_stream': function (data) {
+            Turbo.renderStreamMessage(data);
+          }
+        },
+        url: '<%= new_group_path -%>',
+        data: params
+      });
+    });
+
+    $(document).off('click', '#group_text_submit_<%= select_or_add_div_id -%>');
+    $(document).on('click', '#group_text_submit_<%= select_or_add_div_id -%>', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      var params = {
+        'group[name]': $('#group_text_field_<%= select_or_add_div_id -%>').val(),
+        select_or_add_field_name: '<%= select_or_add_field_name -%>',
+        select_or_add_div_id: '<%= select_or_add_div_id -%>',
+        exclude_groups: '<%= exclude_groups -%>',
+        autofocus: '<%= autofocus.to_s -%>',
+        disabled: '<%= disabled.to_s -%>'
+      }
+
+      $('#group_text_submit_<%= select_or_add_div_id -%>').prop('value', '<%= "#{button_text}ing..." -%>')
+
+      $.ajax({
+        type: '<%= (@group.new_record? ? 'POST' : 'PATCH') -%>',
+        dataType: 'turbo_stream',
+        accepts: {
+          'turbo_stream': 'text/vnd.turbo-stream.html'
+        },
+        converters: {
+          'text turbo_stream': function (data) {
+            Turbo.renderStreamMessage(data);
+          }
+        },
+        url: '<%= (@group.new_record? ? groups_path : group_path(@group)) -%>',
+        data: params
+      }).always(function() {
+        $('#group_text_submit_<%= select_or_add_div_id -%>').prop('value', '<%= "#{button_text}e" -%>')
+      });
+    });
+  });
+</script>

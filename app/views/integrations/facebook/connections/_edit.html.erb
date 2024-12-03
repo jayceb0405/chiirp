@@ -1,0 +1,54 @@
+<%
+  # app/views/integrations/facebook/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/facebook/edit"
+  #
+  # Required Instance Variables:
+  #   @user_api_integration: (UserApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # removed user_messenger_contact scope 2023-08-30
+  presenter = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Facebook Connections</h6>
+  <div class="card-body">
+
+    <% presenter.user_api_integration.users.map(&:deep_symbolize_keys).each do |user| %>
+      <p class="mb-3"><strong>Facebook User: <%= user[:name].to_s -%></strong></p>
+
+      <% if Integration::Facebook::Base.new(presenter.user_api_integration, fb_user_id: user.dig(:id)).valid_credentials? %>
+        <%= bootstrap_info_field(
+              info:         '<i class="fa fa-link text-success mr-2"></i>Facebook User connection is valid. Click to Revoke Permissions',
+              info_wrapper: { tag: 'a', class: 'btn btn-link mb-1', href: integrations_facebook_connections_path(user_id: user[:id]), 'data-remote': true, 'data-method': :delete, rel: 'nofollow' },
+              row:          { columns: [0, 12] },
+              col:          { class: 'mb-0' }
+            ) %>
+      <% else %>
+        <%= bootstrap_info_field(
+              col:  { class: 'mb-0' },
+              info: '<i class="fa fa-link text-danger mr-2"></i>Facebook User connection must be refreshed. Click "Login with Facebook" to refresh token.',
+              row:  { columns: [0, 12] }
+            ) %>
+      <% end %>
+    <% end %>
+
+    <div class="mt-auto">
+     <div class="form-actions">
+       <%= link_to "#{icon('fab', 'facebook')} Login with Facebook".html_safe, user_facebook_omniauth_authorize_url(scope: 'business_management,email,leads_retrieval,pages_manage_ads,pages_manage_metadata,pages_messaging,pages_read_engagement,pages_show_list,public_profile'), { method: :post, class: 'btn btn-info ml-auto facebook' } %>
+     </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

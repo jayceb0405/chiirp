@@ -1,0 +1,222 @@
+<%
+  # app/views/user_contact_forms/v3/edit/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/v3/edit/edit'
+  #
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @user_contact_form.new_record? && @user_contact_form.form_name.empty?
+
+  disabled = @user_contact_form.marketplace
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@user_contact_form] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @user_contact_form.form_name -%></span>
+
+      <% unless @user_contact_form.new_record? %>
+        <%= link_to '<i class="fa fa-file-invoice-dollar"></i>'.html_safe, edit_user_contact_form_marketplace_path(@user_contact_form.id), {
+              class:  'btn btn-icon btn-light',
+              remote: true,
+              method: :get
+            } %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_user_contact_form_delete'
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <% if disabled %>
+      <%= bootstrap_info_field(
+            info: '<i class="fa fa-times text-danger mr-2"></i>Your QuickPage may NOT be edited. It has been submitted to the Marketplace. Only the following items are editable...'
+          ) %>
+      <div class="row">
+        <div class="col-6 offset-md-3 col-md-3">
+          <ul>
+            <li>Link Domain</li>
+            <li>Link Page Name</li>
+            <li>Redirect URL</li>
+          </ul>
+        </div>
+        <div class="col-6 col-md-3">
+          <ul>
+            <li>Campaign</li>
+            <li>Group</li>
+            <li>Tag</li>
+          </ul>
+        </div>
+      </div>
+    <% end %>
+
+    <%= form_with model: [:api, :v3, @user_contact_form], builder: LooperFormBuilder, multipart: true, remote: true, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+
+      <%= f.text_field :form_name, {
+            label:        { title: 'QuickPage Name' },
+            html_options: { id: 'user_contact_form_form_name', minlength: 2, placeholder: 'Name', required: true, disabled:, autofocus: true },
+            messages:     { error: 'Must be minimum of 2 characters.' }
+          } %>
+
+      <% if current_user.client.share_quick_leads_allowed %>
+        <%= f.copy_field :share_code, {
+              label: { title: 'QuickPage Share Code' }
+            } %>
+      <% end %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [
+              { title: 'View in a new tab!', class: 'prevent-default', id: 'button_view_in_new_tab', disabled: @user_contact_form.new_record? },
+              { title: 'Create a Trackable Link', class: 'prevent-default', id: 'button_create_trackable_link', disabled: @user_contact_form.new_record? }
+            ]
+          ) %>
+
+      <div class="section-block">
+        <div class="card-expansion" id="user_contact_form_accordion">
+          <div class="card card-expansion-item" id="user_contact_form_links_outer">
+            <%= render partial: 'user_contact_forms/v3/edit/links', locals: { f: } %>
+          </div>
+
+          <div class="card card-expansion-item" id="user_contact_form_form_fields_outer">
+            <%= render partial: 'user_contact_forms/v3/edit/form_fields' %>
+          </div>
+
+          <div class="card card-expansion-item" id="user_contact_form_form_formatting_outer">
+            <%= render partial: 'user_contact_forms/v3/edit/form_formatting' %>
+          </div>
+        </div>
+      </div>
+
+      <%= bootstrap_submit_buttons(
+            row:     { class: 'mb-3' },
+            buttons: [
+              { title: 'Edit Template!', class: 'prevent-default', id: 'button_user_contact_form_template', disabled: disabled || @user_contact_form.new_record? },
+              { title: 'Find free & proven templates in our Marketplace!', class: 'prevent-default', id: 'template_marketplace_link', disabled: disabled || @user_contact_form.new_record? }
+            ]
+          ) %>
+
+      <% if @user_contact_form.user.client.domains.present? %>
+        <%= bootstrap_select_tag(
+              field:        'default_for_domain',
+              label:        { title: 'Select a Custom Domain as Default' },
+              html_options: { id: 'user_contact_form_page_domain' },
+              options:      { array: @user_contact_form.user.client.domains.keys, selected: @user_contact_form.user.client.domains.invert[@user_contact_form.id], blank: 'Select a Domain' },
+              messages:     { note: "When selected all requests to the primary domain (ex: #{I18n.t("tenant.#{Rails.env}.sales_host")}) will show this QuickPage." }
+            ) %>
+      <% end %>
+
+      <%= f.text_field :redirect_url, {
+            label:        { title: 'Redirect URL' },
+            html_options: { placeholder: 'Redirect URL' },
+            messages:     { note: 'Leave blank to clear form ready for another Contact.' }
+          } %>
+
+      <%= render partial: 'campaigns/action_fields', locals: { 
+            client: @user_contact_form.user.client,
+            campaign_id: @user_contact_form.campaign_id, campaign_id_field: 'user_contact_form[campaign_id]',
+            group: @user_contact_form.group, group_id_field: 'user_contact_form[group_id]',
+            tag: @user_contact_form.tag, tag_id_field: 'user_contact_form[tag_id]',
+            stage_id: @user_contact_form.stage_id, stage_id_field: 'user_contact_form[stage_id]',
+            stop_campaign_ids: @user_contact_form.stop_campaign_ids, stop_campaign_ids_field: 'user_contact_form[stop_campaign_ids]'
+          } %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save QuickPage', id: 'user_contact_form_submit', disable_with: 'Saving QuickPage' }]
+          ) %>
+    <% end %>
+  </div>
+
+  <% unless @user_contact_form.new_record? %>
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'user_contact_form_modal', max_width: '900px', close: true } %>
+  <% end %>
+</div>
+
+<%= render partial: 'snippets/custom_modal', locals: { id: 'user_contact_form_marketplace_modal', max_width: '900px', close: true } %>
+
+<script>
+  $(function() {
+    $('#user_contact_form_submit').on('click', function(e) {
+      $('#user_contact_form_head_string').val($('#user_contact_form_head_string').val().replace(/<script/g, '{script'));
+      $('#user_contact_form_head_string').val($('#user_contact_form_head_string').val().replace(/<\/script>/g, '{/script}'));
+      $('#user_contact_form_script_string').val($('#user_contact_form_script_string').val().replace(/<script/g, '{script'));
+      $('#user_contact_form_script_string').val($('#user_contact_form_script_string').val().replace(/<\/script>/g, '{/script}'));
+
+      var sortable = Sortable.get(document.getElementById('data_table')).toArray();
+
+      $.each(sortable, function(index, value) {
+        $('#list_group_sort_order_' + value).val(index);
+      });
+    });
+
+    $('.is-valid, .is-invalid').on('keyup change', function(e) {
+      if (this.id == 'user_contact_form_form_name' && $(this).val().length < 5) {
+        $(this).removeClass('is-valid');
+        $(this).addClass('is-invalid');
+      } else {
+        $(this).removeClass('is-invalid');
+        $(this).addClass('is-valid');
+      }
+    });
+
+    <% unless @user_contact_form.new_record? %>
+      $(document).off('click', '#button_view_in_new_tab');
+      $(document).on('click', '#button_view_in_new_tab', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        window.open('<%= @user_contact_form.landing_page_url -%>', '_blank', 'noreferrer noopener');
+      });
+
+      $(document).off('click', '#button_create_trackable_link');
+      $(document).on('click', '#button_create_trackable_link', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $.ajax({
+          method: 'PATCH',
+          dataType: 'script',
+          url: '<%= api_v3_user_contact_form_path(@user_contact_form) -%>',
+          data: { commit: 'create_trackable_link' }
+        });
+      });
+
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     '#button_user_contact_form_delete',
+            alert:       { body: "Deleting \"#{@user_contact_form.form_name}\" can NOT be un-done. Is it your intention to delete this QuickPage?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: user_contact_form_path(@user_contact_form.id) }
+          } %>
+
+      $('#template_marketplace_link').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $.ajax({
+          method: 'GET',
+          dataType: 'script',
+          url: '<%= user_contact_form_marketplaces_path -%>'
+        });
+      });
+
+      <% unless disabled %>
+        $('#button_user_contact_form_template').on('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          $.ajax({
+            method: 'GET',
+            dataType: 'script',
+            url: '<%= api_v3_edit_template_user_contact_form_path(@user_contact_form) -%>'
+          });
+        });
+      <% end %>
+    <% end %>
+  });
+</script>

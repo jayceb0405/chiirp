@@ -1,0 +1,87 @@
+<%
+  # app/views/user_contact_forms/index.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/index'
+  #
+  # Required Instance Variables:
+  #   @user_contact_forms: (UserContactForms)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-file-invoice mr-2"></i>QuickPages</h1>
+
+        <div class="btn-toolbar">
+          <%= link_to '<i class="fa fa-plus mr-2"></i>New QuickPage'.html_safe, new_api_v3_user_contact_form_path, {
+              class:  'btn btn-light',
+              id:     'button_new_quicklead',
+              remote: true,
+              method: :get
+            } if @user_contact_forms.length < current_user.client.quick_leads_count
+          %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit QuickPage</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_user_contact_forms_dropdown">
+              <%= render partial: 'user_contact_forms/select_user_contact_forms_dropdown' %>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <span>More</span>
+              <span class="fa fa-caret-down"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-arrow"></div>
+              <%= link_to '<i class="fa fa-cloud-download-alt mr-2"></i>Import Shared QuickPage'.html_safe, index_import_user_contact_form_path, {
+                  class:  'dropdown-item',
+                  id:     'button_import_shared_user_contact_form',
+                  remote: true,
+                  method: :get
+                } if @user_contact_forms.length < current_user.client.quick_leads_count && current_user.client.share_quick_leads_allowed
+              %>
+              <%= link_to '<i class="fa fa-funnel-dollar mr-2"></i>QuickPage Marketplace'.html_safe, user_contact_form_marketplaces_path, {
+                  class:  'dropdown-item',
+                  id:     'button_user_contact_form_marketplace'
+                } if @user_contact_forms.length < current_user.client.quick_leads_count && current_user.client.share_quick_leads_allowed
+              %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="user_contact_forms_body">
+      <%= render partial: 'user_contact_forms/index' %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_quickpages').addClass('has-active');
+
+    $(document).on('click', '.option_user_contact_form', function(e) {
+      e.preventDefault();
+
+      var id      = $(this).data('id');
+      var version = $(this).data('version');
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/api/v' + version + '/user_contact_forms/' + id + '/edit'
+      });
+    });
+  });
+</script>

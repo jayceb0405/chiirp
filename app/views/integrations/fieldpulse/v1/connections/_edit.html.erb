@@ -1,0 +1,42 @@
+<%
+  # app/views/integrations/fieldpulse/v1/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/fieldpulse/v1/show"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::fieldpulse::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect <%= I18n.t('tenant.name') -%> to FieldPulse</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_fieldpulse_v1_connections_path, builder: LooperFormBuilder, method: :patch, data: { turbo: true, turbo_stream: true }, html: { class: 'needs-validation', id: 'contact_form', novalidate: true } do |f| %>
+
+      <%= f.text_field :api_key, {
+            label:        { title: 'API Key' },
+            html_options: { value: presenter.client_api_integration.api_key.to_s, placeholder: 'API Key', required: true, autofocus: false },
+            messages:     { note: 'This is the API Key provided by FieldPulse.' }
+          } %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save Credentials', disable_with: 'Saving Credentials' }]
+          ) %>
+
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

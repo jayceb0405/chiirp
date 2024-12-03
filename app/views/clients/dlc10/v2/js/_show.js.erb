@@ -1,0 +1,54 @@
+<%
+  # app/views/clients/dlc10/v2/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  return unless @client.is_a?(Client)
+
+  presenter = Clients::Dlc10::V2::Presenter.new(client: @client)
+  cards     = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('dlc10_brand_edit') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/dlc10/v2/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('dlc10_brand_form') %>
+  $('#dlc10_page_section').html('<%= j render partial: 'clients/dlc10/v2/brand/form', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('dlc10_brand_help') %>
+  $('#dlc10_page_section').html('<%= j render partial: 'clients/dlc10/v2/help', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('dlc10_campaigns_index') %>
+  $('#dlc10_page_section').html('<%= j render partial: 'clients/dlc10/v2/campaigns/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('dlc10_campaign_new') %>
+  <% if @client.dlc10_brand.campaigns.where.not(id: nil).blank? %>
+    $('#campaigns_index').html('');
+  <% end %>
+  $('#campaigns_index').prepend('<tr class="bg-light"><%= j render partial: 'clients/dlc10/v2/campaigns/edit', locals: { presenter: } -%></tr>');
+<% end %>
+<% if cards.include?('dlc10_campaign_show') %>
+  $('#dlc10_campaign_<%= @dlc10_campaign.id -%>').collapse('show');
+<% end %>
+<% if cards.include?('dlc10_campaign_edit') %>
+  $('#dlc10_campaign_<%= @dlc10_campaign.id -%>').html('<%= j render partial: 'clients/dlc10/v2/campaigns/edit', locals: { presenter: } -%>')
+<% end %>
+<% if cards.include?('dlc10_campaign_types') %>
+  $('#dlc10_page_section').html('<%= j render partial: 'clients/dlc10/v2/campaign_types/show', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('dlc10_phone_numbers_index') %>
+  $('#dlc10_page_section').html('<%= j render partial: 'clients/dlc10/v2/phone_numbers/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('intro') %>
+  $('#dlc10_page_section').html('<%= j render partial: 'clients/dlc10/v2/intro/show', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,55 @@
+<%
+  # app/views/integrations/xencall/_api_key.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/xencall/api_key"
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  servicetitan_client_api_integration = @client_api_integration.client.client_api_integrations.find_by(target: 'servicetitan')
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">CRM Designation</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_xencall_api_key_update_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+      <%= bootstrap_text_field(
+            field:        'api_key',
+            value:        @client_api_integration.api_key,
+            label:        { title: 'Xencall CRM Designation' },
+            html_options: { placeholder: 'CRM Designation', required: true },
+            messages:     { note: 'Required. Received from Xencall.' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:  'live_mode',
+            value:  @client_api_integration.live_mode.to_i == 1,
+            values: %w[1 0],
+            label:  { id: 'live_mode', title: 'Live' }
+          ) %>
+
+      <% if @client_api_integration.api_key.present? && servicetitan_client_api_integration && servicetitan_client_api_integration.api_key.present? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'Appointment Webhook Endpoint' },
+              html_options: { value: integrations_xencall_endpoint_url(provider: @client_api_integration.api_key) }
+            } %>
+      <% end %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [{ title: 'Save', disable_with: 'Saving' }]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_api_key').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

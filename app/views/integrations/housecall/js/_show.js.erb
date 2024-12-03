@@ -1,0 +1,92 @@
+<%
+# app/views/integrations/housecall/js/_show.js.erb
+#
+# Example:
+#   render partial: 'integrations/housecall/js/show', locals: { cards: Array }
+#
+# Required Instance Variables:
+#   cards: Array
+#
+# Required Local Variables:
+#   none
+#
+-%>
+// API Keys
+<% if cards.include?('api_key_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/api_key/edit' -%>');
+
+  <% if Integration::Housecallpro::V1::Base.new(@client_api_integration).valid_credentials? %>
+    $('#api_key_connection').removeClass('sidebar-inner__alert');
+    $('#api_key_connection').addClass('sidebar-inner__ok');
+  <% else %>
+    $('#api_key_connection').removeClass('sidebar-inner__ok');
+    $('#api_key_connection').addClass('sidebar-inner__alert');
+  <% end %>
+
+  $('#api_key_webhooks').removeClass('sidebar-inner__ok');
+  $('#api_key_webhooks').addClass('sidebar-inner__alert');
+<% end %>
+
+// Contacts
+<% if cards.include?('contact_edit') %>
+  $("#dash_modal").modal("show");
+  $("#dash_modal_header").html('<%= "<h6>Housecall Pro Customer Information</h6> (#{@contact.fullname})".html_safe -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'integrations/housecall/contacts/edit' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+// Employees
+<% if cards.include?('employees') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/employees/index' -%>');
+<% end %>
+
+// Import Customers
+<% if cards.include?('update_contacts_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/update_contacts/show' -%>');
+<% end %>
+
+// Import Estimates
+<% if cards.include?('import_estimates_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/import_estimates/show' -%>');
+<% end %>
+
+// Import Jobs
+<% if cards.include?('import_jobs_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/import_jobs/show' -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/instructions/show' -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/overview' -%>');
+<% end %>
+
+// Price Book
+<% if cards.include?('price_book_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/price_book/show' -%>');
+<% end %>
+
+// Push Contacts
+<% if cards.include?('push_leads_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/push_leads/edit' -%>');
+<% end %>
+
+// Webhooks
+<% if cards.include?('webhooks_index') %>
+  $('.tooltip').remove();
+  $('#integration_page_section').html('<%= j render partial: 'integrations/housecall/webhooks/index' -%>');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  $('#edit_webhook_<%= @webhook&.second&.dig('event_id') -%>').html('<%= j render partial: 'integrations/housecall/webhooks/edit' -%>');
+  <% end %>
+<% if cards.include?('webhooks_open_new') %>
+  $('#edit_webhook_<%= @webhook&.second&.dig('event_id') -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

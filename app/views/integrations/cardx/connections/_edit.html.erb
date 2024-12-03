@@ -1,0 +1,68 @@
+<%
+  # app/views/integrations/cardx/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/cardx/connections/edit"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to CardX</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <%= form_tag integrations_cardx_connections_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_text_field(
+              field:        'credentials[account]',
+              value:        presenter.client_api_integration.account,
+              label:        { title: 'CardX Link Name' },
+              html_options: { placeholder: 'CardX link name' },
+              messages:     { note: "Paste the Hosted Lightbox name provided by CardX. This is the portion of the URL after 'pay-'" }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'credentials[redirect]',
+              value:        presenter.client_api_integration.redirect,
+              label:        { title: 'Redirect (Optional)' },
+              html_options: { placeholder: 'Redirect URL' },
+              messages:     { note: 'Enter an optional URL to redirect customers to after a successful payment is made.' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'webhook-url',
+              value:    integrations_cardx_endpoint_url(presenter.client_api_integration.webhook_api_key),
+              row:      { class: 'mb-0' },
+              label:    { title: 'Webhook URL' },
+              messages: { note: 'This URL should be sent to CardX to set up the webhook.' }
+            ) %>
+        <%= bootstrap_copy_field(
+              field:    'header-token',
+              value:    presenter.client_api_integration.webhook_header_token,
+              row:      { class: 'mb-0' },
+              label:    { title: 'Webhook Header Token' },
+              messages: { note: 'This should be given to CardX to set up the webhook.' }
+            ) %>
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Credentials', disable_with: 'Saving Credentials' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

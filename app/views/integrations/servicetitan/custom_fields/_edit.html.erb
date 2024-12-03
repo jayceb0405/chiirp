@@ -1,0 +1,29 @@
+<%
+  # app/views/integrations/servicetitan/custom_fields/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/custom_fields/edit', locals: { presenter: Integrations::Servicetitan::CustomFieldsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::CustomFieldsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::CustomFieldsPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div id="custom_field_assignments">
+  <%= render partial: 'integrations/servicetitan/custom_fields/edit_custom_field_assignments', locals: { presenter: } %>
+</div>
+<div id="booking_field_assignments">
+  <%= render partial: 'integrations/servicetitan/custom_fields/edit_booking_field_assignments', locals: { presenter: } %>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_custom_fields').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

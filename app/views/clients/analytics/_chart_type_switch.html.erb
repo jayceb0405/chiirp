@@ -1,0 +1,27 @@
+<%
+  # app/views/clients/analytics/_chart_type_switch.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/analytics/chart_type_switch', locals: { chart_type: String, chart_name: String }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   chart_type: (String)
+  #   chart_name: (String)
+  #
+  chart_type = local_assigns.dig(:chart_type).to_s.downcase
+  chart_name = local_assigns.dig(:chart_name).to_s.downcase
+  chart_name = chart_name.include?('_ratio') ? chart_name.gsub('_ratio', '') : "#{chart_name}_ratio"
+-%>
+<div class="row m-3">
+  <div class="col-4 offset-md-4 text-center">
+    <%= link_to "Switch to #{chart_type == 'comparison' ? 'Ratio' : 'Comparison'} Chart", edit_clients_analytics_path(show: chart_name),
+                {
+                  class:  'btn btn-app',
+                  remote: true,
+                  method: :get
+                } %>
+  </div>
+</div>

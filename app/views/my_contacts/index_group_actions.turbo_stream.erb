@@ -1,0 +1,30 @@
+<%
+  # /app/views/my_contacts/index_group_actions.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (opt) user_setting: (Users::Setting)
+  #   (opt) broadcast:    (Boolean)
+  #   (opt) page_number:  (Integer)
+  #
+  # Local Variables:
+  #
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast   = @broadcast
+  presenter.page_number = @page_number
+%>
+
+<%= turbo_stream.update 'dash_modal_title' do %>
+  Scheduled Actions
+<% end %>
+
+<%= turbo_stream.update 'dash_modal_body' do %>
+  <%= render partial: 'my_contacts/broadcast/action_list', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.show_modal :dash_modal %>
+
+<%# update header button with schedule action count tag %>
+<%= turbo_stream.update 'central_conversation_header' do %>
+  <%= render partial: 'my_contacts/broadcast/header', locals: { broadcast: presenter.broadcast, presenter: } %>
+<% end %>
+<%= turbo_stream.bootstrap_init %>

@@ -1,0 +1,103 @@
+<%
+# app/views/user_contact_forms/v3/edit/_edit_template.html.erb
+#
+# Example:
+#   render partial: 'user_contact_forms/v3/edit/edit_template'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= form_tag api_v3_user_contact_form_path(@user_contact_form), { builder: LooperFormBuilder, remote: true, method: :patch } do %>
+
+  <%= bootstrap_text_area(
+        field:        'user_contact_form[template]',
+        value:        @user_contact_form.template,
+        row:          { columns: [0, 12] },
+        html_options: { id: 'user_contact_form_template' }
+      ) %>
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Save Template', class: 'string', id: 'user_contact_form_template_submit', disable_with: 'Saving' }]
+      ) %>
+<% end %>
+
+<script>
+  $(function () {
+    var trackable_links = <%= raw(@user_contact_form.user.client.trackable_links.collect { |tl| { title: tl.name, value: tl.original_url } }.to_json) -%>;
+
+    tinymce.init({
+      selector: 'textarea#user_contact_form_template',
+      plugins: ['preview', 'code', 'fullscreen', 'table', 'emoticons', 'media', 'image', 'link', 'lists', 'wordcount'],
+      link_list: trackable_links,
+      toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist hashtag_menu',
+      promotion: false,
+      skin: false,
+      content_css: false,
+      height: 500,
+      file_picker_types: 'image',
+      images_upload_handler: (function (blobInfo, progress) {
+        return new Promise(function (resolve, reject) {
+          var xhr, formData;
+          xhr = new XMLHttpRequest();
+          xhr.withCredentials = false;
+          xhr.open(
+            "POST",
+            "https://api.cloudinary.com/v1_1/<%= Rails.application.credentials[:cloudinary][:cloud_name] -%>/auto/upload"
+          );
+          xhr.upload.onprogress = function (e) {
+            progress((e.loaded / e.total) * 100);
+          };
+          xhr.onload = function () {
+            if (xhr.readyState == 4 && xhr.status == 200) {
+              var response = JSON.parse(xhr.responseText);
+              var url = response.secure_url; //get the url
+              var json = {
+                location: url
+              }; //set it in the format tinyMCE wants it
+              resolve(json.location);
+            }
+          };
+          formData = new FormData();
+          formData.append("file", blobInfo.blob(), blobInfo.filename());
+          formData.append("upload_preset", "MessageEmailAttachment");
+          xhr.send(formData);
+        });
+      }),
+      setup: function (editor) {
+        editor.ui.registry.addMenuButton('hashtag_menu', {
+          text: '#',
+          fetch: function (callback) {
+            var items = []
+            items.push(
+              {
+                type: 'menuitem',
+                text: 'Form',
+                onAction: function () {
+                  editor.insertContent('#{form}');
+                }
+              }
+            );
+            callback(items);
+          }
+        });
+      }
+    });
+
+    $(document).on('shown.bs.modal', '#user_contact_form_modal', function () {
+      tinymce.execCommand('mceAddEditor', false, 'user_contact_form_template');
+    });
+
+    $(document).on('hidden.bs.modal', '#user_contact_form_modal', function () {
+      tinymce.execCommand('mceRemoveEditor', false, 'user_contact_form_template');
+    });
+
+    $(document).on('focusin', function(e) {
+      if ($(e.target).closest(".tox-dialog").length) {
+        e.stopImmediatePropagation();
+      }
+    });
+  });
+</script>

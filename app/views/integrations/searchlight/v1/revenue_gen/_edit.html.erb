@@ -1,0 +1,50 @@
+<%
+  # app/views/integrations/searchlight/v1/revenue_gen/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/searchlight/v1/revenue_gen/edit', locals: ( presenter: Integrations::Searchlight::V1::Presenter)
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Searchlight::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Searchlight::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Campaigns Generating Revenue</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with model: @client_api_integration, url: integrations_searchlight_v1_revenue_gen_path, builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+        <%= bootstrap_select_tag_campaign(
+              client:       presenter.client,
+              field:        'campaign_ids',
+              label:        { title: 'Revenue Generating Campaigns' },
+              html_options: { multiple: true },
+              options:      { selected: presenter.selected_campaign_ids, include_groups: false },
+              messages:     { note: 'Select only the Campaigns that SearchLight should attribute revenue from.' }
+            ) %>
+
+        <%= f.submit_buttons(
+              buttons: [{ title: 'Save', disable_with: 'Saving' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_revenue_gen').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

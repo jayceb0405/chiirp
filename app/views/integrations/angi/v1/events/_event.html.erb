@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/angi/v1/events/_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/angi/v1/events/event', locals: { presenter: Integrations::Angi::V1::Events::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) event_id:  (String)
+  #   (req) presenter: (Integrations::Angi::V1::Events::Presenter)
+  #
+  return unless local_assigns.dig(:event_id).present? && local_assigns.dig(:presenter).is_a?(Integrations::Angi::V1::Events::Presenter)
+
+  presenter.event_from_id = event_id
+-%>
+<tr id="event_item_<%= presenter.event_id -%>">
+  <%= render partial: 'integrations/angi/v1/events/event_item', locals: { presenter: } %>
+</tr>
+
+<tr class="row-details bg-light collapse" id="edit_event_<%= presenter.event_id -%>">
+  <!-- Edit Event Here -->
+</tr>

@@ -1,0 +1,179 @@
+(function($) {
+	"use strict";
+	var win = $(window);
+
+	$(document).on('ready', function() {
+
+		/*******************
+		*  Preloader  *
+		********************/
+		var $element = $("#loader");
+		$element.fadeOut(1000);
+
+		/*******************************************
+		 *   Add/remove class on scroll to Header  *
+		 *******************************************/
+		// win.on('scroll',function() {
+		// 	var scroll = win.scrollTop();
+		// 	if (scroll >= 100) {
+		// 		$("header.header").addClass("fixed");
+		// 	} else {
+		// 		$("header.header").removeClass("fixed");
+		// 	}
+		// });
+
+		/************************************
+		*  Dropdown Menu on hover  *
+		*************************************/
+		function dropdown() {
+			var $viewportWidth = win
+			.width();
+			var $element = $('ul.navbar-nav li.dropdown');
+			if ($viewportWidth > 767) {
+				$element.on('mouseenter',function() {
+					$(this)
+					.find('.dropdown-menu')
+					.stop(true, true)
+					.delay(200)
+					.slideDown(300);
+				});
+				$element.on('mouseleave',function() {
+					$(this)
+					.find('.dropdown-menu')
+					.stop(true, true)
+					.delay(200)
+					.slideUp(300);
+				});
+			}
+		}
+		win.on('resize', dropdown);
+		dropdown();
+
+		/****************************
+		*  Responsive Equal Height  *
+		*****************************/
+		var $element = $('.equal-hight');
+		if ($element.length > 0) {
+			var $viewportWidth = win
+			.width();
+			if ($viewportWidth > 767) {
+				$element.matchHeight();
+			}
+			win.on('resize', function() {
+				if ($viewportWidth > 767) {
+					$element.matchHeight();
+				}
+			});
+		}
+
+		/*******************************
+		* Animated Background Gradient *
+		********************************/
+		var colors = new Array(
+			[62, 220, 148], 
+			[97, 177, 35], 
+			[87, 188, 225], 
+			[48, 89, 91], 
+			[63, 207, 221], 
+			[242, 154, 50]);
+
+		var step = 0;
+		//color table indices for: 
+		// current color left
+		// next color left
+		// current color right
+		// next color right
+		var colorIndices = [0, 1, 2, 3];
+
+		//transition speed
+		var gradientSpeed = 0.002;
+
+		function updateGradient() {
+
+			if ($ === undefined) return;
+
+			var c0_0 = colors[colorIndices[0]];
+			var c0_1 = colors[colorIndices[1]];
+			var c1_0 = colors[colorIndices[2]];
+			var c1_1 = colors[colorIndices[3]];
+
+			var istep = 1 - step;
+			var r1 = Math.round(istep * c0_0[0] + step * c0_1[0]);
+			var g1 = Math.round(istep * c0_0[1] + step * c0_1[1]);
+			var b1 = Math.round(istep * c0_0[2] + step * c0_1[2]);
+			var color1 = "rgb(" + r1 + "," + g1 + "," + b1 + ")";
+
+			var r2 = Math.round(istep * c1_0[0] + step * c1_1[0]);
+			var g2 = Math.round(istep * c1_0[1] + step * c1_1[1]);
+			var b2 = Math.round(istep * c1_0[2] + step * c1_1[2]);
+			var color2 = "rgb(" + r2 + "," + g2 + "," + b2 + ")";
+
+			$('.animated-gradient').css({
+				background: "-webkit-gradient(linear, left top, right top, from(" + color1 + "), to(" + color2 + "))"
+			}).css({
+				background: "-moz-linear-gradient(left, " + color1 + " 0%, " + color2 + " 100%)"
+			});
+			step += gradientSpeed;
+			if (step >= 1) {
+				step %= 1;
+				colorIndices[0] = colorIndices[1];
+				colorIndices[2] = colorIndices[3];
+
+				//pick two new target color indices
+				//do not pick the same as the current one
+				colorIndices[1] = (colorIndices[1] + Math.floor(1 + Math.random() * (colors.length - 1))) % colors.length;
+				colorIndices[3] = (colorIndices[3] + Math.floor(1 + Math.random() * (colors.length - 1))) % colors.length;
+			}
+		}
+
+		setInterval(updateGradient, 10);
+
+		/***************************
+		*  Couter up  						 *
+		****************************/
+		var $element = $('.counter');
+		if ($element.length > 0) {
+			$element.counterUp({
+				delay: 10,
+				time: 1000
+			});
+		}
+
+		/*****************************
+		*  Smooth Scrolling To Div   *
+		******************************/
+		var $element = $(".scroll-link");
+		if ($element.length > 0) {
+			$element.on('click', function(event) {
+				if (this.hash !== "") {
+					event.preventDefault();
+					var hash = this.hash;
+					$('html, body').animate({
+						scrollTop: $(hash).offset().top
+					}, 800, function() {});
+				}
+			});
+		}
+
+		/***************************
+		*  Scroll to top Action  *
+		***************************/
+		var $element = $('.scroll-top');
+		win.on("scroll", function() {
+			if ($(this)
+				.scrollTop() > 100) {
+				$('.scroll-top').fadeIn();
+			} else {
+				$('.scroll-top').fadeOut();
+			}
+		});
+
+		$element.on("click", function() {
+			var $scrollElement = $("html, body");
+			$scrollElement.animate({
+				scrollTop: 0
+			}, 600);
+			return false;
+		});
+	});
+})(jQuery);

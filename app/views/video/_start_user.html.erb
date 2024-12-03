@@ -1,0 +1,60 @@
+<%
+	# app/views/video/_start_user.html.erb
+	# 
+	# Example:
+	# 	render partial: "video/start_user", locals: { room_name: String, token: String }
+	# 
+	# Required Instance Variables:
+	# 	@contact: (Contact)
+	# 	@user:    (User)
+	# 
+	# Required Local Variables:
+	# 	room_name: (String)
+	# 	token:     (String)
+	# 
+	room_name = local_assigns.include?(:room_name) ? local_assigns[:room_name].to_s : ""
+	token     = local_assigns.include?(:token) ? local_assigns[:token].to_s : ""
+-%>
+<div class="row">
+	<div class="col-8">
+		<div class="embed-responsive embed-responsive-16by9" id="primary-video-container"></div>
+
+		<div class="row">
+			<div class="col-6 embed-responsive embed-responsive-16by9" id="participant-container"></div>
+			<div class="col-6 embed-responsive embed-responsive-16by9" id="local-participant-container"></div>
+		</div>
+
+		<div id="log"></div>
+	</div>
+	<div class="col-4" id="contact_info"></div>
+</div>
+
+<script>
+	$(function () {
+		$('#video_modal_title').html('<%= j render partial: 'video/start_user_title' -%>');
+
+		$('#send_email_invite').on('click', function(e) {
+			e.preventDefault();
+
+			$.ajax({
+				type: 'POST',
+				dataType: "json",
+				url: '<%= video_send_invite_path -%>',
+				data: { contact_id: '<%= @contact.id -%>', user_id: '<%= @user.id -%>', type: 'email' }
+			});
+		});
+
+		$('#send_text_invite').on('click', function(e) {
+			e.preventDefault();
+
+			$.ajax({
+				type: 'POST',
+				dataType: "json",
+				url: '<%= video_send_invite_path -%>',
+				data: { contact_id: '<%= @contact.id -%>', user_id: '<%= @user.id -%>', type: 'text' }
+			});
+		});
+	});
+</script>
+
+<%= render partial: "video/js/video_call", locals: { full_name: @user.fullname, room_name: room_name, token: token, user: true } %>

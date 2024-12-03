@@ -1,0 +1,39 @@
+<%
+  # app/views/contacts/import/_form_actions.html.erb
+  #
+  # Example:
+  #   render partial: 'contacts/import/form_actions', locals: { presenter: Contacts::Import::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Contacts::Import::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Import::Presenter)
+-%>
+<%= bootstrap_switch_field(
+      field:  'overwrite',
+      value:  1,
+      values: [1, 0],
+      label:  { title: 'Update existing Contacts' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'user_id',
+      label:        { title: 'Assign All New Contacts to' },
+      html_options: { id: 'user_id' },
+      options:      { array: presenter.options_for_users, selected: presenter.client.def_user_id }
+    ) %>
+<% if presenter.client.groups_count.positive? %>
+  <div id="import_group">
+    <%= render partial: 'groups/select_or_add', locals: { user: presenter.user, group: presenter.client.groups.new, select_or_add_field_name: 'group_id', select_or_add_div_id: 'import_group' } %>
+  </div>
+<% end %>
+
+<div id="import_tag">
+  <%= render partial: 'tags/select_or_add', locals: { user: presenter.user, tag: presenter.client.tags.new, select_or_add_field_name: 'tag_id', select_or_add_div_id: 'import_tag' } %>
+</div>
+
+<%= bootstrap_submit_buttons(
+      buttons: [{ title: 'Import File', disable_with: 'Importing', id: 'button_import_file' }]
+    ) %>

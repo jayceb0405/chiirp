@@ -1,0 +1,26 @@
+<%
+  # app/views/user_contact_forms/v2/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: 'user_contact_forms/v2/js/show', locals: { cards: (Array) }
+  # 
+  # Required Instance Variables:
+  #   cards[1]
+  #     @user_contact_forms: (UserContactForms)
+  #   cards[2]
+  #     @user_contact_form:  (UserContactForm)
+  #   cards[3]
+  #     none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('edit_form') %>
+  $('#user_contact_forms_body').html('<%= j render partial: 'user_contact_forms/v2/edit/edit' -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,50 @@
+<%
+  # app/views/clients/stage_parents/stages/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/stage_parents/stages/edit', locals: { client_stages_presenter: ClientStagesPresenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   client_stages_presenter: (ClientStagesPresenter)
+  #
+  csp = local_assigns.dig(:client_stages_presenter)
+-%>
+<td colspan="7">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= csp.stage.name.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= csp.stage.name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: [csp.stage_parent.client, csp.stage_parent, csp.stage], builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "stage_form_#{csp.stage_parent.id}_#{csp.stage.id}", novalidate: true } do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: " #{Stage.title} Name" },
+              html_options: { minlength: 2, placeholder: " #{Stage.title} Name", required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.select :show_custom_fields, {
+              label:        { title: 'Custom Fields' },
+              html_options: { multiple: true, mobile: browser.device.mobile? },
+              choices:      { for_select: options_for_client_custom_fields(csp.stage_parent.client, csp.stage.show_custom_fields), blank: 'Select Custom Fields' },
+              messages:     { note: 'Select Custom Fields to display for Contacts when shown in this Stage.' }
+            } %>
+        <%= bootstrap_select_tag_campaign(
+              client:       csp.stage_parent.client,
+              field:        'stage[campaign_id]',
+              label:        { title: 'Start Campaign' },
+              html_options: { id: 'stage_campaign_id' },
+              options:      { selected: csp.stage.campaign_id, active_only: true },
+              messages:     { note: 'Select a Campaign to start when a Contact is added to this Stage.' }
+            ) %>
+        <%= f.submit_buttons buttons: [{ title: "Save #{Stage.title}", id: "stage_button_#{csp.stage.id}", disable_with: "Saving #{Stage.title}" }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

@@ -1,0 +1,26 @@
+<%
+  # app/views/integrations/servicemonster/employees/_employee.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicemonster/employees/employee", collection: @client_api_integration.employees, as: :employee, locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<tr>
+  <td>
+    <%= employee[:name] -%> <small>(<%= employee[:id] -%>)</small><br>
+  </td>
+  <td>
+    <%= bootstrap_select_tag(
+          field:    "employees[#{employee[:id]}]",
+          row:      { columns: [0, 12] },
+          options:  { for_select: options_from_collection_for_select(presenter.client_api_integration.client.users, 'id', 'fullname', presenter.client_api_integration.employees.dig(employee[:id].to_s)), blank: 'Select a User' },
+          messages: { note: "Select a matching #{I18n.t('tenant.name')} User." }
+        ) %>
+  </td>
+</tr>

@@ -1,0 +1,60 @@
+<%
+  # app/views/clients/tags/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/tags/edit'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #   @tag:  (tag)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter     = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+  presenter.tag = @tag
+-%>
+<td colspan="7">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.tag.name.to_s.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.tag.name -%> </h3>
+    </div>
+
+    <div class="col">
+
+      <%= form_with model: presenter.tag, url: presenter.tag.new_record? ? client_tags_path(presenter.client.id) : client_tag_path(presenter.client.id, presenter.tag.id), builder: LooperFormBuilder, remote: true, class: 'needs-validation card-body d-flex flex-column', id: "tag_form_#{presenter.tag.id}", novalidate: true do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: 'Tag Name' },
+              html_options: { minlength: 2, placeholder: 'Tag Name', required: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= bootstrap_color_picker(
+              field: 'tag[color]',
+              value: presenter.tag_color,
+              label: { title: 'Tag Color' }
+            ) %>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>When a Tag is Applied</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: presenter.tag.campaign_id, campaign_id_field: 'tag[campaign_id]',
+                group: presenter.tag.group, group_id_field: 'tag[group_id]',
+                tag: presenter.tag.tag, tag_id_field: 'tag[tag_id]',
+                stage_id: presenter.tag.stage_id, stage_id_field: 'tag[stage_id]',
+                stop_campaign_ids: presenter.tag.stop_campaign_ids, stop_campaign_ids_field: 'tag[stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', id: "tag_button_#{presenter.tag.id}", disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

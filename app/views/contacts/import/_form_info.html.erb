@@ -1,0 +1,49 @@
+<%
+# app/views/contacts/import/_form_info.html.erb
+#
+# Example:
+#   render partial: 'contacts/import/form_info'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="card ml-4 mr-4 mt-3 mb-3 bg-transparent shadow-none">
+  <div class="card-header border-0">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto">Import Contacts Instructions</span>
+    </div>
+  </div>
+
+  <div class="card-body border-0">
+    <ul>
+      <li>Your account is permitted to import up to <strong><%= Contact.model_name.human(count: current_user.client.import_contacts_count) -%></strong> at a time.</li>
+      <li><%= I18n.t('tenant.name') -%> can import an Excel spreadsheet (.xlsx) or Comma Separated Value file (.csv).</li>
+      <li>Your file may (or may not) include a header row at the top naming each column.</li>
+      <li>You will have the opportunity to match up file columns with <%= I18n.t('tenant.name') -%> data after selecting a file.</li>
+      <li>Your file may include the following columns:<br>First Name, Last Name, Address Line 1, Address Line 2, City, State, Zip Code, Phone, Email, Birthdate, Ok To Text, Ok To Email, Reference ID</li>
+      <ul>
+        <li>Fullname may be substituted for Firstname, Lastname.</li>
+        <li>When using Fullname it will be parsed for Firstname, Lastname.</li>
+        <li>Ok To Text: "1", "y", "yes" or "ok" are all acceptable for Yes (case-insensitive / default: No)</li>
+        <li>Ok To Email: "1", "y", "yes" or "ok" are all acceptable for Yes (case-insensitive / default: No)</li>
+      </ul>
+      <li>Your file MUST include at least one of the following columns:<br>First Name, Last Name, Phone, Email or Company Name</li>
+      <li>Any number of Phone columns may be imported.</li>
+      <li>Each spreadsheet row is processed as follows:</li>
+      <ol>
+        <li>The Contact (from external source) ID field is used to locate an existing Contact.</li>
+        <li>If not found, the phone number fields are used to locate an existing Contact.</li>
+        <li>If not found, the email address is used to locate an existing Contact.</li>
+        <li>If not found, a new Contact is created.</li>
+        <li>Data with NO first name, last name, phone numbers, email addresses or ID from external source will be ignored.</li>
+      </ol>
+      <li>Any number of Tag columns with the header "Tag" are optional. When included, the specific tag will be applied. The Tag will be created if not found.</li>
+      <li>Groups and Tags will only be applied to existing Contacts when "Update Existing Contacts" is selected.</li>
+      <li>File import processing: Your file will be pre-processed then queued for post-process importing. Watch the first instructions bullet (top / green) for updates.</li>
+    </ul>
+  </div>
+</div>

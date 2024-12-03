@@ -1,0 +1,24 @@
+<%
+  # app/views/package_pages/_select_package_page_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'package_pages/select_package_page_dropdown'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select a Package/Page</span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% @package_pages.each_with_index do |package_page| %>
+    <a href="#" class="dropdown-item option_package_page ml-3" id="<%= package_page.id -%>"><%= package_page.name -%></a>
+  <% end %>
+</div>

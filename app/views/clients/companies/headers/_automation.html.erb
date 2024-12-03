@@ -1,0 +1,31 @@
+<%
+  # app/views/clients/companies/headers/_automation.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/headers/automation', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+-%>
+<tr>
+  <th colspan="3" class="text-left" style="min-width: 240px">Company</th>
+  <th class="align-bottom text-left">Started</th>
+  <th class="align-bottom text-center">AI Agents</th>
+  <th class="align-bottom text-center">Email Templates</th>
+  <th class="align-bottom text-center">Campaigns</th>
+  <th class="align-bottom text-center">QuickPages</th>
+  <th class="align-bottom text-center">Surveys</th>
+  <th class="align-bottom text-center">SiteChat</th>
+  <th class="align-bottom text-center">Trackable Links</th>
+  <th class="align-bottom text-center">Groups</th>
+  <th class="align-bottom text-center"><%= StageParent.title.pluralize -%></th>
+  <th style="width:150px; min-width:150px;"></th>
+</tr>
+<tr>
+  <td colspan="12" class="text-center"><span class="text-success">Sharable</span> / <span class="text-danger">Not Sharable</span></td>
+</tr>

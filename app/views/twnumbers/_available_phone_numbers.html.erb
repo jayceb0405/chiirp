@@ -1,0 +1,38 @@
+<%
+  # app/views/twnumbers/_available_phone_numbers.html.erb
+  #
+  # Example:
+  #   render partial: 'twnumbers/available_phone_numbers', collection: @available_phone_numbers, as: :number, locals: { referer: String }
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (req) number: {
+  #     phone_number: (String),
+  #     city:         (String),
+  #     state:        (String)
+  #   }
+  #   (opt) referer: (String)
+  #
+  referer = local_assigns.dig(:referer).presence || 'phone_numbers'
+-%>
+<tr>
+  <td class="align-middle px-0" style="width:100px;">
+    <%= link_to '<i class="fa fa-thumbs-up mr-2"></i>Request'.html_safe, client_twnumbers_path(@client.id),
+                method: :post,
+                class:  'pr-0 select_tag',
+                remote: true,
+                style:  'text-decoration: none;',
+                data:   { params: { phone_number: number[:phone_number], commit: 'buy', referer: }.to_param } %>
+  </td>
+  <td>
+    <%= number_to_phone(number[:phone_number].to_s) %>
+  </td>
+  <td>
+    <%= number[:city].to_s %>
+  </td>
+  <td>
+    <%= number[:state].to_s %>
+  </td>
+</tr>

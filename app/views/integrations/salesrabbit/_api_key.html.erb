@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/salesrabbit/_api_key.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/salesrabbit/api_key"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">API Key</h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: integrations_salesrabbit_api_key_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+      <%= f.text_field :api_key, {
+            label: { title: 'SalesRabbit API Token' },
+        html_options: { placeholder: 'API Token', required: true, autofocus: true },
+        messages: { note: '* Required. Copy from SalesRabbit / Integrations / API.' }
+      } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Token', disable_with: 'Saving Token' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_api_key').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,45 @@
+<%
+  # app/views/integrations/five9/lead_sources/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/lead_sources/edit'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Lead Sources</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: @user_api_integration, url: integrations_five9_lead_source_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', novalidate: true } do |f| %>
+      <%= bootstrap_select_tag(
+        field: 'lead_sources',
+            label: { title: 'Lead Sources' },
+        html_options: { multiple: true },
+        options: { array: [['Select a Tag', 0]] + @client_api_integration.client.tag_collection_options(false, []), selected: @client_api_integration.lead_sources },
+        messages: { note: 'Select all Tags used to define how a lead (Contact) was aquired.' }
+      ) %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    $('.nav-link').removeClass('active');
+    $('#link_lead_source').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

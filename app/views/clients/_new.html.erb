@@ -1,0 +1,413 @@
+<%
+  # app/views/clients/_new.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/new'
+  #
+  # Instance Variables:
+  #   (req) @client:         (Client)
+  #   (req) @package:        (Package)
+  #   (req) @package_page:   (PackagePage)
+  #   (opt) @user:           (User)
+  #
+  # Local Variables:
+  #   (opt) self_create:     (Boolean) true: client created / false: super_admin created
+  #
+  self_create       = local_assigns[:self_create].is_a?(TrueClass) ? local_assigns[:self_create] : false
+  collapsed         = !@client.new_record?
+  form_local        = (self_create ? true : false)
+  form_remote       = (self_create ? false : true)
+  @user             = defined?(@user) ? @user : @client.users.new
+  charge_card_amt   = if (@package.first_payment_delay_days + @package.first_payment_delay_months).zero?
+                        @package.promo_months.positive? ? @package.promo_mo_charge.to_d : @package.mo_charge.to_d
+                      else
+                        0
+                      end
+  charge_card_amt += @package.setup_fee.to_d
+
+  presenter = Clients::Dlc10::V2::Presenter.new(client: @client)
+-%>
+<div class="app_collapse">
+  <%= render partial: 'layouts/alerts', locals: { models: [@client, @user] } %>
+  <% unless self_create %>
+    <a class="app_collapse__header<%= collapsed ? ' collapsed' : '' -%>" data-toggle="collapse" href="#client_form_collapse">
+      <h4>Company Info</h4>
+      <span class="collapse-icon fa fa-arrow-circle-down"></span>
+    </a>
+  <% end %>
+
+  <div class="collapse app_collapse-inner p-2<%= collapsed ? '' : ' show' -%>" id="client_form_collapse">
+    <%= form_with model: @client, id: 'client_form', builder: LooperFormBuilder, local: form_local, remote: form_remote, class: 'needs-validation', novalidate: true do |f| %>
+      <%= hidden_field_tag :self_create, self_create %>
+      <%= hidden_field_tag :send_invite, self_create %>
+      <%= hidden_field_tag :package_id, @package.id %>
+      <%= hidden_field_tag :package_page_id, @package_page.id %>
+      <%= hidden_field_tag 'client[card_token]', '', { id: 'card_token' } %>
+
+      <% if @client.new_record? %>
+        <h4>About <%= self_create ? 'me' : 'user' -%></h4>
+        <%= bootstrap_text_field(
+              field:        'user[firstname]',
+              value:        @user.firstname,
+              row:          { columns: [0, 12] },
+              label:        { title: 'First name' },
+              html_options: { id: 'input_user_firstname', placeholder: 'First Name', minlength: 2, required: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'user[lastname]',
+              value:        @user.lastname,
+              row:          { columns: [0, 12] },
+              label:        { title: 'Last name' },
+              html_options: { id: 'input_user_lastname', placeholder: 'Last Name', minlength: 2, required: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            ) %>
+        <%= bootstrap_text_field(
+              field:        'user[email]',
+              value:        @user.email,
+              row:          { class: 'mb-4', columns: [0, 12] },
+              label:        { title: 'Email address' },
+              html_options: { id: 'input_user_email', placeholder: 'Email', required: true },
+              prepends:     [{ button: false, label: '<i class="fa fa-envelope"></i>' }],
+              messages:     { note: "This will be your username when logging in to #{I18n.t('tenant.name')}. It must not be already in use." }
+            ) %>
+
+        <% if self_create %>
+          <%= hidden_field_tag :send_invite, true %>
+        <% else %>
+          <%= bootstrap_switch_field(
+                field:  'send-invite',
+                value:  @client.new_record?,
+                row:    { class: 'mt-2', columns: [3, 9] },
+                values: %w[1 0],
+                label:  { title: 'Send invitation' }
+              ) %>
+        <% end %>
+      <% end %>
+
+      <h4 class="mt-3">Company</h4>
+
+      <%= f.text_field :name, {
+            row:          { columns: [0, 12] },
+            label:        { title: 'Company name' },
+            html_options: { id: 'input_companyname', placeholder: 'Company Name', minlength: 5, required: true },
+            messages:     { note: 'Must be minimum of 5 characters.' }
+          } %>
+      <% if @client.new_record? && @package.dlc10_required %>
+        <%= f.text_field :legal_name, {
+              row:          { columns: [0, 12] },
+              label:        { title: 'Company legal name' },
+              html_options: { id: 'input_legalname', minlength: 5, placeholder: 'Company Legal Name', required: true },
+              messages:     { note: 'Must be the legal business name registered with the IRS. An exact match is required for approval. Must be minimum of 5 characters.' }
+            } %>
+      <% end %>
+      <%= f.text_field :address1, {
+            row:          { columns: [0, 12] },
+            label:        { title: 'Address' },
+            html_options: { id: 'input_client_address1', placeholder: 'Address', required: true }
+          } %>
+      <%= f.text_field :address2, {
+            row:          { columns: [0, 12] },
+            html_options: { placeholder: 'Address (line #2)' }
+          } %>
+      <%= f.text_field :city, {
+            row:          { columns: [0, 12] },
+            label:        { title: 'City' },
+            html_options: { id: 'input_client_city', placeholder: 'City', required: true }
+          } %>
+      <%= f.select :state, {
+            row:          { columns: [0, 12] },
+            choices:      { for_select: options_for_state(country: %w[US Canada], selected: @client.state), blank: 'State' },
+            label:        { title: 'State' },
+            html_options: { id: 'input_client_state', required: true }
+          } %>
+      <%= f.text_field :zip, {
+            row:          { columns: [0, 12] },
+            html_options: { id: 'input_client_zip', placeholder: 'Postal Code', maxlength: 6, required: true },
+            label:        { title: 'Postal code' }
+          } %>
+      <%= bootstrap_select_tag(
+            field:        'client[country]',
+            row:          { columns: [0, 12] },
+            label:        { title: 'Country' },
+            html_options: { mobile: browser.device.mobile?, required: true },
+            options:      { array: [['United States', 'US'], %w[Canada CA]], selected: 'US', blank: 'Select a Country' }
+          ) %>
+      <%= f.telephone_field :phone, {
+            row:          { columns: [0, 12] },
+            label:        { title: 'Cell phone number' },
+            html_options: { value: number_to_phone(@client.phone), id: 'input_client_phone_number', placeholder: 'Cell Phone Number', required: true },
+            messages:     { note: 'Must be exactly 10 digits and ONLY include numbers (0-9).' }
+          } %>
+      <%= f.time_zone_select :time_zone, {
+            row:          { columns: [0, 12] },
+            label:        { title: 'Time zone where your business is located' },
+            html_options: { id: 'time_zone', required: true },
+            messages:     { note: 'All times shown are based on time zone selected.' }
+          } %>
+
+      <% if @client.new_record? && @package.dlc10_required %>
+        <h4 class="mt-4 mb-3">10DLC brand info</h4>
+        <%= f.fields_for :dlc10_brand do |dlc_form| %>
+          <%= dlc_form.select :entity_type, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Business type' },
+                html_options: { id: 'input_business_type', required: true, mobile: browser.device.mobile? },
+                choices:      { array: presenter.options_for_brand_entity_type, selected: presenter.client&.dlc10_brand&.entity_type }
+              } %>
+          <%= dlc_form.text_field :ein, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Employer id (EIN)' },
+                html_options: { id: 'input_ein_field', required: true, minlength: 9, maxlength: 9, placeholder: 'Employer ID' },
+                messages:     { note: 'Must be exactly 9 digits and ONLY include numbers (0-9).' }
+              } %>
+          <%= dlc_form.select :ein_country, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'EIN issuing country' },
+                html_options: { mobile: browser.device.mobile?, required: true },
+                choices:      { array: [['United States', 'US'], %w[Canada CA]], selected: presenter.client&.dlc10_brand&.ein_country }
+              } %>
+          <%= dlc_form.text_field :website, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Website' },
+                html_options: { placeholder: 'Website URL' }
+              } %>
+          <%= dlc_form.text_field :support_email, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Support email' },
+                html_options: { placeholder: 'Support Email', required: true }
+              } %>
+          <%= dlc_form.select :vertical, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Business segment' },
+                html_options: { id: 'input_business_segment', required: true, mobile: browser.device.mobile? },
+                choices:      { array: presenter.options_for_brand_verticals, selected: presenter.client&.dlc10_brand&.vertical, blank: 'Select a Business Segment' }
+              } %>
+          <%= dlc_form.select :alt_business_id_type, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Alternate business identifier type' },
+                html_options: { id: 'input_business_id_type', required: true, mobile: browser.device.mobile? },
+                choices:      { array: presenter.options_for_brand_alt_business_id_type, selected: presenter.client&.dlc10_brand&.alt_business_id_type }
+              } %>
+          <%= dlc_form.text_field :alt_business_id, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Alternate business identifier' },
+                html_options: { id: 'input_alt_business_id', placeholder: 'Identifier' }
+              } %>
+          <%= dlc_form.select :stock_exchange, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Stock exchange' },
+                html_options: { id: 'input_stock_exchange', required: true, mobile: browser.device.mobile? },
+                choices:      { array: presenter.options_for_brand_stock_exchange, blank: 'Select a Stock Exchange' }
+              } %>
+          <%= dlc_form.text_field :stock_symbol, {
+                row:          { columns: [0, 12] },
+                label:        { title: 'Stock symbol' },
+                html_options: { id: 'input_stock_symbol', placeholder: 'Stock Symbol' }
+              } %>
+        <% end %>
+      <% end %>
+
+      <% unless @client.new_record? %>
+        <div class="form-group">
+          <%= label_tag 'def_user_id', 'Assign all new contacts to', { class: 'form-group-label mb-0 text-muted' } %>
+          <%= f.collection_select :def_user_id,
+                                  @client.users,
+                                  # @client.users.where("id IS NOT NULL"),
+                                  :id, :fullname,
+                                  {},
+                                  { class: 'form-control', id: 'def_user_id', style: 'width: 100%;' } %>
+        </div>
+      <% end %>
+
+      <% if self_create && @package.requires_credit_card? %>
+        <h4 class="mt-4 mb-3">Payment</h4>
+
+        <%= bootstrap_info_field(
+              info: "Your card will be charged #{number_to_currency(charge_card_amt)}",
+              row:  { class: 'my-3', columns: [0, 12] },
+              col:  { class: 'mb-0' }
+            ) %>
+
+        <!-- credit card processing -->
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Add Credit Card</h6></legend>
+          <%= render partial: 'layouts/credit_card', locals: { form_id: 'client_form', card_token_id: 'card_token', submit_button_text: 'Create My Account', submit_button_disable_with: 'Creating Account...', package: @package.name, base_form_validation_function: 'baseFormValidate' } %>
+        </fieldset>
+        <!-- /.credit card processing -->
+      <% else %>
+        <%= f.submit_buttons buttons: [{ title: 'Create account', class: 'btn-client-form-submit', disable_with: 'Creating account...' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#time_zone').selectpicker('val', jstz.convert_tz_to_rails(Intl.DateTimeFormat().resolvedOptions().timeZone))
+
+    $('#input_user_email').on('focusout', function (e) {
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= validate_unique_email_url -%>',
+        data: { email: $('#input_user_email').val() },
+        success: function(result) {
+          if (result == 'false') {
+            ChiirpAlert({
+              'title': 'Email Address Unavailable',
+              'body':'Email address ' + $('#input_user_email').val() + ' is already in use. Please use a different address.',
+              'type':'danger',
+              'persistent':true
+            });
+            $('#input_user_email').val('');
+          }
+        }
+      });
+    });
+  });
+
+  function baseFormValidate() {
+    if ($('#input_user_firstname').val().length < 2) {
+      ChiirpAlert({
+        'title':      'Invalid First Name',
+        'body':       'Your first name must be a minimum of 2 characters.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_user_lastname').val().length < 2) {
+      ChiirpAlert({
+        'title':      'Invalid Last Name',
+        'body':       'Your last name must be a minimum of 2 characters.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_user_email').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Email',
+        'body':       'Your email address is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_companyname').val().length < 5) {
+      ChiirpAlert({
+        'title':      'Invalid Company Name',
+        'body':       'Your company name must be a minimum of 5 characters.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_client_address1').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Address',
+        'body':       'Your address is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_client_city').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid City',
+        'body':       'Your city is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_client_state').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid State',
+        'body':       'Your state is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_client_zip').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Zip',
+        'body':       'Your zip is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_client_phone_number').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Phone Number',
+        'body':       'Your phone number is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    <% if @client.new_record? && @package.dlc10_required %>
+    } else if ($('#input_legalname').val().length < 5) {
+      ChiirpAlert({
+        'title':      'Invalid Company Legal Name',
+        'body':       'Your company legal name must be a minimum of 5 characters.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_business_type').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Business Type',
+        'body':       'Your business type is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_ein_field').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Employer ID',
+        'body':       'Your Employer ID is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_ein_field').val().length != 9) {
+      ChiirpAlert({
+        'title':      'Invalid Employer ID',
+        'body':       'Your Employer ID must be 9 digits.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_business_segment').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Business Segment',
+        'body':       'Your Business Segment is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_business_id_type').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Business ID Type',
+        'body':       'Your Business ID Type is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_stock_exchange').val().length == 0) {
+      ChiirpAlert({
+        'title':      'Invalid Stock Exchange Setting',
+        'body':       'Your Stock Exchange is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    } else if ($('#input_stock_symbol').val().length > 0 && ($('#input_stock_exchange').val().length == 0 || $('#input_stock_exchange').val() == 'NONE')) {
+      ChiirpAlert({
+        'title':      'Invalid Stock Exchange Setting',
+        'body':       'Your Stock Exchange is required.',
+        'type':       'warning',
+        'persistent': true
+      });
+      return false;
+    <% end %>
+    } else {
+      return true;
+    }
+  }
+</script>

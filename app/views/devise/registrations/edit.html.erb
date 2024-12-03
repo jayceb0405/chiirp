@@ -1,0 +1,61 @@
+<%
+# app/views/devise/registrations/edit.html.erb
+#
+# Devise change password
+#
+# Example:
+# 	render partial: 'devise/registrations/edit'
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'devise/shared/header' %>
+
+<%= form_for resource, as: resource_name, url: user_registration_path, builder: LooperFormBuilder, html: { class: 'auth-form-noborder needs-validation mb-5', novalidate: true, method: :put } do |f| %>
+  <h4 class="text-left pb-3">Change password</h4>
+  <%= f.hidden_field :email -%>
+
+  <% if resource.errors&.full_messages.present? %>
+    <div class="text-danger animated iteration-2 heartBeat">
+      <%= resource.errors.full_messages.join(', ') %>.
+    </div>
+  <% end %>
+
+  <% if devise_mapping.confirmable? && resource.pending_reconfirmation? %>
+    <div class="form-group">
+      <div class="form-label-group">
+        Currently waiting confirmation for: <%= resource.unconfirmed_email %>
+      </div>
+    </div>
+  <% end %>
+
+  <%= f.password_field :current_password, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'Current' },
+        html_options: { id: 'input_current_password', placeholder: 'Password', autocomplete: 'off', required: true, autofocus: true },
+        prepends:     []
+      } %>
+  <%= f.password_field :password, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'New' },
+        html_options: { id: 'input_password', placeholder: "Password #{@minimum_password_length ? " (min #{@minimum_password_length} chars)" : ''}", minlength: @minimum_password_length, autocomplete: 'off', required: true },
+        prepends:     []
+      } %>
+  <%= f.password_field :password_confirmation, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'Confirm' },
+        html_options: { id: 'input_password_confirmation', placeholder: "New Password #{@minimum_password_length ? " (min #{@minimum_password_length} chars)" : ''}", minlength: @minimum_password_length, autocomplete: 'off', required: true },
+        prepends:     []
+      } %>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Change' }]
+      ) %>
+<% end -%>

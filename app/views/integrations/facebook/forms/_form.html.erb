@@ -1,0 +1,76 @@
+<%
+  # app/views/integrations/facebook/forms/_form.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/forms/form', locals: { user_id: String, form_id: String }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter               = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+  presenter.facebook_form = local_assigns.dig(:form_id).to_s
+  page_id                 = local_assigns.dig(:page_id).to_s
+  form                    = (presenter.page_forms(local_assigns.dig(:user_id), page_id).find { |f| f.dig(:id) == local_assigns.dig(:form_id).to_s } || {}).deep_symbolize_keys
+-%>
+<%= form_tag integrations_facebook_leads_form_path(local_assigns.dig(:form_id).to_s), builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', novalidate: true do %>
+  <%= hidden_field_tag 'forms[id]', form.dig(:id).to_s %>
+  <%= hidden_field_tag 'forms[page_id]', page_id %>
+  <%= hidden_field_tag 'forms[user_id]', local_assigns.dig(:user_id).to_s %>
+
+  <% form.dig(:questions).to_a.each do |question| %>
+    <% question_key = question.dig(:key).to_s.to_sym %>
+
+    <%= bootstrap_select_tag(
+          field:   "forms[questions][#{question_key}][custom_field_id]",
+          label:   { title: question.dig(:label).to_s },
+          options: { array: presenter.options_for_key_hash, selected: presenter.facebook_form.dig(:questions, question_key, :custom_field_id).to_s, prompt: 'Matching Field or Skip' }
+        ) %>
+
+    <% question.dig(:options).to_a.each do |option| %>
+      <% option_key = option.dig(:key).to_s.to_sym %>
+
+      <%= bootstrap_select_tag(
+            field:   "forms[questions][#{question_key}][#{option_key}]",
+            label:   { title: "Response: #{option.dig(:value)}" },
+            options: { array: presenter.options_for_campaign_hash, selected: presenter.facebook_form.dig(:questions, question_key, option_key).to_s, prompt: 'Select a Campaign' }
+          ) %>
+    <% end %>
+  <% end %>
+
+  <fieldset class="border rounded p-2 mt-3 mb-2">
+    <legend class="w-auto mb-0"><h6>All Contacts</h6></legend>
+
+    <% if presenter.campaigns_allowed %>
+      <%= bootstrap_select_tag(
+            field:   'forms[campaign_id]',
+            label:   { title: 'Start Campaign' },
+            options: { array: presenter.options_for_campaign_hash, selected: presenter.facebook_form.dig(:campaign_id).to_i, blank: 'Select a Campaign' }
+          ) %>
+    <% end %>
+
+    <% if presenter.groups_allowed %>
+      <div id="group_id_<%= page_id -%>_<%= local_assigns.dig(:form_id).to_s -%>">
+        <%= render partial: 'groups/select_or_add', locals: { user: current_user, group: presenter.facebook_form_group || presenter.client.groups.new, select_or_add_field_name: 'forms[group_id]', select_or_add_div_id: "group_id_#{page_id}_#{@facebook_form_id}" } %>
+      </div>
+    <% end %>
+
+    <div id="tag_id_<%= page_id -%>_<%= local_assigns.dig(:form_id).to_s -%>">
+      <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: presenter.facebook_form_tag || presenter.client.tags.new, select_or_add_field_name: 'forms[tag_id]', select_or_add_div_id: "tag_id_#{page_id}_#{@facebook_form_id}" } %>
+    </div>
+
+    <% if presenter.stages_allowed %>
+      <%= bootstrap_select_tag(
+            field:   'forms[stage_id]',
+            label:   { title: 'Move to Stage' },
+            options: { for_select: option_groups_from_collection_for_select(StageParent.where(client: presenter.client), :stages, :name, :id, :name, presenter.facebook_form.dig(:stage_id).to_i), blank: 'Select a Stage' }
+          ) %>
+    <% end %>
+  </fieldset>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Save', disable_with: 'Saving' }]
+      ) %>
+<% end %>

@@ -1,0 +1,51 @@
+<%
+# app/views/user_contact_form_marketplaces/index.html.erb
+#
+# Example:
+# 	render "user_contact_form_marketplaces/index"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-filter mr-2"></i>QuickPages Marketplace</h1>
+
+        <div class="btn-toolbar">
+          <%= link_to '<i class="fa fa-file-invoice mr-2"></i>QuickPage Editor'.html_safe, user_contact_forms_path, {
+                class: 'btn btn-light',
+                id:    'button_user_contact_forms'
+              } %>
+        </div>
+      </div>
+    </header>
+
+    <% if current_user.team_member? && @user_contact_forms_unapproved.any? %>
+      <div class="page-section">
+        <h3>QuickPages Awaiting Approval</h3>
+        <div class="row mt-2 ml-0 mr-4">
+          <%= render partial: 'user_contact_form_marketplaces/user_contact_form', collection: @user_contact_forms_unapproved %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="page-section">
+      <div class="row mt-2 ml-0 mr-4">
+
+        <% if @user_contact_forms.any? %>
+          <%= render partial: 'user_contact_form_marketplaces/user_contact_form', collection: @user_contact_forms %>
+        <% else %>
+          <p class="ml-2">No QuickPages have been added yet. Please try back soon.</p>
+        <% end %>
+      </div>
+      <div id="modal_user_contact_form_container"></div>
+    </div>
+  </div>
+</div>

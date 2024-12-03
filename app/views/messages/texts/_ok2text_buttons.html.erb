@@ -1,0 +1,38 @@
+<%
+  # app/views/messages/texts/_ok2text_buttons.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/ok2text_buttons', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return if presenter.contact&.new_record? || !presenter.show_ok2text?
+-%>
+<% if !presenter.contact&.new_record? && presenter.contact.ok2text.to_i == 1 %>
+  <%= button_tag(type: 'button', id: "text_ok_button_#{presenter.message_id}", class: 'btn btn-light rounded-pill') do %>
+    <i class="fa fa-check text-success pr-1" style="line-height:inherit;"></i>OK to Text
+  <% end %>
+<% elsif !presenter.contact&.new_record? %>
+  <%= button_tag(type: 'button', id: "text_ok_button_#{presenter.message_id}", class: 'btn btn-light rounded-pill') do %>
+    <i class="fa fa-times text-danger pr-1" style="line-height:inherit;"></i>Not OK to Text
+  <% end %>
+<% end %>
+
+<script>
+  $(function() {
+    $(document).off('click', '#text_ok_button_<%= presenter.message_id -%>');
+    $(document).on('click', '#text_ok_button_<%= presenter.message_id -%>', function (e) {
+      e.preventDefault();
+      $.ajax({
+        method: 'POST',
+        dataType: 'script',
+        url: '<%= central_toggle_ok_2_text_path(presenter.contact) -%>'
+      });
+    });
+  });
+</script>

@@ -1,0 +1,21 @@
+<%
+  # app/views/clients/phone_numbers/sorted_routing/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/phone_numbers/sorted_routing/index', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client:   (Client)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Clients::PhoneNumbers::Presenter.new(client: @client)
+-%>
+<div class="row ml-1 mr-1 mb-3 border" data-toggle="sortable" data-draggable=".sortable-tile" data-handle=".drag-handle">
+  <div class="sortable-tile w-100">
+    <ul class="sortable-lists list-group list-group-flush" id="data_table_<%= presenter.twnumber.id -%>" data-toggle="sortable" data-group="pages">
+      <%= render partial: 'clients/phone_numbers/sorted_routing/route', collection: presenter.pass_routing_selected, as: :route, locals: { presenter: } %>
+    </ul>
+  </div>
+</div>

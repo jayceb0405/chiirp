@@ -1,0 +1,17 @@
+<%
+   # integrations/facebook/pages/index.turbo_stream.erb
+   #
+   # Example:
+   #   render partial: 'integrations/facebook/pages/index'
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) user_api_integration: (UserApiIntegration)
+   #
+   return unless @user_api_integration.is_a?(UserApiIntegration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/facebook/pages/index' %>
+<% end %>

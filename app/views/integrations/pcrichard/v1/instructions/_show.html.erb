@@ -1,0 +1,80 @@
+<%
+  # app/views/integrations/pcrichard/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Pcrichard::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">PC Richard Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>The PC Richard Integration provides an automated communication platform for receiving & updating installation orders for products sold by PC Richard.</li>
+      <li>An installation agreement is required with PC Richard.</li>
+      <li>Currently available models are updated each day at 6am Eastern Time (they may also be updated manually).</li>
+      <li>The PC Richard order/installation flow is as follows...</li>
+      <ol>
+        <li>PC Richard receives an inquiry in store or online and passes the lead info to <%= I18n.t('tenant.name') -%>.</li>
+        <li><%= I18n.t('tenant.name') -%> Campaigns are triggered to collect info from the lead, models are selected and info is submitted to PC Richard.</li>
+        <ul>
+          <li>Model selections are submitted from a Contact selection in Message Central. Click the vertical ellipsis above the message thread & click "PC Richard".</li>
+        </ul>
+        <li>PC Richard makes the sale and the lead becomes a customer. Model sold is passed back to <%= I18n.t('tenant.name') -%>.</li>
+        <li><%= I18n.t('tenant.name') -%> Campaigns are triggered, the installation date is determined then info is submitted to PC Richard.</li>
+        <ul>
+          <li>The installation date is submitted using a Campaign action.</li>
+        </ul>
+        <li>Installation is completed, <%= I18n.t('tenant.name') -%> Campaigns are started and info is passed back to PC Richard.</li>
+        <ul>
+          <li>The completion date is submitted using a Campaign action.</li>
+        </ul>
+      </ol>
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>Share authorization data with PC Richard.</li>
+      <li>Receive PC Richard Authorization Token, copy and paste here.</li>
+      <li>Copy New Lead URL & Customer Updates URL and send to PC Richard.</li>
+    </ul>
+
+    <h6>Leads:</h6>
+    <ul>
+      <li>Select <%= I18n.t('tenant.name') -%> Custom Fields where a PC Richard invoice number & request date will be automatically saved upon receipt from PC Richard.</li>
+      <li>Select Campaign, Group, Tag & Stage as desired to start automations.</li>
+    </ul>
+
+    <h6>Orders:</h6>
+    <ul>
+      <li>Select <%= I18n.t('tenant.name') -%> Custom Fields where a model number & order sale date will be automatically saved upon receipt from PC Richard.</li>
+      <li>Select Campaign, Group, Tag & Stage as desired to start automations.</li>
+    </ul>
+
+    <h6>Custom Fields:</h6>
+    <ul>
+      <li>Select <%= I18n.t('tenant.name') -%> Custom Fields where selected models, installation charged, receipt notes & internal notes will be saved prior to sending info back to PC Richard.</li>
+      <li>This info will be automatically sent to PC Richard to contact the customer and complete the sale.</li>
+    </ul>
+
+    <h6>Models:</h6>
+    <ul>
+      <li>The currently available models will be listed.</li>
+      <li><%= I18n.t('tenant.name') -%> model Custom Fields are updated every day at 6:00am Eastern time with the currently available models.</li>
+      <li>Click "Update Model Custom Fields" to update all <%= I18n.t('tenant.name') -%> model Custom Fields with the currently available models (necessary if models are changed after 6:00am by PC Richard).</li>
+    </ul>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,59 @@
+<%
+  # app/views/integrations/jobber/v20231115/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobber/v20231115/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) cards: Array
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Jobber::V20231115::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Connection
+<% if cards.include?('connections_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/connections/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Employees
+<% if cards.include?('employees') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/employees/index', locals: { presenter: } -%>');
+<% end %>
+
+// Import Contacts
+<% if cards.include?('show_import_contacts') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/import_contacts/show', locals: { presenter: } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/instructions/show', locals: { presenter: } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/overview', locals: { presenter: } -%>');
+<% end %>
+
+// Push Contacts Tag
+<% if cards.include?('push_contacts_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/push_contacts/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Webhooks
+<% if cards.include?('webhooks_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobber/v20231115/webhooks/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  $('#edit_webhook_<%= @webhook&.second&.dig('event_id') -%>').html('<%= j render partial: 'integrations/jobber/v20231115/webhooks/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('webhooks_open_new') %>
+  $('#edit_webhook_<%= @webhook&.second&.dig('event_id') -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,32 @@
+<%
+  # app/views/integrations/calendly/_appointment.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/calendly/appointment'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="mx-5">
+  <%= form_with model: @contact, builder: LooperFormBuilder do |f| %>
+    <%= f.copy_field :fullname, {
+      row: { columns: [2, 10] },
+      label: { title: 'Name' }
+    } %>
+    <%= f.copy_field :primary_phone, {
+      row: { columns: [2, 10] },
+      html_options: { value: number_to_phone(@contact.primary_phone&.phone.to_s) },
+      label: { title: 'Phone' }
+    } %>
+    <%= f.copy_field :email, {
+      row: { columns: [2, 10] },
+      label: { title: 'Email' }
+    } %>
+  <% end %>
+</div>
+
+<%= @user_api_integration.embed_script.html_safe %>

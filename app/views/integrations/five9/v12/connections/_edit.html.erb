@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/five9/v12/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/five9/v12/show"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::five9::V12::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Five9::V12::Connection::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect <%= I18n.t('tenant.name') -%> to Five9</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_five9_v12_connections_path, builder: LooperFormBuilder, method: :patch, data: { turbo: true, turbo_stream: true }, html: { class: 'needs-validation', id: 'contact_form', novalidate: true } do |f| %>
+
+      <%= bootstrap_text_field(
+            field:        'credentials[username]',
+            value:        presenter.client_api_integration.credentials.dig('username').to_s,
+            label:        { title: 'Username' },
+            html_options: { placeholder: 'Username', required: true, autofocus: false },
+            prepends:     [{ button: false, label: '<i class="fa fa-key"></i>' }],
+            messages:     { note: "This is a Five9 Administrator's username." }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'credentials[password]',
+            value:        presenter.client_api_integration.credentials.dig('password').to_s,
+            label:        { title: 'Auth Token' },
+            html_options: { password: true, placeholder: 'Password', required: true, autofocus: false },
+            prepends:     [{ button: false, label: '<i class="fa fa-key"></i>' }],
+            messages:     { note: "This is a Five9 Administrator's password." }
+          ) %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save Credentials', disable_with: 'Saving Credentials' }]
+          ) %>
+
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

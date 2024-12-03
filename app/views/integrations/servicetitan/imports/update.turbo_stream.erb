@@ -1,0 +1,18 @@
+<%
+  # /app/views/integrations/servicetitan/imports/update.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Servicetitan::ImportsPresenter.new(@client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/servicetitan/imports/show', locals: { presenter: } %>
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<%= turbo_stream.bootstrap_init %>

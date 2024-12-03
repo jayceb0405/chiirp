@@ -1,0 +1,68 @@
+<%
+  # app/views/integrations/servicetitan/events/events/_list_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/list_event', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<td class="text-center align-middle" style="width: 1.5rem">
+  <%= link_to '',
+              edit_integrations_servicetitan_events_event_path(presenter.event_id),
+              {
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-angle-right collapse-indicator',
+                id:    "collapse_indicator_#{presenter.event_id}",
+                data:  {
+                  turbo:        true,
+                  turbo_stream: true
+                }
+              } %>
+</td>
+<td class="text-left align-middle" colspan="2">
+  <%= link_to presenter.event_type_string,
+              edit_integrations_servicetitan_events_event_path(presenter.event_id),
+              {
+                class: 'btn text-left',
+                id:    "collapse_indicator_#{presenter.event_id}",
+                data:  {
+                  turbo:        true,
+                  turbo_stream: true
+                }
+              } %>
+</td>
+<td class="text-left align-middle"><%= presenter.customer_type_string -%></td>
+<td class="text-left align-middle"><%= presenter.show_status_in_index? ? presenter.status_string : '' -%></td>
+<td class="text-left align-middle"><%= truncate(presenter.job_types_string, length: 25) -%></td>
+<td class="text-left align-middle"><%= truncate(presenter.business_units_string, length: 25) -%></td>
+<td class="text-left align-middle"><%= presenter.membership_string -%></td>
+<%= content_tag(:td, class: 'text-left align-middle') { presenter.campaign&.name.to_s } if presenter.campaigns_allowed %>
+<%= content_tag(:td, class: 'text-left align-middle') { presenter.group&.name.to_s } if presenter.groups_allowed %>
+<td class="text-left align-middle"><%= presenter.tag&.name.to_s -%></td>
+<%= content_tag(:td, class: 'text-left align-middle') { presenter.stage&.name.to_s } if presenter.stages_allowed %>
+<td class="text-right align-middle">
+  <%= link_to '',
+              edit_integrations_servicetitan_events_event_path(presenter.event_id),
+              {
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt collapse-indicator',
+                id:    "collapse_indicator_#{presenter.event_id}",
+                data:  {
+                  turbo:        true,
+                  turbo_stream: true
+                }
+              } %>
+  <%= link_to '',
+              integrations_servicetitan_events_event_path(presenter.event_id),
+              {
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt action_delete',
+                data:  {
+                  id:   presenter.event_id,
+                  name: ([presenter.event_type_string, presenter.customer_type_string, presenter.status_string, presenter.business_units_string, presenter.membership_string] + (presenter.show_totals_in_index? ? ["#{number_to_currency(presenter.total_min)} to #{number_to_currency(presenter.total_max)}"] : [])).compact_blank.join(', ')
+                }
+              } %>
+</td>

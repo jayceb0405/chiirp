@@ -1,0 +1,330 @@
+<%
+  # app/views/messages/_ggl_message_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/ggl_message_fields', locals: { presenter: CentralPresenter }
+  #
+  # Required Instance Variables:
+  #   (opt) @message:          (Messages::Message)
+  #   (opt) @file_attachments: (Array)
+  #
+  # Local Variables:
+  #   (req) presenter:      (CentralPresenter)
+  #   (opt) contacts_array: (Array)
+  #   (opt) show_msg_delay: (Boolean)
+  #   (opt) show_submit:    (Boolean)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+
+  contacts_array      = [] if local_assigns[:contacts_array].nil? || !contacts_array.is_a?(Array)
+  show_msg_delay      = local_assigns[:show_msg_delay].nil?
+  show_payment_request = true if local_assigns[:show_payment_request].nil? && presenter.ok2cardx?
+  show_submit         = local_assigns[:show_submit].nil?
+  message             = @message || presenter.contact.messages.new
+  fieldset_disabled   = !presenter.ok2google? && contacts_array.empty?
+  file_attachments    = @file_attachments || []
+%>
+<%= hidden_field_tag :msg_type, 'ggl' %>
+<%= hidden_field_tag :contact_id, presenter.contact.id %>
+<%= hidden_field_tag :user_id, presenter.contact.user_id %>
+<%= hidden_field_tag :contacts_array, contacts_array %>
+<%= hidden_field_tag :file_attachments, file_attachments.to_json, { id: 'file_attachments' } %>
+
+<div class="media-body" id="live_message_form_<%= presenter.contact.id %>">
+
+  <% unless fieldset_disabled %>
+    <div id="message_area">
+      <span id="message_spinner" class="file-upload-spinner spinner-border text-primary" role="status" style="display:none;z-index:1000;"></span>
+      <div id="message_files" class="file-upload-area"></div>
+      <div class="form-group has-typeahead-scrollable">
+        <%= text_area_tag 'message[message]',
+                          message.message,
+                          {
+                            id:          'emoji_textarea',
+                            class:       'form-control border-1 shadow-none typeahead',
+                            style:       'min-height:50px;padding-right:30px;',
+                            placeholder: 'Type a Message (drag & drop files)...',
+                            spellcheck:  'true'
+                          } %>
+      </div>
+    </div>
+
+    <div class="form-group" id="scheduler_options" style="display:none;">
+      <div class="input-group input-group-alt flatpickr" value="">
+        <div class="input-group-prepend">
+          <%= button_tag '', { class: 'btn btn-secondary fa fa-calendar', title: 'toggle', id: 'button_ggl_page_scheduler_calendar_open', type: 'button' } %>
+          <%= button_tag '', { class: 'btn btn-secondary fa fa-times', id: 'button_ggl_page_scheduler_calendar_clear', type: 'button' } %>
+        </div>
+        <%= text_field_tag 'message[msg_delay]',
+                           '',
+                           {
+                             id:           'ggl_page_scheduler_calendar',
+                             class:        'form-control',
+                             placeholder:  'Select Date / Time',
+                             autocomplete: 'off'
+                           } %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if show_payment_request %>
+  <div class="form-group" id="payment_request_options" style="display:none;">
+    <div class="input-group input-group-alt flatpickr" value="">
+      <div class="input-group-prepend">
+        <span class="input-group-text">$</span>
+      </div>
+      <%= text_field_tag 'message[payment_request]',
+                         '',
+                         {
+                           id:           'text_payment_request',
+                           class:        'form-control',
+                           placeholder:  'Request amount',
+                           disabled:     fieldset_disabled,
+                           type:         'number',
+                           min:          '0',
+                           step:         '0.01',
+                           autocomplete: 'off'
+                         } %>
+    </div>
+  </div>
+  <% end %>
+</div>
+
+<div>
+  <div class="ml-2 pr-2 pb-1">
+    <% unless fieldset_disabled || browser.device.mobile? %>
+      <button type="button" class="btn btn-light btn-icon" id="button_emoji"><i class="fa fa-smile"></i></button>
+    <% end %>
+
+    <% if !fieldset_disabled && !presenter.contact&.new_record? && show_msg_delay %>
+      <%= button_tag(type: 'button', id: 'scheduler_button', class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-clock"></i>
+      <% end %>
+    <% end %>
+
+    <% if !fieldset_disabled && !presenter.contact&.new_record? && !presenter.current_phone_number.empty? && show_payment_request %>
+      <%= button_tag(type: 'button', id: 'payment_button', class: 'btn btn-light btn-icon', disabled: fieldset_disabled) do %>
+        <i class="fa fa-dollar-sign"></i>
+      <% end %>
+    <% end %>
+
+    <% if !fieldset_disabled && presenter.client.text_message_images_allowed %>
+      <%= button_tag(type: 'button', id: 'file_upload_button', class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-image"></i>
+      <% end %>
+    <% end %>
+  </div>
+
+  <% unless fieldset_disabled %>
+    <div class="ml-2 pr-2 pb-1">
+
+      <% if show_submit %>
+        <%= button_tag(type: 'submit', class: 'btn btn-light rounded-pill', id: 'send_button', style: 'width:auto;') do %>
+          <i class="fa fa-paper-plane"></i> Send Google Message
+        <% end %>
+      <% end %>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    var send_to_contact_ok = false;
+
+    <% unless fieldset_disabled %>
+      autosize($('#emoji_textarea'));
+
+      <% unless browser.device.mobile? %>
+        $('#emoji_textarea').emojiPicker({
+          width: '280px',
+          height: '250px',
+          button: false,
+          position: 'right',
+          onShow: function(picker, settings, isActive) {
+            // $('.emojiPicker').css({top: 100});
+            if ((parseInt(picker.css('top')) + parseInt(picker.css('height'))) >= $(window).height()) {
+              var distance = $(window).height() - (parseInt(picker.css('height')) + 50);
+              picker.css('top', distance + 'px');
+            }
+          },
+          onHide: function(picker, settings, isActive) {
+          }
+        });
+
+        $('#button_emoji').on('click', function(e) {
+          $('#emoji_textarea').emojiPicker('toggle');
+        });
+      <% end %>
+
+      // provide #hashtag variable selector
+      MultiTypeahead('#emoji_textarea', <%= options_for_hashtag(client: presenter.client).to_json.html_safe %>, '#', true);
+
+      $(document).off('blur', '#emoji_textarea');
+      $(document).on('blur', '#emoji_textarea', function(e) {
+        $.ajax({
+          method: 'PATCH',
+          dataType: 'script',
+          url: '<%= central_update_message_meta_path -%>',
+          data: {
+            contact_id: '<%= presenter.contact.id -%>',
+            focus: 'off'
+          }
+        });
+      });
+
+      $(document).off('focus', '#emoji_textarea');
+      $(document).on('focus', '#emoji_textarea', function(e) {
+        $.ajax({
+          method: 'PATCH',
+          dataType: 'script',
+          url: '<%= central_update_message_meta_path -%>',
+          data: {
+            contact_id: '<%= presenter.contact.id -%>',
+            focus: 'on'
+          }
+        });
+      });
+
+      <% if show_submit && current_user.submit_text_on_enter %>
+        $('#emoji_textarea').on('keydown', function(e) {
+          if(e.which === 13 && !e.shiftKey) {
+            if (e.ctrlKey) {
+              return true;
+            }
+            e.preventDefault();
+            $('#send_button').click();
+          }
+        });
+      <% end %>
+
+      $('#text_message_form').submit(function(e) {
+
+        setTimeout(function() {
+          file_attachments = [];
+          $('#file_attachments').val(JSON.stringify([]));
+        }, 100);
+      });
+
+      // payment request
+      $(document).off('click', '#payment_button');
+      $(document).on("click", "#payment_button", function (e) {
+        e.preventDefault();
+        $("#payment_request_options").toggle();
+      });
+
+      // scheduler calendar
+      $(document).off('click', '#scheduler_button');
+      $(document).on("click", "#scheduler_button", function (e) {
+        e.preventDefault();
+        $("#scheduler_options").toggle();
+      });
+
+      $('#ggl_page_scheduler_calendar').flatpickr({
+        altFormat: 'm/d/Y G:i K',
+        allowInput: false,
+        dateFormat: 'm/d/Y G:i K',
+        defaultDate: '',
+        enableTime: true,
+        mode: 'single', // single, multiple, range
+        minDate: '<%= Time.current.in_time_zone(presenter.contact.client.time_zone).strftime('%m/%d/%Y %H:%M %p') -%>',
+        maxDate: '',
+        plugins: [
+          new confirmDatePlugin({
+            showAlways: true
+          })
+        ]
+      });
+
+      $('#button_ggl_page_scheduler_calendar_open').on('click', function(e) {
+        setTimeout(function(){
+          document.querySelector("#ggl_page_scheduler_calendar")._flatpickr.open();
+        }, 0);
+      });
+      $('#button_ggl_page_scheduler_calendar_clear').on('click', function(e) {
+        document.querySelector("#ggl_page_scheduler_calendar")._flatpickr.clear();
+        document.querySelector("#ggl_page_scheduler_calendar")._flatpickr.close();
+      });
+    <% end %>
+  });
+
+  // disable auto discover
+  Dropzone.autoDiscover  = false;
+
+  var file_attachments   = <%= file_attachments.to_json.html_safe -%>;
+  var image_id           = '';
+
+  $("#message_area").dropzone( {
+    method: 'POST',
+    url: '<%= user_file_upload_url(current_user) -%>',
+    maxFilesize: 150,
+    paramName: "file",
+    addRemoveLinks: false,
+    acceptedFiles: '<%= UploadableMimeTypes.all_mime_types.join(',') -%>',
+    previewsContainer: "#message_files",
+    clickable: '#file_upload_button',
+    previewTemplate: '<div class="dz-preview dz-file-preview"><div class="dz-error-message"><span data-dz-errormessage></span></div></div>',
+    headers: {
+      'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+    },
+    sending: function(file, response){
+      $('#message_files').fadeTo( "slow", 0.3 );
+      $('#message_spinner').show();
+    },
+    success: function(file, response){
+      if ( parseInt(response.fileId) > 0 ) {
+        file_attachments.push({ id: response.fileId, type: 'user', url: response.fileUrl });
+        updateImages();
+      }
+    },
+    error: function(file, response) {
+      $('#message_spinner').hide();
+      $('#message_files').fadeTo( "slow", 1 );
+      ChiirpAlert({
+        'title':      'Oops...',
+        'body':       response + ' Please try again.',
+        'type':       'danger',
+        'persistent': true
+      });
+    }
+  });
+
+  function createTag(item) {
+    return '<div class="message_image_wrap" style="display:inline-block;"><span id="message_image_close_' + item.id + '" class="message_image_close">&times;</span><img src="' + item.url + '" class="message_image"></div>';
+  }
+
+  function updateImages() {
+
+    if ( file_attachments.length > 0 ) {
+      $('#message_files').css('padding','5px');
+      $('#message_files').html(file_attachments.map(createTag));
+      $('#message_spinner').hide();
+      $('#message_files').fadeTo( "slow", 1 );
+
+      $('.message_image_close').on('mouseover', function() {
+        $(this).css('cursor', 'pointer');
+      });
+
+      $('.message_image_close').on('click', function() {
+        image_id = $(this).attr('id').replace('message_image_close_', '');
+        file_attachments = file_attachments.filter(deleteImage);
+        updateImages();
+      });
+    } else {
+      $('#message_files').html('');
+      $('#message_files').css('padding','0px');
+    }
+
+    // $('#message_file_ids').val(file_attachments.map(createFileIds).join(','));
+    $('#file_attachments').val(JSON.stringify(file_attachments));
+  }
+
+  function deleteImage(value, index, array) {
+    return value.id != image_id;
+  }
+
+  function createFileIds(item) {
+    return item.id;
+  }
+
+  updateImages();
+</script>

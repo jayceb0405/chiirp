@@ -1,0 +1,28 @@
+<%
+  # app/views/integrations/callrail/v3/events/_outbound_post_call_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/events/outbound_post_call_fields', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+  presenter.account_and_company_id = presenter.event[:account_company_id]
+-%>
+
+<legend class="w-auto mb-0"><h6>Post Call Event</h6></legend>
+
+<%= bootstrap_select_tag(
+      field:        'event[answered]',
+      label:        { title: 'Answered' },
+      options:      { for_select: options_for_select([['', ''], %w[Yes true], %w[No false]], presenter.event[:answered]) },
+      html_options: { multiple: false },
+      messages:     { note: 'Was the call answered?' }
+    ) %>
+
+<%= render partial: 'call_event_fields', locals: { presenter: } %>

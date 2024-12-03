@@ -1,0 +1,139 @@
+// app/assets/stylesheets/common/dash_buttons.scss
+.dash-button {
+  background-color: $primary;
+  box-shadow: $input-box-shadow;
+  font-size: 15px;
+  color: $white;
+  margin-bottom: 20px;
+  border-radius: 5px;
+  height: 85px;
+  border: 1px solid $primary;
+
+  .btn-select {
+    border-color: rgba(#000000, .15);
+    background: #fff;
+
+    &:focus {
+      border-color: $input-focus-border-color;
+    }
+  }
+
+  &__handle {
+    cursor: grab;
+  }
+}
+
+.dash-button-alpha {
+  position: relative;
+  background-color: $primary;
+
+  &__header {
+    align-items: left;
+    padding: 3px;
+    font-size: 12px;
+    font-weight: 600;
+    color: $white;
+    background-color: $white;
+    border-bottom: 1px solid rgba($white, .6);
+    border-radius: 5px;
+  }
+
+  &__body {
+    padding: 16px 17px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__amount {
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: $white;
+  }
+
+  &__icon {
+    font-size: 30px;
+    line-height: 30px;
+    height: 30px;
+    color: $white;
+  }
+
+  &__description {
+    color: $white;
+  }
+
+  &__handle {
+    position: relative;
+    left: 5px;
+    bottom: 22px;
+    color: $white;
+    cursor: grab;
+  }
+
+  &__footer {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: $white;
+  }
+
+  &__ghost {
+    opacity: .3;
+    background: $primary;
+  }
+}
+
+.dash-button-statistic-g {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  min-height: 146px;
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  &__title {
+    font-size: 20px;
+    line-height: 20px;
+  }
+
+  &__desc {
+    color: $secondary;
+  }
+
+  &__chart {
+    width: 50px;
+    height: 50px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0px;
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    &-text {
+      position: relative;
+      top: 12px;
+      left: 20px;
+      font-size: 20px;
+      line-height: 20px;
+      font-weight: 700;
+      color: lighten($success, 40%);
+    }
+  }
+}
+
+.list-group-dashboard {
+  flex-direction: unset;
+}

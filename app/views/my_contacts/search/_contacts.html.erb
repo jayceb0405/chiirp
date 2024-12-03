@@ -1,0 +1,175 @@
+<%
+  # app/views/my_contacts/search/_contacts.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/search/contacts', locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_setting: (Users::Setting)
+  #
+  # Local Variables:
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#search_contacts">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="font-weight-bold">
+    <i class="fa fa-user mr-2"></i>Contacts
+
+    <% unless local_assigns.dig(:collapsed).to_bool %>
+      <span class="badge badge-warning">Filters Applied</span>
+    <% end %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="search_contacts">
+  <td colspan="2" class="ml-0 mr-0 search_td">
+    <!-- Sleep -->
+    <%= bootstrap_select_tag(
+          field:        'data[sleep]',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Sleep' },
+          html_options: { id: 'sleep' },
+          options:      { array: [['All Contacts', 'all'], ['Sleeping', true], ['Not Sleeping', false]], selected: @user_setting.data.dig(:sleep) }
+        ) %>
+
+    <!-- Block -->
+    <%= bootstrap_select_tag(
+          field:        'data[block]',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Block' },
+          html_options: { id: 'block' },
+          options:      { array: [['All Contacts', 'all'], ['Blocking', true], ['Not Blocking', false]], selected: @user_setting.data.dig(:block) }
+        ) %>
+
+    <!-- OK 2 Text -->
+    <%= bootstrap_select_tag(
+          field:        'data[ok2text]',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'OK to Text' },
+          html_options: { id: 'ok2text' },
+          options:      { array: [['All Contacts', 2], ['OK to Text', 1], ['Not OK to Text', 0]], selected: @user_setting.data.dig(:ok2text).to_i }
+        ) %>
+
+    <!-- OK 2 Email -->
+    <%= bootstrap_select_tag(
+          field:        'data[ok2email]',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'OK to Email' },
+          html_options: { id: 'ok2email' },
+          options:      { array: [['All Contacts', 2], ['OK to Email', 1], ['Not OK to Email', 0]], selected: @user_setting.data.dig(:ok2email).to_i }
+        ) %>
+
+    <!-- has phone numbers -->
+    <%= bootstrap_select_tag(
+          field:        'data[has_number]',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Has Number' },
+          html_options: { id: 'has_number' },
+          options:      { array: [['All Contacts', '']] + presenter.client.contact_phone_labels_for_select, selected: @user_setting.data.dig(:has_number).to_s }
+        ) %>
+
+    <!-- not has phone numbers -->
+    <%= bootstrap_select_tag(
+          field:        'data[not_has_number]',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Does Not Have Number' },
+          html_options: { id: 'not_has_number' },
+          options:      { array: [['All Contacts', '']] + presenter.client.contact_phone_labels_for_select, selected: @user_setting.data.dig(:not_has_number).to_s }
+        ) %>
+
+    <!-- Contacts created -->
+    <%= bootstrap_select_tag(
+          field:        'data[created_at_dynamic]',
+          row:          { class: 'mb-1', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Date Created' },
+          html_options: { id: 'created_at_dynamic' },
+          options:      { array: options_for_dynamic_dates(@user_setting.data.dig(:created_at_dynamic).to_s), blank: 'Select a Time Period' }
+        ) %>
+    <%= bootstrap_calendar_field(
+          field:        'data[created_at]',
+          value:        presenter.user_setting_created_at_string,
+          row:          { id: 'created_at_row', display: !@user_setting.data.dig(:created_at_dynamic).to_s.empty?, columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0' },
+          html_options: { id: 'created_at', placeholder: 'Custom Time Period' },
+          flatpickr:    { include_time: true, mode: 'range' }
+        ) %>
+
+    <!-- Contact updated -->
+    <%= bootstrap_select_tag(
+          field:        'data[updated_at_dynamic]',
+          row:          { class: 'mb-1', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Date Updated' },
+          html_options: { id: 'updated_at_dynamic' },
+          options:      { array: options_for_dynamic_dates(@user_setting.data.dig(:updated_at_dynamic).to_s), blank: 'Select a Time Period' }
+        ) %>
+    <%= bootstrap_calendar_field(
+          field:        'data[updated_at]',
+          value:        presenter.user_setting_updated_at_string,
+          row:          { id: 'updated_at_row', display: !@user_setting.data.dig(:updated_at_dynamic).to_s.empty?, columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0' },
+          html_options: { id: 'updated_at', placeholder: 'Custom Time Period' },
+          flatpickr:    { include_time: true, mode: 'range' }
+        ) %>
+
+    <!-- Days Since Last Contact -->
+    <%= bootstrap_range_slider(
+          field:        'data[since_last_contact]',
+          row:          { class: 'mr-3', columns: [0, 12] },
+          col:          { class: 'ml-2 mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mb-0', title: 'Days since last contact' },
+          html_options: { id: 'since_last_contact' },
+          range_slider: { min: 0, max: 90, from: @user_setting.data.dig(:since_last_contact).to_i, type: 'single', postfix: ' days', grid: true, grid_num: 5 }
+        ) %>
+  </td>
+</tr>
+
+<script>
+  $(function () {
+    $('#created_at_dynamic').on('change', function() {
+
+      if ($('#created_at_dynamic').val() == '') {
+        $('#created_at_row').show();
+      } else {
+        $('#created_at').val('');
+        $('#created_at_row').hide();
+      }
+    });
+
+    $('#updated_at_dynamic').on('change', function() {
+
+      if ($('#updated_at_dynamic').val() == '') {
+        $('#updated_at_row').show();
+      } else {
+        $('#updated_at').val('');
+        $('#updated_at_row').hide();
+      }
+    });
+  });
+</script>

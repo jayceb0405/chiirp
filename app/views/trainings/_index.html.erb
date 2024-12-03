@@ -1,0 +1,61 @@
+<%
+  # app/views/trainings/_index.html.erb
+  # 
+  # Example:
+  #   render partial: 'trainings/index', locals: { trainings_presenter: TrainingsPresenter }
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training)
+  return unless TrainingPage.user_authorized?(current_user, tp.training, 'edit')
+-%>
+<h4 class="card-title"> All Training Courses </h4>
+<div class="sidebar-inner__separator"></div>
+
+<% if current_user.super_admin? %>
+  <div class="btn-toolbar d-flex justify-content-end mb-2">
+    <%= link_to '<i class="fa fa-plus mr-2"></i>New'.html_safe,
+        new_training_path, {
+        class:  'btn btn-light',
+        remote: true,
+        method: :get
+      }
+    %>
+  </div>
+<% end %>
+
+<%= render partial: 'trainings/training', collection: tp.trainings, locals: { trainings_presenter: tp } -%>
+
+<script>
+  $(function() {
+    $(document).off('click', '.training_delete');
+    $(document).on('click', '.training_delete', function(e) {
+      e.preventDefault();
+
+      var trainingid = $(this).data('trainingid');
+      var name       = $(this).data('name');
+
+      ChiirpAlert({
+        'body':'Deleting "' + name + '" can NOT be un-done. Is it your intention to delete this entire Course?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/trainings/' + trainingid
+        });
+      });
+    });
+  });
+</script>

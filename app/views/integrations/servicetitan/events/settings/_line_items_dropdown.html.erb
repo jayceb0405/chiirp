@@ -1,0 +1,32 @@
+<%
+  # app/views/integrations/servicetitan/events/settings/_line_items_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/settings/line_items_dropdown', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= form_with url: integrations_servicetitan_events_settings_path, builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: :patch, class: 'needs-validation', novalidate: true do |f| %>
+  <%= f.select :ignore_sold_with_line_items, {
+        label:        { title: 'ServiceTitan Line Items' },
+        html_options: { multiple: true, count_selected_text: 'line items', mobile: browser.device.mobile? },
+        choices:      { array: presenter.options_for_line_items, selected: presenter.ignore_sold_with_line_items, live_search: true },
+        messages:     { note: 'Select line items that will disqualify an estimate from counting as sold.' }
+      } %>
+
+  <h6>Call Completion Events</h6>
+  <%= bootstrap_range_slider(
+        field:        'call_event_delay',
+        label:        { title: 'Call Event Delay' },
+        range_slider: { min: 0, max: 300, from: presenter.call_event_delay, type: 'single', postfix: ' seconds', grid: true, grid_num: 10 },
+        messages:     { note: 'Delay processing of Call Events to allow users to complete call processing data entry.' }
+      ) %>
+
+  <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+<% end %>

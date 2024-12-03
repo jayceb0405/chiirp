@@ -1,0 +1,90 @@
+<%
+  # app/views/welcome/js/_init.js.erb
+  # 
+  # Example:
+  #   render partial: "welcome/js/init"
+  # 
+  # Required Instance Variables:
+  #   @package_page_key: (String)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+(function() {
+  document.onreadystatechange = function () {
+    if (document.readyState === 'complete') {
+      ajax_get('<%= welcome_pricing_url(@package_page_key) -%>', function(data) {
+
+        if (data['package_01'] && document.getElementById('package_01')) {
+          document.getElementById('package_01_name').innerHTML = data['name']
+          document.getElementById('package_01_mo_charge').innerHTML = data['package_data']['mo_charge']
+          document.getElementById('package_01_max_voice_recordings').innerHTML = data['package_data']['max_voice_recordings']
+          document.getElementById('package_01_mo_credits').innerHTML = data['package_data']['mo_credits']
+          document.getElementById('package_01_first_payment_delay_days').innerHTML = data['package_data']['first_payment_delay_days']
+          document.getElementById('package_01_first_payment_delay_months').innerHTML = data['package_data']['first_payment_delay_months']
+          document.getElementById('package_01_rvm_credits').innerHTML = data['package_data']['rvm_credits']
+          document.getElementById('package_01_credit_charge').innerHTML = data['package_data']['credit_charge']
+          document.getElementById('package_01_trial_credits').innerHTML = data['package_data']['trial_credits']
+          document.getElementById('package_01_widgets_count').innerHTML = data['package_data']['widgets_count']
+          document.getElementById('package_01_campaigns_count').innerHTML = data['package_data']['campaigns_count']
+          document.getElementById('package_01_max_users_count').innerHTML = data['package_data']['max_users_count']
+          document.getElementById('package_01_max_phone_numbers').innerHTML = data['package_data']['max_phone_numbers']
+          document.getElementById('package_01_quick_leads_count').innerHTML = data['package_data']['quick_leads_count']
+          document.getElementById('package_01_user_chat_allowed').innerHTML = data['package_data']['user_chat_allowed']
+          document.getElementById('package_01_max_contacts_count').innerHTML = data['package_data']['max_contacts_count']
+          document.getElementById('package_01_phone_call_credits').innerHTML = data['package_data']['phone_call_credits']
+          document.getElementById('package_01_text_image_credits').innerHTML = data['package_data']['text_image_credits']
+          document.getElementById('package_01_custom_fields_count').innerHTML = data['package_data']['custom_fields_count']
+          document.getElementById('package_01_folders_count').innerHTML = data['package_data']['folders_count']
+          document.getElementById('package_01_groups_count').innerHTML = data['package_data']['groups_count']
+          document.getElementById('package_01_stages_count').innerHTML = data['package_data']['stages_count']
+          document.getElementById('package_01_surveys_count').innerHTML = data['package_data']['surveys_count']
+          document.getElementById('package_01_share_surveys_allowed').innerHTML = data['package_data']['share_surveys_allowed']
+          document.getElementById('package_01_message_central_allowed').innerHTML = data['package_data']['message_central_allowed']
+          document.getElementById('package_01_my_contacts_allowed').innerHTML = data['package_data']['my_contacts_allowed']
+          document.getElementById('package_01_phone_calls_allowed').innerHTML = data['package_data']['phone_calls_allowed']
+          document.getElementById('package_01_rvm_allowed').innerHTML = data['package_data']['rvm_allowed']
+          document.getElementById('package_01_text_message_credits').innerHTML = data['package_data']['text_message_credits']
+          document.getElementById('package_01_import_contacts_count').innerHTML = data['package_data']['import_contacts_count']
+          document.getElementById('package_01_share_funnels_allowed').innerHTML = data['package_data']['share_funnels_allowed']
+          document.getElementById('package_01_share_widgets_allowed').innerHTML = data['package_data']['share_widgets_allowed']
+          document.getElementById('package_01_share_stages_allowed').innerHTML = data['package_data']['share_stages_allowed']
+          document.getElementById('package_01_trackable_links_count').innerHTML = data['package_data']['trackable_links_count']
+          document.getElementById('package_01_text_segment_charge_type').innerHTML = data['package_data']['text_segment_charge_type']
+          document.getElementById('package_01_share_quick_leads_allowed').innerHTML = data['package_data']['share_quick_leads_allowed']
+          document.getElementById('package_01_text_message_images_allowed').innerHTML = data['package_data']['text_message_images_allowed']
+          document.getElementById('package_01_my_contacts_group_actions_all_allowed').innerHTML = data['package_data']['my_contacts_group_actions_all_allowed']
+        }
+        // document.getElementById("title").innerHTML = data["title"];
+     
+        // var html = "<h2>" + data["title"] + "</h2>";
+        // html += "<h3>" + data["description"] + "</h3>";
+        // html += "<ul>";
+        //    for (var i=0; i < data["articles"].length; i++) {
+        //        html += '<li><a href="' + data["articles"][i]["url"] + '">' + data["articles"][i]["title"] + "</a></li>";
+        //    }
+        // html += "</ul>";
+        // document.getElementById("text").innerHTML = html;
+      });
+    }
+  }
+
+  function ajax_get(url, callback) {
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        try {
+          var data = JSON.parse(xmlhttp.responseText);
+        } catch(err) {
+          console.log(err.message + ' in ' + xmlhttp.responseText);
+          return;
+        }
+        callback(data);
+      }
+    };
+ 
+    xmlhttp.open('GET', url, true);
+    xmlhttp.send();
+  }
+ });

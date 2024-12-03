@@ -1,0 +1,103 @@
+<%
+  # app/views/clients/stage_parents/_stage_parent.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/stage_parents/stage_parent', collection: stage_parents, as: :stage_parent, locals: { client_stage_parents_presenter: ClientStageParentsPresenter, stage_parent: StageParent }
+  #
+  # Instance Variables:
+  #   (req) @client: (Client)
+  #
+  # Local Variables:
+  #   (req) client_stage_parents_presenter: (ClientStageParentsPresenter)
+  #   (req) stage_parent:                   (StageParent)
+  #
+  presenter              = local_assigns.dig(:client_stage_parents_presenter)
+  presenter.stage_parent = local_assigns.dig(:stage_parent)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#stage_parent_<%= presenter.stage_parent.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_stage_parent_name_<%= presenter.stage_parent.id -%>">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#stage_parent_<%= presenter.stage_parent.id -%>">
+      <%= presenter.stage_parent.name -%>
+    </button>
+  </td>
+  <td class="text-center align-middle"> <%= presenter.stages_count.to_s -%> </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(presenter.stage_parent.created_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-right align-middle">
+    <span data-toggle="tooltip" data-title="Edit" data-boundary="viewport">
+      <%= button_tag('',
+                     class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                     id:    "edit_button_#{presenter.stage_parent.id}",
+                     type:  'button',
+                     data:  {
+                       toggle: 'collapse',
+                       target: "#stage_parent_#{presenter.stage_parent.id}"
+                     }) %>
+    </span>
+    <%= if presenter.stage_parents_count < presenter.client.stages_count
+          link_to('', client_import_stage_parent_copy_path(presenter.client.id, presenter.stage_parent.id),
+                  class:  'btn btn-sm btn-icon btn-secondary fa fa-clone',
+                  remote: true,
+                  method: :get,
+                  title:  'Copy',
+                  data:   {
+                    toggle:   'tooltip',
+                    boundary: 'viewport'
+                  })
+        end %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_stage_parent_#{presenter.stage_parent.id}",
+          title: 'Delete',
+          data:  {
+            toggle:   'tooltip',
+            boundary: 'viewport'
+          }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="stage_parent_<%= presenter.stage_parent.id -%>">
+  <!-- StageParent -->
+</tr>
+
+<script>
+  $(function() {
+
+    $(document).off('show.bs.collapse', '#stage_parent_<%= presenter.stage_parent.id -%>');
+    $(document).on('show.bs.collapse', '#stage_parent_<%= presenter.stage_parent.id -%>', function(e) {
+
+      if ($(this).is(e.target)) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= edit_client_stage_parent_path(presenter.client, presenter.stage_parent.id) -%>'
+        });
+      }
+    });
+
+    $('#button_delete_stage_parent_<%= presenter.stage_parent.id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting "<%= presenter.stage_parent.name -%>" can NOT be un-done. Is it your intention to delete this <%= StageParent.title -%>?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{presenter.stage_parent.id}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= presenter.stage_parent.id -%>');
+      $(document).on('click', '#button_dump_it_<%= presenter.stage_parent.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= client_stage_parent_path(presenter.client.id, presenter.stage_parent.id) -%>'
+        });
+      });
+    });
+  });
+</script>

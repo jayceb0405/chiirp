@@ -1,0 +1,22 @@
+<%
+# app/views/email_templates/_thumbnail.html.erb
+#
+# Example:
+# 	render partial: "email_templates/thumbnail"
+#
+# Required Instance Variables:
+# 	@email_templates: (EmailTemplate)
+#
+# Required Local Variables:
+#   none
+# 
+# 
+# Images are now automated and this isn't needed. Keeping for now in case the automation doesn't work correctly.
+-%>
+<%= bootstrap_file_field(
+      file_field:      { field: 'email_template[thumbnail]', id: 'thumbnail_image_input', name: 'email_template[thumbnail]', url: email_template_image_path(@email_template) },
+      col:             { id: 'attachment-col' },
+      image_container: { id: 'thumbnail_image_container' },
+      label:           { title: 'Thumbnail Image' },
+      image:           @email_template.thumbnail.attached? ? { key: @email_template.thumbnail.key, width: 200, height: 200, class: 'rounded', crop: 'fit', format: 'png' } : {}
+    ) %>

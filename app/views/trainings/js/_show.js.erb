@@ -1,0 +1,40 @@
+<%
+	# app/views/trainings/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: 'trainings/show', locals: { cards: [] }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training, training_page: @training_page)
+-%>
+// Trainings
+<% if cards.include?('training_edit') %>
+	$('#training_edit').html('<%= j render partial: 'trainings/edit', locals: { trainings_presenter: tp } -%>');
+	Looper.toggleSidebar()
+<% end %>
+<% if cards.include?('training_index') %>
+	$('#trainings_index').html('<%= j render partial: 'trainings/index', locals: { trainings_presenter: tp } -%>');
+<% end %>
+
+// Training Pages
+<% if cards.include?('training_pages_edit') %>
+	$('#training_edit').html('<%= j render partial: 'trainings/pages/edit', locals: { trainings_presenter: tp } -%>');
+	Looper.toggleSidebar()
+<% end %>
+<% if cards.include?('training_pages_index') %>
+	$('#training_pages_index').html('<%= j render partial: 'trainings/pages/index', locals: { trainings_presenter: tp } -%>');
+<% end %>
+<% if cards.include?('training_page_show') %>
+	$('#training_edit').html('<%= j render partial: 'trainings/pages/show', locals: { trainings_presenter: tp } -%>');
+	Looper.toggleSidebar()
+<% end %>
+<% if cards.include?('training_pages_sort') %>
+	$('#training_pages_index').html('<%= j render partial: 'trainings/pages/index_sort', locals: { trainings_presenter: tp } -%>');
+<% end %>
+
+Looper.init();

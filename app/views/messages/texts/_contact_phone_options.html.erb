@@ -1,0 +1,25 @@
+<%
+  # app/views/messages/texts/_contact_phone_options.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/contact_phone_options', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return if presenter.disabled? || !presenter.show_submit?
+-%>
+<div class="ml-2 pr-2 pb-1">
+  <div class="form-group mb-0">
+    <%= select_tag 'to_phone',
+                   options_for_select(ContactPhone.contact_phones_for_select(presenter.contact.id), presenter.contact.latest_contact_phone_by_label(label: 'mobile')),
+                   { include_blank: 'Primary Number',
+                     class:         'form-control',
+                     id:            "contact_to_phone_#{presenter.message_id}",
+                     data:          { toggle: 'selectpicker', width: '100%' } } %>
+  </div>
+</div>

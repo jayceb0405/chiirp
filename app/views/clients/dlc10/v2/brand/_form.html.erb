@@ -1,0 +1,291 @@
+<%
+  # app/views/clients/dlc10/v2/brand/_form.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/brand/form', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client.dlc10_brand] } %>
+<% if presenter.dlc10_ok_to_edit(presenter.user || current_user) %>
+
+  <h6 id="client_dlc10_brand_verification">
+    <%= presenter.dlc10_brand_verification_notice.html_safe %>
+  </h6>
+
+  <%= presenter.brand_feedback.html_safe -%>
+
+  <%= form_with model: presenter.client.dlc10_brand, url: clients_dlc10_brand_path(presenter.client), builder: LooperFormBuilder, remote: true, class: 'needs-validation card-body d-flex flex-column', id: 'brand_form', novalidate: true do |f| %>
+    <%= f.text_field :firstname, {
+          label:        { title: 'First Name' },
+          html_options: { minlength: 2, placeholder: 'First Name', required: true, autofocus: true, disabled: !presenter.ok2edit_brand_field?('firstname') },
+          messages:     { note: 'Must be minimum of 2 characters.' }
+        } %>
+    <%= f.text_field :lastname, {
+          label:        { title: 'Last Name' },
+          html_options: { minlength: 2, placeholder: 'Last Name', required: true, disabled: !presenter.ok2edit_brand_field?('lastname') },
+          messages:     { note: 'Must be minimum of 2 characters.' }
+        } %>
+    <%= f.text_field :company_name, {
+          label:        { title: 'Company Name' },
+          html_options: { minlength: 2, placeholder: 'Company Name', required: true, disabled: !presenter.ok2edit_brand_field?('company_name') },
+          messages:     { note: 'Must be the legal business name registered with the IRS. An exact match is required for approval. Must be minimum of 2 characters.' }
+        } %>
+    <%= f.text_field :display_name, {
+          label:        { title: 'Display Name' },
+          html_options: { minlength: 2, placeholder: 'Display Name', required: true, disabled: !presenter.ok2edit_brand_field?('display_name') },
+          messages:     { note: 'Must be minimum of 2 characters.' }
+        } %>
+    <%= f.text_field :street, {
+          label:        { title: 'Street Address' },
+          html_options: { placeholder: 'Street Address', required: true, disabled: !presenter.ok2edit_brand_field?('street') },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.text_field :city, {
+          label:        { title: 'City' },
+          html_options: { placeholder: 'City', required: true, disabled: !presenter.ok2edit_brand_field?('city') },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.select :state, {
+          label:        { title: 'State' },
+          html_options: { id: 'select_state', required: true, mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('state') },
+          choices:      { grouped_array: [['United States', us_states_array], ['Canada', canada_states_array]], selected: presenter.client.dlc10_brand.state, blank: 'Select a State', required: true },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.text_field :zipcode, {
+          label:        { title: 'Zip Code' },
+          html_options: { maxlength: 6, placeholder: 'Zip Code', required: true, disabled: !presenter.ok2edit_brand_field?('zipcode') },
+          messages:     { note: 'Must be maximum of 6 characters.' }
+        } %>
+    <%= f.select :country, {
+          label:        { title: 'Country' },
+          html_options: { mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('country'), required: true },
+          choices:      { array: [['United States', 'US'], %w[Canada CA]], selected: presenter.client.dlc10_brand.country, blank: 'Select a Country' },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.telephone_field :phone, {
+          label:        { title: 'Phone Number' },
+          html_options: { value: number_to_phone(presenter.client.dlc10_brand.phone), id: 'input_phone', placeholder: 'Phone Number', required: true, disabled: !presenter.ok2edit_brand_field?('phone') },
+          messages:     { note: 'Must be 10 characters.' }
+        } %>
+    <%= f.email_field :email, {
+          label:        { title: 'Email Address' },
+          html_options: { placeholder: 'Email', required: true, disabled: !presenter.ok2edit_brand_field?('email') },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.select :entity_type, {
+          label:        { title: 'Business Type' },
+          html_options: { required: true, mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('entity_type') },
+          choices:      { array: presenter.options_for_brand_entity_type, selected: presenter.client.dlc10_brand.entity_type },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.text_field :ein, {
+          label:        { title: 'Employer ID (EIN)' },
+          html_options: { id: 'ein_field', required: true, minlength: 9, maxlength: 9, placeholder: 'Employer ID', disabled: !presenter.ok2edit_brand_field?('ein') },
+          messages:     { note: 'Must be exactly 9 digits and ONLY include numbers (0-9).' }
+        } %>
+    <%= f.select :ein_country, {
+          label:        { title: 'EIN Issuing Country' },
+          html_options: { mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('ein_country') },
+          choices:      { array: [['United States', 'US'], %w[Canada CA]], selected: presenter.client.dlc10_brand.ein_country }
+        } %>
+    <%= f.text_field :website, {
+          label:        { title: 'Website' },
+          html_options: { id: 'website_text_field', placeholder: 'Website URL', disabled: !presenter.ok2edit_brand_field?('website') }
+        } %>
+    <%= f.text_field :support_email, {
+          label:        { title: 'Support email' },
+          html_options: { id: 'support_email_text_field', placeholder: 'Support Email', required: true }
+        } %>
+    <%= f.select :vertical, {
+          label:        { title: 'Business Segment' },
+          html_options: { required: true, mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('vertical') },
+          choices:      { array: presenter.options_for_brand_verticals, selected: presenter.client.dlc10_brand.vertical, blank: 'Select a Business Segment' },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.select :alt_business_id_type, {
+          label:        { title: 'Alternate Business Identifier Type' },
+          html_options: { required: true, mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('alt_business_id_type') },
+          choices:      { array: presenter.options_for_brand_alt_business_id_type, selected: presenter.client.dlc10_brand.alt_business_id_type },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.text_field :alt_business_id, {
+          label:        { title: 'Alternate Business Identifier' },
+          html_options: { placeholder: 'Identifier', disabled: !presenter.ok2edit_brand_field?('alt_business_id') }
+        } %>
+    <%= f.select :stock_exchange, {
+          label:        { title: 'Stock Exchange' },
+          html_options: { required: true, mobile: browser.device.mobile?, disabled: !presenter.ok2edit_brand_field?('stock_exchange') },
+          choices:      { array: presenter.options_for_brand_stock_exchange, selected: presenter.client.dlc10_brand.stock_exchange, blank: 'Select a Stock Exchange' },
+          messages:     { note: 'Must not be empty.' }
+        } %>
+    <%= f.text_field :stock_symbol, {
+          label:        { title: 'Stock Symbol' },
+          html_options: { placeholder: 'Stock Symbol', disabled: !presenter.ok2edit_brand_field?('stock_symbol') }
+        } %>
+    <%= f.text_field :ip_address, {
+          label:        { title: 'IP Address' },
+          html_options: { placeholder: 'IP Address (xxx:xxx:xxx:xxx)', disabled: !presenter.ok2edit_brand_field?('ip_address') }
+        } %>
+    <%= bootstrap_info_field(
+          info:  Friendly.new.date(presenter.client.dlc10_brand.submitted_at, presenter.client.time_zone, true),
+          label: { title: 'Submitted to The Campaign Registry' }
+        ) %>
+    <% if presenter.client.dlc10_brand.resubmitted_at.present? %>
+      <%= bootstrap_info_field(
+            info:  Friendly.new.date(presenter.client.dlc10_brand.resubmitted_at, presenter.client.time_zone, true),
+            label: { title: 'Re-Submitted to The Campaign Registry' }
+          ) %>
+    <% end %>
+    <%= bootstrap_info_field(
+          info:  Friendly.new.date(presenter.client.dlc10_brand.verified_at, presenter.client.time_zone, true),
+          label: { title: 'Approved by The Campaign Registry' }
+        ) %>
+    <%= bootstrap_info_field(
+          info:  presenter.client.dlc10_brand.opt_in_message,
+          label: { title: 'Opt-in message' }
+        ) %>
+    <%= bootstrap_info_field(
+          info:         presenter.client.dlc10_brand.help_message,
+          label:        { title: 'Help message' },
+          html_options: { id: 'dlc10_help_message' }
+        ) %>
+    <%= bootstrap_info_field(
+          info:  presenter.client.dlc10_brand.opt_out_message,
+          label: { title: 'Opt-out message' }
+        ) %>
+
+    <% if @campaign %>
+      <%= bootstrap_text_area(
+            field:        'clients_dlc10_campaign[message_flow]',
+            value:        @campaign.message_flow,
+            label:        { title: 'Opt-In Methods' },
+            html_options: { id: "dlc10_message_flow_#{@campaign.id}", minlength: 40, maxlength: 2048, required: true },
+            messages:     { note: 'Describe how your company is receiving opt-ins from your customers and leads. If opt-ins are collected on your website, make sure to include a link to your website and a link to your privacy policy.' }
+          ) %>
+
+      <% max_count = presenter.campaign_required_sample_count %>
+      <% 5.times do |i| %>
+        <%= bootstrap_text_area(
+              field:        "clients_dlc10_campaign[sample#{i + 1}]",
+              value:        @campaign.send("sample#{i + 1}"),
+              label:        { title: "Sample ##{i + 1}" },
+              html_options: { id: "dlc10_sample_#{i + 1}_input_#{@campaign.id}", minlength: 20, maxlength: 1024, required: (i + 1) <= max_count },
+              messages:     { note: 'Enter a sample text message. Between 20 & 1024 characters.' }
+            ) %>
+      <% end %>
+    <% end %>
+
+    <% if presenter.client.dlc10_charged %>
+      <%= bootstrap_info_field(
+            row:  { class: 'my-3' },
+            info: 'Your credit card (on file) will be charged the $5.00 TCR fee for each Brand submittal or re-submittal.'
+          ) %>
+    <% end %>
+
+    <%= f.submit_buttons buttons: presenter.brand_submit_buttons %>
+  <% end %>
+<% else %>
+  <h3>Access NOT permitted!</h3>
+<% end %>
+
+<script>
+  $(function () {
+    var help_message = '<%= presenter.client.dlc10_brand.help_message(false) %>';
+
+    $('.nav-dlc10_link').removeClass('active');
+    $('#link_dlc10_brand').addClass('active');
+
+    $('#ein_field').off('keyup');
+    $('#ein_field').on('keyup', function(e) {
+      var ein = $(this).val().replace(/[\D]/g, '');
+      $(this).val(ein);
+    });
+
+    $('#website_text_field').off('keyup');
+    $('#website_text_field').on('keyup', function(e) {
+      var website = $(this).val();
+      var support_email = $('#support_email_text_field').val();
+
+      if (website.length > 0 && support_email.length == 0) {
+        $('#dlc10_help_message').html('<p>' + help_message.replace('xxx', website) + '</p>');
+      } else if (website.length == 0) {
+        $('#dlc10_help_message').html('<p>' + help_message + '</p>');
+      }
+    });
+
+    $('#support_email_text_field').off('keyup');
+    $('#support_email_text_field').on('keyup', function(e) {
+      var support_email = $(this).val();
+      var website = $('#website_text_field').val();
+
+      if (support_email.length > 0) {
+        $('#dlc10_help_message').html('<p>' + help_message.replace('xxx', support_email) + '</p>');
+      } else if (support_email.length == 0 && website.length > 0) {
+        $('#dlc10_help_message').html('<p>' + help_message.replace('xxx', website) + '</p>');
+      } else if (support_email.length == 0 && website.length == 0) {
+        $('#dlc10_help_message').html('<p>' + help_message + '</p>');
+      }
+    });
+
+    $('#save_brand_submit_button').off('click');
+    $('#save_brand_submit_button').on('click', function(e) {
+      e.preventDefault();
+
+      var form = $('#brand_form');
+
+      ChiirpAlert({
+        'title':      'Submitting Brand!',
+        'body':       'Your credit card will be charged a $5.00 CampaignRegistry pass through fee prior to submitting your brand. Continue?',
+        'buttons':    [{label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait_submit'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_go_for_it_submit'}],
+        'type':       'warning',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_go_for_it_submit');
+      $(document).on('click', '#button_go_for_it_submit', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: form.attr('method'),
+          dataType: 'script',
+          url: form.attr('action'),
+          data: form.serialize() + '&commit=submit_brand'
+        });
+      });
+    });
+
+    $('#save_brand_resubmit_button').off('click');
+    $('#save_brand_resubmit_button').on('click', function(e) {
+      e.preventDefault();
+
+      var form = $('#brand_form');
+
+      ChiirpAlert({
+        'title':      'Re-Submitting Brand!',
+        'body':       'Your credit card will be charged a $5.00 CampaignRegistry pass through fee prior to submitting your brand. Continue?',
+        'buttons':    [{label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait_resubmit'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_go_for_it_resubmit'}],
+        'type':       'warning',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_go_for_it_resubmit');
+      $(document).on('click', '#button_go_for_it_resubmit', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: form.attr('method'),
+          dataType: 'script',
+          url: form.attr('action'),
+          data: form.serialize() + '&commit=resubmit_brand'
+        });
+      });
+    });
+  });
+</script>

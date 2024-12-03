@@ -1,0 +1,144 @@
+<%
+  # app/views/package_pages/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'package_pages/edit'
+  #
+  # Required Instance Variables:
+  #   @package_page: (PackagePage)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @package_page.nil? || (@package_page.new_record? && @package_page.name.to_s.empty?)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@package] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @package_page.name -%></span>
+
+      <% unless @package_page.new_record? %>
+        <%= link_to '<i class="fa fa-clone"></i>'.html_safe, package_page_path(@package_page.id, commit: 'copy'), {
+              class:  'btn btn-icon btn-light',
+              remote: true,
+              method: :put
+            } %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class:  'btn btn-icon btn-light',
+              id:     'button_delete',
+              remote: true,
+              method: :put
+            } %>
+      <% end %>
+    </div>
+  </div>
+  <div class="card-body">
+
+    <%= form_with model: @package_page, builder: LooperFormBuilder, remote: true, class: 'needs-validation', id: 'contact_form', novalidate: true do |f| %>
+      <%= f.text_field :name, {
+            label:        { title: 'Package Name' },
+            html_options: { placeholder: 'Package/Page Name', minlength: 3, required: true, autofocus: true },
+            messages:     { note: 'Required. Must be minimum of 3 characters.' }
+          } %>
+
+      <% unless @package_page.new_record? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'Package/Page URL' },
+              html_options: { value: welcome_pricing_url(@package_page.page_key.to_s) }
+            } %>
+      <% end %>
+
+      <%= bootstrap_switch_field(
+            field:        'package_page[sys_default]',
+            value:        @package_page.sys_default == 1,
+            values:       %w[1 0],
+            label:        { title: 'System Default Package Page' },
+            html_options: { disabled: @package_page.sys_default == 1 },
+            messages:     { note: 'May only be switched on.' }
+          ) %>
+
+      <div class="row">
+        <div class="col-3 offset-9">
+          Primary Package
+        </div>
+      </div>
+
+      <% [1, 2, 3, 4].each do |position| %>
+
+        <div class="row">
+
+          <% if position == 1 %>
+            <div class="col-3 mt-3">Packages Included</div>
+          <% else %>
+            <div class="col-3"></div>
+          <% end %>
+
+          <div class="col-6">
+            <%= f.select :"package_0#{position}_id", {
+                  row:          { columns: [0, 12] },
+                  html_options: { mobile: browser.device.mobile? },
+                  choices:      { array: [['Select a Page', 0]] + Package.where(tenant: I18n.t('tenant.id')).order(:name).pluck(:name, :id), selected: @package_page.send(:"package_0#{position}_id") }
+                } %>
+          </div>
+          <div class="col-3">
+            <%= bootstrap_switch_field(
+                  field:        'package_page[primary_package]',
+                  value:        @package_page.primary_package == position,
+                  values:       [position.to_s, '0'],
+                  form_group:   { hidden_field: false },
+                  html_options: { class: 'switch_primary_package', id: "package_page_primary_package_#{position}" },
+                  row:          { columns: [0, 12] }
+                ) %>
+          </div>
+        </div>
+      <% end %>
+
+      <%= bootstrap_info_field(
+            info:  @package_page.created_at ? Friendly.new.date(@package_page.created_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) : 'Not Yet',
+            label: { title: 'Date Created' }
+          ) %>
+      <%= bootstrap_info_field(
+            info:  @package_page.updated_at ? Friendly.new.date(@package_page.updated_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) : 'Not Yet',
+            label: { title: 'Date Updated' }
+          ) %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save Package Page', disable_with: 'Saving' }]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+
+    <% unless @package_page.new_record? %>
+      $('#button_delete').off('click');
+      $('#button_delete').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= @package_page.name -%>" can NOT be un-done. Is it your intention to delete this package/page?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it');
+        $(document).on('click', '#button_dump_it', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= package_page_path(@package_page.id) -%>'
+          });
+        });
+      });
+    <% end %>
+
+    $('.switch_primary_package').on('click', function(e) {
+      $('.switch_primary_package').prop('checked', false);
+      $(this).prop('checked', true);
+    });
+  });
+</script>

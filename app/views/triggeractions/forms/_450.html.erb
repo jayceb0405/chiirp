@@ -1,0 +1,16 @@
+<%
+  # app/views/triggeractions/forms/_450.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/450", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # stop an AI Agent Conversation
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>

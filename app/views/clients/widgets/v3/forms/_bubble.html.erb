@@ -1,0 +1,107 @@
+<%
+  # app/views/clients/widgets/v3/forms/_bubble.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/forms/bubble', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   widget_presenter: Presenter
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="card-header border-0" id="clients_widget_bubble">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#clients_widget_bubble_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>SiteChat Bubble Popup Settings</span>
+  </button>
+</div>
+
+<div id="clients_widget_bubble_body" class="collapse" data-parent="#clients_widget_accordion">
+  <div class="card-body pt-0">
+
+    <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+
+      <%= f.switch :bb_show, {
+            label:      { title: 'Show Bubble Popup' },
+            checkboxes: [{ checked: presenter.widget.bb_show, values: %w[true false] }]
+          } %>
+      <%= f.switch :bb_user_avatar, {
+            label:      { title: 'Show User Avatar' },
+            checkboxes: [{ checked: presenter.widget.bb_user_avatar, values: %w[true false] }]
+          } %>
+      <%= f.select :bb_user_id, {
+            label:        { title: 'Users with an Avatar' },
+            html_options: { id: 'bb_user_id', mobile: browser.device.mobile? },
+            choices:      { array: presenter.users_with_avatar, selected: presenter.widget.bb_user_id }
+          } %>
+      <%= f.number_field :bb_timeout, {
+            label:        { title: 'Seconds Before Popup' },
+            html_options: { min: 0, step: 1 },
+            prepends:     [{ button: false, label: '<i class="fas fa-stopwatch"></i>' }]
+          } %>
+      <%= f.select :bb_font, {
+            label:        { title: 'Font Style' },
+            html_options: { id: 'clients_widget_bb_font', mobile: browser.device.mobile? },
+            choices:      { array: [], prompt: 'Select a Font' }
+          } %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[bb_bg_color]',
+            value:        presenter.widget.bb_bg_color,
+            label:        { title: 'Bubble Color' },
+            html_options: { id: 'bb_bg_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+      <%= f.text_field :bb_text, {
+            label:        { title: 'Bubble Text' },
+            html_options: { id: 'bb_text', placeholder: 'Bubble Text' },
+            messages:     { note: 'Enter <br /> to break to a new line.' }
+          } %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[bb_text_color]',
+            value:        presenter.widget.bb_text_color,
+            label:        { title: 'Bubble Text Color' },
+            html_options: { id: 'bb_text_color' },
+            messages:     { note: 'Click color square for color picker.' }
+          ) %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Bubble Popup Settings', id: 'clients_widget_form_submit', disable_with: 'Saving Bubble Popup Settings' }] %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $(document).off('show.bs.collapse', '#clients_widget_bubble_body');
+    $(document).on('show.bs.collapse', '#clients_widget_bubble_body', function (e) {
+
+      if ($('#clients_widget_bb_font').children('option').length <= 1) {
+        i = 0
+
+        while ($.isEmptyObject(window.google_fonts)) {
+          setTimeout(function() {
+            i++
+          }, 100);
+
+          if (i >= 500) {
+            return false;
+          }
+        }
+
+        $.each(window.google_fonts, function(i, font) {
+
+          if (font.variants.includes('regular')) {
+            $('#clients_widget_bb_font').append('<option class="font-' + font.family.toLowerCase().replace(/ /g,"_") + '" value="' + font.family + '">' + font.family + '</option>');
+          }
+        });
+
+        $('#clients_widget_bb_font').selectpicker('val', '<%= presenter.widget.bb_font -%>');
+        $('#clients_widget_bb_font').selectpicker('refresh');
+      }
+    });
+  });
+</script>

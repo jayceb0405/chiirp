@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/google/reviews/actions/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/actions/edit', locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<span id="review_campaigns_excluded_form">
+  <%= render partial: 'integrations/google/reviews/actions/review_campaigns_excluded_form', locals: { presenter: } %>
+</span>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Actions</h6>
+  <div class="card-body">
+
+    <%= form_with model: presenter.client_api_integration, url: integrations_google_reviews_actions_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+      <% (1..5).each do |stars| %>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6><%= pluralize(stars, 'Star') -%> Actions</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: presenter.actions_reviews.dig(stars.to_s.to_sym, :campaign_id).to_i, campaign_id_field: "actions[#{stars}][campaign_id]",
+                group: presenter.action_reviews_group(stars), group_id_field: "actions[#{stars}][group_id]",
+                tag: presenter.action_reviews_tag(stars), tag_id_field: "actions[#{stars}][tag_id]",
+                stage_id: presenter.actions_reviews.dig(stars.to_s.to_sym, :stage_id).to_i, stage_id_field: "actions[#{stars}][stage_id]",
+                stop_campaign_ids: presenter.actions_reviews.dig(stars.to_s.to_sym, :stop_campaign_ids), stop_campaign_ids_field: "actions[#{stars}][stop_campaign_ids]",
+                first_trigger_types: Trigger::START_CAMPAIGN_TYPES
+              } %>
+        </fieldset>
+      <% end %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-reviews-link').removeClass('active');
+    $('#link_reviews_actions').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

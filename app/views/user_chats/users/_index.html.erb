@@ -1,0 +1,20 @@
+<%
+	# app/views/user_chats/users/_index.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_chats//users/index_users"
+	# 
+	# Required Instance Variables:
+	# 	@users: (Hash)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<!-- user_chats.users.index -->
+<div class="sidebar-inner__separator">Team</div>
+
+<span id="user_chats_users_list_<%= current_user.id -%>">
+	<%= render partial: "user_chats/users/users_list" %>
+</span>
+<!-- /.user_chats.users.index -->

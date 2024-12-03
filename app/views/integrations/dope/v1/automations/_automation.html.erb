@@ -1,0 +1,30 @@
+<%
+  # app/views/integrations/dope/v1/automations/_automation.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/dope/v1/automations/automation', collection: presenter.automations, as: :automation, locals: { dope_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: ClientApiIntegration
+  #
+  # Required Local Variables:
+  #   automation: (Hash)
+  #
+  presenter            = local_assigns.dig(:dope_presenter) || Integrations::Dope::V1::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.automation = automation
+-%>
+<tr>
+  <td class="text-left pt-4" colspan="3"><%= presenter.automation_name -%></td>
+  <td class="text-left pt-4"><%= presenter.automation_type -%></td>
+  <td class="text-left pt-4"><%= presenter.automation_status -%></td>
+  <td class="text-left">
+    <%= bootstrap_select_tag(
+          field:        'tag_id',
+          row:          { class: 'mb-0', columns: [0, 12] },
+          options:      { for_select: options_for_tag(presenter.client, presenter.automation_tag_id, [], false), blank: 'Select a Tag' },
+          html_options: { class: 'select_tag', data: { automationid: presenter.automation_id, automationname: presenter.automation_name } },
+          prepends:     [{ label: '<i class="fa fa-user-tag text-muted"></i>' }],
+          messages:     { note: 'Select a Tag that will trigger the Automation when applied to a Contact.' }
+        ) %>
+  </td>
+</tr>

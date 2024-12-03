@@ -1,0 +1,25 @@
+<%
+	# app/views/user_contact_forms/v2/_header.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_contact_forms/v2/header"
+	# 
+	# Required Instance Variables:
+	# 	@user_contact_form: (UserContactForm)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="row" id="tenant-quicklead-header" style="max-height:200px;min-height:100px;background-color:<%= @user_contact_form.header_bg_color.to_s -%>;">
+	<% if @user_contact_form.logo_image.attached? %>
+		<div class="col-4<%= ( @user_contact_form.tag_line.to_s.present? ? " offset-2" : " offset-4" ) -%> text-center">
+			<%= cl_image_tag( @user_contact_form.logo_image.key, { class: "img-fluid m-2 m-sm-3", secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [ height: 150, crop: "scale" ], format: "png" } ) %>
+		</div>
+	<% end %>
+	<% if @user_contact_form.tag_line.to_s.present? %>
+		<div class="col-4<%= ( @user_contact_form.logo_image.attached? ? "" : " offset-4" ) -%> text-center" style="margin-top:auto;margin-bottom:auto;">
+			<span class="align-middle"><%= @user_contact_form.tag_line.to_s %></span>
+		</div>
+	<% end %>
+</div>

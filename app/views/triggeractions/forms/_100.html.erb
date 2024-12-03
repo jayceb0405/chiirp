@@ -1,0 +1,51 @@
+<%
+  # app/views/triggeractions/forms/_100.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/100", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # send a text message
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+
+  messages_text_presenter = Messages::Text::Presenter.new(contact: current_user.contacts.new(ok2text: 1, ok2email: 1), user: current_user)
+  messages_text_presenter.contacts_array            = []
+  messages_text_presenter.disabled                  = presenter.campaign_disabled?
+  messages_text_presenter.file_attachments          = presenter.triggeraction.attachments.map { |a| { id: a, type: 'client', url: presenter.client.client_attachments.find_by(id: a).image.thumb.url(resource_type: presenter.client.client_attachments.find_by(id: a).image.resource_type, secure: true) } }
+  messages_text_presenter.file_type                 = 'client'
+  messages_text_presenter.include_estimate_hashtags = true
+  messages_text_presenter.include_invoice_hashtags  = true
+  messages_text_presenter.include_job_hashtags      = true
+  messages_text_presenter.message                   = presenter.triggeraction.text_message
+  messages_text_presenter.show_hashtag_notes        = true
+  messages_text_presenter.show_msg_delay            = false
+  messages_text_presenter.show_ok2text              = false
+  messages_text_presenter.show_payment_request      = false
+  messages_text_presenter.show_phone_call           = false
+  messages_text_presenter.show_submit               = false
+  messages_text_presenter.show_voicemail            = false
+  messages_text_presenter.show_video_calls          = false
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[send_to]',
+      label:        { title: 'Select Who to Send Message To' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_text_send_to, selected: presenter.triggeraction.send_to, blank: 'Select a Recipient' },
+      messages:     { note: presenter.triggeraction_note_for_send_to.html_safe }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[from_phone]',
+      label:        { title: 'Select Phone Number(s) to Send From (in a "round robin" method)' },
+      html_options: { id: "from_phone_select_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? || presenter.campaign.lock_phone, multiple: true },
+      options:      { for_select: options_for_phone_numbers(client: presenter.client, selected: presenter.triggeraction.from_phone, options: [['last_number', 'Last Number Used'], ['user_number', 'User\'s Default Number']]) },
+      messages:     { note: "When 'Last Number Used' is selected the previous phone number used will be used again.<br>Actions are #{presenter.campaign_disabled? || presenter.campaign.lock_phone ? '' : 'NOT '}locked to the Campaign default phone number.".html_safe }
+    ) %>
+<div class="mt-2">
+  <%= render partial: 'messages/texts/message', locals: { presenter: messages_text_presenter } %>
+</div>

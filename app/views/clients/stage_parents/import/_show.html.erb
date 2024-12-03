@@ -1,0 +1,23 @@
+<%
+# app/views/clients/stage_parents/import/_show.html.erb
+#
+# Example:
+#   render partial: 'clients/stage_parents/import/show'
+#
+# Instance Variables:
+#   (req) @client: Client
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= form_tag client_import_stage_parent_path, builder: LooperFormBuilder, remote: true, method: :post do %>
+  <%= bootstrap_text_field(
+        field:        'share_code',
+        label:        { title: "#{StageParent.title} Share Code" },
+        html_options: { placeholder: 'Shared Code', autofocus: true }
+      ) %>
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Import', disable_with: 'Importing' }]
+      ) %>
+<% end %>

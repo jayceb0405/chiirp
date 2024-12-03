@@ -1,0 +1,40 @@
+<%
+  # app/views/integrations/interest_rates/_instructions.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/interest_rates/instructions'
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Interest Rates Integration Instructions</h6>
+  <div class="card-body">
+    <h6>Interest Rate Actions:</h6>
+    <ul>
+      <li><%= I18n.t("tenant.name") -%> allows you to start Campaigns for Contacts based on current interest rates.</li>
+      <li><%= I18n.t("tenant.name") -%> allows you to add a Contact to a Group based on current interest rates.</li>
+      <li><%= I18n.t("tenant.name") -%> allows you to apply a Tag to a Contact based on current interest rates.</li>
+      <li>Rates are updated from Federal Reserve and actions processed daily at 9:00am UTC.</li>
+      <li>Federal Reserve data is updated every Thursday.</li>
+    </ul>
+
+    <h6>Current Rates - Weekly (Last: <%= Friendly.new.date( Chronic.parse(@client_api_integration.mortgage_rate_updated), @client_api_integration.client.time_zone, false ) -%>)</h6>
+    <ul>
+      <% @client_api_integration.current_mortgage_rates.each do |rate| %>
+        <li><%= rate['title'] -%>: <%= rate['value'] -%>%</li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

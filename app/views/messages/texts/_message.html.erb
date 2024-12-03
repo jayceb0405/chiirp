@@ -1,0 +1,265 @@
+<%
+  # app/views/messages/texts/_message.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/message', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:                   (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+%>
+<%= hidden_field_tag :msg_type, 'text' %>
+<%= hidden_field_tag :contact_id, presenter.contact.id %>
+<%= hidden_field_tag :user_id, presenter.user.id %>
+<%= hidden_field_tag :contacts_array, presenter.contacts_array %>
+<%= hidden_field_tag :from_phone, presenter.current_phone_number, { id: "phone_number_tag_#{presenter.message_id}" } %>
+<%= hidden_field_tag 'message[file_attachments]', presenter.file_attachments.to_json, { id: "file_attachments_#{presenter.message_id}" } %>
+
+<div class="media flex-column flex-xl-row">
+  <div class="media-body" id="live_message_form_<%= presenter.contact.id %>">
+
+    <div id="message_area_<%= presenter.message_id -%>">
+      <span id="message_spinner_<%= presenter.message_id -%>" class="file-upload-spinner spinner-border text-primary" role="status" style="display:none;z-index:1000;"></span>
+      <div id="message_files_<%= presenter.message_id -%>" class="file-upload-area"></div>
+
+      <%= render partial: 'messages/texts/character_count', locals: { presenter: } %>
+
+      <div class="form-group has-typeahead-scrollable">
+        <%= text_area_tag 'message[message]',
+                          presenter.message,
+                          {
+                            id:          "textarea_#{presenter.message_id}",
+                            class:       'form-control border-1 shadow-none typeahead',
+                            style:       'min-height:50px;padding-right:30px;',
+                            placeholder: 'Type a Message (drag & drop files)...',
+                            disabled:    presenter.disabled?,
+                            spellcheck:  true
+                          } %>
+        <p class="mb-0"><small class="text-muted">This field is hashtag aware. Press "#" to access data fields.</small></p>
+
+        <%= render partial: 'messages/texts/hashtag_notes', locals: { presenter: } %>
+        <%= render partial: 'messages/texts/active_aiagent_message', locals: { presenter: } %>
+      </div>
+    </div>
+
+    <%= render partial: 'messages/texts/scheduler_options', locals: { presenter: } %>
+    <%= render partial: 'messages/texts/payment_request_options', locals: { presenter: } %>
+    <%= render partial: 'messages/texts/rvm_options', locals: { presenter: } %>
+  </div>
+
+  <div>
+    <%= render partial: 'messages/texts/action_buttons', locals: { presenter: } %>
+    <%= render partial: 'messages/texts/contact_phone_options', locals: { presenter: } %>
+
+    <% unless presenter.disabled? %>
+      <div class="ml-2 pr-2 pb-1">
+        <%= render partial: 'messages/texts/submit_options', locals: { presenter: } %>
+        <%= render partial: 'messages/texts/stop_aiagent_link', locals: { presenter: } %>
+
+        <div class="float-right">
+          <%= render partial: 'messages/texts/ok2text_buttons', locals: { presenter: } %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <script>
+    $(function() {
+      var message_id = '<%= presenter.message_id -%>';
+      var send_to_contact_ok = false;
+
+      <% unless presenter.disabled? %>
+        autosize($('#textarea_' + message_id));
+
+        <% unless browser.device.mobile? %>
+          $('#textarea_' + message_id).emojiPicker({
+            width: '280px',
+            height: '250px',
+            button: false,
+            position: 'right',
+            onShow: function(picker, settings, isActive) {
+              if ((parseInt(picker.css('top')) + parseInt(picker.css('height'))) >= $(window).height()) {
+                var distance = $(window).height() - (parseInt(picker.css('height')) + 50);
+                picker.css('top', distance + 'px');
+              }
+            },
+            onHide: function(picker, settings, isActive) {
+            }
+          });
+        <% end %>
+
+        // provide #hashtag variable selector
+        MultiTypeahead('#textarea_' + message_id, <%= options_for_hashtag(client: presenter.client, include_estimate_hashtags: presenter.include_estimate_hashtags?, include_invoice_hashtags: presenter.include_invoice_hashtags?, include_job_hashtags: presenter.include_job_hashtags?, include_subscription_hashtags: presenter.include_subscription_hashtags?).to_json.html_safe %>, '#', true);
+
+        $(document).off('blur', '#textarea_' + message_id);
+        $(document).on('blur', '#textarea_' + message_id, function(e) {
+          $.ajax({
+            method: 'PATCH',
+            dataType: 'script',
+            url: '<%= central_update_message_meta_path -%>',
+            data: {
+              contact_id: '<%= presenter.contact.id -%>',
+              focus: 'off'
+            }
+          });
+        });
+
+        $(document).off('focus', '#textarea_' + message_id);
+        $(document).on('focus', '#textarea_' + message_id, function(e) {
+          $.ajax({
+            method: 'PATCH',
+            dataType: 'script',
+            url: '<%= central_update_message_meta_path -%>',
+            data: {
+              contact_id: '<%= presenter.contact.id -%>',
+              focus: 'on'
+            }
+          });
+        });
+
+        <% if presenter.show_submit? && presenter.user.submit_text_on_enter %>
+          $('#textarea_' + message_id).on('keydown', function(e) {
+            if(e.which === 13 && !e.shiftKey) {
+              if (e.ctrlKey) {
+                return true;
+              }
+              e.preventDefault();
+              $('#send_button_<%= presenter.message_id -%>').click();
+            }
+          });
+        <% end %>
+      <% end %>
+
+      initializeImages();
+
+      <% if presenter.file_attachments.present? %>
+        <% presenter.file_attachments.each do |a| %>
+          window.file_attachments[message_id].push({ id: '<%= a.dig(:id) -%>', type: '<%= presenter.file_type -%>', url: '<%= a.dig(:url) -%>' });
+        <% end %>
+      <% end %>
+
+      if (<%= presenter.show_images? && presenter.client.text_message_images_allowed && !presenter.disabled? -%>) {
+        // disable auto discover
+        Dropzone.autoDiscover  = false;
+
+        var image_id   = '';
+
+        $('#message_area_' + message_id).dropzone( {
+          method: 'POST',
+          url: '<%= presenter.file_upload_url -%>',
+          maxFilesize: 150,
+          paramName: 'file',
+          addRemoveLinks: false,
+          acceptedFiles: '<%= UploadableMimeTypes.all_mime_types.join(',') -%>',
+          previewsContainer: '#message_files_' + message_id,
+          clickable: '#file_upload_button_' + message_id,
+          previewTemplate: '<div class="dz-preview dz-file-preview"><div class="dz-error-message"><span data-dz-errormessage></span></div></div>',
+          headers: {
+            'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+          },
+          sending: function(file, response){
+            $('#message_files_' + message_id).fadeTo( "slow", 0.3 );
+            $('#message_spinner_' + message_id).show();
+          },
+          success: function(file, response){
+            if ( parseInt(response.fileId) > 0 ) {
+              window.file_attachments[message_id].push({ id: response.fileId, type: '<%= presenter.file_type -%>', url: response.fileUrl });
+              console.log(window.file_attachments[message_id]);
+              updateImages();
+            }
+          },
+          error: function(file, response) {
+            $('#message_spinner_' + message_id).hide();
+            $('#message_files_' + message_id).fadeTo('slow', 1);
+
+            ChiirpAlert({
+              'title':      'Oops...',
+              'body':       response + ' Please try again.',
+              'type':       'danger',
+              'persistent': true
+            });
+          }
+        });
+      }
+
+      updateTextInfo('#textarea_' + message_id);
+      updateImages();
+    });
+
+    function createImageTag(item) {
+      var string_response = '<figure class="user-avatar" style="width:90px;height:90px;"><img class="rounded" src="' + item.url + '">'
+
+      if (<%= !presenter.disabled? %>) {
+        string_response = string_response + '<a class="avatar-badge has-indicator busy message_image_close" style="height:20px;width:20px;border-radius:10px;line-height:21px;font-size:15px;color:white;" id="message_image_close_' + item.id + '" href="#"><i class="fa fa-times"></i></a>'
+      }
+
+      string_response = string_response + '</figure>'
+
+      return string_response
+    }
+
+    function updateImages() {
+      var message_id = '<%= presenter.message_id -%>';
+
+      if ( window.file_attachments[message_id].length > 0 ) {
+        $('#message_files_' + message_id).css('padding','5px');
+        $('#message_files_' + message_id).html(window.file_attachments['<%= presenter.message_id -%>'].map(createImageTag));
+        $('#message_spinner_' + message_id).hide();
+        $('#message_files_' + message_id).fadeTo('slow', 1);
+
+        $('.message_image_close').on('mouseover', function() {
+          $(this).css('cursor', 'pointer');
+        });
+
+        $('.message_image_close').on('click', function() {
+          image_id = $(this).attr('id').replace('message_image_close_', '');
+          window.file_attachments[message_id] = window.file_attachments[message_id].filter(deleteImage);
+          updateImages();
+        });
+      } else {
+        $('#message_files_' + message_id).html('');
+        $('#message_files_' + message_id).css('padding','0px');
+      }
+
+      // $('#message_file_ids').val(file_attachments.map(createFileIds).join(','));
+      $('#file_attachments_' + message_id).val(JSON.stringify(window.file_attachments[message_id]));
+      updateTextInfo('#textarea_' + message_id);
+    }
+
+    function deleteImage(value, index, array) {
+      return value.id != image_id;
+    }
+
+    function createFileIds(item) {
+      return item.id;
+    }
+
+    function initializeImages() {
+      // file_attachments is loaded into window for access by updateTextInfo and updateImages
+      if ($.isEmptyObject(window.file_attachments)) {
+        window.file_attachments = { '<%= presenter.message_id -%>': [] };
+      } else {
+        window.file_attachments['<%= presenter.message_id -%>'] = [];
+      }
+      updateImages();
+    }
+
+    function msgFormClear() {
+      var message_id = '<%= presenter.message_id -%>';
+
+      initializeImages();
+      $('#message_files_' + message_id).html('');
+      $('#text_scheduler_calendar_' + message_id).val('');
+      $('#scheduler_options_' + message_id).hide();
+      $('#payment_request_options_' + message_id).hide();
+      $('#text_payment_request_' + message_id).val('');
+      $('#select_rvm_' + message_id).val('');
+      $('#rvm_options_' + message_id).hide();
+      $('#textarea_' + message_id).typeahead('val', '');
+    }
+  </script>
+</div>

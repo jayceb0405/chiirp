@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/servicetitan/reports/report_results.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/report_results'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @report:                 (Hash)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && @report.is_a?(Hash)
+
+  presenter        = Integrations::Servicetitan::ReportsPresenter.new(client_api_integration: @client_api_integration)
+  presenter.report = @report || {}
+-%>
+<%= turbo_stream.show_modal('full_size_modal') %>
+<%= turbo_stream.update('full_size_modal_title', html: "#{image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'img-fluid pr-3', style: 'height:40px;' })}ServiceTitan Report Results".html_safe) %>
+<%= turbo_stream.update('full_size_modal_body', partial: 'integrations/servicetitan/reports/results/index', locals: { presenter: }) %>
+<%= turbo_stream.update("edit_report_#{presenter.report_id}", partial: 'integrations/servicetitan/reports/edit', locals: { presenter: }) %>
+
+<%= turbo_stream.bootstrap_init %>

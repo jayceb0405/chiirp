@@ -1,0 +1,22 @@
+<%
+  # /app/views/integrations/servicetitan/reports/criteria/_bool.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/criteria/bool', locals: { presenter: Integrations::Servicetitan::ReportsPresenter, criteria: Hash }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) criteria: (Hash)
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter) && local_assigns.dig(:criteria).is_a?(Hash)
+-%>
+<%= hidden_field_tag "report[criteria][#{criteria.dig(:name)}][data_type]", criteria.dig(:dataType).to_s %>
+<%= bootstrap_switch_field(
+      field:  "report[criteria][#{criteria.dig(:name)}][boolean]",
+      value:  presenter.criteria_value(criteria.dig(:name), 'boolean').to_bool,
+      values: [true, false],
+      label:  { title: criteria.dig(:label), checked: 'true', unchecked: 'false' }
+    ) %>

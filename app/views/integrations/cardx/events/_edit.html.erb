@@ -1,0 +1,94 @@
+<%
+  # app/views/integrations/cardx/events/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/cardx/events/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+-%>
+<td colspan="7">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.event[:name].split.pluck(0).join -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.event[:name] -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= bootstrap_text_field(
+              field:    'event[name]',
+              value:    presenter.event[:name],
+              label:    { title: 'Event Name' },
+              messages: { note: 'Enter any name to identify this event. This is for your reference only and will not be used to filter incoming Payment Events.' }
+            ) %>
+
+        <% if presenter.client.job_integration_available? %>
+          <div id="remaining_balance_operator" class="mt-4">
+            <%= bootstrap_select_tag(
+                  field:   'event[remaining_balance_operator]',
+                  label:   { title: 'Remaining Balance Operator' },
+                  options: { for_select: options_for_select([['Do not filter', ''], ['Less than or equal to', 'lte'], ['Greater than or equal to', 'gte']], selected: presenter.event[:remaining_balance_operator]) },
+                  messages: { note: 'Filter the event based on the remaining balance of a job.' }
+                ) %>
+          </div>
+
+          <div id="remaining_balance" style="display: none;">
+            <%= bootstrap_text_field(
+                  field:    'event[remaining_balance]',
+                  value:    presenter.event[:remaining_balance],
+                  label:    { title: 'Remaining Balance' },
+                  prepends: [{ button: true, label: '$', disabled: true }],
+                  html_options: { type: 'number', step: '0.01', min: '0.0' },
+                  messages: { note: 'Enter the amount to filter by.' }
+                ) %>
+          </div>
+        <% end %>
+        <fieldset class="border rounded p-2 mt-3 mb-2" id="row_actions_fieldset_<%= presenter.event[:event_id] -%>">
+          <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: { 
+                client: presenter.client,
+                campaign: presenter.event_campaign, campaign_id_field: 'event[action][campaign_id]',
+                group: presenter.event_group, group_id_field: 'event[action][group_id]',
+                tag: presenter.event_tag, tag_id_field: 'event[action][tag_id]',
+                stage_id: presenter.event_stage, stage_id_field: 'event[action][stage_id]',
+                stop_campaign_ids: presenter.event_stop_campaign_ids, stop_campaign_ids_field: 'event[action][stop_campaign_ids]',
+                first_trigger_types: [115, 120, 125, 130, 135, 133, 140, 145, 143],
+              } %>
+        </fieldset>
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Actions for Event', disable_with: 'Saving Actions for Event' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function () {
+    var handleRemainingBalanceChange = function() {
+      var value = $('#remaining_balance_operator').find('select').val();
+      // console.log(typeof value);
+      // console.log(value);
+      if (typeof value !== 'undefined' && value != '') {
+        $('#remaining_balance').show();
+      } else {
+        $('#remaining_balance').hide();
+      }
+    }
+    $('#remaining_balance_operator').off('change');
+    $('#remaining_balance_operator').on('change', handleRemainingBalanceChange);
+    handleRemainingBalanceChange();
+  });
+</script>

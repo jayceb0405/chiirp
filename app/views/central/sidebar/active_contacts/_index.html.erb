@@ -1,0 +1,259 @@
+<%
+  # app/views/central/sidebar/active_contacts/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'central/sidebar/active_contacts/index', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+-%>
+<div class="list-group list-group-reflow list-group-flush list-group-divider mb-5">
+  <div class="list-group-header d-block pb-0">
+    <div class="dropdown d-flex flex-row">
+      <%= bootstrap_select_tag(
+            field:        'show_user_ids',
+            row:          { class: ' mb-0 w-100' },
+            col:          { class: 'mb-0' },
+            form_group:   { class: 'mb-0' },
+            label:        { title: 'Users' },
+            html_options: { id: 'show_user_ids', multiple: true, count_selected_text: 'users', sp_size: 1 },
+            options:      { for_select: options_for_users(user: presenter.user, client: presenter.client, controller: controller_name, selected: presenter.user_settings.data[:show_user_ids]) }
+          ) %>
+
+      <div class="dropdown ml-2 mt-1" style="width:30px;">
+        <button class="btn btn-sm btn-icon btn-light" data-toggle="dropdown"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="dropdown-menu dropdown-menu-left">
+          <%= link_to("Activity Period... <span class=\"badge badge-warning\">#{presenter.active_contacts_period_string}</span>".html_safe,
+                      '#',
+                      class:       'dropdown-item prevent-default stop-propogation',
+                      style:       'text-decoration: none;',
+                      onmouseover: "$('#active_contacts_period_options').removeClass('d-none');".html_safe) %>
+          <span class="d-none" id="active_contacts_period_options" onmouseleave="$('#active_contacts_period_options').addClass('d-none');">
+            <div class="dropdown-divider"></div>
+            <%= link_to('Today',
+                        central_active_contacts_path(active_contacts_period: 1),
+                        class:  'dropdown-item',
+                        style:  'text-decoration: none;',
+                        remote: true,
+                        method: :get) %>
+            <%= link_to('Yesterday & Today',
+                        central_active_contacts_path(active_contacts_period: 2),
+                        class:  'dropdown-item',
+                        style:  'text-decoration: none;',
+                        remote: true,
+                        method: :get) %>
+            <%= link_to('Past Week',
+                        central_active_contacts_path(active_contacts_period: 7),
+                        class:  'dropdown-item',
+                        style:  'text-decoration: none;',
+                        remote: true,
+                        method: :get) %>
+            <%= link_to('Past 15 Days',
+                        central_active_contacts_path(active_contacts_period: 15),
+                        class:  'dropdown-item',
+                        style:  'text-decoration: none;',
+                        remote: true,
+                        method: :get) %>
+            <%= link_to('Past 30 Days',
+                        central_active_contacts_path(active_contacts_period: 30),
+                        class:  'dropdown-item',
+                        style:  'text-decoration: none;',
+                        remote: true,
+                        method: :get) %>
+          </span>
+
+          <%= link_to("Group Filter... <span class=\"badge badge-warning\">#{presenter.active_contacts_group_string}</span>".html_safe,
+                      '#',
+                      class:       'dropdown-item prevent-default stop-propogation',
+                      style:       'text-decoration: none;',
+                      onmouseover: "$('#active_contacts_group_options').removeClass('d-none');".html_safe) %>
+          <div class="dropdown-scroll perfect-scrollbar d-none" id="active_contacts_group_options" onmouseleave="$('#active_contacts_group_options').addClass('d-none');" style="max-height:200px;">
+            <div class="dropdown-divider"></div>
+            <%= link_to('All Groups',
+                        central_active_contacts_path(active_contacts_group_id: 0),
+                        class:  'dropdown-item',
+                        style:  'text-decoration: none;',
+                        remote: true,
+                        method: :get) %>
+            <% presenter.client.groups.each do |group| %>
+              <%= link_to(group.name,
+                          central_active_contacts_path(active_contacts_group_id: group.id),
+                          class:  'dropdown-item',
+                          style:  'text-decoration: none;',
+                          remote: true,
+                          method: :get) %>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="list-group list-group-reflow list-group-flush list-group-divider">
+    <div class="list-group-header d-block pb-0">
+      <div class="dropdown d-flex flex-row justify-content-center">
+        <%= link_to("<i class=\"fa fa-comments #{presenter.include_text? ? 'text-success' : ''}\"></i>".html_safe,
+                    central_active_contacts_path(include_text: !presenter.include_text?),
+                    class:  'btn btn-icon',
+                    method: :get,
+                    remote: true,
+                    title:  "Texts are #{presenter.include_text? ? '' : 'not'} included",
+                    data:   {
+                      toggle: 'tooltip'
+                    }) %>
+
+        <% if current_user.client.integrations_allowed.include?('sendgrid') %>
+          <%= link_to("<i class=\"fa fa-envelope #{presenter.include_email? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_email: !presenter.include_email?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "Emails are #{presenter.include_email? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+          <% end %>
+
+        <% if current_user.client.rvm_allowed.to_bool %>
+          <%= link_to("<i class=\"fa fa-voicemail #{presenter.include_rvm? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_rvm: !presenter.include_rvm?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "Ringless Voicemails are #{presenter.include_rvm? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+        <% end %>
+
+        <% if current_user.client.phone_calls_allowed.to_bool %>
+          <%= link_to("<i class=\"fa fa-phone #{presenter.include_voice? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_voice: !presenter.include_voice?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "Phone calls are #{presenter.include_voice? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+        <% end %>
+
+        <% if current_user.access_controller?('widgets', 'allowed', session) %>
+          <%= link_to("<i class=\"fa fa-cog #{presenter.include_widget? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_widget: !presenter.include_widget?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "SiteChat messages are #{presenter.include_widget? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+        <% end %>
+
+        <% if current_user.client.video_calls_allowed %>
+          <%= link_to("<i class=\"fa fa-desktop #{presenter.include_video? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_video: !presenter.include_video?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "Video calls are #{presenter.include_video? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+        <% end %>
+
+        <% if current_user.client.integrations_allowed.include?('facebook_messenger') %>
+          <%= link_to("<i class=\"fab fa-facebook #{presenter.include_fb? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_fb: !presenter.include_fb?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "Facebook messages are #{presenter.include_fb? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+        <% end %>
+
+        <% if current_user.client.integrations_allowed.include?('google') %>
+          <%= link_to("<i class=\"fab fa-google #{presenter.include_ggl? ? 'text-success' : ''}\"></i>".html_safe,
+                      central_active_contacts_path(include_ggl: !presenter.include_ggl?),
+                      class:  'btn btn-icon',
+                      method: :get,
+                      remote: true,
+                      title:  "Google messages are #{presenter.include_ggl? ? '' : 'not'} included",
+                      data:   {
+                        toggle: 'tooltip'
+                      }) %>
+        <% end %>
+
+        <%= link_to("<i class=\"fa fa-eye-slash #{presenter.include_sleeping? ? 'text-success' : ''}\"></i>".html_safe,
+                    central_active_contacts_path(include_sleeping: !presenter.include_sleeping?),
+                    class:  'btn btn-icon',
+                    method: :get,
+                    remote: true,
+                    title:  "Sleeping Contacts are #{presenter.include_sleeping? ? '' : 'not'} included",
+                    data:   {
+                      toggle: 'tooltip'
+                    }) %>
+        <%= link_to("<i class=\"fa fa-sync #{presenter.include_automated? ? 'text-success' : ''}\"></i>".html_safe,
+                    central_active_contacts_path(include_automated: !presenter.include_automated?),
+                    class:  'btn btn-icon',
+                    method: :get,
+                    remote: true,
+                    title:  "Automated messages are #{presenter.include_automated? ? '' : 'not'} included",
+                    data:   {
+                      toggle: 'tooltip'
+                    }) %>
+
+        <%= link_to("<i class=\"fa fa-hand-paper #{presenter.active_contacts_paused? ? 'text-danger' : ''}\"></i>".html_safe,
+                    central_active_contacts_path(active_contacts_paused: !presenter.active_contacts_paused?),
+                    class:  'btn btn-icon',
+                    method: :get,
+                    remote: true,
+                    title:  "Refresh is #{presenter.active_contacts_paused? ? 'paused' : 'active'}",
+                    data:   {
+                      toggle: 'tooltip'
+                    }) %>
+        </span>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="active_contacts_index">
+    <%= render partial: 'central/sidebar/active_contacts/active_contacts', locals: { presenter: } %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.tooltip').remove();
+
+    var include_automated = '<%= presenter.include_automated? -%>';
+
+    $(document).off('change', '#contacts_per_page');
+    $(document).on('change', '#contacts_per_page', function(e) {
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= central_conversation_path(0) -%>',
+        data: { page: 1, per_page: this.value }
+      });
+    });
+
+    $(document).off('change', '#show_user_ids');
+    $(document).on('change', '#show_user_ids', function(e) {
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= central_conversation_path(0) -%>',
+        data: { show_user_ids: $('#show_user_ids').selectpicker('val'), page: 1 }
+      });
+    });
+  });
+</script>

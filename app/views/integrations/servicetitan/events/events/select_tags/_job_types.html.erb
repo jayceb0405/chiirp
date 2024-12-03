@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_job_types.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/job_types', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[job_types]',
+      row:          { class: 'event_criteria_row', id: "job_types_row_#{presenter.event_id}" },
+      label:        { title: "Job Types<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_job_types_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Job Types', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.servicetitan_job_types, selected: presenter.job_types },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Job Type includes any of the selected types.' }
+    ) %>

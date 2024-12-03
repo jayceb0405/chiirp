@@ -1,0 +1,53 @@
+<%
+  # app/views/clients/features/forms/_aiagents.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/features/forms/aiagents', locals: { presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || ClientPresenter.new(client: @client)
+-%>
+<h6 class="card-header">AI Agents</h6>
+<%= form_with model: presenter.client, url: clients_feature_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'features_form', novalidate: true } do |f| %>
+  <%= f.number_field :aiagent_base_charge, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Base Charge' },
+        html_options: { min: 0, step: '0.01' },
+        prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }],
+        messages:     { note: 'Monthly charge for access to AI Agents.' }
+      } %>
+  <%= f.number_field :aiagent_included_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Included AI Agents' },
+        html_options: { min: -1, step: 1 },
+        messages:     { note: 'AI Agents Included in Plan (-1 for unlimited)' }
+      } %>
+  <%= f.number_field :aiagent_overage_charge, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Monthly Extra Charge' },
+        html_options: { min: 0, step: '0.01' },
+        prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }],
+        messages:     { note: 'Monthly charge per AI Agent over the included setting.' }
+      } %>
+  <%= f.number_field :aiagent_message_credits, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'AI Agent Price (credits)' },
+        html_options: { min: 0, step: '0.01' },
+        prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }],
+        messages:     { note: 'Cost per training segment in credits.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'AI Agents Sharing Allowed' },
+        checkboxes: [{ field: 'share_aiagents_allowed', checked: presenter.client.share_aiagents_allowed, values: %w[true false] }]
+      } %>
+  <%= f.submit_buttons buttons: [{ title: 'Save AI Agent Features', disable_with: 'Saving AI Agent Features' }] %>
+<% end %>

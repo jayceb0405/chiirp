@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/servicetitan/events/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/show', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <div class="card-header nav-scroller">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <%= link_to 'Events', integrations_servicetitan_events_events_path, { class: 'nav-link event_nav_link active', id: 'link_events', data: { turbo: true, turbo_stream: true } } %>
+        </li>
+        <li class="nav-item">
+          <%= link_to 'Settings', edit_integrations_servicetitan_events_settings_path, { class: 'nav-link event_nav_link', id: 'link_settings', data: { turbo: true, turbo_stream: true } } %>
+        </li>
+      </ul>
+    </div>
+
+    <div class="card-body">
+      <div class="card-deck-xl">
+        <div class="card card-fluid ml-0" id="events_show_body">
+          <%= render partial: 'integrations/servicetitan/events/events/index', locals: { presenter: } %>
+        </div>
+      </div>
+    </div>>
+  </div>
+</div>

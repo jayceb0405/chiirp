@@ -1,0 +1,89 @@
+<%
+  # app/views/tasks/_task.html.erb
+  #
+  # Example:
+  #   render partial: 'tasks/task', collection: @tasks, locals: { tasks_presenter: TasksPresenter }
+  #
+  # Required Instance Variables:
+  #   task: (Task)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   tasks_presenter: (TaskPresenter)
+  # 
+  tp = local_assigns.dig(:tasks_presenter) || TasksPresenter.new(task: @task, contact: @contact)
+  tp.task = task
+  tp.contact = nil
+-%>
+<div class="task-issue">
+  <div class="card">
+    <div class="card-header">
+      <h4 class="card-title">
+        <a href="#"><%= truncate(tp.task.name, length: 50) -%></a>
+      </h4>
+      <h6 class="card-subtitle text-muted">
+        <div class="due-date text-muted">User Assigned: <%= tp.task_user_assigned_string -%></div>
+        <div class="due-date text-muted">Contact: <%= tp.task_contact_string -%></div>
+        <div class="due-date text-muted"><i class="fa fa-fw fa-clock"></i> Created: <%= Friendly.new.date(tp.task.created_at, tp.client.time_zone, false) -%></div>
+        <div class="due-date <%= tp.text_color_for_date(tp.task.created_at, tp.task.due_at, tp.task.completed_at) -%>"><i class="fa fa-fw fa-clock"></i> Due: <%= Friendly.new.date(tp.task.due_at, tp.client.time_zone, false) -%></div>
+        <div class="due-date <%= tp.text_color_for_date(tp.task.created_at, tp.task.deadline_at, tp.task.completed_at) -%>"><i class="fa fa-fw fa-clock"></i> Deadline: <%= Friendly.new.date(tp.task.deadline_at, tp.client.time_zone, false) -%></div>
+        <div class="due-date <%= tp.text_color_for_date(tp.task.created_at, tp.task.deadline_at, tp.task.completed_at) -%>"><i class="fa fa-fw fa-clock"></i> Completed: <%= Friendly.new.date(tp.task.completed_at, tp.client.time_zone, false) -%></div>
+      </h6>
+    </div>
+
+    <div class="card-body">
+      <div class="list-group">
+        <div class="list-group-item">
+          <div class="list-group-item-body py-1 text-truncate">
+            <a href="#" class="badge badge-<%= tp.text_color_for_progress_bar(task.created_at, task.due_at, task.completed_at) -%> text-white" data-toggle="tooltip" title="Smart Paper Project"><%= tp.task_progress_label(task.created_at, task.due_at, task.completed_at) -%></a>
+            <span class="text-muted mx-2"><i class="fa fa-long-arrow-alt-right"></i></span>
+            <div class="avatar-group">
+              <%= tp.text_days_remaining(tp.task.created_at, tp.task.due_at, tp.task.completed_at) %>
+            </div>
+          </div>
+        </div>
+        <div class="list-group-item pt-0">
+          <a href="#" class="stretched-link"></a>
+          <div class="list-group-item-body">
+            <div class="progress progress-xs">
+              <div class="progress-bar bg-<%= tp.text_color_for_progress_bar(task.created_at, task.due_at, task.completed_at) -%>" role="progressbar" style="width: <%= tp.task_progress(task.created_at, task.due_at, task.completed_at) -%>%;" aria-valuenow="<%= tp.task_progress(task.created_at, task.due_at, task.completed_at) -%>" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </div>
+          <div class="list-group-item-figure">
+            <span class="todos"><%= tp.task_progress_elapsed_days(tp.task.created_at, tp.task.completed_at) -%>/<%= tp.task_days(tp.task.created_at, tp.task.due_at, tp.task.completed_at) -%></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-footer">
+      <div class="flex flex-column justify-content-around card-footer-item card-footer-item-bordered border pt-2" style="display:flex;">
+        <div class="custom-control custom-checkbox">
+          <%= check_box_tag('complete', '', tp.task.completed_at.present?, {
+              class: 'custom-control-input',
+              id: "task_#{tp.task.id}",
+              style: 'opacity:unset;',
+              data: {
+                remote: true,
+                method: :post,
+                url: complete_task_path(tp.task.id)
+              }
+            })
+          %>
+        </div>
+        <%= link_to_if(tp.task.contact_id.to_i.positive?, '', central_path(contact_id: tp.task.contact_id), {
+            class: 'fa fa-comments text-muted pb-2'
+          })
+        %>
+        <%= link_to('', edit_task_path(tp.task.id), {
+            remote: true,
+            method: :get,
+            class: 'fa fa-pencil-alt text-muted'
+          })
+        %>
+      </div>
+    </div>
+  </div>
+</div>

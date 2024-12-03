@@ -1,0 +1,54 @@
+<%
+  # app/views/integrations/housecall/employees/_index.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/housecall/employees/index"
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Housecall Pro Employee Links</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if presenter.valid_credentials? %>
+        <%= form_with model: presenter.client_api_integration, url: integrations_housecall_employees_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+          <table class="table table-no-bordered table-striped">
+            <thead>
+              <tr>
+                <th>Housecall Pro Employee</th>
+                <th><%= I18n.t('tenant.name') -%> User Assignment</th>
+              </tr>
+            </thead>
+            <tbody>
+              <%= render partial: 'integrations/housecall/employees/employee', collection: presenter.housecallpro_employees, as: :employee, locals: { presenter: } %>
+            </tbody>
+          </table>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Users', disable_with: 'Saving Users' }] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_employees').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

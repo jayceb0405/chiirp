@@ -1,0 +1,33 @@
+<%
+  # app/views/dashboards/buttons/_user_trackable_link.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/user_trackable_link', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) TrackableLink id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.client.trackable_links_count.positive? && (trackable_link = presenter.client.trackable_links.find_by(id: local_assigns.dig(:id).to_i)) %>
+  <%
+    short_code_count = TrackableLink.contacts_delivered_by_user(trackable_link.id, presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).uniq.count
+    hit_count        = TrackableLink.contacts_clicked_by_user(trackable_link.id, presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).uniq.count
+    hit_rate         = short_code_count.positive? ? (hit_count.to_d / short_code_count.to_d).round(2) : 0
+  %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               "user_trackable_link_#{trackable_link.id}",
+        stats:            "#{short_code_count} / #{hit_count}",
+        description:      trackable_link.name,
+        description_icon: 'u',
+        icon:             'fa fa-link',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', trackable_link_id: trackable_link.id, user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         "user_trackable_link_chart_#{trackable_link.id}",
+        chart_value:      hit_rate,
+        button_movable:   true
+      } %>
+<% end %>

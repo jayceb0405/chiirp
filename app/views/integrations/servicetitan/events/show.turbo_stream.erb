@@ -1,0 +1,21 @@
+<%
+  # app/views/integrations/servicetitan/events/show.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/show'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Servicetitan::EventsPresenter.new(@client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/servicetitan/events/show', locals: { presenter: } %>
+<% end %>
+<%= turbo_stream.remove_class('.nav-link', 'active') %>
+<%= turbo_stream.append_class('link_job_events', 'active') %>
+
+<%= turbo_stream.bootstrap_init %>

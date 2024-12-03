@@ -1,0 +1,93 @@
+<%
+  # app/views/clients/voice_recordings/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/voice_recordings/index', locals: { presenter: Clients::VoiceRecordings::Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: (Clients::VoiceRecordings::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Clients::VoiceRecordings::Presenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Voice Recordings <span class="badge"><%= presenter.client.voice_recordings.count -%> / <%= presenter.client.max_voice_recordings -%></span></span>
+      <span>
+        <%= if presenter.ok_to_create_new_voice_recording
+              link_to '<i class="fa fa-plus mr-2"></i>New Voice Recording'.html_safe, new_client_voice_recording_path(presenter.client), {
+                class:  'btn btn-light',
+                id:     'button_new_campaign',
+                remote: true,
+                method: :get
+              }
+            end %>
+        <%= link_to '<i class="fa fa-question"></i>'.html_safe, '#', {
+              class: 'btn btn-sm btn-icon btn-secondary ml-2',
+              id:    'voice_recordings_help'
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px">Name</th>
+              <th>Created</th>
+              <th style="width:100px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody id="voice_recordings_table_body">
+            <%= render partial: 'clients/voice_recordings/voice_recording', collection: presenter.voice_recordings, locals: { presenter: } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if presenter.client.errors.any? %>
+      ChiirpAlert({
+        'body':       triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':       'warning',
+        'persistent': true
+      });
+    <% end %>
+
+    $('#voice_recordings_help').on('click', function(e) {
+      e.preventDefault();
+
+      var help_info = '<ul>'
+      help_info += '<li>The number of stored Voice Recordings is determined by the Package selected.</li>'
+      help_info += '<li>You have been assigned a maximum of <%= presenter.client.max_voice_recordings -%> Voice Recordings.</li>'
+      help_info += '<li>Voice Recordings may be selected for the following actions...</li>'
+      help_info += '<ul>'
+      help_info += '<li>Ringless Voicemail</li>'
+      help_info += '<li>Voicemail Greeting</li>'
+      help_info += '</ul></ul>'
+
+      ChiirpAlert({
+        'title':      'Voice Recordings Help Info',
+        'body':       help_info,
+        'type':       'info',
+        'persistent': true
+      });
+    });
+
+    $('.nav-link').removeClass('active');
+    $('#link_voice_recordings').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_voice_recordings').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

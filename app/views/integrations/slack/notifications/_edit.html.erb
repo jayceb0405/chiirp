@@ -1,0 +1,39 @@
+<%
+  # app/views/integrations/slack/notifications/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/slack/notifications/edit"
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Slack::Presenter.new(user_api_integration: @user_api_integration) unless local_assigns.dig(:presenter).is_a?(Integrations::Slack::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Notifications Sent to Slack</h6>
+  <div class="card-body">
+
+    <%= form_with model: @user_api_integration, url: integrations_slack_notifications_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', novalidate: true } do |f| %>
+      <%= f.select :notifications_channel, {
+            label:        { title: 'General Slack Notification Channel' },
+            html_options: { id: 'select_slack_channel', mobile: browser.device.mobile? },
+            choices:      { array: Integrations::Slacker::Base.new(presenter.user_api_integration.token).channel_names.sort, blank: 'Select a Slack Channel', selected: presenter.user_api_integration.notifications_channel }
+          } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_notifications').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

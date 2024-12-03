@@ -1,0 +1,160 @@
+<%
+  # app/views/integrations/google/reviews/reviews/_index.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/google/reviews/reviews/index", locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+  presenter.account  = local_assigns.dig(:account).presence || (presenter.options_for_selected_accounts.length == 1 ? presenter.options_for_selected_accounts[0][1] : '')
+  presenter.location = local_assigns.dig(:location).presence || (presenter.options_for_selected_locations_reviews(presenter.account).length == 1 ? presenter.options_for_selected_locations_reviews(presenter.account)[0][1] : '')
+  presenter.page     = (local_assigns.dig(:page) || 1).to_i
+  presenter.per_page = (local_assigns.dig(:per_page) || 20).to_i
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Reviews</h6>
+  <div class="card-body">
+
+    <%= bootstrap_select_tag(
+          field:        'account',
+          label:        { class: 'pb-1', title: 'Google Account' },
+          html_options: { id: 'select_account', autofocus: true },
+          options:      { array: presenter.options_for_selected_accounts, selected: presenter.account, prompt: 'Select a Google account' },
+          messages:     { note: 'Select your Google account to manage reviews.' }
+        ) %>
+
+    <% if presenter.account.present? %>
+      <%= bootstrap_select_tag(
+            field:        'location',
+            label:        { title: 'Google Location' },
+            html_options: { id: 'select_location' },
+            options:      { array: presenter.options_for_selected_locations_reviews(presenter.account), selected: presenter.location, prompt: 'Select a Google location' },
+            messages:     { note: 'Select your Google account location to manage reviews.' }
+          ) %>
+    <% end %>
+
+    <%= bootstrap_info_field(
+          info:         number_with_precision(presenter.average_rating, precision: 2),
+          info_wrapper: { tag: 'span', class: 'mr-3', id: '' },
+          html_options: { id: 'average_rating_stars' },
+          label:        { title: 'Average Rating' }
+        ) %>
+    <%= bootstrap_info_field(
+          info:  presenter.total_reviews,
+          label: { title: 'Total Number of Reviews' }
+        ) %>
+
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="2" class="text-left">Name</th>
+            <th class="text-left">Contact</th>
+            <th class="text-center">Star Rating</th>
+            <th class="text-center">Location</th>
+            <th class="text-center">Comments</th>
+            <th class="text-left">Last Updated</th>
+            <th class="text-center">Replied</th>
+            <th style="width:100px; min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="reviews_list_body">
+          <%= render partial: 'integrations/google/reviews/reviews/review_list', locals: { presenter:, account: presenter.account, location: presenter.location } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-reviews-link').removeClass('active');
+    $('#link_reviews_reviews').addClass('active');
+    $('#breadcrumb').show();
+    // displayStars('average_rating_stars', <%= presenter.average_rating -%>, 20);
+    displayStars('average_rating_stars', <%= presenter.average_rating * 100 -%>, 20);
+
+    $(document).off('change', '#select_account');
+    $(document).on('change', '#select_account', function(e) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= integrations_google_reviews_reviews_path -%>',
+        data: { account: $('#select_account').val() }
+      });
+    });
+
+    $(document).off('change', '#select_location');
+    $(document).on('change', '#select_location', function(e) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= integrations_google_reviews_reviews_path -%>',
+        data: {
+          account: $('#select_account').val(),
+          location: $('#select_location').val()
+        }
+      });
+    });
+  });
+
+  function displayStars(element_id, count, size) {
+    $('#' + element_id).starRating({
+      initialRating: count,
+      starSize: size,
+      totalStars: 5,
+      useFullStars: false,
+      useGradient: false,
+      emptyColor: 'lightgray',
+      hoverColor: 'gold',
+      activeColor: 'gold',
+      readOnly: true
+    });
+  }
+
+  function selectContact(clientId, reviewId, contactId, contactName) {
+    var contactSelect = $('#contact_select_' + reviewId);
+
+    // if (contactId > 0) {
+    //   var data = {
+    //     id: contactId,
+    //     text: contactName
+    //   };
+    //   var newOption = new Option(data.text, data.id, false, false);
+    //   contactSelect.append(newOption);
+    // }
+
+    // contactSelect.trigger('change');
+
+    contactSelect.select2({
+      // theme: 'classic',
+      ajax: {
+        delay: 250, // wait 250 milliseconds before triggering the request
+        minimumInputLength: 3,
+        url: '<%= contact_task_path -%>',
+        dataType: 'json',
+        data: function (params) {
+          var query = {
+            client_id: clientId,
+            searchchars: params.term
+          }
+
+          return query;
+        },
+        processResults: function (data, params) {
+          return {
+            results: data.results
+          }
+        }
+      }
+    });
+  }
+</script>

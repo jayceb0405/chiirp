@@ -1,0 +1,254 @@
+<%
+  # app/views/central/conversation/_body.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/body', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+
+  presenter.folders
+-%>
+<div class="card card-fluid mb-0">
+  <div role="log" class="conversations">
+    <ul class="conversation-list" id="conversation_list_<%= presenter.contact.id -%>">
+
+      <% if presenter.contact_message_thread.any? %>
+        <li class="log-divider">
+          <span><i class="fa fa-comment"></i> Conversation started <%= Friendly.new.date(presenter.contact_message_thread.first.created_at, presenter.client.time_zone, true, true) -%> </span>
+        </li>
+
+        <%= render partial: 'central/conversation/message', collection: presenter.contact_message_thread, locals: { presenter: } %>
+      <% elsif presenter.contact.new_record? %>
+        <li class="log-divider">
+          <span><i class="fa fa-comment"></i> Select a Contact from Active Contacts </span>
+        </li>
+      <% else %>
+        <li class="log-divider">
+          <span><i class="fa fa-comment"></i> Conversation has not begun using the selected phone number </span>
+        </li>
+      <% end %>
+    </ul>
+  </div>
+</div>
+
+<%= render partial: 'snippets/custom_modal', locals: { id: 'show_image', max_width: '500px', max_height: '500px', large: true, centered: false, scrollable: false, close: true } %>
+
+<script>
+  $(function() {
+    var msgBody = document.getElementById('central_conversation_body');
+    msgBody.scrollTop = msgBody.scrollHeight;
+
+    var message_group = [];
+
+    $(document).off('click', '.show_image_modal');
+    $(document).on('click', '.show_image_modal', function(e) {
+      e.preventDefault();
+
+      var image_type          = $(this).data('imagetype')
+      var image_tag           = $(this).data('imagetag');
+      var image_full_size_tag = $(this).data('imagefullsizetag');
+
+      $('#show_image').modal('show');
+      $('#show_image_title').html('Message Attachment');
+
+      if (image_type == 'video') {
+        $('#show_image_body').html('<div class="row justify-content-center embed-responsive embed-responsive-16by9">' + image_tag + '</div><%= bootstrap_submit_buttons(buttons: [{ title: 'Full Size', class: 'show_full_size_image_modal' }]).html_safe -%>');
+      } else {
+        // $('#show_image_body').html('<div class="row justify-content-center">' + image_tag + '</div><div class="row justify-content-center mt-2">' + image_link + '</div>');
+        $('#show_image_body').html('<div class="row justify-content-center">' + image_tag + '</div><%= bootstrap_submit_buttons(buttons: [{ title: 'Full Size', class: 'show_full_size_image_modal' }]).html_safe -%>');
+      }
+
+      $(document).off('click', '.show_full_size_image_modal');
+      $(document).on('click', '.show_full_size_image_modal', function(e) {
+        e.preventDefault();
+
+        $('#full_size_modal').modal('show');
+        $('#full_size_modal_title').html('Message Attachment (Full Size)');
+
+        if (image_type == 'video') {
+          $('#full_size_modal_body').html('<div class="row justify-content-center embed-responsive embed-responsive-16by9">' + image_full_size_tag + '</div>');
+        } else {
+          $('#full_size_modal_body').html('<div class="row justify-content-center">' + image_full_size_tag + '</div>');
+        }
+      });
+    });
+
+    $(document).off('click', '.message_dropdown_button');
+    $(document).on('click', '.message_dropdown_button', function(e) {
+      e.preventDefault();
+
+      var messageId = $(this).data('messageid');
+
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '/central/messagedropdown/' + messageId
+      });
+    });
+
+    <% if presenter.client.folders_count.positive? %>
+
+      $(document).off('click', '.message-icon');
+      $(document).on('click', '.message-icon', function(e) {
+        e.preventDefault();
+
+        var index = $.inArray($(this).data('message-id'), message_group);
+
+        if (index >= 0) {
+          $(this).removeClass('fa fa-check').addClass($(this).data('save-class'));
+          message_group.splice(index, 1);
+        } else {
+          $(this).removeClass($(this).data('save-class')).addClass('fa fa-check');
+          message_group.push($(this).data('message-id'));
+        }
+
+        messageGroupDisplay();
+      });
+
+      $(document).off('click', '.multi_folder_assignment_apply');
+      $(document).on('click', '.multi_folder_assignment_apply', function(e) {
+        e.preventDefault();
+
+        var folder_id = $(this).data('folder-id');
+
+        $.ajax({
+          type: 'POST',
+          dataType: 'script',
+          url: '/folders/' + folder_id + '/message_apply',
+          data: {
+            message_id: message_group
+          }
+        });
+
+        $('.folder_assignment').each(function(i, obj) {
+          var message_index = $.inArray($(this).data('message-id'), message_group);
+
+          if (message_index >= 0 && ($(this).data('folder-id') == folder_id)) {
+            $(this).html($(this).html().replace('Add to', 'Remove from'));
+
+            var folders    = $(this).closest('li.conversation-faux').data('folders');
+            var this_index = $.inArray(folder_id, folders);
+
+            if (this_index < 0) {
+              folders.push(folder_id);
+              $(this).closest('li.conversation-faux').data('folders', folders);
+            }
+          }
+        });
+
+        messageGroupClear();
+      });
+
+      $(document).off('click', '.multi_folder_assignment_remove');
+      $(document).on('click', '.multi_folder_assignment_remove', function(e) {
+        e.preventDefault();
+
+        var folder_id = $(this).data('folder-id');
+
+        $.ajax({
+          type: 'POST',
+          dataType: 'script',
+          url: '/folders/' + folder_id + '/message_remove',
+          data: {
+            message_id: message_group
+          }
+        });
+
+        $('.folder_assignment').each(function(i, obj) {
+          var message_index = $.inArray($(this).data('message-id'), message_group);
+
+          if (message_index >= 0 && ($(this).data('folder-id') == folder_id)) {
+            $(this).html($(this).html().replace('Remove from', 'Add to'));
+
+            var folders    = $(this).closest('li.conversation-faux').data('folders');
+            var this_index = $.inArray(folder_id, folders);
+
+            if (this_index >= 0) {
+              folders.splice(this_index, 1);
+              $(this).closest('li.conversation-faux').data('folders', folders);
+            }
+          }
+        });
+
+        messageGroupClear();
+      });
+
+      $(document).off('click', '.folder_display');
+      $(document).on('click', '.folder_display', function(e) {
+        e.preventDefault();
+
+        var folder_id = $(this).data('folder-id');
+
+        $('.folder_display').each(function(i, obj) {
+
+          if ($(this).data('folder-id') == folder_id) {
+            $(this).find('i').removeClass('text-white');
+          } else {
+            $(this).find('i').addClass('text-white');
+          }
+        });
+
+        $('.conversation-faux').each(function(i, obj) {
+
+          if (folder_id == 0) {
+            $(this).show();
+          } else {
+            var index = $.inArray(folder_id, $(this).data('folders'));
+
+            if (index >= 0) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          }
+        });
+
+        messageGroupClear();
+        var msgBody = document.getElementById('central_conversation_body');
+        msgBody.scrollTop = msgBody.scrollHeight;
+      });
+
+      $('.folder_assignment').bind('ajax:success', function(e) {
+        var folders    = $(this).closest('li.conversation-faux').data('folders');
+        var this_index = $.inArray($(this).data('folder-id'), folders);
+
+        if ($(this).html().indexOf('Add to') >= 0) {
+          $(this).html($(this).html().replace('Add to', 'Remove from'));
+          folders.push($(this).data('folder-id'));
+        } else if ($(this).html().indexOf('Remove from') >= 0) {
+          $(this).html($(this).html().replace('Remove from', 'Add to'));
+          folders.splice(this_index, 1);
+        }
+
+        $(this).closest('li.conversation-faux').data('folders', folders);
+      });
+
+      function messageGroupClear() {
+        $('.message-icon').each(function(i, obj) {
+          var index = $.inArray($(this).data('message-id'), message_group);
+
+          if (index >= 0) {
+            $(this).removeClass('fa fa-check').addClass($(this).data('save-class'));
+            message_group.splice(index, 1);
+          }
+        });
+
+        messageGroupDisplay();
+      }
+
+      function messageGroupDisplay() {
+        if (message_group.length) {
+          $('#message_folder_links').show();
+        } else {
+          $('#message_folder_links').hide();
+        }
+      }
+    <% end %>
+  });
+</script>

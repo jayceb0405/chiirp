@@ -1,0 +1,200 @@
+<%
+  # app/views/messages/texts/_action_buttons.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/action_buttons', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+-%>
+<div class="ml-2 pr-2 pb-1">
+  <% if presenter.disabled? %>
+    <%= render partial: 'messages/texts/ok2text_buttons', locals: { presenter: } %>
+  <% else %>
+    <% if !presenter.current_phone_number.empty? && presenter.show_quick_responses? %>
+      <%= button_tag(type: 'button', id: "quick_responses_button_#{presenter.message_id}", class: 'btn btn-light btn-icon') do %>
+        <i class="fas fa-edit"></i>
+      <% end %>
+    <% end %>
+
+    <% unless browser.device.mobile? %>
+      <%= button_tag(type: 'button', id: "button_emoji_#{presenter.message_id}", class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-smile"></i>
+      <% end %>
+    <% end %>
+
+    <% if !presenter.current_phone_number.empty? && presenter.show_msg_delay? %>
+      <%= button_tag(type: 'button', id: "scheduler_button_#{presenter.message_id}", class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-clock"></i>
+      <% end %>
+    <% end %>
+
+    <% if !presenter.current_phone_number.empty? && presenter.show_payment_request? %>
+      <%= button_tag(type: 'button', id: "payment_button_#{presenter.message_id}", class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-dollar-sign"></i>
+      <% end %>
+    <% end %>
+
+    <% if presenter.client.max_voice_recordings.positive? && presenter.show_voicemail? %>
+      <%= button_tag(type: 'button', id: "rvm_contact_#{presenter.message_id}", class: 'btn btn-light btn-icon', disabled: presenter.voice_disabled) do %>
+        <i class="fa fa-voicemail"></i>
+      <% end %>
+    <% end %>
+
+    <% if presenter.client.phone_calls_allowed && presenter.show_phone_call? && !presenter.contact.new_record? %>
+      <%= button_tag(type: 'button', id: "call_contact_#{presenter.message_id}", class: 'btn btn-light btn-icon', disabled: presenter.voice_disabled) do %>
+        <i class="fa fa-phone"></i>
+      <% end %>
+    <% end %>
+
+    <% if presenter.show_images? && presenter.client.text_message_images_allowed %>
+      <%= button_tag(type: 'button', id: "file_upload_button_#{presenter.message_id}", class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-image"></i>
+      <% end %>
+    <% end %>
+
+    <% if presenter.client.video_calls_allowed && presenter.show_video_calls? %>
+      <%= button_tag(type: 'button', id: "video_contact_button_#{presenter.message_id}", class: 'btn btn-light btn-icon') do %>
+        <i class="fa fa-desktop"></i>
+      <% end %>
+    <% end %>
+
+    <script>
+      $(function() {
+        <% if !presenter.disabled? && !presenter.current_phone_number.empty? && presenter.show_quick_responses? %>
+          // quick responses button
+          $(document).off('click', '#quick_responses_button_<%= presenter.message_id -%>');
+          $(document).on('click', '#quick_responses_button_<%= presenter.message_id -%>', function (e) {
+            $.ajax({
+              url:      '<%= quick_responses_path(contact_id: presenter.contact.id, phone_number: presenter.current_phone_number, message_id: presenter.message_id).html_safe -%>',
+              method:   'GET',
+              dataType: 'script',
+            });
+          });
+        <% end %>
+
+        <% unless browser.device.mobile? %>
+          $(document).off('click', '#button_emoji_<%= presenter.message_id -%>');
+          $(document).on('click', '#button_emoji_<%= presenter.message_id -%>', function (e) {
+            e.preventDefault();
+            $('#textarea_<%= presenter.message_id -%>').emojiPicker('toggle');
+          });
+        <% end %>
+
+        <% if !presenter.current_phone_number.empty? && presenter.show_msg_delay? %>
+          // scheduler calendar
+          $(document).off('click', '#scheduler_button_<%= presenter.message_id -%>');
+          $(document).on('click', '#scheduler_button_<%= presenter.message_id -%>', function (e) {
+            e.preventDefault();
+            $('#scheduler_options_<%= presenter.message_id -%>').toggle();
+          });
+        <% end %>
+
+        <% if !presenter.current_phone_number.empty? && presenter.show_payment_request? %>
+          // payment request
+          $(document).off('click', '#payment_button_<%= presenter.message_id -%>');
+          $(document).on('click', '#payment_button_<%= presenter.message_id -%>', function (e) {
+            e.preventDefault();
+            $('#payment_request_options_<%= presenter.message_id -%>').toggle();
+          });
+        <% end %>
+
+        <% if presenter.client.max_voice_recordings.positive? && presenter.show_voicemail? %>
+          // send voicemail to a Contact
+          $(document).off('click', '#rvm_contact_<%= presenter.message_id -%>');
+          $(document).on('click', '#rvm_contact_<%= presenter.message_id -%>', function (e) {
+            e.preventDefault();
+            $('#rvm_options_<%= presenter.message_id -%>').toggle();
+            $('#send_button_<%= presenter.message_id -%>').removeAttr('disabled');
+          });
+        <% end %>
+
+        <% if presenter.client.phone_calls_allowed && presenter.show_phone_call? && !presenter.contact.new_record? %>
+          // call a Contact
+          $(document).off('click', '#call_contact_<%= presenter.message_id -%>');
+          $(document).on('click', '#call_contact_<%= presenter.message_id -%>', function(e) {
+            e.preventDefault();
+            $('#call_contact_<%= presenter.message_id -%>').attr('disabled', 'disabled');
+
+            ChiirpAlert({
+              'title':      'Calling <%= presenter.contact.fullname -%>!',
+              'body':       'Have your cell phone ready! We will call you and then connect the call to <%= presenter.contact.fullname -%>.',
+              'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Place the call!', id: "button_call_#{presenter.message_id}" }].to_json) -%>,
+              'type':       'info',
+              'persistent': true
+            });
+
+            $(document).off('click', '#button_call_<%= presenter.message_id -%>');
+            $(document).on('click', '#button_call_<%= presenter.message_id -%>', function(e) {
+              e.preventDefault();
+
+              $('#alert_modal').off('hidden.bs.modal');
+              $('#alert_modal').on('hidden.bs.modal', function (e) {
+                $('#alert_modal').off('hidden.bs.modal');
+
+                ChiirpAlert({
+                  'title':      'Calling <%= presenter.contact.fullname -%>!',
+                  'body':       'Answer your phone.',
+                  'type':       'info',
+                  'persistent': false
+                });
+
+                var params = {
+                  user_id:    '<%= presenter.contact.user_id -%>',
+                  contact_id: '<%= presenter.contact.id -%>',
+                  from_phone: $('#phone_number_tag_<%= presenter.message_id -%>').val(),
+                  to_phone:   $('#contact_to_phone_<%= presenter.message_id -%>').val(),
+                  commit:     'call contact'
+                }
+
+                // Submit the form via ajax
+                $.ajax({
+                  url: '<%= central_call_contact_path(presenter.contact.id) -%>',
+                  method: 'POST',
+                  data: params
+                }).done(function(data) {
+
+                  if (data.status === 'fail') {
+                    ChiirpAlert({
+                      'title':      'Call to <%= presenter.contact.fullname -%> Failed!',
+                      'body':       data.message,
+                      'type':       'danger',
+                      'persistent': false
+                    });
+                  }
+                }).fail(function(data) {
+
+                  ChiirpAlert({
+                    'title':      'Call to <%= presenter.contact.fullname -%> Failed!',
+                    'body':       'There was a problem completing the call - please try again later.',
+                    'type':       'danger',
+                    'persistent': false
+                  });
+                }).always(function() {
+                  $('#call_contact_<%= presenter.message_id -%>').removeAttr('disabled');
+                });
+              });
+            });
+          });
+        <% end %>
+
+        <% if presenter.client.video_calls_allowed && presenter.show_video_calls? %>
+          $(document).off('click', '#video_contact_button_<%= presenter.message_id -%>');
+          $(document).on('click', '#video_contact_button_<%= presenter.message_id -%>', function (e) {
+            e.preventDefault();
+            $.ajax({
+              method: 'GET',
+              dataType: 'script',
+              url: '<%= video_start_user_path(presenter.contact.id, presenter.user.id) -%>'
+            });
+          });
+        <% end %>
+      });
+    </script>
+  <% end %>
+</div>

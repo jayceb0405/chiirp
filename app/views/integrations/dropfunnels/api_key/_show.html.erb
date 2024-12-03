@@ -1,0 +1,36 @@
+<%
+  # app/views/integrations/dropfunnels/api_key/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/dropfunnels/api_key/_show.html.erb', collection: @client.tags.order( :name ), locals: {  }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">API Key</h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: '', builder: LooperFormBuilder do |f| %>
+      <%= f.copy_field :api_key, {
+            label: { title: 'Your DropFunnels API Key' }
+      } %>
+      <%= f.copy_field nil, {
+            label: { title: 'Your DropFunnels Webhook URL' },
+        html_options: { value: integrations_dropfunnels_integration_endpoint_url(@client_api_integration.api_key) }
+      } %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_api_key').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

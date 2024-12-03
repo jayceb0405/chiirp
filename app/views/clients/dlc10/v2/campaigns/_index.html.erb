@@ -1,0 +1,66 @@
+<%
+  # app/views/clients/dlc10/v2/campaigns/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/campaigns/index', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@dlc10_campaign] } %>
+<% if presenter.dlc10_ok_to_edit(current_user) %>
+
+  <div class="table-responsive">
+    <table class="table">
+
+      <thead>
+        <tr>
+          <td colspan="<%= presenter.campaign_index_colspan -%>" class="text-right align-top">
+            <%= link_to('<i class="fa fa-plus mr-2"></i>New Use Case'.html_safe, new_clients_dlc10_campaign_path(client_id: presenter.client.id), { class: 'btn btn-light', remote: true, method: :get }) %>
+          </td>
+        </tr>
+        <tr>
+          <th class="text-left align-middle"> Name </th>
+          <th class="text-left align-middle"> Use Case </th>
+          <th class="text-left align-middle"> Vertical </th>
+          <th class="text-left align-middle"> Description </th>
+          <th class="text-left align-middle"> Created </th>
+
+          <% if presenter.client.dlc10_charged %>
+            <th class="text-left align-middle"> Monthly Charge </th>
+          <% end %>
+
+          <th class="text-center align-middle"> Registered </th>
+          <th class="text-center align-middle"> Approved </th>
+          <th class="text-right align-middle" style="width:100px; min-width:100px;"></th>
+        </tr>
+      </thead>
+
+      <tbody id="campaigns_index">
+        <% if presenter.client.dlc10_brand && presenter.dlc10_campaigns.any? %>
+          <%= render partial: 'clients/dlc10/v2/campaigns/campaign', collection: presenter.dlc10_campaigns, as: :dlc10_campaign, locals: { presenter: } -%>
+        <% else %>
+          <tr>
+            <td colspan="<%= presenter.campaign_index_colspan -%>">
+              Use cases were not found.
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+<% else %>
+  <h6>Access NOT permitted!</h6>
+<% end %>
+
+<script>
+  $(function () {
+    $('.nav-dlc10_link').removeClass('active');
+    $('#link_dlc10_campaigns').addClass('active');
+  });
+</script>

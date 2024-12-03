@@ -1,0 +1,44 @@
+<%
+  # app/views/clients/widgets/v3/forms/_option.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/forms/option', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   widget_presenter: Presenter
+  #
+  presenter   = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+  option_name = local_assigns.dig(:option)
+  option      = option.tr('^A-Za-z0-9', '').underscore
+  group_id    = presenter.widget.w_dd_actions.dig(option_name, 'group_id').to_i
+  tag_id      = presenter.widget.w_dd_actions.dig(option_name, 'tag_id').to_i
+-%>
+<div class="card-header border-0" id="clients_widget_option_<%= option -%>">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#clients_widget_option_body_<%= option -%>">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span><%= option_name -%></span>
+  </button>
+</div>
+
+<div id="clients_widget_option_body_<%= option -%>" class="collapse" data-parent="#clients_widget_options_accordion">
+  <div class="card-body pt-0">
+    <%= bootstrap_select_tag(
+          field:   "clients_widget[w_dd_actions][#{option_name}][user_id]",
+          label:   { title: 'Assign New Contacts To' },
+          options: { array: presenter.client.users.where.not(id: nil).order(:lastname, :firstname).map { |user| [user.fullname, user.id] }, selected: presenter.widget.w_dd_actions.dig(option_name, 'user_id') }
+        ) %>
+    <%= render partial: 'campaigns/action_fields', locals: {
+          client:            presenter.client,
+          campaign_id:       presenter.widget.w_dd_actions.dig(option_name, 'campaign_id'), campaign_id_field: "clients_widget[w_dd_actions][#{option_name}][campaign_id]",
+          group:             group_id.positive? && presenter.client.groups.find_by(id: group_id), group_id_field: "clients_widget[w_dd_actions][#{option_name}][group_id]",
+          tag:               tag_id.positive? && presenter.client.tags.find_by(id: tag_id), tag_id_field: "clients_widget[w_dd_actions][#{option_name}][tag_id]",
+          stage_id:          presenter.widget.w_dd_actions.dig(option_name, 'stage_id'), stage_id_field: "clients_widget[w_dd_actions][#{option_name}][stage_id]",
+          stop_campaign_ids: presenter.widget.w_dd_actions.dig(option_name, 'stop_campaign_ids'), stop_campaign_ids_field: "clients_widget[w_dd_actions][#{option_name}][stop_campaign_ids]"
+        } %>
+
+  </div>
+</div>

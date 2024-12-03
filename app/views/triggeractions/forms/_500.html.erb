@@ -1,0 +1,16 @@
+<%
+  # app/views/triggeractions/forms/_500.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/500", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # set ok2text on
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>

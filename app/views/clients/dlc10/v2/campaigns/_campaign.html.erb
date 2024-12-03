@@ -1,0 +1,80 @@
+<%
+  # app/views/clients/dlc10/v2/campaigns/_campaign.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/campaigns/campaign', collection: @client.dlc10_campaigns.order(:use_case, :vertical, :created_at), as: :dlc10_campaign, locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<tr>
+  <td class="align-middle text-left"> <%= dlc10_campaign.name -%> </td>
+  <td class="align-middle text-left"> <%= dlc10_campaign.use_case -%> </td>
+  <td class="align-middle text-left"> <%= dlc10_campaign.vertical -%> </td>
+  <td class="align-middle text-left"> <%= dlc10_campaign.description.truncate(25) -%> </td>
+  <td class="align-middle text-left"> <%= Friendly.new.date(dlc10_campaign.created_at, presenter.client.time_zone, true) -%> </td>
+
+  <% if presenter.client.dlc10_charged %>
+    <td class="align-middle text-left"> <%= number_to_currency(dlc10_campaign.mo_charge) -%> on <%= Friendly.new.date(dlc10_campaign.next_mo_date, presenter.client.time_zone, false) -%> </td>
+  <% end %>
+
+  <td class="align-middle text-center"> <%= (dlc10_campaign.verified? ? '<i class="fa fa-check text-success"></i>' : '').html_safe -%> </td>
+  <td class="align-middle text-center"> <%= (dlc10_campaign.dca_completed_at.present? ? '<i class="fa fa-check text-success"></i>' : '').html_safe -%> </td>
+  <td class="align-middle text-middle text-right">
+    <%= link_to '<span data-toggle="tooltip" title="Edit"><i class="fa fa-pencil-alt"></i></span>'.html_safe,
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary prevent-default',
+                data:  {
+                  toggle: 'collapse',
+                  target: "#dlc10_campaign_#{dlc10_campaign.id}"
+                } %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_dlc10_campaign',
+                id:    "button_delete_dlc10_campaign_#{dlc10_campaign.id}",
+                data:  { id: dlc10_campaign.id, name: "#{dlc10_campaign.use_case}/#{dlc10_campaign.vertical}" } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="dlc10_campaign_<%= dlc10_campaign.id -%>">
+  <!-- Dlc10Campaign -->
+</tr>
+
+<script>
+  $(function() {
+
+    $(document).off('show.bs.collapse', '#dlc10_campaign_<%= dlc10_campaign.id -%>');
+    $(document).on('show.bs.collapse', '#dlc10_campaign_<%= dlc10_campaign.id -%>', function(e) {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= edit_clients_dlc10_campaign_path(presenter.client.id, id: dlc10_campaign.id) -%>'
+      });
+    });
+
+    $('#button_delete_dlc10_campaign_<%= dlc10_campaign.id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting "<%= dlc10_campaign.name -%>" can NOT be un-done. Is it your intention to delete this campaign?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{dlc10_campaign.id}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= dlc10_campaign.id -%>');
+      $(document).on('click', '#button_dump_it_<%= dlc10_campaign.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= clients_dlc10_campaign_path(presenter.client.id, id: dlc10_campaign.id) -%>'
+        });
+      });
+    });
+  });
+</script>

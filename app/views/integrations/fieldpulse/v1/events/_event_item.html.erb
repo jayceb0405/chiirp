@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/fieldpulse/v1/events/_event_item.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/fieldpulse/v1/events/event_item', locals: { presenter: Integrations::Fieldpulse::V1::Events::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldpulse::V1::Events::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::Events::Presenter)
+-%>
+<td class="text-center align-middle" style="width: 1.5rem">
+  <%= link_to '',
+              edit_integrations_fieldpulse_v1_event_path(presenter.event_id),
+              {
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-angle-right collapse-indicator',
+                id:    "collapse_indicator_#{presenter.event_id}",
+                data:  {
+                  turbo:        true,
+                  turbo_stream: true
+                }
+              } %>
+</td>
+<td class="text-left align-middle" colspan="2">
+  <%= link_to presenter.event_type_name,
+              edit_integrations_fieldpulse_v1_event_path(presenter.event_id),
+              {
+                class: 'btn text-left',
+                id:    "collapse_indicator_#{presenter.event_id}",
+                data:  {
+                  turbo:        true,
+                  turbo_stream: true
+                }
+              } %>
+</td>
+<%= content_tag(:td, class: 'text-left align-middle') { presenter.campaign&.name.to_s } if presenter.campaigns_allowed? %>
+<%= content_tag(:td, class: 'text-left align-middle') { presenter.group&.name.to_s } if presenter.groups_allowed? %>
+<%= content_tag(:td, class: 'text-left align-middle') { presenter.stage&.name.to_s } if presenter.stages_allowed? %>
+<td class="text-left align-middle"><%= presenter.tag&.name.to_s -%></td>
+<td class="text-right align-middle">
+  <%= link_to '',
+              edit_integrations_fieldpulse_v1_event_path(presenter.event_id),
+              {
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt collapse-indicator',
+                id:    "collapse_indicator_#{presenter.event_id}",
+                data:  {
+                  turbo:        true,
+                  turbo_stream: true
+                }
+              } %>
+  <%= link_to '',
+              integrations_fieldpulse_v1_event_path(presenter.event_id),
+              {
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt event_delete',
+                data:  {
+                  id:   presenter.event_id,
+                  name: presenter.event_type_name
+                }
+              } %>
+</td>

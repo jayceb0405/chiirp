@@ -1,0 +1,60 @@
+<%
+  # app/views/integrations/housecall/webhooks/_webhook.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/webhooks/webhook', collection: Housecallpro.webhooks, as: :webhook, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: ClientApiIntegration
+  #
+  # Local Variables:
+  #   (req) webhook: (Hash)
+  #
+  presenter         = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook = webhook
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_webhook_<%= presenter.webhook_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_webhook_<%= presenter.webhook_id -%>">
+    <button type="button" class="btn text-left" data-toggle="collapse" data-target="#edit_webhook_<%= presenter.webhook_id -%>">
+      <%= presenter.webhook_name -%>
+    </button>
+  </td>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.webhook_line_item_names } %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.webhook_campaign&.name.to_s } if presenter.campaigns_allowed %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.webhook_group&.name.to_s } if presenter.groups_allowed %>
+  <td class="text-left align-middle"><%= presenter.webhook_tag&.name.to_s -%></td>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.webhook_stage&.name.to_s } if presenter.stages_allowed %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.webhook_stop_campaigns.join(', ') } if presenter.campaigns_allowed %>
+  <td class="text-right align-middle">
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+          style: 'text-decoration: none;',
+          data:  { toggle: 'collapse', target: "#edit_webhook_#{presenter.webhook_id}" }
+        } %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_webhook',
+          style: 'text-decoration: none;',
+          data:  { id: presenter.webhook_id, event: presenter.event_name, name: presenter.webhook_name }
+        } %>
+    <%= if presenter.webhook_id.present? && presenter.event_name.present?
+          link_to '', integrations_housecall_webhook_activate_path(presenter.webhook_id, presenter.event_name), {
+            class:  "btn btn-sm btn-icon btn-secondary fa fa-hand-paper button_campaign_active #{presenter.webhook_active ? 'text-success' : 'text-danger'}",
+            title:  (presenter.webhook_active ? 'Deactivate' : 'Activate').to_s,
+            data:   {
+              toggle: 'tooltip'
+            },
+            method: :patch,
+            remote: true
+          }
+        end %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_webhook" id="edit_webhook_<%= presenter.webhook_id -%>">
+  <!-- Webhook -->
+</tr>

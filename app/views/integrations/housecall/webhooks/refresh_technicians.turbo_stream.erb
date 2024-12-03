@@ -1,0 +1,23 @@
+<%
+  # app/views/integrations/housecall/webhooks/refresh_technicians.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/webhooks/refresh_technicians'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && @webhook.present?
+
+  presenter = Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @webhook
+  presenter.webhook = @webhook&.second
+-%>
+<%= turbo_stream.update "webhooks_ext_tech_ids_#{presenter.webhook_id}" do %>
+  <%= render partial: 'integrations/housecall/webhooks/technicians', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

@@ -1,0 +1,50 @@
+<%
+  # app/views/tags/_select_or_add.html.erb
+  #
+  # Example:
+  #   render partial: 'tags/select_or_add', locals: { user: User, tag: Tag, select_or_add_field_name: String, select_or_add_div_id: String, select_id: String, select_class: String }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) user:                     (User)
+  #   (req) tag:                      (Tag)
+  #   (req) select_or_add_field_name: (String)
+  #   (req) select_or_add_div_id:     (String)
+  #   (opt) disabled:                 (Boolean)
+  #   (opt) exclude_tags:             (Array)
+  #   (opt) message_note:             (String)
+  #   (opt) select_class:             (String)
+  #   (opt) select_id:                (String)
+  #
+  return unless local_assigns.dig(:user).is_a?(User) && local_assigns.dig(:tag).is_a?(Tag) && local_assigns.dig(:select_or_add_field_name).present? && local_assigns.dig(:select_or_add_div_id).present?
+-%>
+<%= bootstrap_select_tag(
+      field:        select_or_add_field_name,
+      label:        { title: (local_assigns.dig(:legend_string) || 'Apply Tag').to_s },
+      options:      { for_select: options_for_tag(tag.client, tag.id, [local_assigns.dig(:exclude_tags) || []].flatten, false), blank: 'Select a Tag' },
+      html_options: { class: (local_assigns.dig(:select_class).presence || "tag_class_#{rand(100_000)}").to_s, id: (local_assigns.dig(:select_id).presence || "tag_id_#{rand(100_000)}").to_s, disabled: local_assigns.dig(:disabled).to_bool },
+      messages:     { note: local_assigns.dig(:message_note).to_s }
+    ) %>
+
+<div id="<%= select_or_add_div_id -%>_tag_name_field">
+</div>
+
+<% if user.is_a?(User) && user.access_controller?('clients', 'tags', session) %>
+  <script>
+    $(document).ready( function() {
+      $.ajax({
+        method:   'GET',
+        dataType: 'script',
+        url:      '<%= new_tag_path -%>',
+        data:     {
+          select_or_add_field_name: '<%= select_or_add_field_name -%>',
+          select_or_add_div_id: '<%= select_or_add_div_id -%>',
+          exclude_tags: '<%= local_assigns.dig(:exclude_tags) || [] -%>',
+          disabled: '<%= local_assigns.dig(:disabled).to_bool -%>'
+        }
+      });
+    });
+  </script>
+<% end %>

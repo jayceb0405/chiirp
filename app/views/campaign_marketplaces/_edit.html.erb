@@ -1,0 +1,60 @@
+<%
+	# app/views/campaign_marketplaces/_edit.html.erb
+	# 
+	# Example:
+	# 	render partial: "campaign_marketplaces/edit"
+	# 
+	# Required Instance Variables:
+	# 	@campaign: (Campaign)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	campaign_or_group = @campaign.campaign_share_code.campaign_id ? "Campaign" : "Campaign Package"
+-%>
+<%= form_with model: @campaign, url: campaign_marketplace_path(@campaign.campaign_share_code), builder: LooperFormBuilder, role: 'form', remote: true, html: { class: 'needs-validation', novalidate: true } do |f| %>
+	<h6>
+		<%= @campaign.name %> <small>(<%= campaign_or_group -%>)</small>
+	</h6>
+
+  <%= f.text_area :description, {
+    label: { title: 'Description/Instructions' },
+    html_options: { placeholder: 'Description', disabled: @campaign.marketplace }
+  } %>
+  <%= f.number_field :price, {
+    label: { title: 'Price' },
+    html_options: { value: number_with_precision(@campaign.price.to_d, precision: 2), min: '0.00', step: '0.01', disabled: @campaign.marketplace },
+    prepends: [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }]
+  } %>
+  <%= render partial: 'snippets/f_file_field', locals: {
+    form: f,
+    file_field: { field: 'marketplace_image', id: 'marketplace_image_input', name: 'campaign[marketplace_image]', url: image_campaign_path(@campaign.campaign_share_code), disabled: @campaign.marketplace },
+    col: { id: 'marketplace_image_dropzone' },
+    label: { title: 'Marketplace Image' },
+    image_container: { id: 'marketplace_image_container' },
+    image: @campaign.marketplace_image.attached? ? { key: @campaign.marketplace_image.key, width: 200, height: 200, class: 'rounded', crop: 'fit', format: 'png' } : {}
+  } %>
+
+	<p class="border rounded ml-3 mr-3 p-2">
+		Note: By submitting your <%= campaign_or_group -%> you are authorizing <%= I18n.t("tenant.name") -%> to list your <%= campaign_or_group -%> in the <%= I18n.t("tenant.name") -%> Campaign Marketplace.
+		Once Submitted your <%= campaign_or_group -%> <%= @campaign.campaign_share_code.campaign_id ? "" : "(and all associated Campaigns) " -%>will no longer be editable until you withdraw your <%= campaign_or_group -%> from the Campaign Marketplace.
+		Your <%= campaign_or_group -%> will be accessible to all <%= I18n.t("tenant.name") -%> account holders after it is approved.
+	</p>
+
+  <%= f.submit_buttons(
+    buttons: [
+    	{ title: "#{ @campaign.marketplace ? "Withdraw from" : "Submit to" } Marketplace" },
+    	{ title: 'Save Marketplace Information', disable_with: 'Saving', disabled: @campaign.marketplace },
+    	{ title: 'Cancel', class: 'string', id: 'campaign_marketplace_edit_cancel_button' }
+    ]
+  ) %>
+<% end %>
+
+<script>
+	$(function () {
+		$('#campaign_marketplace_edit_cancel_button').on("click", function (e) {
+			e.preventDefault();
+			$('#campaign_marketplace_modal').modal('hide');
+		});
+	});
+</script>

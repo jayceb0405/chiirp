@@ -1,0 +1,60 @@
+<%
+  # app/views/integrations/pcrichard/V1/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/V1/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) cards: Array
+  #
+  presenter = Integrations::Pcrichard::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Connection
+<% if cards.include?('connections_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/connections/edit', locals: { presenter: } -%>');
+<% end %>
+
+// CVustom Fields
+<% if cards.include?('custom_fields_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/custom_fields/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Orders
+<% if cards.include?('orders_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/orders/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/instructions/show', locals: { presenter: } -%>');
+<% end %>
+
+// Leads
+<% if cards.include?('leads_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/leads/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Models
+<% if cards.include?('models_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/models/show', locals: { presenter: } -%>');
+<% end %>
+
+// ModelSubmissions
+<% if cards.include?('model_submissions_edit') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('Submit Model Options to PC Richard');
+  $('#dash_modal_body').html('<%= j render partial: 'integrations/pcrichard/v1/model_submissions/edit', locals: { presenter: } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/pcrichard/v1/overview', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

@@ -1,0 +1,72 @@
+<%
+  # app/views/integrations/callrail/v3/events/_company_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/events/company_fields', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+  presenter.account_and_company_id = presenter.event[:account_company_id]
+-%>
+
+<%= bootstrap_select_tag(
+      field:        'event[type]',
+      label:        { title: 'Webhook Type' },
+      options:      { for_select: options_for_select(Integration::Callrail::V3::Base::WEBHOOK_TYPES, presenter.event[:type]) },
+      html_options: { id: 'event_type' },
+      messages:     { note: 'Select any call types that should be filtered on.' }
+    ) %>
+
+<fieldset class="border rounded p-2 mt-3 mb-2" id="event_type_fields_<%= presenter.event[:event_id] %>">
+  <%= render partial: 'event_type_fields', locals: { presenter: } %>
+</fieldset>
+
+<fieldset class="border rounded p-2 mt-3 mb-2"">
+  <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+  <%= render partial: 'campaigns/action_fields', locals: { 
+          client: presenter.client,
+          campaign_id: presenter.event_campaign, campaign_id_field: 'event[action][campaign_id]',
+          group: presenter.event_group, group_id_field: 'event[action][group_id]',
+          tag: presenter.event_tag, tag_id_field: 'event[action][tag_id]',
+          stage_id: presenter.event_stage, stage_id_field: 'event[action][stage_id]',
+          stop_campaign_ids: presenter.event_stop_campaign_ids, stop_campaign_ids_field: 'event[action][stop_campaign_ids]',
+          first_trigger_types: [115, 120, 125, 130, 135, 133, 140, 145, 143],
+        } %>
+</fieldset>
+
+<%= bootstrap_submit_buttons(
+      buttons: [{ title: 'Save Actions for Event', disable_with: 'Saving Actions for Event' }]
+    ) %>
+
+<script>
+  $(function () {
+    $(document).off('change', '#tracking_phone_numbers');
+    $(document).on('change', '#tracking_phone_numbers', function(e) {
+      $('#source_names').val([])
+      $('#source_names').selectpicker('refresh')
+    });
+
+    $(document).off('change', '#source_names');
+    $(document).on('change', '#source_names', function(e) {
+      $('#tracking_phone_numbers').val([])
+      $('#tracking_phone_numbers').selectpicker('refresh')
+    });
+
+    var updateEditForm = function(e) {
+      $('#event_type_fields_<%= presenter.event[:event_id] %>').html('<span class="text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Event' } %></span>');
+      $.ajax('<%= edit_integrations_callrail_v3_event_path(presenter.event[:event_id]) %>?event_type=' + e.target.value + '&account_company_id=' + $('#event_account_company').val());
+    };
+
+    $(document).off('change', '#event_type')
+    $(document).on('change', '#event_type', function(e) {
+      updateEditForm(e);
+    });
+  });
+</script>

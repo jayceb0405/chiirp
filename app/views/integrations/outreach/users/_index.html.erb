@@ -1,0 +1,47 @@
+<%
+  # app/views/integrations/outreach/users/_index.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/outreach/users/index"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Outreach User Links</h6>
+  <div class="card-body">
+
+    <% if presenter.client_api_integration.api_key.present? %>
+      <%= form_with model: presenter.client_api_integration, url: integrations_outreach_users_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+        <table class="table table-no-bordered table-striped">
+          <thead>
+            <tr>
+              <th>Outreach User</th>
+              <th><%= I18n.t('tenant.name') -%> User</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= render partial: 'integrations/outreach/users/user', collection: presenter.outreach_users, as: :user, locals: { presenter: presenter } %>
+          </tbody>
+        </table>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Users', disable_with: 'Saving Users' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_users').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

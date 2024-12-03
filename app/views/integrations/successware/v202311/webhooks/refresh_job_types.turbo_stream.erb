@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/successware/v202311/webhooks/refresh_reports.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/successware/v202311/webhooks/refresh_reports'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @report:                 (Hash)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && @webhook.is_a?(Array)
+
+  presenter = Integrations::Successware::V202311::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event   = @webhook
+  presenter.webhook = @webhook&.second
+-%>
+<%= turbo_stream.update "criteria_job_types_#{presenter.webhook_id}" do %>
+  <%= render partial: 'integrations/successware/v202311/webhooks/criteria/job_types', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

@@ -1,0 +1,42 @@
+<%
+  # app/views/integrations/webhooks/webhooks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/webhook/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #   (req) @webhook_id:             (String)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Webhooks::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Webhooks::Presenter.new(client_api_integration: @client_api_integration)
+  webhook   = @client_api_integration.webhooks.dig(@webhook_id)&.symbolize_keys
+-%>
+<%= form_with url: presenter.webhook_save_path(@webhook_id, webhook), builder: LooperFormBuilder, remote: true, method: presenter.webhook_save_method(@webhook_id, webhook), class: 'needs-validation', novalidate: true do |f| %>
+  <%= hidden_field_tag :webhook_id, @webhook_id %>
+
+  <%= f.select :type, {
+        label:        { title: "#{I18n.t('tenant.name')} Event" },
+        html_options: { required: true, multiple: false, mobile: browser.device.mobile? },
+        choices:      { array: Integrations::Webhooks::Presenter::WEBHOOK_TYPES, selected: @client_api_integration.webhooks.dig(@webhook_id, 'type'), prompt: 'Select an event' },
+        messages:     { note: "Select a #{I18n.t('tenant.name')} event to trigger the webhook." }
+      } %>
+  <%= f.text_field :url, {
+        label:        { title: 'Webhook Destination URL' },
+        html_options: { value: @client_api_integration.webhooks.dig(@webhook_id, 'url'), placeholder: 'Webhook URL', minlength: 10, required: true },
+        messages:     { note: 'This is the web address where the data will be posted to.' }
+      } %>
+  <%= bootstrap_select_tag(
+        field:        'fields',
+        label:        { title: "#{I18n.t('tenant.name')} Data Fields" },
+        html_options: { multiple: true },
+        options:      { array: presenter.webhook_fields, selected: @client_api_integration.webhooks.dig(@webhook_id, 'fields'), prompt: 'Select data fields' },
+        messages:     { note: "Select the #{I18n.t('tenant.name')} data fields to send in the webhook." }
+      ) %>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Save', disable_with: 'Saving' }]
+      ) %>
+<% end %>

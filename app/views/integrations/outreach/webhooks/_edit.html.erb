@@ -1,0 +1,65 @@
+<%
+  # app/views/integrations/outreach/webhooks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/outreach/webhooks/edit', locals: { presenter: Presenter, webhook_id }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.outreach_webhook = local_assigns.dig(:webhook_id).to_i
+-%>
+<%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, class: 'needs-validation', novalidate: true do |f| %>
+  <%= hidden_field_tag 'webhook[id]', presenter.outreach_webhook.dig(:id).to_i %>
+
+  <%= bootstrap_select_tag(
+    field: "webhook[resource_action]",
+    label: { title: 'Outreach Event' },
+    html_options: { id: "resource_action_#{presenter.outreach_webhook.dig(:id).to_i}" },
+    options: { array: presenter.available_webhooks_array, selected: "#{presenter.webhook_actions.dig(:resource).to_s}_#{presenter.webhook_actions.dig(:action).to_s}", blank: 'Select an Outreach Event' }
+  ) %>
+
+  <%= bootstrap_select_tag(
+    field: "webhook[call_disposition_id]",
+    row: { id: "call_disposition_row_#{presenter.outreach_webhook.dig(:id).to_i}" },
+    label: { title: 'Outreach Call Disposition' },
+    html_options: { id: "call_disposition_#{presenter.outreach_webhook.dig(:id).to_i}" },
+    options: { array: presenter.available_call_dispositions_array, selected: presenter.webhook_actions.dig(:call_disposition_id), blank: 'All Call Dispositions' }
+  ) %>
+
+  <%= render partial: 'campaigns/action_fields', locals: {
+        client: presenter.client,
+        campaign: presenter.webhook_campaign, campaign_id_field: 'webhook[actions][campaign_id]',
+        group: presenter.webhook_group, group_id_field: 'webhook[actions][group_id]',
+        tag: presenter.webhook_tag, tag_id_field: 'webhook[actions][tag_id]',
+        stage: presenter.webhook_stage, stage_id_field: 'webhook[actions][stage_id]',
+        stop_campaign_ids: presenter.webhook_stop_campaign_ids, stop_campaign_ids_field: 'webhook[actions][stop_campaign_ids]'
+      } %>
+
+  <%= bootstrap_submit_buttons(
+    buttons: [{ title: "Save Actions for #{presenter.webhook_actions.dig(:resource).to_s.capitalize}/#{presenter.webhook_actions.dig(:action).to_s.capitalize} Events", disable_with: "Saving Actions for #{presenter.webhook_actions.dig(:resource).to_s.capitalize}/#{presenter.webhook_actions.dig(:action).to_s.capitalize} Event" }]
+  ) %>
+<% end %>
+
+<script>
+  $(function () {
+    updateCallDispositionRow();
+
+    $(document).off('change', '#resource_action_<%= presenter.outreach_webhook.dig(:id).to_i -%>');
+    $(document).on('change', '#resource_action_<%= presenter.outreach_webhook.dig(:id).to_i -%>', function(e) {
+      updateCallDispositionRow();
+    });
+
+    function updateCallDispositionRow() {
+      if ($('#resource_action_<%= presenter.outreach_webhook.dig(:id).to_i -%>').val() == 'call_created') {
+        $('#call_disposition_row_<%= presenter.outreach_webhook.dig(:id).to_i -%>').show();
+      } else {
+        $('#call_disposition_row_<%= presenter.outreach_webhook.dig(:id).to_i -%>').hide();
+      }
+    }
+  });
+</script>

@@ -1,0 +1,32 @@
+<%
+  # app/views/surveys/screens/types/_question_option.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/question_option', locals: { option_id: Integer, presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #   (req) option_id: (Integer)
+  #
+  option_id = local_assigns.dig(:option_id).to_i
+-%>
+<tr>
+  <td class="text-center px-0 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#tr_survey_screen_option_<%= presenter.survey_screen.id -%>_<%= option_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left" colspan="2" id="survey_screen_option_name_<%= presenter.survey_screen.id -%>_<%= option_id -%>">#<%= option_id + 1 -%>: <%= presenter.survey_screen.responses.dig("option_#{option_id}", 'string').to_s.presence || 'Not Defined' -%></td>
+  <td class="text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#tr_survey_screen_option_<%= presenter.survey_screen.id -%>_<%= option_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="tr_survey_screen_option_<%= presenter.survey_screen.id -%>_<%= option_id -%>">
+  <%= render partial: 'surveys/screens/types/question_option_td', locals: { option_id:, presenter: } %>
+</tr>

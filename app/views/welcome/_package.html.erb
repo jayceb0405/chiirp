@@ -1,0 +1,174 @@
+<%
+  # app/views/welcome/_package.html.erb
+  #
+  # Example:
+  #   render partial: 'welcome/package'
+  #
+  # Required Instance Variables:
+  #   @client:       (Client)
+  #   @package:      (Package)
+  #   @package_page: (PackagePage)
+  #
+  # Required Local Variables:
+  #   package_position: (Integer)
+  #   package_count:    (Integer)
+  #   upgrade:          (Boolean)
+  #
+  # Optional Local Variables:
+  #   contact_id: (Integer)
+  #
+  wp                  = local_assigns.dig(:welcome_presenter) || WelcomePresenter.new(package_page: @package_page, upgrade: local_assigns.dig(:upgrade).to_bool)
+  wp.package_position = local_assigns.dig(:package_position)
+  wp.package          = wp.package_page.send("package_0#{wp.package_position.to_s}_id")
+
+  return unless wp.package
+
+  wp.contact          = local_assigns.dig(:contact_id)
+  wp.client           = @client
+-%>
+<div class="<%= wp.container_class -%>">
+  <div class="<%= wp.card_class -%>" data-aos="fade-up" <%= wp.data_aos_delay -%>>
+    <h5 class="<%= wp.card_header_class -%>">
+      <%= wp.package.name.upcase -%><br />
+    </h5>
+    <div class="<%= wp.card_body_class -%>">
+      <h3 class="display-3 text-center">
+        <sup><small>$</small></sup><%= wp.package_monthly_charge -%><small><small>/mo</small></small>
+      </h3>
+      <p class="<%= wp.card_sub_heading_class -%>">
+        <small><%= wp.package_sub_heading.html_safe %></small>
+      </p>
+      <ul class="list-icons">
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          <%= Campaign.model_name.human(count: wp.package.campaigns_count) -%>
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          1 to 1 Text Messaging
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          <%= wp.package.max_users_count.to_i == 1 ? 'Single User' : User.model_name.human(count: wp.package.max_users_count.to_i) -%>
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          <%= wp.package.max_contacts_count.to_i == -1 ? 'Unlimited Contacts' : Contact.model_name.human(count: wp.package.max_contacts_count.to_i) -%>
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          <%= Twnumber.model_name.human(count: wp.package.max_phone_numbers.to_i) -%> (10 Digits)
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          Dashboard
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          Message Central
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          Broadcast Actions
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          Automated Texting
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          Webhooks
+        </li>
+
+        <% if wp.package.widgets_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= Clients::Widget.model_name.human(count: wp.package.widgets_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.quick_leads_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= UserContactForm.model_name.human(count: wp.package.quick_leads_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.custom_fields_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= ClientCustomField.model_name.human(count: wp.package.custom_fields_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.groups_count.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            Groups
+          </li>
+        <% end %>
+        <% if wp.package.stages_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= StageParent.model_name.human(count: wp.package.stages_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.folders_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= Folder.model_name.human(count: wp.package.folders_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.surveys_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= ::Surveys::Survey.title.pluralize(wp.package.surveys_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.trackable_links_count.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= TrackableLink.model_name.human(count: wp.package.trackable_links_count.to_i) -%>
+          </li>
+        <% end %>
+        <% if wp.package.max_voice_recordings.to_i.positive? %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            <%= "Voice Recordings - #{VoiceRecording.model_name.human(count: wp.package.max_voice_recordings.to_i)}" -%>
+          </li>
+        <% end %>
+        <% if wp.package.share_funnels_allowed %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            Share Campaigns
+          </li>
+        <% end %>
+        <% if wp.package.phone_calls_allowed %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            Voice Calling
+          </li>
+        <% end %>
+        <% if wp.package.rvm_allowed %>
+          <li class="mb-2 pl-1">
+            <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+            Ringless Voicemail
+          </li>
+        <% end %>
+
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          <%= "#{wp.package.mo_credits.to_i} Free Message Credits / month" -%>
+        </li>
+        <li class="mb-2 pl-1">
+          <span class="list-icon"><%= image_tag 'check.svg', class: 'mr-2', alt: '', width: '16' -%></span>
+          <%= "#{(wp.package.credit_charge.to_d * 100).to_i}&#162; / Message Credit".html_safe -%>
+        </li>
+      </ul>
+
+      <p class="<%= wp.card_sub_heading_class -%>">
+        <%= wp.package_monthly_charge_after_promo -%>
+      </p>
+    </div>
+    <div class="card-footer">
+      <%= link_to (((wp.package.first_payment_delay_days + wp.package.first_payment_delay_months).positive? || ((wp.package.promo_months.positive? && wp.package.promo_mo_charge.to_d.zero?) || wp.package.mo_charge.to_d.zero?)) && wp.package.setup_fee.to_d.to_d.zero? ? 'Get Started For Free' : 'Get Started Now'), wp.link_path, class: wp.package_position.even? ? 'card-footer-item text-white p-4 px-lg-5' : 'card-footer-item p-4 px-lg-5', method: wp.link_method %>
+    </div>
+  </div>
+</div>

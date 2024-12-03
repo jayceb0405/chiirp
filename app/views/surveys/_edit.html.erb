@@ -1,0 +1,170 @@
+<%
+  # app/views/surveys/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @survey: (Survey)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.survey = @survey
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.survey.name[..2] -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.survey.name -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <%= form_with model: presenter.survey, builder: LooperFormBuilder, remote: true, class: 'needs-validation card-body d-flex flex-column', id: "survey_form_#{presenter.survey.id}", novalidate: true do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: " #{Surveys::Survey.title} Name" },
+              html_options: { minlength: 2, placeholder: " #{Surveys::Survey.title} Name", required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+
+        <% unless presenter.survey.new_record? %>
+          <%= f.select :page_domain, {
+                label:        { title: 'Survey Domain' },
+                html_options: { id: "survey_page_domain_#{presenter.survey.id}", mobile: browser.device.mobile? },
+                choices:      { array: UserContactForm.available_domains(client: presenter.client), selected: presenter.survey.page_domain, blank: 'Select a Domain' },
+                messages:     { note: 'Only valid when a page name is reserved.' }
+              } %>
+          <%= f.text_field :page_name, {
+                label:        { title: 'Unique Page Name' },
+                html_options: { id: "survey_page_name_#{presenter.survey.id}", placeholder: 'Page Name', disabled: presenter.survey.page_domain.empty? },
+                prepends:     [{ button: true, label: 'Reserve', id: "survey_page_name_button_#{presenter.survey.id}", disabled: presenter.survey.page_domain.empty? }],
+                messages:     { note: "This is the 'xxxx' in 'https://www.selected_domain.com/xxxx' (must be letters, numbers or underscore / must select a domain)." }
+              } %>
+
+          <% if current_user.client.share_surveys_allowed %>
+            <%= f.copy_field :share_code, {
+                  label: { title: 'Survey Share Code' }
+                } %>
+          <% end %>
+
+          <%= bootstrap_copy_field(
+                field:    'survey_url',
+                value:    presenter.survey.landing_page_url,
+                label:    { title: 'Survey URL' },
+                messages: { note: "Use this link to display this #{Surveys::Survey.title}." }
+              ) %>
+          <%= bootstrap_file_field(
+                file_field:      { field: 'survey[logo_image]', id: "survey_logo_image_#{presenter.survey.id}", name: 'survey[logo_image]', url: surveys_logo_image_path(presenter.survey.id) },
+                col:             { id: "survey_logo_image_#{presenter.survey.id}_dropzone" },
+                label:           { title: 'Logo Image' },
+                image_container: { id: "survey_logo_image_#{presenter.survey.id}_container" },
+                image:           presenter.survey.logo_image.attached? ? { key: presenter.survey.logo_image.key, width: 50, height: 50, crop: 'fit', format: 'png' } : {}
+              ) %>
+          <%= bootstrap_file_field(
+                file_field:      { field: 'survey[background_image]', id: "survey_background_image_#{presenter.survey.id}", name: 'survey[background_image]', url: surveys_background_image_path(presenter.survey.id) },
+                col:             { id: "survey_background_image_#{presenter.survey.id}_dropzone" },
+                label:           { title: 'Background Image' },
+                image_container: { id: "survey_background_image_#{presenter.survey.id}_container" },
+                image:           presenter.survey.background_image.attached? ? { key: presenter.survey.background_image.key, width: 250, height: 250, class: 'rounded', crop: 'fit', format: 'png' } : {}
+              ) %>
+        <% end %>
+
+        <%= bootstrap_color_picker(
+              field:        'surveys_survey[background_color]',
+              value:        presenter.survey.background_color,
+              label:        { title: 'Background Color' },
+              html_options: { id: 'background_color_field' }
+            ) %>
+        <%= bootstrap_color_picker(
+              field:        'surveys_survey[header_color]',
+              value:        presenter.survey.header_color,
+              label:        { title: 'Header Text Color' },
+              html_options: { id: 'header_color_field' }
+            ) %>
+        <%= f.text_area :facebook_pixel_base_code, {
+              label:        { title: 'Facebook Pixel Base Code' },
+              html_options: { id: "facebook_pixel_base_code_#{presenter.survey.id}", placeholder: 'Facebook Pixel Base Code' }
+            } %>
+        <span id="survey_first_screen_id_span_<%= presenter.survey.id -%>">
+          <%= render partial: 'surveys/edit_first_screen_id', locals: { presenter: } %>
+        </span>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Footer Links</h6></legend>
+          <%= f.text_field 'footer_links[label_01]', {
+                label:        { title: 'Link #1 Label' },
+                html_options: { value: presenter.survey.footer_links['label_01'], minlength: 2, placeholder: 'Link #1 Label' },
+                messages:     { note: 'Must be minimum of 2 characters.' }
+              } %>
+          <%= f.text_field 'footer_links[link_01]', {
+                label:        { title: 'Link #1 URL' },
+                html_options: { value: presenter.survey.footer_links['link_01'], placeholder: 'Link #1 URL' }
+              } %>
+          <%= f.text_field 'footer_links[label_02]', {
+                label:        { title: 'Link #2 Label' },
+                html_options: { value: presenter.survey.footer_links['label_02'], minlength: 2, placeholder: 'Link #2 Label' },
+                messages:     { note: 'Must be minimum of 2 characters.' }
+              } %>
+          <%= f.text_field 'footer_links[link_02]', {
+                label:        { title: 'Link #2 URL' },
+                html_options: { value: presenter.survey.footer_links['link_02'], placeholder: 'Link #2 URL' }
+              } %>
+          <%= f.text_field 'footer_links[label_03]', {
+                label:        { title: 'Link #3 Label' },
+                html_options: { value: presenter.survey.footer_links['label_03'], minlength: 2, placeholder: 'Link #3 Label' },
+                messages:     { note: 'Must be minimum of 2 characters.' }
+              } %>
+          <%= f.text_field 'footer_links[link_03]', {
+                label:        { title: 'Link #3 URL' },
+                html_options: { value: presenter.survey.footer_links['link_03'], placeholder: 'Link #3 URL' }
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons buttons: [{ title: "Save #{Surveys::Survey.title}", id: "survey_button_#{presenter.survey.id}", disable_with: "Saving #{Surveys::Survey.title}" }] %>
+      <% end %>
+    </div>
+  </div>
+
+  <div id="surveys_<%= presenter.survey.id -%>">
+    <%= render partial: 'surveys/screens/index', locals: { survey: presenter.survey, presenter: } %>
+  </div>
+</td>
+
+<script>
+  $(function() {
+    $(document).off('click', '#survey_button_<%= presenter.survey.id -%>');
+    $(document).on('click', '#survey_button_<%= presenter.survey.id -%>', function(e) {
+      $('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val($('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val().replace(/<script/g, '{script'));
+      $('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val($('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val().replace(/<\/script>/g, '{/script}'));
+      $('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val($('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val().replace(/<noscript/g, '{noscript'));
+      $('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val($('#facebook_pixel_base_code_<%= presenter.survey.id -%>').val().replace(/<\/noscript>/g, '{/noscript}'));
+    });
+
+    $(document).off('change', '#survey_page_domain_<%= presenter.survey.id -%>');
+    $(document).on('change', '#survey_page_domain_<%= presenter.survey.id -%>', function (e) {
+      $.ajax({
+        method: 'PATCH',
+        dataType: 'script',
+        url: '<%= surveys_survey_path(presenter.survey.id) -%>',
+        data: { 'surveys_survey[page_domain]': $(this).val() }
+      });
+    });
+
+    $(document).off('click', '#survey_page_name_button_<%= presenter.survey.id -%>');
+    $(document).on('click', '#survey_page_name_button_<%= presenter.survey.id -%>', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'PATCH',
+        dataType: 'script',
+        url: '<%= surveys_survey_path(presenter.survey.id) -%>',
+        data: { 'surveys_survey[page_name]': $('#survey_page_name_<%= presenter.survey.id -%>').val() }
+      });
+    });
+  });
+</script>

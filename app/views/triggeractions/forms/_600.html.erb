@@ -1,0 +1,95 @@
+<%
+  # app/views/triggeractions/forms/_600.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/common/600", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # parse text message response
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+
+  messages_text_presenter = Messages::Text::Presenter.new(contact: current_user.contacts.new(ok2text: 1, ok2email: 1), user: current_user)
+  messages_text_presenter.contacts_array            = []
+  messages_text_presenter.disabled                  = presenter.campaign_disabled?
+  messages_text_presenter.file_attachments          = presenter.triggeraction.attachments.map { |a| { id: a, type: 'client', url: presenter.client.client_attachments.find_by(id: a).image.thumb.url(resource_type: presenter.client.client_attachments.find_by(id: a).image.resource_type, secure: true) } }
+  messages_text_presenter.file_type                 = 'client'
+  messages_text_presenter.include_estimate_hashtags = true
+  messages_text_presenter.include_invoice_hashtags  = true
+  messages_text_presenter.include_job_hashtags      = true
+  messages_text_presenter.message                   = presenter.triggeraction.text_message
+  messages_text_presenter.show_hashtag_notes        = true
+  messages_text_presenter.show_msg_delay            = false
+  messages_text_presenter.show_ok2text              = false
+  messages_text_presenter.show_payment_request      = false
+  messages_text_presenter.show_phone_call           = false
+  messages_text_presenter.show_submit               = false
+  messages_text_presenter.show_voicemail            = false
+  messages_text_presenter.show_video_calls          = false
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[client_custom_field_id]',
+      label:        { title: 'Field to Save the Response' },
+      html_options: { id: "client_custom_field_id_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_client_custom_field_id_600, selected: presenter.triggeraction.client_custom_field_id, blank: 'Select a Data Field' }
+    ) %>
+
+<div id="invalid_responses_<%= presenter.triggeraction.id -%>">
+  <%= bootstrap_switch_field(
+        field:        'triggeraction[parse_text_respond]',
+        value:        presenter.triggeraction.parse_text_respond,
+        values:       %w[1 0],
+        label:        { title: 'Actions to Take on Invalid Response' },
+        html_options: { id: "parse_text_respond_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+        messages:     { note: 'Text Contact with request for clarification (3 times)' }
+      ) %>
+
+  <div class="form-row">
+    <div class="col-md-3"></div>
+    <div class="form-group col-md-9" id="invalid_text_response_<%= presenter.triggeraction.id -%>" style="<%= presenter.triggeraction.parse_text_respond ? '' : 'display: none' -%>">
+      <%= label_tag '', 'Text Returned on Invalid Response', { class: 'form-group-label mb-0' } %>
+      <%= render partial: 'messages/texts/message', locals: { presenter: messages_text_presenter } %>
+    </div>
+  </div>
+
+  <%= bootstrap_switch_field(
+        field:        'triggeraction[parse_text_notify]',
+        value:        presenter.triggeraction.parse_text_notify,
+        values:       %w[1 0],
+        html_options: { disabled: presenter.campaign_disabled? },
+        label:        { title: 'Notify assigned User' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'triggeraction[parse_text_text]',
+        value:        presenter.triggeraction.parse_text_text,
+        values:       %w[1 0],
+        html_options: { disabled: presenter.campaign_disabled? },
+        label:        { title: 'Text assigned User' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'triggeraction[clear_field_on_invalid_response]',
+        value:        presenter.triggeraction.clear_field_on_invalid_response,
+        values:       %w[1 0],
+        html_options: { disabled: presenter.campaign_disabled? },
+        label:        { title: 'Clear Custom Field on invalid response' }
+      ) %>
+</div>
+
+<script>
+  $(function() {
+    $('#parse_text_respond_<%= presenter.triggeraction.id -%>').off('change');
+    $('#parse_text_respond_<%= presenter.triggeraction.id -%>').on('change', function (e) {
+
+      if ($('#parse_text_respond_<%= presenter.triggeraction.id -%>').is(':checked')) {
+        $('#invalid_text_response_<%= presenter.triggeraction.id -%>').show('slow');
+      } else {
+        $('#invalid_text_response_<%= presenter.triggeraction.id -%>').hide('slow');
+      }
+    });
+  });
+</script>

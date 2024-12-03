@@ -1,0 +1,123 @@
+<%
+  # app/views/quick_responses/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'quick_responses/index', locals: { presenter: QuickResponsesPresenter }
+  #
+  # Instance Variables:
+  #   (req) @contact:        (Contact)
+  #   (opt) @quick_response: (QuickResponse)
+  #
+  # Local Variables:
+  #   (req) presenter:  (QuickResponsesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(QuickResponsesPresenter)
+-%>
+<div class="table-responsive">
+  <table class="table">
+
+    <thead>
+      <tr>
+        <th class="text-left"> Quick Response </th>
+        <th class="text-left d-none d-md-table-cell"> Excerpt </th>
+        <th class="text-left d-none d-md-table-cell"> Created </th>
+        <th style="width:200px; min-width:200px;"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <% if @contact.is_a?(Contact) %>
+        <%= render partial: 'quick_responses/quick_response', collection: @contact.client.aiagents.quick_responses, locals: { presenter: } -%>
+      <% end %>
+
+      <%= render partial: 'quick_responses/quick_response', collection: @quick_responses, locals: { presenter: } -%>
+    </tbody>
+
+  </table>
+</div>
+
+<script>
+$(function () {
+  $('.quick_response_delete').off('click');
+  $('.quick_response_delete').on('click', function(e){
+    e.preventDefault();
+
+    var quick_response_name = $(this).data('name');
+    var quick_response_id = $(this).data('id');
+    var url = '<%= quick_response_path('QUICKRESPONSEID', contact_id: params[:contact_id], message_id: presenter.message_id) %>';
+
+    ChiirpAlert({
+      'body':'Deleting "' + quick_response_name + '" can NOT be un-done. Is it your intention to delete this Quick Response?',
+      'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+      'type':'danger',
+      'persistent':true
+    });
+
+    $(document).off('click', '#button_do_it');
+    $(document).on('click', '#button_do_it', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        type: 'DELETE',
+        dataType: 'script',
+        url: url.replace('QUICKRESPONSEID', quick_response_id)
+      });
+    });
+  });
+
+  $('.quick_response_target').off('click');
+  $('.quick_response_target').on('click', function(e) {
+    e.preventDefault();
+
+    var $elem = $('#textarea_<%= presenter.message_id -%>');
+    function cleanUp() {
+      $('#dash_modal').modal('hide');
+      $elem.trigger('keyup');
+      autosize.update($('#textarea_<%= presenter.message_id -%>'));
+    }
+
+    if ($(this).data('type') == 'simple') {
+      // simple text
+      var message = $(this).data('message');
+
+      // https://stackoverflow.com/a/15977052/437400
+      const caretPos = $elem[0].selectionStart;
+      const textAreaTxt = $elem.val();
+
+      $elem.typeahead('val', textAreaTxt.substring(0, caretPos) + message + textAreaTxt.substring(caretPos) );
+
+      cleanUp();
+    } else {
+
+      <% if @contact.is_a?(Contact) %>
+        // aiagent
+        var aiagent_id = $(this).data('aiagent-id');
+        var url = '<%= aiagent_quick_response_path('AIAGENTID', @contact&.id, phone_number: params[:phone_number], message_id: presenter.message_id) -%>';
+        $.ajax({
+                  url: url.replace('AIAGENTID', aiagent_id),
+                  method: 'POST',
+                  dataType: 'json',
+                  success: function(data){
+                    const message = data.content;
+                    const caretPos = $elem[0].selectionStart;
+                    const textAreaTxt = $elem.val();
+
+                    $elem.typeahead('val', textAreaTxt.substring(0, caretPos) + message + textAreaTxt.substring(caretPos) );
+
+                    cleanUp();
+                  },
+                  error: function(a,b,c){
+                    ChiirpAlert({
+                      'title':      'Oops...',
+                      'body':       'We could not retreive a response from the AI. Please try again or contact support for help.',
+                      'type':       'danger',
+                      'persistent': true
+                    });
+                  }
+                });
+      <% end %>
+    }
+  });
+});
+</script>

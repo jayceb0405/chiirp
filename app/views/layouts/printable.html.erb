@@ -1,0 +1,76 @@
+<%
+# app/views/layouts/printable.html.erb
+-%>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+  <head>
+    <%= render partial: 'layouts/common/meta_tags' %>
+    <%= render partial: 'layouts/common/open_graph' %>
+    <%= render partial: 'layouts/common/structured_data' %>
+
+    <title><%= I18n.t('tenant.name') -%> / Printable</title>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- favicons -->
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon-57.png", rel: 'apple-touch-icon', type: 'image/png' %>
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon.ico", rel: 'shortcut icon' %>
+    <meta name="theme-color" content="#3063A0">
+
+    <!-- stylesheets & javascript -->
+    <%= stylesheet_link_tag "application_#{cookies[:skin] || 'default'}", media: 'all' %>
+    <%= javascript_include_tag 'application' %>
+    <%= action_cable_meta_tag %>
+
+    <!-- web push notifications -->
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+    <script>
+      window.OneSignal = window.OneSignal || [];
+      let externalUserId = "<%= current_user.id -%>";
+
+      OneSignal.push(function () {
+        OneSignal.init({
+          appId: "<%= Rails.application.credentials[:one_signal][:app_id] -%>",
+        });
+        OneSignal.setExternalUserId(externalUserId);
+      });
+    </script>
+  </head>
+  <body data-turbo-prefetch="false">
+    <main class="app app-site">
+
+      <div class="modal-header border-bottom mb-3" id="show_image_header">
+        <!-- MODAL HEADER -->
+        <h5 class="modal-title w-100 pr-4" id="show_image_title">
+          <%= link_to "#{I18n.t('tenant.app_protocol')}://#{I18n.t("tenant.#{Rails.env}.sales_host")}", class: 'navbar-brand ml-auto mr-0' do %>
+            <%= image_tag("tenant/#{I18n.t('tenant.id')}/logo-banner.svg", { height: 40 }) %>
+          <% end %>
+        </h5>
+
+        <button type="button" class="close" id="show_image_close_button" aria-label="Close">
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+
+      <div class="wrapper">
+        <%= yield %>
+      </div>
+    </main>
+
+    <script>
+      $(function () {
+        <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+        $(document).off('click', '#show_image_close_button');
+        $(document).on('click', '#show_image_close_button', function(e) {
+          e.preventDefault();
+          window.top.close();
+        });
+
+        print();
+      });
+    </script>
+
+  </body>
+</html>

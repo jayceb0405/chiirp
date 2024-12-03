@@ -1,0 +1,60 @@
+<%
+  # app/views/triggeractions/_form.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/form", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<div class="card-body pt-0">
+  <div class="card-block">
+    <%= bootstrap_select_tag(
+          field:        'action_type',
+          label:        { title: 'Action Type' },
+          html_options: { data: { remote: true, url: trigger_triggeractions_path(presenter.triggeraction.trigger), method: :post, params: { triggeraction_id: presenter.triggeraction.id }.to_param }, disabled: presenter.campaign_disabled? },
+          options:      { array: presenter.triggeractions_array, selected: presenter.triggeraction.action_type }
+        ) %>
+
+    <% unless presenter.triggeraction.new_record? %>
+      <%= form_tag trigger_triggeraction_path(presenter.trigger, presenter.triggeraction), { builder: LooperFormBuilder, remote: true, method: :put, multipart: true, class: 'needs-validation', novalidate: true } do %>
+        <%= hidden_field_tag 'trigger_id', presenter.trigger.id %>
+
+        <%= render partial: "triggeractions/forms/#{presenter.triggeraction.action_type}", locals: { presenter: } %>
+
+        <% if presenter.triggeraction.scheduled_type? %>
+          <%= render partial: 'triggeractions/action_scheduler', locals: { presenter: } %>
+        <% end %>
+
+        <%= bootstrap_info_field(
+              info:  Friendly.new.date(presenter.triggeraction.updated_at, presenter.client.time_zone, true),
+              label: { title: 'Last Updated' }
+            ) %>
+
+        <% if presenter.show_submit_button? %>
+          <%= bootstrap_submit_buttons(
+                buttons: [{ title: 'Save Action', disable_with: 'Saving', disabled: presenter.campaign_disabled? }]
+              ) %>
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<% if presenter.triggeraction.errors.any? %>
+  <script>
+    $(function(){
+      ChiirpAlert({
+        'title':      'Error!',
+        'body':       ,'<%= presenter.triggeraction.errors.full_messages.join('<br />').html_safe -%>'
+        'type':       'danger',
+        'persistent': true
+      });
+    });
+  </script>
+<% end %>

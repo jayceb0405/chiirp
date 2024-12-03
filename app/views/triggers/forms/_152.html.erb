@@ -1,0 +1,43 @@
+<%
+  # app/views/triggers/forms/_152.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/152", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions after a missed incoming voice call
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Start on a Missed Phone Call...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will fire their first Trigger on all missed calls within the specified time period.</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>May be restricted to one (or all) of your phone numbers.</li>
+      </ul>
+    </small>
+  </div>
+</div>
+
+<%= bootstrap_select_tag(
+      field:        'data[phone_number]',
+      label:        { title: 'Phone Number that will Trigger this Campaign' },
+      html_options: { id: 'phone_number_options', disabled: presenter.campaign_disabled? },
+      options:      { for_select: options_for_phone_numbers(client: current_user.client, selected: presenter.trigger.data&.dig(:phone_number).to_s), blank: 'All Phone Numbers' }
+    ) %>
+<%= bootstrap_switch_field(
+      field:        'data[new_contacts_only]',
+      value:        (presenter.trigger.data&.dig(:new_contacts_only) || 1).to_i == 1,
+      values:       [1, 0],
+      label:        { title: 'New Contacts Only' },
+      html_options: { disabled: presenter.campaign_disabled? }
+    ) %>
+<%= render partial: 'triggers/forms/active_times', locals: { presenter: } %>

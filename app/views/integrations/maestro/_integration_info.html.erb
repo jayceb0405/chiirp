@@ -1,0 +1,27 @@
+<%
+  # app/views/integrations/maestro/_integration_info.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/maestro/integration_info"
+  # 
+  # Optional Instance Variables:
+  #   none
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+-%>
+<!-- integrations.maestro.integration_info -->
+<div class="container-body">
+  <h2>Maestro Integration Instructions</h2>
+
+  <ul>
+    <li>Maestro integration provides 2-way text message & other communications capabilities beginning at the time of guest registration.</li>
+    <li>A Maestro Hotel ID & Password Key is required (issued by Maestro).</li>
+    <li>The Maestro "Cell" phone number field is required to receive a guest into <%= I18n.t("tenant.name") -%>.</li>
+    <li><%= I18n.t("tenant.name") -%> receives Reservation, Check In, Check Out & Room Move data from Maestro.</li>
+    <li>Define actions to be taken at various points throughout guest progress.</li>
+    <li>Select from your existing Custom Fields and data will be saved to them as it arrives.</li>
+  </ul>
+</div>
+<!-- /.integrations.maestro.integration_info -->

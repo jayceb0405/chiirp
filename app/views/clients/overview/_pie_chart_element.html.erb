@@ -1,0 +1,43 @@
+<%
+  # app/views/clients/overview/_pie_chart_element.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/overview/pie_chart_element'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) count: (Integer)
+  #   (req) max:   (Integer)
+  #
+  return if count.nil? || max.nil?
+
+  # generate a unique id for the chart
+  id = SecureRandom.hex(6)
+-%>
+
+<h2 class="metric-label"> <%= title %> </h2>
+<p class="metric-value h3">
+  <span class="value text-success">
+    <div id="<%= id %>" class="dash-button-statistic-g__chart">
+      <span class="dash-button-statistic-g__chart-text text-success" style="width:150px;padding-left:50px;text-shadow:1px 1px 2px white;"><%= count.to_i -%> / <%= max.to_i.negative? ? '∞' : max.to_i %></span>
+    </div>
+  </span>
+</p>
+
+<script>
+  $(function() {
+    $('#<%= id %>').circleProgress({
+      value: <%= max == -1 ? 100 : count.to_d / max.to_d %>,
+      size: 60,
+      thickness: 8,
+      startAngle: 1.5 * Math.PI,
+      lineCap: 'round',
+      emptyFill: '#e8ebef',
+      fill: {
+        gradient: ['#ff9100', '#ffffff']
+      }
+    }).on('circle-animation-progress', function(event, progress, stepValue) { });
+  });
+</script>

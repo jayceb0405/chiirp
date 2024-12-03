@@ -1,0 +1,28 @@
+<%
+  # app/views/user_contact_forms/_select_user_contact_forms_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/select_user_contact_forms_dropdown'
+  #
+  # Required Instance Variables:
+  #   @user_contact_forms: (UserContactForms)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select a QuickPage</span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% @user_contact_forms.each_with_index do |user_contact_form| %>
+    <%= link_to user_contact_form.form_name, '#', {
+        class: 'dropdown-item option_user_contact_form',
+        data:  { id: user_contact_form.id, version: user_contact_form.version }
+      }
+    %>
+  <% end %>
+</div>

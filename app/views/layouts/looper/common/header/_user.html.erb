@@ -1,0 +1,48 @@
+<%
+  # app/views/layouts/looper/common/header/_user.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/header/user'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  image_tag = if current_user.avatar.present?
+                # image_tag = cl_image_tag(Cloudinary::Utils.cloudinary_url(current_user.avatar.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' } ))
+                cl_image_tag(current_user.avatar.key, secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png')
+              else
+                image_tag("tenant/#{I18n.t('tenant.id')}/logo-600.png")
+              end
+-%>
+<% if current_user %>
+  <div class="dropdown d-none d-md-flex" id="my_profile">
+    <button class="btn-account" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+
+      <figure class="user-avatar user-avatar-md">
+        <span id="header_user_avatar"><%= image_tag %></span>
+
+        <% if current_user.version_notification %>
+          <span class="avatar-badge has-indicator busy"><i class="fa fa-gift"></i></span>
+        <% end %>
+      </figure>
+
+      <span class="account-summary pr-lg-4 d-none d-lg-block">
+        <span class="account-name" id="header_user_fullname">
+          <%= current_user.fullname -%>
+        </span>
+        <!-- <span class="account-description">Marketing Manager</span> -->
+      </span>
+    </button>
+    <div class="dropdown-menu">
+      <div class="dropdown-arrow d-lg-none" x-arrow=""></div>
+      <div class="dropdown-arrow ml-3 d-none d-lg-block"></div>
+      <h6 class="dropdown-header d-none d-md-block d-lg-none"><%= current_user.fullname -%></h6>
+
+      <%= render partial: 'layouts/looper/common/user' %>
+
+    </div>
+  </div>
+<% end %>

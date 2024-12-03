@@ -1,0 +1,37 @@
+<%
+  # app/views/clients/widgets/index/_widget.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/index/sitechat', collection: Clients::Widgets, as: :widget, locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+  presenter.widget = widget
+-%>
+<tr>
+  <td class="text-left align-middle">
+    <%= link_to widget.widget_name,
+                "/api/#{widget.version}/clients/widgets/#{widget.id}/edit",
+                class:  'text-decoration-none text-reset',
+                remote: true,
+                method: :get %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(widget.created_at, widget.client.time_zone, true) -%> </td>
+  <td class="text-center align-middle d-none d-md-table-cell"> <%= widget.version -%> </td>
+  <td class="text-middle align-middle text-right">
+    <%= link_to '',
+                "/api/#{widget.version}/clients/widgets/#{widget.id}/edit",
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_client_widget',
+                data:  { id: widget.id, name: widget.widget_name } %>
+  </td>
+</tr>

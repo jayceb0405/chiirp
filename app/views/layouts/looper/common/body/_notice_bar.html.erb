@@ -1,0 +1,28 @@
+<%
+   # app/views/layouts/looper/common/body/_notice_bar.html.erb
+   #
+   # Example:
+   #   render partial: 'layouts/looper/common/body/notice_bar'
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   none
+   #
+   return unless current_user&.suspended? || (client_inactive = !current_user&.client&.active?) || (current_user.client.usa? && (any_unregistered_numbers = current_user.client.twnumbers.where(dlc10_campaign_id: nil).where.not(phone_vendor: 'twilio').any?))
+-%>
+<div class="d-flex justify-content-start align-items-center d-print-none bg-danger py-0 px-5 text-white text-center">
+  <div class="px-3">
+    <h1 class="py-0 my-0"><i class="fa fa-hand-point-right"></i></h1>
+  </div>
+  <div>
+    <% if current_user&.suspended? %>
+      Your access was suspended. We're Sorry! Please contact your administrator.
+    <% elsif client_inactive %>
+      Your account is deactivated. We're Sorry! Please contact support.
+    <% elsif any_unregistered_numbers %>
+      Register with 10DLC today to reduce your text messaging costs by 50% <a href="<%= edit_clients_dlc10_brand_path(current_user.client) -%>">Complete your registration now!</a>
+    <% end %>
+  </div>
+</div>

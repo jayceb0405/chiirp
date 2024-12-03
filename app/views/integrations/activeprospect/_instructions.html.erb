@@ -1,0 +1,45 @@
+<%
+# app/views/integrations/activeprospect/_instructions.html.erb
+#
+# Example:
+#   render partial: 'integrations/activeprospect/instructions'
+#
+# Required Instance Variables:
+#   @client_api_integration: (ClientApiIntegration)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">ActiveProspect TrustedForm Integration Instructions</h6>
+  <div class="card-body">
+    <h6>ActiveProspect Functions:</h6>
+    <ul>
+      <li><%= I18n.t("tenant.name") -%> saves the ActiveProspect TrustedForm URLs with each Contact.</li>
+      <li>Your TrustedForm URLs are visible in the Contact edit window.</li>
+      <li>Your TrustedForm URLs are passed to Zapier (requires configured Zapier Integration).</li>
+    </ul>
+
+    <h6>ActiveProspect TrustedForm Setup:</h6>
+    <ul>
+      <li><%= link_to 'Click Here', 'https://activeprospect.com/products/trustedform-script/', target: '_blank' -%> to get your free TrustedForm script.</li>
+      <li>Follow the instructions using your email address.</li>
+      <li>Copy the TrustedForm script.</li>
+    </ul>
+
+    <h6><%= I18n.t("tenant.name") -%> Setup:</h6>
+    <ul>
+      <li>From the ActiveProspect Integration click on "TrustedForm Script".</li>
+      <li>Paste the TrustedForm script that you copied from ActiveProspect and click "Save".</li>
+      <li>Your TrustedForm script will be embeded in all of your QuickPage and <%= ::Surveys::Survey.title -%> forms - automatically!</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

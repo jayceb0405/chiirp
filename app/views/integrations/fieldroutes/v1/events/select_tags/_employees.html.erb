@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/fieldroutes/v1/events/select_tags/_employees.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/fieldroutes/v1/events/select_tags/employees', locals: { presenter: Integrations::Fieldroutes::V1::Events::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Fieldroutes::V1::Events::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldroutes::V1::Events::Presenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'event[ext_tech_ids]',
+      row:          { class: 'event_criteria_row', id: "row_employees_#{presenter.event_id}" },
+      label:        { title: "Employees<span class=\"ml-2\">#{link_to '', integrations_fieldroutes_v1_event_refresh_employees_path(presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Employees', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.ext_tech_ids_for_select, selected: presenter.event.dig(:criteria, :ext_tech_ids) },
+      messages:     { note: 'Event actions will trigger when FieldRoutes Technician is any of the selected employees.' }
+    ) %>

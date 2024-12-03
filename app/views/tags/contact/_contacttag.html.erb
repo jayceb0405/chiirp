@@ -1,0 +1,50 @@
+<%
+  # /Users/Kevin/Rails Projects/funyl/app/views/tags/contact/_tag.html.erb
+  #
+  # Example:
+  #   render partial: 'xxx/_tag.html.erb', collection: @client.tags.order( :name ), locals: {  }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  tp = local_assigns.dig(:tags_presenter) || TagsPresenter.new(contact: @contact)
+  tp.contacttag = contacttag
+-%>
+<tr>
+  <td class="align-left" colspan="3"> <%= tp.contacttag.tag.name -%> </td>
+  <td class="align-left"> <%= Friendly.new.date(tp.contacttag.created_at, tp.client.time_zone, false) -%> </td>
+  <td class="align-middle text-right">
+    <%= link_to '', '#', {
+        class:  'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+        id:     "button_delete_contacttag_#{tp.contacttag.id}",
+      }
+    %>
+  </td>
+</tr>
+
+<script>
+  $(function() {
+    $('#button_delete_contacttag_<%= tp.contacttag.id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting Tag "<%= tp.contacttag.tag.name -%>" can NOT be un-done. Is it your intention to delete this Tag?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{tp.contacttag.id}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= tp.contacttag.id -%>');
+      $(document).on('click', '#button_dump_it_<%= tp.contacttag.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= contact_tag_remove_path(tp.contact.id, tp.contacttag.id, show_modal: true) -%>'
+        });
+      });
+    });
+  });
+</script>

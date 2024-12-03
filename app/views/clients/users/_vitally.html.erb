@@ -1,0 +1,46 @@
+<%
+   # app/views/clients/users/_vitally.html.erb
+   #
+   # Example:
+   #   render partial: 'clients/users/vitally', locals: { presenter: Users::Presenter}
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Users::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Users::Presenter)
+-%>
+<% if current_user.team_member? %>
+  <% if presenter.user_found_in_vitally %>
+    <%= bootstrap_info_field(
+          info:  'User found in Vitally.',
+          label: { title: 'Vitally<span class="ml-2 small">(Super Admin Only)</span>'.html_safe }
+        ) %>
+  <% elsif presenter.user.persisted? %>
+    <%= bootstrap_info_field(
+          info:         '<i class="fa fa-times text-danger mr-2"></i>Not found in Vitally. Click to send User to Vitally.',
+          label:        { title: 'Vitally<span class="ml-2 small">(Super Admin Only)</span>'.html_safe },
+          info_wrapper: { tag: 'a', class: 'btn btn-link mb-1', href: client_users_update_vitally_path(presenter.user.client_id, presenter.user.id), 'data-turbo': true, 'data-turbo-stream': true, 'data-turbo-method': 'patch', rel: 'nofollow' }
+        ) %>
+  <% else %>
+    <%= bootstrap_info_field(
+          info:  'User must be created before being added in Vitally.',
+          label: { title: 'Vitally<span class="ml-2 small">(Super Admin Only)</span>'.html_safe }
+        ) %>
+  <% end %>
+<% end %>
+
+<script>
+  $(function() {
+    <% if @user&.errors&.any? %>
+      ChiirpAlert({
+        'title':      'Errors Encountered!',
+        'body':       '<%= @user.errors.full_messages.join('<br />') -%>',
+        'type':       'warning',
+        'persistent': true
+      });
+    <% end %>
+  });
+</script>

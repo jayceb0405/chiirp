@@ -1,0 +1,25 @@
+<%
+  # app/views/central/conversation/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/show', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   (req) @contact_messages (Messages::Messages)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+-%>
+<div class="message-header pt-4 pr-4 shadow-none bg-transparent" id="central_conversation_header">
+  <%= render partial: 'central/conversation/header', locals: { presenter: } %>
+</div>
+
+<div class="message-body" id="central_conversation_body">
+  <%= render partial: 'central/conversation/body', locals: { presenter: } %>
+</div>
+
+<div class="message-publisher" id="central_conversation_footer">
+  <%= render partial: 'central/conversation/footer', locals: { presenter: } %>
+</div>

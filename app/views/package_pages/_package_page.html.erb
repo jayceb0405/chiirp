@@ -1,0 +1,37 @@
+<%
+  # app/views/package_pages/_package_page.html.erb
+  #
+  # Example:
+  #   render partial: 'package_pages/package_page', collection: @package_pages.order( :name )
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  package_01_name = package_page.package_01_id.positive? ? Package.find_by(id: package_page.package_01_id)&.name : 'Unassigned'
+  package_02_name = package_page.package_02_id.positive? ? Package.find_by(id: package_page.package_02_id)&.name : 'Unassigned'
+  package_03_name = package_page.package_03_id.positive? ? Package.find_by(id: package_page.package_03_id)&.name : 'Unassigned'
+  package_04_name = package_page.package_04_id.positive? ? Package.find_by(id: package_page.package_04_id)&.name : 'Unassigned'
+-%>
+<tr>
+  <td class="text-left"> <%= package_page.name -%> </td>
+  <td class="text-center"> <%= (package_page.sys_default.positive? ? '<i class="fa fa-check text-success"></i>' : '<i class="fa fa-times text-danger"></i>').html_safe -%> </td>
+  <td class="text-left<%= package_page.primary_package == 1 ? ' text-success' : '' -%>"> <%= package_01_name -%> </td>
+  <td class="text-left<%= package_page.primary_package == 2 ? ' text-success' : '' -%>"> <%= package_02_name -%> </td>
+  <td class="text-left<%= package_page.primary_package == 3 ? ' text-success' : '' -%>"> <%= package_03_name -%> </td>
+  <td class="text-left<%= package_page.primary_package == 4 ? ' text-success' : '' -%>"> <%= package_04_name -%> </td>
+  <td class="text-left"> <%= Friendly.new.date(package_page.created_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) -%> </td>
+  <td class="text-middle text-right">
+    <%= link_to '',
+                edit_package_page_path(package_page),
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_package_page',
+                data:  { id: package_page.id, name: package_page.name } %>
+  </td>
+</tr>

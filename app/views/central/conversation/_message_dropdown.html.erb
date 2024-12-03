@@ -1,0 +1,80 @@
+<%
+  # app/views/central/conversation/_message_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/message_dropdown', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+-%>
+<div class="dropdown-arrow ml-n1"></div>
+<div class="dropdown-item-text">Type: <%= presenter.message.type_as_title -%></div>
+<div class="dropdown-item-text">Date: <%= Friendly.new.date(presenter.message.created_at, presenter.client.time_zone, true) -%></div>
+<div class="dropdown-item-text">To: <%= presenter.message_to_phone_formatted -%></div>
+<div class="dropdown-item-text">From: <%= presenter.message_from_phone_formatted -%></div>
+<div class="dropdown-item-text">Status: <%= presenter.message.status -%></div>
+<div class="dropdown-item-text">Cost: <%= presenter.message_cost_in_credits -%></div>
+
+<% if presenter.message.automated %>
+  <div class="dropdown-item-text">Automated</div>
+<% end %>
+
+<% if presenter.message.email? %>
+  <%= link_to('<i class="fa fa-envelope mr-2"></i>Open Email'.html_safe,
+              messages_message_email_path(presenter.message.id),
+              class:  'dropdown-item',
+              style:  'text-decoration: none;',
+              method: :get,
+              remote: true) %>
+<% end %>
+
+<% if presenter.message.msg_type == 'gglin' %>
+  <div class="dropdown-item-text">Google: <%= presenter.google_location -%></div>
+<% end %>
+
+<% if presenter.message_direction == 'inbound' %>
+  <div class="dropdown-divider"></div>
+  <div class="dropdown-item-text">Read at: <%= presenter.message.read_at.nil? ? 'Unread' : Friendly.new.date(presenter.message.read_at, presenter.client.time_zone, true) -%></div>
+  <div class="dropdown-item-text">Read by: <%= presenter.message.read_at_user&.fullname.presence || 'Unknown' -%></div>
+
+  <% unless presenter.message.read_at.nil? %>
+    <%= link_to('Mark As Unread',
+                central_mark_as_unread_path(presenter.message.id),
+                class:  'dropdown-item',
+                style:  'text-decoration: none;',
+                method: :post,
+                remote: true) %>
+  <% end %>
+<% end %>
+
+<% if presenter.client.folders_count.positive? %>
+  <div class="dropdown-divider"></div>
+
+  <% if presenter.folders.present? %>
+
+    <% presenter.folders.each do |folder| %>
+      <%= link_to("<i class=\"fa fa-folder mr-2\"></i>#{presenter.folder_assignments.include?(folder.id) ? 'Remove from' : 'Add to'} #{folder.name.titleize}".html_safe,
+                  folder_message_toggle_path(folder.id, message_id: presenter.message.id),
+                  class:  'dropdown-item folder_assignment',
+                  style:  'text-decoration: none;',
+                  data:   { folder_id: folder.id, message_id: presenter.message.id },
+                  method: :post,
+                  remote: true) %>
+    <% end %>
+  <% else %>
+    <div class="dropdown-item-text">Edit Contact to select Message Folders</div>
+  <% end %>
+<% end %>
+
+<% if presenter.message.error_code.to_i.positive? %>
+  <div class="dropdown-divider"></div>
+  <%= button_tag('Error Information',
+                 class:   'dropdown-item',
+                 type:    'button',
+                 onclick: "ChiirpAlert({'title':'#{presenter.message_error_title}','body':'#{presenter.message_error_message.html_safe}','type':'warning','persistent':'true'});") %>
+<% end %>

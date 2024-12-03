@@ -1,0 +1,73 @@
+<%
+  # app/views/clients/features/_edit.html.erb
+  #
+  # Example:
+  # 	render partial: 'clients/features/edit', locals: { presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || ClientPresenter.new(client: @client)
+-%>
+<% if presenter.client.new_record? || !current_user.team_member? %>
+  <div class="card card-fluid card-margins-mobile">
+    <h6 class="card-header"> Settings </h6>
+    <div class="card-body">
+      <h3>Access NOT permitted!</h3>
+    </div>
+  </div>
+<% else %>
+  <div class="card-deck-xl card-margins-mobile">
+    <div class="card card-fluid ml-0">
+      <%= render partial: 'clients/features/forms/account', locals: { presenter: } %>
+    </div>
+
+    <div class="card card-fluid ml-0">
+      <%= render partial: 'clients/features/forms/automation', locals: { presenter: } %>
+    </div>
+  </div>
+
+  <div class="card-deck-xl card-margins-mobile">
+    <div class="card card-fluid ml-0">
+      <%= render partial: 'clients/features/forms/texting', locals: { presenter: } %>
+    </div>
+
+    <div class="card card-fluid mr-0">
+      <%= render partial: 'clients/features/forms/voice_video', locals: { presenter: } %>
+    </div>
+  </div>
+
+  <div class="card-deck-xl card-margins-mobile">
+    <div class="card card-fluid ml-0">
+      <%= render partial: 'clients/features/forms/aiagents', locals: { presenter: } %>
+    </div>
+
+    <div class="card card-fluid mr-0"></div>
+  </div>
+
+  <script>
+    $(function () {
+      <% if @client.errors.any? %>
+        ChiirpAlert({
+          'title':'Unable to Save!',
+          'body':@client.errors.full_messages.join("<br />").html_safe,
+          'type':'warning',
+          'persistent':true
+        });
+      <% end %>
+
+      $('.nav-link').removeClass('active');
+      $('#link_features').addClass('active');
+      $('.menu-item').removeClass('has-active');
+      $('#aside_menu_item_company_settings').addClass('has-active');
+      $('#aside_menu_item_client_features').addClass('has-active');
+      $('#breadcrumb').show();
+    });
+  </script>
+<% end %>

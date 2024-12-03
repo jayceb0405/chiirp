@@ -1,0 +1,152 @@
+<%
+  # app/views/integrations/servicetitan/imports/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicetitan/imports/show", locals: { presenter: Integrations::Servicetitan::ImportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ImportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ImportsPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Contacts from ServiceTitan</span>
+      <span class="my-auto text-success small" id="contact_imports_remaining_count"><%= presenter.import_contacts_remaining_string(current_user) -%></span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_servicetitan_import_path, builder: LooperFormBuilder, method: :patch, data: { turbo: true, turbo_stream: true }, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+        <%= bootstrap_calendar_field(
+              field:        'import_type[created_period]',
+              value:        '',
+              label:        { title: 'Customers Created Between' },
+              html_options: { id: 'import_type_created_period', placeholder: 'Click to select a period' },
+              flatpickr:    { include_time: false, mode: 'range', max_date: 'today' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'import_type[active_only]',
+              value:  true,
+              values: %w[true false],
+              label:  { title: 'Active Customers Only', checked: 'Yes', unchecked: 'No' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_type[ignore_emails]',
+              value:    false,
+              values:   %w[true false],
+              label:    { title: 'Ignore Emails', checked: 'Yes', unchecked: 'No' },
+              messages: { note: 'Ignore emails when matching existing Contacts.' }
+            ) %>
+        <%= f.check_box nil, {
+              label:      { title: 'Customer Balance' },
+              checkboxes: [
+                { field: 'import_type[account_0]', label: 'Balance = $0.00', checked: true, values: [true, false] },
+                { field: 'import_type[account_below_0]', label: 'Balance < $0.00', checked: true, values: [true, false] },
+                { field: 'import_type[account_above_0]', label: 'Balance > $0.00', checked: true, values: [true, false] }
+              ]
+            } %>
+
+        <div id="forms_accordion" class="card-expansion">
+
+          <div class="card card-expansion-item">
+            <div class="card-header border-0" id="form_header_id_0">
+              <button class="btn btn-reset collapsed prevent-default text-left" data-toggle="collapse" data-target="#actions_0">
+                <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+                <span>Processes on Contacts w/ Balance = $0.00</span>
+              </button>
+            </div>
+
+            <div class="collapse" id="actions_0" data-parent="#forms_accordion">
+              <div class="card-body pt-0 action_fields">
+
+                <%= render partial: 'campaigns/action_fields', locals: {
+                      client: presenter.client,
+                      campaign_id: presenter.campaign_0.id, campaign_id_field: 'import[campaign_id_0]',
+                      group: presenter.group_0, group_id_field: 'import[group_id_0]',
+                      tag: presenter.tag_0, tag_id_field: 'import[tag_id_0]',
+                      stage_id: presenter.stage_0.id, stage_id_field: 'import[stage_id_0]',
+                      stop_campaign_ids: presenter.stop_campaign_ids_0, stop_campaign_ids_field: 'import[stop_campaign_ids_0]'
+                    } %>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-expansion-item">
+            <div class="card-header border-0" id="form_header_id_below_0">
+              <button class="btn btn-reset collapsed prevent-default text-left" data-toggle="collapse" data-target="#actions_below_0">
+                <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+                <span>Processes on Contacts w/ Balance &lt; $0.00</span>
+              </button>
+            </div>
+
+            <div class="collapse" id="actions_below_0" data-parent="#forms_accordion">
+              <div class="card-body pt-0 action_fields">
+
+                <%= render partial: 'campaigns/action_fields', locals: {
+                      client: presenter.client,
+                      campaign_id: presenter.campaign_below_0.id, campaign_id_field: 'import[campaign_id_below_0]',
+                      group: presenter.group_below_0, group_id_field: 'import[group_id_below_0]',
+                      tag: presenter.tag_below_0, tag_id_field: 'import[tag_id_below_0]',
+                      stage_id: presenter.stage_below_0.id, stage_id_field: 'import[stage_id_below_0]',
+                      stop_campaign_ids: presenter.stop_campaign_ids_below_0, stop_campaign_ids_field: 'import[stop_campaign_ids_below_0]'
+                    } %>
+              </div>
+            </div>
+          </div>
+
+          <div class="card card-expansion-item">
+            <div class="card-header border-0" id="form_header_id_above_0">
+              <button class="btn btn-reset collapsed prevent-default text-left" data-toggle="collapse" data-target="#actions_above_0">
+                <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+                <span>Processes on Contacts w/ Balance > $0.00</span>
+              </button>
+            </div>
+
+            <div class="collapse" id="actions_above_0" data-parent="#forms_accordion">
+              <div class="card-body pt-0 action_fields">
+
+                <%= render partial: 'campaigns/action_fields', locals: {
+                      client: presenter.client,
+                      campaign_id: presenter.campaign_above_0.id, campaign_id_field: 'import[campaign_id_above_0]',
+                      group: presenter.group_above_0, group_id_field: 'import[group_id_above_0]',
+                      tag: presenter.tag_above_0, tag_id_field: 'import[tag_id_above_0]',
+                      stage_id: presenter.stage_above_0.id, stage_id_field: 'import[stage_id_above_0]',
+                      stop_campaign_ids: presenter.stop_campaign_ids_above_0, stop_campaign_ids_field: 'import[stop_campaign_ids_above_0]'
+                    } %>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <%= f.submit_buttons(
+              buttons: [
+                { title: 'Import Contacts', disable_with: 'Importing Contacts' }
+              ]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_import_contacts').addClass('active');
+    $('#breadcrumb').show();
+
+    $('.action_fields').on('changed.campaigns.action_fields', function(e, fieldName, value, name) {
+      // import[campaign_id_0] => campaign_0_name
+      var elId = fieldName.replace('import[', '').replace('_ids', '').replace('_id', '').replace(']', '').replace('[]', '') + '_name';
+      // console.log(fieldName, elId)
+
+      $('#' + elId).html(name);
+    });
+  });
+</script>

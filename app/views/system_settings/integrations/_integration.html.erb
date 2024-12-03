@@ -1,0 +1,47 @@
+<%
+  # app/views/system_settings/integrations/_integration.html.erb
+  #
+  # Example:
+  # 	render partial: "system_settings/integrations/integration", collection: presenter.integrations, as: :integration, locals: { presenter: SystemSettings::IntegrationsPresenter }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) integration: (Integration)
+  #   (req) presenter:   (SystemSettings::IntegrationsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(SystemSettings::IntegrationsPresenter)
+  presenter.integration = integration if local_assigns.dig(:integration).is_a?(SystemSettings::Integration)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#integration_<%= presenter.integration.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" id="integration_company_name_<%= presenter.integration.id -%>"> <%= presenter.integration.company_name -%> </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(presenter.integration.created_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) -%> </td>
+  <td class="text-right align-middle">
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+          data:  {
+            toggle: 'collapse',
+            target: "#integration_#{presenter.integration.id}"
+          }
+        } %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_integration',
+          id:    "button_delete_integration_#{presenter.integration.id}",
+          style: 'text-decoration: none;',
+          data: {
+            id: presenter.integration.id.to_i,
+            company_name: presenter.integration.company_name
+          }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse integration_edit" id="integration_<%= presenter.integration.id -%>">
+  <!-- Integration -->
+</tr>

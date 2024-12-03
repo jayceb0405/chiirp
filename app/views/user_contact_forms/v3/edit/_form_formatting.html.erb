@@ -1,0 +1,116 @@
+<%
+  # app/views/user_contact_forms/v3/edit/_form_formatting.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/v3/edit/form_formatting'
+  #
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  disabled = @user_contact_form.marketplace
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@user_contact_form] } %>
+<div class="card-header border-0" id="user_contact_form_form_formatting">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#user_contact_form_form_formatting_body" aria-expanded="false" aria-controls="user_contact_form_form_formatting_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>Form Formatting</span>
+  </button>
+</div>
+
+<div id="user_contact_form_form_formatting_body" class="collapse" aria-labelledby="user_contact_form_form_formatting" data-parent="#user_contact_form_accordion">
+  <div class="card-body pt-0">
+
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[title]',
+          value:        @user_contact_form.title.to_s,
+          label:        { title: 'HTML Page Title' },
+          html_options: { id: 'user_contact_form_page_title', placeholder: 'Page Title', disabled: }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[head_string]',
+          value:        @user_contact_form.head_string.to_s,
+          label:        { title: 'HTML Head Code' },
+          html_options: { id: 'user_contact_form_head_string', placeholder: 'Paste your HTML Head Code here', disabled: },
+          messages:     { note: 'Normally used to embed tracking code in the form.' }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[script_string]',
+          value:        @user_contact_form.script_string.to_s,
+          label:        { title: 'Script Code' },
+          html_options: { id: 'user_contact_form_script_string', placeholder: 'Paste your Script Code here', disabled: },
+          messages:     { note: 'Normally used to embed Javascript code in the footer of the form.' }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[submit_button_text]',
+          value:        @user_contact_form.submit_button_text.to_s,
+          label:        { title: 'Submit Button Text' },
+          html_options: { id: 'submit_button_text', placeholder: 'Submit', disabled: }
+        ) %>
+    <%= bootstrap_switch_field(
+          field:        'user_contact_form[ok2text]',
+          value:        @user_contact_form.ok2text.to_s == '1',
+          values:       %w[1 0],
+          label:        { title: 'Ask if OK to Text' },
+          html_options: { disabled: }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[ok2text_text]',
+          value:        @user_contact_form.ok2text_text.to_s,
+          label:        { title: 'OK to Text Text' },
+          html_options: { id: 'ok2text_text', placeholder: 'May We Send Text Messages?', disabled: }
+        ) %>
+    <%= bootstrap_switch_field(
+          field:        'user_contact_form[ok2email]',
+          value:        @user_contact_form.ok2email.to_s == '1',
+          values:       %w[1 0],
+          label:        { title: 'Ask if OK to Email' },
+          html_options: { disabled: }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[ok2email_text]',
+          value:        @user_contact_form.ok2email_text.to_s,
+          label:        { title: 'OK to Email Text' },
+          html_options: { id: 'ok2email_text', placeholder: 'May We Send Email Messages?', disabled: }
+        ) %>
+    <%= bootstrap_color_picker(
+          field:        'user_contact_form[submit_button_color]',
+          value:        @user_contact_form.submit_button_color,
+          label:        { title: 'Submit Button Color' },
+          html_options: { id: 'submit_button_color_hidden_field', disabled: }
+        ) %>
+    <%= bootstrap_color_picker(
+          field:        'user_contact_form[body_bg_color]',
+          value:        @user_contact_form.body_bg_color.to_s,
+          label:        { title: 'Body Background Color' },
+          html_options: { id: 'body_bg_color_hidden_field', disabled: }
+        ) %>
+
+    <% unless @user_contact_form.new_record? %>
+      <%= bootstrap_file_field(
+            file_field:      { field: 'background_image', id: 'background_image_input', name: 'user_contact_form[background_image]', url: api_v3_background_image_user_contact_form_path(@user_contact_form.id), disabled: },
+            col:             { id: 'background_image_dropzone' },
+            label:           { title: 'Background Image' },
+            image_container: { id: 'background_image_container' },
+            image:           @user_contact_form.background_image.attached? ? { key: @user_contact_form.background_image.key, width: 250, height: 250, class: 'rounded', crop: 'fit', format: 'png' } : {}
+          ) %>
+    <% end %>
+
+    <%= bootstrap_select_tag_campaign(
+          client:       @user_contact_form.user.client,
+          field:        'user_contact_form[selectable_campaign_ids]',
+          label:        { title: 'Selectable Campaigns' },
+          html_options: { id: 'selectable_campaign_ids', disabled:, multiple: true },
+          options:      { selected: @user_contact_form.selectable_campaign_ids, active_only: true },
+          messages:     { note: 'Selected Campaigns will appear as a dropdown on the form.' }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[selectable_campaign_label]',
+          value:        @user_contact_form.selectable_campaign_label.to_s,
+          label:        { title: 'Selectable Campaigns Label' },
+          html_options: { id: 'selectable_campaign_label', placeholder: 'Enter a label for the Campaign options', disabled: }
+        ) %>
+  </div>
+</div>

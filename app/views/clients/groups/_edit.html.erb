@@ -1,0 +1,41 @@
+<%
+  # app/views/clients/groups/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/groups/edit'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #   @group:  (Group)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+  cp.group = @group
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= cp.group.name.to_s.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= cp.group.name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: cp.group, url: cp.group.new_record? ? client_groups_path(cp.client.id) : client_group_path(cp.client.id, cp.group.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "group_form_#{cp.group.id}", novalidate: true } do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: 'Group Name' },
+              html_options: { minlength: 2, placeholder: 'Group Name', required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.submit_buttons buttons: [{ title: 'Save', id: "group_button_#{cp.group.id}", disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

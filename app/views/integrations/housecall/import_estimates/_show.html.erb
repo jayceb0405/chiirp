@@ -1,0 +1,110 @@
+<%
+  # app/views/integrations/housecall/import_estimates/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/import_estimates/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Estimates from Housecall Pro</span>
+      <span>
+        <span class="text-muted" id="estimate_imports_remaining"><%= presenter.estimate_imports_remaining -%></span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <p>Import all of your Housecall pro estimates into <%= I18n.t('tenant.name') -%>.</p>
+
+      <%= form_with url: integrations_housecall_import_estimates_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= bootstrap_select_tag(
+              field:        'import_estimate[work_statuses]',
+              label:        { title: 'Estimate Work Statuses' },
+              html_options: { multiple: true, count_selected_text: 'string' },
+              options:      { array: presenter.options_for_status, selected: '' },
+              messages:     { note: 'Import estimates with any of the selected statuses.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'import_estimate[approval_statuses]',
+              label:        { title: 'Estimate Approval Statuses' },
+              html_options: { multiple: true, count_selected_text: 'string' },
+              options:      { array: presenter.estimate_approval_status_options, selected: '' },
+              messages:     { note: 'Import estimates matching any of the selected option approval statuses.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_estimate[date_range_type]',
+              value:    'start',
+              values:   %w[start end],
+              label:    { title: 'Estimate Scheduled Date (Start/End)', checked: 'Start', unchecked: 'End' },
+              messages: { note: 'Import estimates based on scheduled start or end date.' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:     'import_estimate[date_range]',
+              value:     '',
+              row:       { class: 'mb-0' },
+              label:     { title: 'Estimate Scheduled Date Range' },
+              flatpickr: { include_time: true, mode: 'range' },
+              messages:  { note: 'Import estimates whose scheduled start or end date (as selected) falls within the selected range.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'import_estimate[lead_sources]',
+              row:          { id: 'import_estimate_lead_sources' },
+              label:        { title: 'Lead Sources' },
+              html_options: { multiple: true },
+              options:      { for_select: options_for_lead_source(presenter.client, []) },
+              messages:     { note: 'Import estimates originating from any of the selected lead sources.' }
+            ) %>
+        <span id='import_estimates_ext_tech_ids'>
+          <%= render partial: 'integrations/housecall/import_estimates/technicians', locals: { presenter: } %>
+        </span>
+        <%= bootstrap_select_tag(
+              field:        'import_estimate[tag_ids_include]',
+              label:        { title: 'Housecall Pro Tags Included' },
+              options:      { for_select: options_for_tag(presenter.client, [], [], false) },
+              html_options: { multiple: true },
+              messages:     { note: 'Import estimates whose customer has any of the selected Tags (MUST be exact match).' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'import_estimate[tag_ids_exclude]',
+              label:        { title: 'Housecall Pro Tags Excluded' },
+              options:      { for_select: options_for_tag(presenter.client, [], [], false) },
+              html_options: { multiple: true },
+              messages:     { note: 'Import estimates whose customer does NOT have any of the selected Tags (MUST be exact match).' }
+            ) %>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client:                  presenter.client,
+                campaign_id_field:       'import_estimate[actions][campaign_id]',
+                group_id_field:          'import_estimate[actions][group_id]',
+                tag_id_field:            'import_estimate[actions][tag_id]',
+                stage_id_field:          'import_estimate[actions][stage_id]',
+                stop_campaign_ids_field: 'import_estimate[actions][stop_campaign_ids]',
+                first_trigger_types:     [115, 120, 125, 130, 135, 136, 137, 138, 139, 140, 143, 144, 145, 146, 147, 148, 149]
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons buttons: [{ title: 'Import Estimates', id: 'import_estimates_button', disable_with: 'Preparing to Import Estimates...', disabled: presenter.estimate_imports_remaining.present? || !presenter.valid_credentials? }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('.nav-link').removeClass('active');
+    $('#link_import_estimates').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

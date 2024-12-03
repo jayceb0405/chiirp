@@ -1,0 +1,97 @@
+<%
+  # app/views/surveys/show/_data.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/data'
+  #
+  # Required Instance Variables:
+  #   @survey_screen: (SurveyScreen)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  form_fields    = contact_custom_fields_form_fields(@survey_screen.survey.client, @survey_screen.form_fields)
+  date_field_ids = []
+
+  path_params    = params.dig(:contact_id) ? { contact_id: params[:contact_id].to_s } : {}
+  contact        = @cid.to_i.positive? ? @survey_screen.survey.client.contacts.find_by(id: @cid) : nil
+-%>
+<% if @survey_screen.question.present? %>
+  <h5>
+    <%= @survey_screen.question.html_safe %>
+  </h5>
+<% end %>
+
+<div class="form_div" id="survey_screen_form">
+  <%= form_tag survey_contact_path(@survey_screen.survey.survey_key, @survey_screen.screen_key, cid: @cid, rid: @rid), local: true do %>
+    <% client_custom_fields = @survey_screen.survey.client.client_custom_fields %>
+
+    <% form_fields.each do |key, value| %>
+      <% custom_field = client_custom_fields.find_by(var_var: key) || @survey_screen.survey.client.client_custom_fields.new(var_name: value['name'], var_var: key, var_type: 'string', var_placeholder: value['name'], var_options: {}) %>
+      <% field_tag = 'client_custom_fields' %>
+
+      <div class="form-group mb-1">
+        <%= contact_custom_field_input(
+              custom_field:,
+              object_name:  field_tag,
+              contact:,
+              row:          { class: 'mb-0', columns: [0, 12] },
+              col:          { class: 'mb-0' },
+              form_group:   { class: 'mb-0' },
+              label:        { class: 'mt-0 mb-0', display: false },
+              html_options: { required: value['required'].to_i == 1 }
+            ) %>
+      </div>
+    <% end %>
+
+    <% if @survey_screen.form_data&.dig('ok2text').to_s == '1' %>
+      <div class='input-group'>
+        <label class='switch mr-1'>
+          <%= check_box_tag 'client_custom_fields[ok2text]', '1', true, { class: 'custom-control-input', id: 'ok2text' } %>
+          <span class='slider round'></span>
+        </label>
+        <%= @survey_screen.form_data&.dig('ok2text_text').to_s -%>
+      </div>
+    <% end %>
+
+    <% if @survey_screen.form_data&.dig('ok2email').to_s == '1' %>
+      <div class="input-group">
+        <label class="switch mr-1">
+          <%= check_box_tag 'client_custom_fields[ok2email]', '1', true, { class: 'custom-control-input', id: 'ok2email' } %>
+          <span class="slider round"></span>
+        </label>
+        <%= @survey_screen.form_data&.dig('ok2email_text').to_s -%>
+      </div>
+    <% end %>
+
+    <div class="input-group">
+      <%= submit_tag @survey_screen.form_data&.dig('submit_button_text'), { id: 'contact_form_submit', class: 'btn btn-info w-100 my-3', style: "background-color:#{@survey_screen.form_data&.dig('submit_button_color')};border-color:#{@survey_screen.form_data&.dig('submit_button_color')};" } %>
+    </div>
+  <% end %>
+
+  <% if @survey_screen.form_data&.dig('disclaimer_text').to_s.present? %>
+    <div class=" my-2 small">
+      <%= @survey_screen.form_data['disclaimer_text'].to_s.html_safe -%>
+    </div>
+  <% end %>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('#contact_form_submit').css({'color':contrastColor('<%= @survey_screen.form_data&.dig('submit_button_color').to_s -%>', true)});
+
+    <% date_field_ids.each do |id| %>
+      // date calendar
+      $('#<%= id -%>').flatpickr({
+        nextArrow: '>',
+        prevArrow: '<',
+        dateFormat: 'm/d/Y G:i K',
+        enableTime: 'true',
+        allowInput: 'false',
+        plugins: [
+          new confirmDatePlugin({}),
+        ]
+      });
+    <% end %>
+  });
+</script>

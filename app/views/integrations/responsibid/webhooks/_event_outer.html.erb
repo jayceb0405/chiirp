@@ -1,0 +1,28 @@
+<%
+  # app/views/integrations/responsibid/webhooks/_event_outer.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/responsibid/webhooks/event_outer', collection: Responsibidpro.webhooks, as: :webhook_event, locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: ClientApiIntegration
+  #
+  # Required Local Variables:
+  #   webhook: (Hash)
+  #
+  presenter               = local_assigns.dig(:presenter) || Integrations::Responsibid::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook_event = webhook_event
+-%>
+<tr id="webhook_event_listing_<%= presenter.webhook_event_id -%>">
+  <%= render partial: 'integrations/responsibid/webhooks/event_inner', locals: { presenter: presenter } %>
+</tr>
+
+<tr class="row-details bg-light collapse webhook_edit_row" id="webhook_edit_tr_<%= presenter.webhook_event_id -%>" data-id="<%= presenter.webhook_event_id -%>">
+  <td colspan="9" class="p-3" id="webhook_edit_td_<%= presenter.webhook_event_id -%>">
+    <% if presenter.webhook_event.dig(:event_id).to_s.empty? %>
+      <%= render partial: 'integrations/responsibid/webhooks/edit', locals: { presenter: presenter } %>
+    <% else %>
+      <%= bootstrap_spinning_logo(message: 'Loading Event') %>
+    <% end %>
+  </td>
+</tr>

@@ -1,0 +1,137 @@
+<%
+  # app/views/stages/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/show', locals: { stage_parent: StageParent }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   stage_parent: (StageParent)
+  #
+  sp = StagesPresenter.new(stage_parent:)
+  sp.user = current_user
+  sp.user_settings
+-%>
+<header class="page-title-bar pl-1 pr-1 mb-4">
+  <div class="d-md-flex align-items-md-start">
+    <h1 class="mr-sm-auto page-title"><%= stage_parent.name -%></h1>
+
+    <div class="btn-toolbar">
+      <% if current_user.access_controller?('stages', 'all_contacts', session) %>
+        <div class="dropdown">
+          <button type="button" class="btn btn-light" data-toggle="dropdown">
+            <i class="fa fa-user"></i>
+            <span class="ml-1">Select 1 or More Users</span>
+          </button>
+          <div class="dropdown-menu dropdown-menu-right stop-propagation" id="select_stage_parents_dropdown">
+            <%= render partial: 'stages/select_user_dropdown', locals: { stages_presenter: sp } %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</header>
+
+<div class="board" id="stages_board" data-toggle="sortable" data-handle=".task-header" data-delay="100" data-force-fallback="true">
+  <%= render partial: 'stages/stage', collection: sp.stages, locals: { stages_presenter: sp } %>
+</div>
+
+<script>
+  $(function() {
+    <% if sp.client.phone_calls_allowed %>
+      // call a Contact
+      $(document).off('click', '.call_contact');
+      $(document).on('click', '.call_contact', function(e) {
+        e.preventDefault();
+        $('.call_contact').attr('disabled', 'disabled');
+
+        var contactId   = $(this).data('contactid');
+        var contactName = $(this).data('fullname');
+        var userId      = $(this).data('userid');
+
+        ChiirpAlert({
+          'title':      'Calling ' + contactName + '!',
+          'body':       'Have your cell phone ready! We will call you and then connect the call to ' + contactName + '.',
+          'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Place the call!', id: 'button_call' }].to_json) -%>,
+          'type':       'info',
+          'persistent': true
+        });
+
+        $('#button_call').off('click');
+        $('#button_call').on('click', function (e) {
+
+          $('#alert_modal').off('hidden.bs.modal');
+          $('#alert_modal').on('hidden.bs.modal', function (e) {
+            $('#alert_modal').off('hidden.bs.modal');
+
+            ChiirpAlert({
+              'title':      'Calling ' + contactName + '!',
+              'body':       'Answer your phone.',
+              'type':       'info',
+              'persistent': false
+            });
+
+            var params = {
+              user_id: userId,
+              contact_id: contactId
+            }
+
+            // Submit the form via ajax
+            $.ajax({
+              url: '/central/call_contact/' + contactId,
+              method: 'POST',
+              data: params
+            }).done(function(data) {
+
+              if (data.status === 'fail') {
+                ChiirpAlert({
+                  'title':      'Call to ' + contactName + ' Failed!',
+                  'body':       data.message,
+                  'type':       'danger',
+                  'persistent': false
+                });
+              }
+            }).fail(function(data) {
+              ChiirpAlert({
+                'title':      'Call to ' + contactName + ' Failed!',
+                'body':       'There was a problem completing the call - please try again later.',
+                'type':       'danger',
+                'persistent': false
+              });
+            }).always(function() {
+              $('.call_contact').removeAttr('disabled');
+            });
+          });
+        });
+      });
+    <% end %>
+  });
+
+  function sortContacts(stage_id, data, direction) {
+    var mylist = document.getElementById('stage_' + stage_id);
+    var divs = mylist.getElementsByClassName('contact');
+    var listitems = [];
+
+    for (i = 0; i < divs.length; i++) {
+      listitems.push(divs.item(i));
+    }
+
+    listitems.sort(function(a, b) {
+      var compA = a.getAttribute(data).toUpperCase();
+      var compB = b.getAttribute(data).toUpperCase();
+      return (compA < compB) ? -1 : (compA > compB) ? 1 : 0;
+    });
+
+    if (direction == 'asc') {
+      for (i = 0; i < listitems.length; i++) {
+        mylist.appendChild(listitems[i]);
+      }
+    } else {
+      for (i = listitems.length - 1; i >= 0; i--) {
+        mylist.appendChild(listitems[i]);
+      }
+    }
+  }
+</script>

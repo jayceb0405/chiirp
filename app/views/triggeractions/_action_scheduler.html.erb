@@ -1,0 +1,156 @@
+<%
+  # app/views/triggeractions/_action_scheduler.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/action_scheduler", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<div class="row mt-3">
+  <div class="col-3">Schedule this Action</div>
+  <div class="col-9">
+    <% if [120, 125, 145, 146].include?(presenter.trigger.trigger_type) %>
+      <small class="text-muted">
+        Schedule this action to be performed prior to the target date.
+        All selected delays are scheduled leading up to the target date of the Campaign.
+        When no delay is selected Action will be performed immediately (NOT on the target date).
+      </small>
+    <% else %>
+      <small class="text-muted">
+        Schedule this action to be performed in the future.
+        All selected delays are based on the start of the Campaign.
+      </small>
+    <% end %>
+  </div>
+</div>
+
+<%= bootstrap_range_slider(
+      field:        'triggeraction_scheduler[delay_months]',
+      row:          { class: 'ml-3 mr-3', columns: [0, 12] },
+      label:        { title: ' Delay Months' },
+      html_options: { id: "delay_months_#{presenter.triggeraction.id}" },
+      range_slider: { min: 0, max: 60, from: presenter.triggeraction.delay_months, type: 'single', postfix: ' months', grid: true, grid_num: 5, disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction_scheduler[delay_days]',
+      row:          { class: 'ml-3 mr-3', columns: [0, 12] },
+      label:        { title: ' Delay Days' },
+      html_options: { id: "delay_days_#{presenter.triggeraction.id}" },
+      range_slider: { min: 0, max: 365, from: presenter.triggeraction.delay_days, type: 'single', postfix: ' days', grid: true, grid_num: 5, disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction_scheduler[delay_hours]',
+      row:          { class: 'ml-3 mr-3', columns: [0, 12] },
+      label:        { title: ' Delay Hours' },
+      html_options: { id: "delay_hours_#{presenter.triggeraction.id}" },
+      range_slider: { min: 0, max: 24, from: presenter.triggeraction.delay_hours, type: 'single', postfix: ' hours', grid: true, grid_num: 5, disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction_scheduler[delay_minutes]',
+      row:          { class: 'ml-3 mr-3', columns: [0, 12] },
+      label:        { title: ' Delay Minutes' },
+      html_options: { id: "delay_minutes_#{presenter.triggeraction.id}" },
+      range_slider: { min: 0, max: 60, from: presenter.triggeraction.delay_minutes, type: 'single', postfix: ' minutes', grid: true, grid_num: 5, disabled: presenter.campaign_disabled? }
+    ) %>
+
+<%= label_tag 'triggeraction_scheduler[safe_times]', 'Select Acceptable Days & Times' %>
+<div class="form-row ml-3 mr-3">
+  <div class="form-group col-12">
+    <%= text_field_tag('triggeraction_scheduler[safe_times]', '', { class: 'form-control', id: "safe_times_#{presenter.triggeraction.id}", autocomplete: false }) %>
+  </div>
+</div>
+
+<div class="form-row mb-3">
+  <div class="col-6 offset-3 d-flex justify-content-between">
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_sun]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_sun]', 1, presenter.triggeraction.safe_sun, { class: 'custom-control-input', id: "safe_sun_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_sun_#{presenter.triggeraction.id}", 'Sun', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_mon]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_mon]', 1, presenter.triggeraction.safe_mon, { class: 'custom-control-input', id: "safe_mon_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_mon_#{presenter.triggeraction.id}", 'Mon', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_tue]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_tue]', 1, presenter.triggeraction.safe_tue, { class: 'custom-control-input', id: "safe_tue_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_tue_#{presenter.triggeraction.id}", 'Tue', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_wed]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_wed]', 1, presenter.triggeraction.safe_wed, { class: 'custom-control-input', id: "safe_wed_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_wed_#{presenter.triggeraction.id}", 'Wed', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_thu]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_thu]', 1, presenter.triggeraction.safe_thu, { class: 'custom-control-input', id: "safe_thu_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_thu_#{presenter.triggeraction.id}", 'Thu', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_fri]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_fri]', 1, presenter.triggeraction.safe_fri, { class: 'custom-control-input', id: "safe_fri_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_fri_#{presenter.triggeraction.id}", 'Fri', { class: 'custom-control-label' } %>
+    </div>
+    <div class="custom-control custom-checkbox">
+      <%= hidden_field_tag 'triggeraction_scheduler[safe_sat]', '0' %>
+      <%= check_box_tag 'triggeraction_scheduler[safe_sat]', 1, presenter.triggeraction.safe_sat, { class: 'custom-control-input', id: "safe_sat_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? } %>
+      <%= label_tag "safe_sat_#{presenter.triggeraction.id}", 'Sat', { class: 'custom-control-label' } %>
+    </div>
+  </div>
+</div>
+
+<%= bootstrap_switch_field(
+      field:        'triggeraction_scheduler[ok2skip]',
+      value:        presenter.triggeraction.ok2skip,
+      values:       [true, false],
+      label:        { title: 'Skip This Action If NOT Within Acceptable Days & Times' },
+      html_options: { disabled: presenter.campaign_disabled? }
+    ) %>
+
+<script>
+  $("#safe_times_<%= presenter.triggeraction.id -%>").ionRangeSlider({
+      type: "double",
+      min: 0,
+      max: 1440,
+      from: <%= presenter.triggeraction.safe_start -%>,
+      to: <%= presenter.triggeraction.safe_end -%>,
+      step: 30,
+      grid: true,
+      grid_num: 12,
+      skin: 'round',
+      disable: <%= presenter.campaign_disabled? -%>,
+      prettify: function(value){
+        if (value == 0) {
+          time = "am";
+          value = 720;
+        }
+        else if (value < 720) {
+          time = "am";
+        }
+        else if (value == 720) {
+          time = "noon";
+        }
+        else if (value == 1440) {
+          time = "am";
+          value = value - 720;
+        }
+        else {
+          time = "pm";
+          value = value - 720;
+        }
+        hours = String(parseInt(value / 60, 10));
+        minutes = String(value - (hours * 60));
+        if (minutes.length == 1) {
+          minutes = "0" + minutes;
+        }
+        return hours + ":" + minutes + time;
+      }
+  });
+</script>

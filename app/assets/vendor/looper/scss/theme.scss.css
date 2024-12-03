@@ -1,0 +1,125 @@
+// Include parts of Bootstrap, Plugins & Theme Components
+
+// Required
+
+@import "default/variable-bs-overrides";
+@import "custom/variable-custom"; // your own + custom variables
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/mixins";
+@import "default/variables";
+@import "default/mixins";
+
+
+// Bootstrap default
+// ==================================================
+
+@import "bootstrap/scss/root";
+@import "bootstrap/scss/reboot";
+@import "bootstrap/scss/type";
+@import "bootstrap/scss/images";
+@import "bootstrap/scss/code";
+@import "bootstrap/scss/grid";
+@import "bootstrap/scss/tables";
+@import "bootstrap/scss/forms";
+@import "bootstrap/scss/buttons";
+@import "bootstrap/scss/transitions";
+@import "bootstrap/scss/dropdown";
+@import "bootstrap/scss/button-group";
+@import "bootstrap/scss/input-group";
+@import "bootstrap/scss/custom-forms";
+@import "bootstrap/scss/nav";
+@import "bootstrap/scss/navbar";
+@import "bootstrap/scss/card";
+@import "bootstrap/scss/breadcrumb";
+@import "bootstrap/scss/pagination";
+@import "bootstrap/scss/badge";
+@import "bootstrap/scss/jumbotron";
+@import "bootstrap/scss/alert";
+@import "bootstrap/scss/progress";
+@import "bootstrap/scss/media";
+@import "bootstrap/scss/list-group";
+@import "bootstrap/scss/close";
+@import "bootstrap/scss/toasts";
+@import "bootstrap/scss/modal";
+@import "bootstrap/scss/tooltip";
+@import "bootstrap/scss/popover";
+@import "bootstrap/scss/carousel";
+@import "bootstrap/scss/spinners";
+@import "bootstrap/scss/utilities";
+@import "bootstrap/scss/print";
+
+
+// Bootstrap components overrides
+// ==================================================
+
+@import "looper/scss/default/bootstrap/type";
+@import "looper/scss/default/bootstrap/images";
+@import "looper/scss/default/bootstrap/code";
+@import "looper/scss/default/bootstrap/grid";
+@import "looper/scss/default/bootstrap/embed-responsive";
+@import "looper/scss/default/bootstrap/tables";
+@import "looper/scss/default/bootstrap/buttons";
+@import "looper/scss/default/bootstrap/alerts";
+@import "looper/scss/default/bootstrap/badge";
+@import "looper/scss/default/bootstrap/forms";
+@import "looper/scss/default/bootstrap/input-group";
+@import "looper/scss/default/bootstrap/custom-forms";
+@import "looper/scss/default/bootstrap/list-group";
+@import "looper/scss/default/bootstrap/cards";
+@import "looper/scss/default/bootstrap/dropdowns";
+@import "looper/scss/default/bootstrap/progress";
+@import "looper/scss/default/bootstrap/breadcrumb";
+@import "looper/scss/default/bootstrap/paginations";
+@import "looper/scss/default/bootstrap/navs";
+@import "looper/scss/default/bootstrap/navbar";
+@import "looper/scss/default/bootstrap/modals";
+@import "looper/scss/default/bootstrap/popovers";
+@import "looper/scss/default/bootstrap/utilities";
+
+
+// Theme components
+// ==================================================
+// app plugins
+@import "stacked-menu/dist/scss/stacked-menu";
+// replace plugins
+@import "looper/scss/default/components/plugins";
+
+// app layout
+@import "looper/scss/default/components/base";
+@import "looper/scss/default/components/header";
+@import "looper/scss/default/components/aside";
+@import "looper/scss/default/components/aside-compact";
+@import "looper/scss/default/components/page";
+@import "looper/scss/default/components/sidebar";
+@import "looper/scss/default/components/footer";
+
+// app components
+@import "looper/scss/default/components/rating";
+@import "looper/scss/default/components/switchers";
+@import "looper/scss/default/components/icons";
+@import "looper/scss/default/components/tiles";
+@import "looper/scss/default/components/avatar";
+@import "looper/scss/default/components/mention";
+@import "looper/scss/default/components/event";
+@import "looper/scss/default/components/hamburger";
+@import "looper/scss/default/components/figure";
+@import "looper/scss/default/components/outbound-link";
+@import "looper/scss/default/components/steps";
+@import "looper/scss/default/components/todos";
+@import "looper/scss/default/components/progress-list";
+@import "looper/scss/default/components/visual-picker";
+@import "looper/scss/default/components/publisher";
+@import "looper/scss/default/components/timeline";
+@import "looper/scss/default/components/conversations";
+@import "looper/scss/default/components/feeds";
+@import "looper/scss/default/components/tasks";
+@import "looper/scss/default/components/metrics";
+@import "looper/scss/default/components/countdown";
+@import "looper/scss/default/components/empty-state";
+@import "looper/scss/default/components/invoice";
+@import "looper/scss/default/components/sticker";
+
+// pages
+@import "looper/scss/default/components/auth";
+@import "looper/scss/default/components/message";

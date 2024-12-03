@@ -1,0 +1,74 @@
+<%
+  # app/views/system_settings/versions/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "system_settings/versions/form"
+  #
+  # Required Instance Variables:
+  #   @version: (SystemSetting)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @version.new_record? && @version.header.to_s.empty?
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@version] } %>
+<td colspan="6">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= @version.header[0, 3] -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= @version.header -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <% if !@version.new_record? || @version.header.to_s.present? %>
+        <%= form_with model: [:system_settings, @version], builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+          <%= f.text_field :header, {
+                label:        { title: 'Name' },
+                html_options: { placeholder: 'Setting Value', autofocus: true }
+              } %>
+          <%= f.text_area :description, {
+                label:        { title: 'Description' },
+                html_options: { class: 'pr-5', id: 'emoji_textarea', placeholder: 'Type Description...' }
+              } %>
+          <%= bootstrap_calendar_field(
+                field:     'version[start_date]',
+                value:     @version.start_date.in_time_zone(I18n.t("tenant.#{Rails.env}.time_zone")).strftime('%m/%d/%Y %H:%M %p'),
+                label:     { title: 'Start Date' },
+                flatpickr: { include_time: true, mode: 'single' },
+                messages:  { note: "Start Date (#{I18n.t("tenant.#{Rails.env}.time_zone")})" }
+              ) %>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Version', disable_with: 'Saving' }] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function () {
+    $('#emoji_textarea').emojiPicker({
+      width: '300px',
+      height: '200px',
+      button: true,
+      iconBackgroundColor: 'white'
+    });
+
+    $('.emojiPickerIcon').ready(function() {
+      $('.emojiPickerIcon').css("width", "30px");
+      $('.emojiPickerIcon').css("height", "30px");
+      $('.emojiPickerIcon').css("top", "2px");
+      $('.emojiPickerIcon').css("right", "2px");
+      $('.emojiPickerIcon').css("border-top-right-radius", "20px");
+    });
+
+    $('.emojiPickerIconWrap').ready(function() {
+      $('.emojiPickerIconWrap').css('display', 'block');
+      $('#emoji_textarea').css('width', '100%');
+    });
+  });
+</script>

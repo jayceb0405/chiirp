@@ -1,0 +1,57 @@
+<%
+  # app/views/aiagents/_form_session_length.html.erb
+  # 
+  # Example:
+  #   render 'form_session_length', presenter: presenter
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   presenter: (AiagentPresenter)
+  # 
+-%>
+
+<div class="card-header border-0" id="form_session_length">
+  <button class="btn btn-reset collapsed prevent-default" type="button" data-toggle="collapse" data-target="#fieldset_session_length_<%= presenter.agent.id -%>" aria-expanded="false" aria-controls="fieldset_session_length_<%= presenter.agent.id -%>">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>Session Limiters</span>
+  </button>
+</div>
+<div id="fieldset_session_length_<%= presenter.agent.id -%>" class="collapse" aria-labelledby="aiagent_edit_accordion" data-parent="#aiagent_edit_accordion">
+  <div class="card-body pt-0">
+    <%= bootstrap_number_field(
+          field:    'agent[max_messages]',
+          value:    presenter.agent.max_messages,
+          label:    { title: 'Maximum Messages Sent' },
+          html_options: { min: 0, required: true },
+          messages: { note: 'This is the number of text messages sent by this AI Agent.' }
+        ) %>
+
+    <%= bootstrap_text_area(
+        field:    'agent[max_messages_prompt]',
+        value:    presenter.agent.max_messages_prompt,
+        label:    { title: 'Error Text Message' },
+        html_options: { typeahead_client: presenter.agent.client, char_count_client: presenter.agent.client },
+        messages: { note: 'This message will be sent instead of the Final Text Message when the Maximum Messages Sent is reached.' }
+      ) %>
+
+    <%= bootstrap_range_slider(
+          field: 'agent[session_length]',
+          row: { class: 'ml-3 mr-3', columns: [0, 12] },
+          label: { title: 'Session Length' },
+          range_slider: { min: 0, max: 168, from: presenter.agent.session_length, type: 'single', postfix: ' hours', grid: true, grid_num: 7 },
+          messages: { note: 'End the session after this many hours. Zero indicates the session will not be ended by this timer.' }
+        ) %>
+
+    <%= render partial: 'campaigns/action_fields', locals: { 
+          client: presenter.agent.client,
+          campaign_id: presenter.agent.session_length_campaign_id, campaign_id_field: 'agent[session_length_campaign_id]',
+          stop_campaign_ids: presenter.agent.session_length_stop_campaign_ids, stop_campaign_ids_field: 'agent[session_length_stop_campaign_ids]',
+          group: presenter.agent.session_length_group, group_id_field: 'agent[session_length_group_id]',
+          tag: presenter.agent.session_length_tag, tag_id_field: 'agent[session_length_tag_id]',
+          stage_id: presenter.agent.session_length_stage_id, stage_id_field: 'agent[session_length_stage_id]',
+          first_trigger_types: [115, 135, 150, 152]
+        } %>
+  </div>
+</div>

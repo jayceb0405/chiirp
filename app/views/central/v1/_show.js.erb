@@ -1,0 +1,19 @@
+<%
+  # app/views/central/v1/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'central/v1/show', locals: { cards: %w(array) }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+
+    presenter = CentralPresenter.new(client: current_user.client, user: current_user, contact: @contact, session: session) if %w[conversation].intersect?(cards)
+  end
+-%>
+<% if cards.include?('conversation') %>
+  $('#conversation').html('<%= j render partial: 'central/conversation/show', locals: { presenter: } -%>');
+<% end %>

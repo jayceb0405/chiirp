@@ -1,0 +1,22 @@
+<%
+# app/views/tasks/_index.html.erb
+#
+# Example:
+#   render partial: 'tasks/index', locals: { task: Task, contact: Contact }
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+# Optional Local Variables:
+#   task:    (Task or Integer)
+#   contact: (Contact or Integer)
+#
+-%>
+<div class="section-block" id="tasks_index_content">
+  <%= render partial: 'tasks/index_content', locals: { task: local_assigns.dig(:task), contact: local_assigns.dig(:contact) } %>
+</div>
+
+<%= render partial: 'snippets/custom_modal', locals: { id: 'task_modal', max_width: '900px', close: true } %>

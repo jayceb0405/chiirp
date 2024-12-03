@@ -1,0 +1,30 @@
+<%
+  # app/views/dashboards/buttons/_client_texts_received.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/client_texts_received', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  responded, received = presenter.texts_responded_by_client
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               'client_texts_received',
+        stats:            "#{responded} / #{received}",
+        description:      'Texts Received',
+        description_icon: 'c',
+        icon:             'fa fa-comments',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', last_msg_direction: 'rcvd', last_msg_absolute: 'last', user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         'client_texts_received_chart',
+        chart_value:      (responded.to_d / received.to_d),
+        chart_type:       'circle_progress',
+        button_movable:   true
+      } %>
+<% end %>

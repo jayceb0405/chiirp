@@ -1,0 +1,135 @@
+<%
+  # app/views/integrations/email/v1/domain_verifications/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/email/v1/domain_verifications/show"
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Email::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Domain Verification</h6>
+  <div class="card-body">
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+        <% if presenter.connected? %>
+          <p>Add the following DNS records. Please see your DNS or domain name provider's website for instructions.</p>
+          <table class="w-100">
+            <tr>
+              <th>Verified</th>
+              <th>Type</th>
+              <th>Host</th>
+              <th>Value</th>
+            </tr>
+            <tr>
+              <td>
+                <%= render partial: 'check', object: presenter.client_api_integration.mail_cname['valid'] %>
+              </td>
+              <td>CNAME</td>
+              <td>
+                <%= bootstrap_copy_field(
+                      field:    'mail_cname-host',
+                      value:    presenter.client_api_integration.mail_cname['host'],
+                      row:      { class: 'mb-0', columns: [0, 12] },
+                      messages: { note: 'Create a CNAME record with this host name.' }
+                    ) %>
+              </td>
+              <td>
+                <%= bootstrap_copy_field(
+                      field:    'mail_cname-data',
+                      value:    presenter.client_api_integration.mail_cname['data'],
+                      row:      { class: 'mb-0', columns: [0, 12] },
+                      messages: { note: 'Set the CNAME record to this value.' }
+                    ) %>
+              </td>
+            </tr>
+            <%= render partial: 'reason', object: presenter.client_api_integration.mail_cname['reason'] %>
+            <tr>
+              <td>
+                <%= render partial: 'check', object: presenter.client_api_integration.dkim1['valid'] %>
+              </td>
+              <td>CNAME</td>
+              <td>
+                <%= bootstrap_copy_field(
+                      field:    'dkim1-host',
+                      value:    presenter.client_api_integration.dkim1['host'],
+                      row:      { class: 'mb-0', columns: [0, 12] },
+                      messages: { note: 'Create a CNAME record with this host name.' }
+                    ) %>
+              </td>
+              <td>
+                <%= bootstrap_copy_field(
+                      field:    'dkim1-data',
+                      value:    presenter.client_api_integration.dkim1['data'],
+                      row:      { class: 'mb-0', columns: [0, 12] },
+                      messages: { note: 'Set the CNAME record to this value.' }
+                    ) %>
+              </td>
+            </tr>
+            <%= render partial: 'reason', object: presenter.client_api_integration.dkim1['reason'] %>
+            <tr>
+              <td>
+                <%= render partial: 'check', object: presenter.client_api_integration.dkim2['valid'] %>
+              </td>
+              <td>CNAME</td>
+              <td>
+                <%= bootstrap_copy_field(
+                      field:    'dkim2-data',
+                      value:    presenter.client_api_integration.dkim2['host'],
+                      row:      { class: 'mb-0', columns: [0, 12] },
+                      messages: { note: 'Create a CNAME record with this host name.' }
+                    ) %>
+              </td>
+              <td>
+                <%= bootstrap_copy_field(
+                      field:    'dkim2-data',
+                      value:    presenter.client_api_integration.dkim2['data'],
+                      row:      { class: 'mb-0', columns: [0, 12] },
+                      messages: { note: 'Set the CNAME record to this value.' }
+                    ) %>
+              </td>
+            </tr>
+            <%= render partial: 'reason', object: presenter.client_api_integration.dkim2['reason'] %>
+          </table>
+
+          <div class="w-100 d-flex flex-column flex-md-row justify-content-end">
+            <%= link_to 'Verify', integrations_email_v1_domain_verifications_path, class: 'btn btn-info', method: :post, remote: true, id: 'email_verify' %>
+          </div>
+
+          <div class="w-100 d-flex flex-column flex-md-row justify-content-end mt-2">
+            <div class="spinner-border text-primary d-none" id="email_integration_spinner" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+          </div>
+
+          <div>
+            <div><h6>Required</h6></div>
+            <p>As of February 2024 the following additional steps are required.</p>
+            <div><strong>SPF</strong></div>
+            <p>Add the <%= I18n.t('tenant.name') %> <a href="https://support.google.com/a/answer/33786?hl=en" target="_blank">SPF</a> mechanism to your DNS settings. Add <code>include:_spf.chiirp.io</code> to your existing TXT record. The following is a complete example of an SPF TXT record: <code class="text-nowrap">v=spf1 include:_spf.chiirp.io ~all</code>. If you send email from other providers we recommend that you also include their SPF mechanisms in your TXT record.</p>
+            <div><strong>DMARC</strong></div>
+            <p>Add at least a basic <a href="https://support.google.com/a/answer/2466580?hl=en&ref_topic=2759254&sjid=3454098709000239504-NA" target="_blank">DMARC</a> configuration to your DNS settings. If you do not have an existing DMARC record, please add a TXT record to your domain at host: <code>_dmarc.yourdomain.com</code> with the following value: <code>v=DMARC1; p=none;</code>.</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_domain_verifications').addClass('active');
+    $('#breadcrumb').show();
+
+    $('#email_verify').off('click');
+    $('#email_verify').on('click', function(e) {
+      $('#email_integration_spinner').removeClass('d-none');
+    });
+  });
+</script>

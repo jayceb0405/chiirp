@@ -1,0 +1,62 @@
+<%
+  # app/views/integrations/servicetitan/reports/criteria/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/criteria/index.html.erb', locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter) && presenter.report_parameters.present?
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-2">
+  <legend class="w-auto mb-0"><h6>Report criteria</h6></legend>
+  <%= render partial: 'integrations/servicetitan/reports/criteria/criteria', collection: presenter.report_parameters, as: :criteria, locals: { presenter: } %>
+</fieldset>
+
+<fieldset class="border rounded p-2 my-3">
+  <legend class="w-auto mb-0"><h6><%= I18n.t('tenant.name') -%> Actions</h6></legend>
+
+  <%= render partial: 'campaigns/action_fields', locals: {
+        client: presenter.client,
+        campaign_id: presenter.report_campaign_id, campaign_id_field: 'report[actions][campaign_id]',
+        group: presenter.report_group, group_id_field: 'report[actions][group_id]',
+        tag: presenter.report_tag, tag_id_field: 'report[actions][tag_id]',
+        stage_id: presenter.report_stage_id, stage_id_field: 'report[actions][stage_id]',
+        stop_campaign_ids: presenter.report_stop_campaign_ids, stop_campaign_ids_field: 'report[actions][stop_campaign_ids]',
+        first_trigger_types: [115, 120, 125, 130, 133, 134, 135, 140, 143, 144, 145]
+      } %>
+</fieldset>
+
+<%= render partial: 'integrations/servicetitan/reports/schedule', locals: { presenter: } %>
+
+<!-- {
+  :id=>76408133,
+  :name=>"Customer List",
+  :description=>"Use this report to pull a list of all customers, including their contact information, last job completed date, lifetime revenue, and lifetime jobs completed.",
+  :modifiedOn=>"2023-05-10T13:16:40.7948786-04:00",
+  :criteria=>[
+    {:name=>"From", :label=>"From", :dataType=>"Date", :isArray=>false, :isRequired=>true, :acceptValues=>nil},
+    {:name=>"To", :label=>"To", :dataType=>"Date", :isArray=>false, :isRequired=>true, :acceptValues=>nil},
+    {:name=>"BusinessUnitId", :label=>"Business Unit", :dataType=>"Number", :isArray=>true, :isRequired=>false, :acceptValues=>{:fields=>[{:name=>"Value", :label=>"Value"}, {:name=>"Name", :label=>"Name"}], :dynamicSetId=>"business-units", :values=>nil}},
+    {:name=>"ShowInactiveCustomers", :label=>"Show Inactive Customers", :dataType=>"Boolean", :isArray=>false, :isRequired=>false, :acceptValues=>nil}
+  ],
+  :fields=>[
+    {:name=>"CustomerId", :label=>"Customer ID", :dataType=>"Number"},
+    {:name=>"CustomerName", :label=>"Customer Name", :dataType=>"String"},
+    {:name=>"Type", :label=>"Type", :dataType=>"String"},
+    {:name=>"PhoneNumber", :label=>"Phone Number", :dataType=>"String"},
+    {:name=>"Email", :label=>"Email", :dataType=>"String"},
+    {:name=>"FullAddress", :label=>"Full Address", :dataType=>"String"},
+    {:name=>"DoNotMail", :label=>"Do Not Mail", :dataType=>"Number"},
+    {:name=>"DoNotService", :label=>"Do Not Service", :dataType=>"Number"},
+    {:name=>"CustomerTags", :label=>"Customer Tags", :dataType=>"String"},
+    {:name=>"LastJobCompleted", :label=>"Last Job Completed", :dataType=>"Date"},
+    {:name=>"LifetimeRevenue", :label=>"Customers Lifetime Revenue", :dataType=>"Number"},
+    {:name=>"LifetimeJobsCompleted", :label=>"Lifetime Jobs Completed", :dataType=>"Number"},
+    {:name=>"LifetimeInvoices", :label=>"Lifetime Invoices", :dataType=>"Number"}
+  ]
+} -->

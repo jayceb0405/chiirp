@@ -1,0 +1,61 @@
+<%
+	# app/views/trainings/pages/_index_sort.html.erb
+	# 
+	# Example:
+	# 	render partial: 'trainings/pages/index_sort', locals: { trainings_presenter: TrainingsPresenter }
+	# 
+	# Required Instance Variables:
+	# 	@training:       (Training)
+	# 	@training_pages: (TrainingPages)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training, training_page: @training_page)
+-%>
+<h4 class="card-title"><%= tp.training.menu_label -%> Pages</h4>
+<div class="sidebar-inner__separator"></div>
+
+<div class="btn-toolbar d-flex justify-content-end mb-2">
+	<% if TrainingPage.user_authorized?(current_user, tp.training, 'edit') %>
+    <%= link_to '<i class="fa fa-sort mr-2"></i>Save & Exit'.html_safe,
+        training_path(tp.training.id, { sort: 1 }), {
+        class:  'btn btn-light',
+				id: 'save_exit_link',
+        remote: true,
+        method: :get
+      }
+    %>
+	<% end %>
+</div>
+
+<%= form_with id: 'training_pages_form', builder: LooperFormBuilder do %>
+	<ol class="dd-list" id="data_table">
+		<%= render partial: "trainings/pages/training_page_sort", collection:tp.training_pages, as: :training_page, locals: { count: tp.training_pages.count } -%>
+	</ol>
+<% end %>
+
+<script>
+	$(function() {
+		$('#data_table').sortable({
+			handle: '.dd-handle', // handle's class
+			animation: 150,
+			dataIdAttr: 'id',
+	    ghostClass: 'sortable-ghost',
+	    chosenClass: 'sortable-chosen',
+	    dragClass: 'sortable-drag',
+	    supportPointer: Sortable.supportPointer !== false && 'PointerEvent' in window
+		});
+
+		$('#save_exit_link').on('click', function(e) {
+			e.preventDefault();
+
+			$.ajax({
+				type: 'PATCH',
+				dataType: 'script',
+				url: '<%= training_path(tp.training.id) -%>',
+				data: { sort: '1', training_pages_order: $('#data_table').sortable('toArray') }
+			});
+		});
+	});
+</script>

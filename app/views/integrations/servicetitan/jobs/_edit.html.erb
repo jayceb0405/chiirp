@@ -1,0 +1,101 @@
+<%
+  # app/views/integrations/servicetitan/jobs/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/servicetitan/jobs/edit"
+  #
+  # Instance Variables:
+  #   (req) @contact:                 (Contact)
+  #   (req) @contact_api_integration: (ContactApiIntegration)
+  #   (req) @client_api_integration:  (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  if @client_api_integration.booking_fields.present?
+    use_options          = %w[req inc]
+    used_booking_fields  = @client_api_integration.booking_fields.select { |_key, value| use_options.include?(value['use'].to_s) && value['client_custom_field_id'].to_i.positive? }
+    client_custom_fields = ClientCustomField.where(client_id: @client_api_integration.client_id, id: used_booking_fields.map { |_key, value| value['client_custom_field_id'] })
+  else
+    used_booking_fields  = {}
+  end
+-%>
+<div class="container-body">
+  <%= form_tag integrations_servicetitan_contact_booking_path(@contact), { builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', novalidate: true } do %>
+
+    <div id="business_unit_form"></div>
+    <div id="job_type_form"></div>
+    <div id="technician_form"></div>
+    <div id="campaign_form"></div>
+    <div id="tag_type_form"></div>
+    <div id="availability_form"></div>
+
+    <% used_booking_fields.sort_by { |_st_custom_field_id, values| values['order'] }.each do |st_custom_field_id, values| %>
+
+      <% if (client_custom_field = client_custom_fields.find_by(id: values['client_custom_field_id'])) %>
+        <%= contact_custom_field_input(
+              custom_field: client_custom_field,
+              object_name:  'client_custom_fields',
+              var_value:    @contact.contact_custom_fields.find_by(client_custom_field_id: client_custom_field.id)&.var_value,
+              html_options: { required: values['use'].to_s == 'req' },
+              messages:     { note: (values['use'].to_s == 'req' ? 'Required' : '').to_s }
+            ) %>
+      <% end %>
+    <% end %>
+
+    <div id="locations_form"></div>
+
+    <%= bootstrap_text_area(
+          field:        'description',
+          value:        '',
+          label:        { title: 'Job Description' },
+          html_options: { placeholder: 'Job Description', required: true },
+          messages:     { note: 'Required' }
+        ) %>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Book it!', disable_with: 'Booking Service, please wait...' }]
+        ) %>
+  <% end %>
+
+</div>
+
+<script>
+  $(function () {
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      data: { commit: 'get_business_unit' }
+    });
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      data: { commit: 'get_job_type' }
+    });
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      data: { commit: 'get_campaigns' }
+    });
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      data: { commit: 'get_tag_type' }
+    });
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      data: { commit: 'get_locations' }
+    });
+  });
+</script>

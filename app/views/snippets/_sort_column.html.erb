@@ -1,0 +1,41 @@
+<%
+  # app/views/snippets/_sort_column.html.erb
+  #
+  # Example:
+  #   render partial: 'snippets/sort_column', locals: {  }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  path               = local_assigns.dig(:path).to_s
+  column_heading     = local_assigns.dig(:column_heading).to_s
+  column_name        = local_assigns.dig(:column_name).to_s
+  selected_column    = local_assigns.dig(:selected_column).to_s
+  selected_direction = local_assigns.dig(:selected_direction).to_s
+  next_sort_dir      = local_assigns.dig(:next_sort_dir).to_s
+
+  column_sort        = { desc: '', asc: '' }
+  sort_tooltip       = next_sort_dir.present? ? "Sort #{next_sort_dir.capitalize}" : 'Clear Sort'
+-%>
+<% if selected_column == column_name && selected_direction == 'desc' %>
+  <% column_sort[:asc] = ' text-muted' %>
+  <% column_sort[:desc] = ' text-dark' %>
+<% elsif selected_column.to_s == column_name && selected_direction == 'asc' %>
+  <% column_sort[:asc] = ' text-dark' %>
+  <% column_sort[:desc] = ' text-muted' %>
+<% else %>
+  <% column_sort[:asc] = ' text-muted' %>
+  <% column_sort[:desc] = ' text-muted' %>
+<% end %>
+<i class="fa fa-long-arrow-alt-down sort_arrow<%= column_sort[:desc] -%>" id="sort-<%= column_name -%>-desc"></i>
+<i class="fa fa-long-arrow-alt-up sort_arrow<%= column_sort[:asc] -%>" id="sort-<%= column_name -%>-asc"></i>
+<%= link_to column_heading, '#', {
+      id:    "sort-link-#{column_name}",
+      class: 'sort_link prevent-default',
+      style: 'text-decoration: none;',
+      title: sort_tooltip,
+      data:  { toggle: 'tooltip' }
+    } %>

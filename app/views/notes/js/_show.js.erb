@@ -1,0 +1,36 @@
+<%
+  # app/views/notes/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'notes/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @contact:      (Contact)
+  #   (req) @contact_note: (Contacts::Note)
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  central_presenter = CentralPresenter.new(client: current_user.client, user: current_user, contact: @contact, session:) if %w[contact_profile].intersect?(cards)
+  notes_presenter   = Contacts::Notes::Presenter.new(contact: @contact) if %w[edit index].intersect?(cards)
+-%>
+<% if cards.include?('index') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-sticky-note"></i> Notes for <%= @contact.fullname_or_phone -%>');
+  $('#dash_modal_body').html('<%= j render partial: 'notes/index', locals: { presenter: notes_presenter } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('edit') %>
+  $('#edit_contact_note_<%= @contact_note.id -%>_td').html('<%= j render partial: 'notes/note_form', locals: { contact_note: @contact_note, presenter: notes_presenter } -%>');
+<% end %>
+<% if cards.include?('contact_profile') %>
+  $('#contact_profile').html('<%= j render partial: 'central/sidebar/contact_profile/show', locals: { presenter: central_presenter } -%>');
+<% end %>
+<% if cards.include?('notes_light_on') %>
+  $('#button_notes').addClass('text-success');
+<% end %>
+<% if cards.include?('notes_light_off') %>
+  $('#button_notes').removeClass('text-success');
+<% end %>
+
+Looper.init();

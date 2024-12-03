@@ -1,0 +1,143 @@
+<%
+# app/views/clients/widgets/v2/show_widget_bubble.html.erb
+#
+# Example:
+# 	render "clients/widgets/v2/show_widget_bubble"
+#
+# Required Instance Variables:
+# 	@client_widget_user:   (User)
+# 	@client_widget: (Clients::Widget)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <title><%= '' -%></title>
+
+  <%= csp_meta_tag %>
+
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,500,500i,700&display=swap">
+
+  <%= javascript_include_tag 'widget_bubble' %>
+
+  <style type="text/css">
+     body {
+      font-family: "Montserrat";
+      font-weight: normal;
+      font-size: 16px;
+     }
+    .container {
+      height: 100px;
+    }
+    .bubble {
+      height: 75px;
+      width: 265px;
+      padding: 15px 20px;
+      /*background-color: #fff0a0;*/
+      background-color: <%= @client_widget.bubble_color -%>;
+      background-image: -webkit-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+      background-image:    -moz-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+      background-image:     -ms-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+      background-image:      -o-linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+      background-image:         linear-gradient(top, hsla(0,0%,100%,.5), hsla(0,0%,100%,0));
+      border-radius: 10px;
+      box-shadow: inset 0 1px 1px hsla(0,0%,100%,.5),
+                  3px 3px 0 hsla(0,0%,0%,.1);
+      color: #333;
+      display: inline-block;
+      font-size: 16px;
+      cursor: pointer;
+      /*position: relative;*/
+      /*text-shadow: 0 1px 1px hsla(0,0%,100%,.5);*/
+    }
+    .bubble:after, .bubble:before {
+      border-bottom: 10px solid transparent;
+      border-right: 20px solid <%= @client_widget.bubble_color -%>;
+      bottom: 2px;
+      content: '';
+      position: absolute;
+      right: 25px;
+    }
+    .bubble:before {
+      border-right: 20px solid hsla(0,0%,0%,.1);
+      bottom: -1px;
+      right: 21px;
+    }
+    .inner_bubble {
+      display: flex;
+      flex-wrap: wrap;
+      position: relative;
+      top: -18px;
+    }
+    .avatar {
+      flex: 0 0 33.333333%;
+      max-width: 33.333333%;
+    }
+    <% if @client_widget.show_user_avatar.to_bool && @client_widget_user && @client_widget_user.avatar.present? %>
+      .body_text {
+        flex: 0 0 66.666667%;
+        max-width: 66.666667%;
+        color: <%= contrasting_text_color(@client_widget.bubble_color) -%>;
+      }
+    <% else %>
+      .body_text {
+        color: <%= contrasting_text_color(@client_widget.bubble_color) -%>;
+      }
+    <% end %>
+    .close_button {
+      font-size: 10px;
+      color: #b2bbc2;
+      position: relative;
+      left: 235px;
+      top: -15px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="bubble" id="sitechat_bubble" style="display:none;">
+      <%= button_tag 'Close', { class: 'close_button', onclick: 'closeBubble()' } %>
+
+      <div class="inner_bubble" id="inner_sitechat_bubble">
+        <% if @client_widget.show_user_avatar.to_bool && @client_widget_user && @client_widget_user.avatar.present? %>
+          <div class="avatar">
+            <%= image_tag(Cloudinary::Utils.cloudinary_url(@client_widget_user.avatar.key, { class: 'img-responsive', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [{ gravity: 'face', radius: 'max', crop: 'crop' }, { width: 70, crop: 'scale', effect: 'outline:outer:1:0' }], format: 'png' })) %>
+          </div>
+        <% end %>
+
+        <div class="body_text">
+          <%= @client_widget.bubble_text.html_safe %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.onreadystatechange = function () {
+      var element = document.getElementById('sitechat_bubble');
+      setTimeout(function() {
+        element.style.display = "inline-block";
+      }, 5000);
+    }
+
+    document.getElementById('inner_sitechat_bubble').onclick = function openSitechat() {
+      window.parent.postMessage('{"action":"open_sitechat"}', '*');
+    }
+
+    function closeBubble() {
+      document.getElementById('sitechat_bubble').style.display = "none";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,128 @@
+<%
+  # app/views/dashboards/_header.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/header', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<header class="page-title-bar">
+  <div class="d-flex flex-column flex-md-row">
+    <div class="lead">
+      <span class="font-weight-bold"><%= presenter.greeting -%>, <%= current_user.firstname -%>.</span>
+
+      <% if current_user.access_controller?('dashboard', 'allowed', session) %>
+        <span class="d-block text-muted">Here’s what’s happening in <%= I18n.t('tenant.name') -%> using: <%= presenter.dashboard_name -%> (<%= presenter.period_greeting_string -%>).</span>
+      <% elsif current_user.suspended? %>
+        <span class="d-block text-muted">We're sorry! Your access was suspended.</span>
+      <% elsif !current_user.client.active? %>
+        <span class="d-block text-muted">We're sorry! Your account was deactivated.</span>
+      <% end %>
+
+    </div>
+
+    <div class="ml-auto d-flex align-items-end">
+
+      <% if current_user.access_controller?('dashboard', 'allowed', session) %>
+        <div class="dropdown ml-auto mr-2">
+          <button class="btn btn-icon btn-light text-muted" data-toggle="dropdown"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+          <div class="dropdown-menu dropdown-menu-right">
+            <div class="dropdown-arrow"></div>
+
+            <% presenter.dashboard_menu_options.each do |option| %>
+              <a href="/dashboards/<%= option[1] -%>" class="dropdown-item"><%= option[0] -%></a>
+            <% end %>
+
+            <%= link_to('Edit', edit_dashboard_path(presenter.dashboard_id), { class: 'dropdown-item', remote: true, method: :get }) if presenter.dashboard_id %>
+            <%= link_to('New', new_dashboard_path, { class: 'dropdown-item', remote: true, method: :get }) %>
+            <%= link_to('Delete', dashboard_path(presenter.dashboard_id), { class: 'dropdown-item', remote: true, method: :delete }) if presenter.dashboard_id %>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <%= button_tag(class: 'btn btn-secondary text-nowrap', data: { toggle: 'dropdown' }) do %>
+            <span><%= presenter.period_dropdown_string -%></span> <i class="fa fa-fw fa-caret-down"></i>
+          <% end %>
+
+          <div class="dropdown-menu dropdown-menu-left dropdown-menu-md stop-propagation" style="max-height:300px;">
+            <div class="dropdown-arrow"></div>
+
+            <% Users::Dashboards::Dashboard::DYNAMIC_DATES_ARRAY.each do |period| %>
+              <div class="custom-control custom-radio">
+                <%= radio_button_tag('dpFilter', period[1], (period[1] == presenter.period_dynamic), { class: 'custom-control-input stats_dynamic', id: period[1] }) %>
+                <%= label_tag('', { class: 'custom-control-label d-flex justify-content-between', for: period[1] }) do %>
+                  <span><%= period[0] -%></span>
+                <% end %>
+              </div>
+            <% end %>
+
+            <div class="custom-control custom-radio" id="stats_custom_period_group">
+              <%= radio_button_tag('dpFilter', '', presenter.period_dynamic.empty?, { class: 'custom-control-input', id: 'dpCustom' }) %>
+              <%= label_tag('', 'Custom Period', { class: 'custom-control-label', for: 'dpCustom' }) %>
+              <div class="custom-control-hint my-1">
+                <%= text_field_tag 'user_setting[custom_period]', presenter.period_custom_string,
+                                   {
+                                     class:        'form-control',
+                                     id:           'dpCustomInput',
+                                     autocomplete: false
+                                   } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <% if current_user.client.integrations_allowed.include?('searchlight') %>
+          <div class="form-actions d-flex flex-column flex-md-row justify-content-end">
+            <%= link_to 'View SEARCHLIGHT', integrations_searchlight_v1_dashboard_path, class: 'btn btn-orange ml-2 text-nowrap' %>
+          </div>
+        <% end %>
+      <% end %>
+
+    </div>
+  </div>
+</header>
+
+<script>
+  $(function() {
+    $(document).off('change', '.stats_dynamic');
+    $(document).on('change', '.stats_dynamic', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: '<%= presenter.user_settings_buttons.new_record? ? 'POST' : 'PATCH' -%>',
+        dataType: 'script',
+        url: '<%= presenter.user_settings_buttons.new_record? ? dashboards_path : period_dashboard_path(presenter.user_settings_buttons.id) -%>',
+        data: { 'user_setting[dynamic_period]': this.value }
+      });
+    });
+
+    // dash buttons calendar
+    $('#dpCustomInput').flatpickr({
+      nextArrow: '>',
+      prevArrow: '<',
+      dateFormat: 'm/d/Y G:i K',
+      enableTime: true,
+      allowInput: false,
+      mode: 'range',
+      plugins: [
+        new confirmDatePlugin({
+          showAlways: true
+        })
+      ],
+      onClose: function(selectedDates, dateStr, instance) {
+        $.ajax({
+          method: '<%= presenter.user_settings_buttons.new_record? ? 'POST' : 'PATCH' -%>',
+          dataType: 'script',
+          url: '<%= presenter.user_settings_buttons.new_record? ? dashboards_path : period_dashboard_path(presenter.user_settings_buttons.id) -%>',
+          data: { 'user_setting[custom_period]': dateStr }
+        });
+      }
+    });
+  });
+</script>

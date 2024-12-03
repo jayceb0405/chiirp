@@ -1,0 +1,32 @@
+<%
+  # app/views/integrations/maestro/_hotel_id.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/maestro/hotel_id"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<div class="container-body">
+  <%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+
+  <%= form_tag integrations_maestro_hotelid_update_path, { builder: LooperFormBuilder, method: :put, remote: true } do %>
+    <div class="form-group">
+      <%= label_tag( "", "Maestro Hotel ID", { class: "form-group-label mb-0 text-muted" } ) %>
+      <%= text_field_tag( "api_key", @client_api_integration.api_key, { class: "form-control", placeholder: "Hotel ID" } ) %>
+      <small class="text-muted">* Required. Copy from Maestro.</small>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag( "", "Maestro Password Key", { class: "form-group-label mb-0 text-muted" } ) %>
+      <%= password_field_tag( "api_pass", @client_api_integration.api_pass, { class: "form-control", placeholder: "Password Key" } ) %>
+      <small class="text-muted">* Required. Copy from Maestro.</small>
+    </div>
+
+    <%= submit_tag "Save", data: { "disable-with": "Saving..." }, class: 'btn btn-app mt-2' %>
+  <% end %>
+</div>

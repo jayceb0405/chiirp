@@ -1,0 +1,28 @@
+<%
+  # app/views/layouts/looper/common/header/_unread_messages_list.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/header/unread_messages_list', locals: { user: User }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   user: (User)
+  #
+  return unless local_assigns.dig(:user).is_a?(User)
+
+  unread_messages = Messages::Message.unread_messages_by_user(user.id).includes(:contact).order(created_at: :desc).limit(10)
+-%>
+<% unread_messages.each do |message| %>
+  <%= link_to(central_path(contact_id: message.contact_id), { class: 'dropdown-item unread' }) do %>
+    <div class="tile tile-circle bg-green"> <%= message.contact.initials -%> </div>
+    <div class="dropdown-item-body">
+      <p class="subject"> <%= message.contact.fullname -%> </p>
+      <p class="text text-truncate"> <%= truncate(message.message, length: 50) -%> </p>
+      <span class="date">
+        <%= Friendly.new.date(message.created_at, user.client.time_zone, false) -%>
+      </span>
+    </div>
+  <% end %>
+<% end %>

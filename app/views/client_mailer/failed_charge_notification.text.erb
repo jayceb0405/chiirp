@@ -1,0 +1,23 @@
+Hi <%= @client.def_user.firstname %>,
+
+We were unable to process your last payment of <%= number_to_currency(params[:amount]) %> for <%= params[:charge_reason] %>.
+
+<%- if params[:content].present? -%>
+<%= params[:content] %>
+<%- end -%>
+
+Please take a moment to double-check your payment information to make sure your CHIIRP account keeps running smoothly.
+
+Why did the payment fail?
+
+In most cases, a payment might fail because:
+
+- The card expired
+- There are insufficient funds
+- The payment needs additional authentication before we can process it.
+
+We'll try charging your card again in 1 day and let you know if the payment is successful.
+
+If you have any questions or need our help, you can reach our support team at 801-753-9312 or just reply to this email.
+
+Thanks,

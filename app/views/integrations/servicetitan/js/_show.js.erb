@@ -1,0 +1,81 @@
+// app/views/integrations/servicetitan/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/servicetitan/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   none
+//
+// Local Variables:
+//   (req) cards: (Array)
+
+// API Key
+<% if cards.include?('connection') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/connections/show' -%>');
+<% end %>
+
+// Balance Updates (7)
+<% if cards.include?('balance_updates') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/balance_updates/show' -%>');
+<% end %>
+
+// Contact Bookings
+<% if cards.include?('show_booking_modal') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<%= image_tag('integrations/servicetitan/logo.png', { class: 'mr-2', style: 'height:40px;' }) -%> ServiceTitan Booking');
+  $('#dash_modal_body').html('<%= j render partial: 'integrations/servicetitan/jobs/edit' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('edit_availability') %>
+  $('#availability_form').html('<%= j render partial: 'integrations/servicetitan/jobs/availability' -%>');
+<% end %>
+<% if cards.include?('edit_business_unit') %> // 12
+  $('#business_unit_form').html('<%= j render partial: 'integrations/servicetitan/jobs/business_unit' -%>');
+<% end %>
+<% if cards.include?('edit_campaign') %> // 13
+  $('#campaign_form').html('<%= j render partial: 'integrations/servicetitan/jobs/campaigns' -%>');
+<% end %>
+<% if cards.include?('edit_job_type') %> // 11
+  $('#job_type_form').html('<%= j render partial: 'integrations/servicetitan/jobs/job_types' -%>');
+<% end %>
+<% if cards.include?('edit_technician') %> // 17
+  $('#technician_form').html('<%= j render partial: 'integrations/servicetitan/jobs/technicians' -%>');
+<% end %>
+<% if cards.include?('edit_tag_type') %> // 15
+  $('#tag_type_form').html('<%= j render partial: 'integrations/servicetitan/jobs/tag_types' -%>');
+<% end %>
+<% if cards.include?('show_locations') %>
+  $('#locations_form').html('<%= j render partial: 'integrations/servicetitan/jobs/locations' -%>');
+<% end %>
+<% if cards.include?('show_locations_new') %>
+  $('#locations_new').html('<%= j render partial: 'integrations/servicetitan/jobs/locations_new' -%>');
+<% end %>
+<% if cards.include?('contact_bookings_update') %>
+  // nothing to do
+<% end %>
+
+// Employees
+<% if cards.include?('employees') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/employees/show' -%>');
+<% end %>
+
+// Import Jobs
+<% if cards.include?('import_jobs_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/import_jobs/show' -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/instructions/show' -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/overview' -%>');
+<% end %>
+
+$('.tooltip').remove();
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

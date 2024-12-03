@@ -1,0 +1,37 @@
+<%
+  # app/views/triggeractions/forms/_171.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/171", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # send an email
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[send_to]',
+      label:        { title: 'Select Who to Send Message To' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_email_user_send_to, selected: presenter.triggeraction.send_to, blank: 'Select a Recipient' },
+      messages:     { note: presenter.triggeraction_note_for_send_to.html_safe }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'triggeraction[subject]',
+      value:        presenter.triggeraction.subject,
+      label:        { title: 'Subject' },
+      html_options: { placeholder: 'Subject', disabled: presenter.campaign_disabled?, multiple: true, typeahead_client: presenter.client },
+      messages:     { note: 'Enter the subject of the email message. This field is hashtag aware.' }
+    ) %>
+<%= bootstrap_text_area(
+      field:        'triggeraction[body]',
+      value:        presenter.triggeraction.body,
+      label:        { title: 'Body' },
+      html_options: { placeholder: 'Body', disabled: presenter.campaign_disabled?, multiple: true, typeahead_client: presenter.client },
+      messages:     { note: 'Enter the body of the email message. This field is hashtag aware.' }
+    ) %>

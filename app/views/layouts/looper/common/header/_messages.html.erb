@@ -1,0 +1,53 @@
+<%
+  # app/views/layouts/looper/common/header/_messages.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/header/messages'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  unread_messages = Messages::Message.unread_messages_by_user(current_user.id).any?
+-%>
+<% if current_user.access_controller?('central', 'allowed', session) %>
+  <li class="nav-item dropdown header-nav-dropdown <%= unread_messages ? 'has-notified' : '' -%>" id="header_unread_messages_light">
+    <%= link_to(central_path, class: 'nav-link', data: { toggle: (browser.device.mobile? ? '' : 'dropdown').to_s }) do %>
+      <span class="fa fa-comments"></span>
+    <% end %>
+
+    <div class="dropdown-menu dropdown-menu-rich dropdown-menu-right">
+      <div class="dropdown-arrow"></div>
+      <h6 class="dropdown-header">
+        <span>Unread Messages</span>
+        <%= link_to('Mark all as read', messages_messages_clear_path, { remote: true, method: :post }) %>
+      </h6>
+      <div class="dropdown-scroll perfect-scrollbar" id="header_unread_messages_list">
+        <div class="text-center py-3">
+          <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo py-2' %>
+          <div class="m-auto">Loading Unread Messages...</div>
+        </div>
+      </div>
+
+      <%= link_to(central_path, { class: 'dropdown-footer' }) do %>
+        Message Central <i class="fa fa-fw fa-long-arrow-alt-right"></i>
+      <% end %>
+    </div>
+  </li>
+
+  <% unless browser.device.mobile? %>
+    <script>
+      $(function() {
+        $('#header_unread_messages_light').on('show.bs.dropdown', function () {
+          $.ajax({
+            type: 'GET',
+            dataType: 'script',
+            url: '<%= messages_header_unread_messages_list_path -%>'
+          });
+        });
+      });
+    </script>
+  <% end %>
+<% end %>

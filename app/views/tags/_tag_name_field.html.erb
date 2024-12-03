@@ -1,0 +1,172 @@
+<%
+  # app/views/tags/_tag_name_field.html.erb
+  #
+  # render partial: "tags/tag_name_field"
+  #
+  # Required Instance Variables:
+  #   @tag: (Tag)
+  #
+  # Required Local Variables:
+  #   select_or_add_field_name: (String)
+  #   select_or_add_div_id:     (String)
+  #   exclude_tags:             (Array)
+  #
+  # Optional Local Variables:
+  #   allow_cgt_assignments:    (Boolean)
+  #   disabled:                 (Boolean)
+  #
+  select_or_add_field_name = local_assigns.dig(:select_or_add_field_name).to_s
+  select_or_add_div_id     = local_assigns.dig(:select_or_add_div_id).to_s
+  exclude_tags             = local_assigns.dig(:exclude_tags) || []
+  button_text              = (@tag.new_record? ? 'Creat' : 'Sav')
+  tag_color                = @tag.color.empty? ? '#2196f3' : @tag.color
+  disabled                 = local_assigns.dig(:disabled).to_bool
+  allow_cgt_assignments    = local_assigns.dig(:allow_cgt_assignments).to_bool
+  autofocus                = local_assigns.dig(:autofocus).to_bool
+-%>
+<%= bootstrap_text_field(
+      field:        "tag[#{select_or_add_field_name}][name]",
+      value:        @tag.name,
+      label:        { class: 'pl-4', title: 'Create a New Tag' },
+      html_options: { id: "tag_text_field_#{select_or_add_div_id}", placeholder: 'Tag Name', disabled: },
+      appends:      [{ button: true, label: 'Cancel', id: "tag_text_new_#{select_or_add_div_id}", display: !@tag.new_record?, disabled: }, { button: true, label: "#{button_text}e", id: "tag_text_submit_#{select_or_add_div_id}", disabled: }]
+    ) %>
+
+<% if allow_cgt_assignments %>
+  <div class="input-group mt-3">
+    <%= hidden_field_tag "tag[#{select_or_add_field_name}][color]", tag_color, { id: 'tag_color_hidden_field' } %>
+    <%= link_to 'Tag Color', '#', { class: 'btn btn-app pl-5 pr-5 rounded-pill', id: 'tag_color', style: "background-color:#{tag_color};border-color:#{tag_color};"} %>
+    <%= link_to ' ', '#', { class: 'fa fa-times ml-3 pt-2', id: 'tag_color_clear' } %>
+  </div>
+
+  <%= bootstrap_select_tag_campaign(
+        client:       @tag.client,
+        field:        'tag_campaign_id',
+        label:        { title: 'Select a Campaign to Start on each Tag Assignment' },
+        html_options: { id: 'tag_campaign_id',  },
+        options:      { selected: @tag.campaign_id, active_only: true }
+      ) %>
+
+  <% if @tag.client.groups_count.positive? %>
+    <fieldset class="border p-2 mb-2">
+      <legend class="w-auto mb-0"><h6><i class="fa fa-user-cog"></i> Select a Group to Add on each Tag Assignment</h6></legend>
+      <div id="tag_group">
+        <%= render partial: 'groups/select_or_add', locals: { user: current_user, group: @tag.group || @tag.client.groups.new, select_or_add_field_name: 'tag_group_id', select_or_add_div_id: 'tag_group', disabled: disabled } %>
+      </div>
+    </fieldset>
+  <% end %>
+
+  <fieldset class="border p-2 mb-2">
+    <legend class="w-auto mb-0"><h6><i class="fa fa-user-tag"></i> Select a Tag to Apply on each Tag Assignment</h6></legend>
+    <div id="tag_tag">
+      <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: @tag.tag || @tag.client.tags.new, select_or_add_field_name: 'tag_tag_id', select_or_add_div_id: 'tag_tag', exclude_tags: [@tag.id], disabled: disabled } %>
+    </div>
+  </fieldset>
+<% end %>
+
+<script>
+  $(function () {
+    $('#tag_text_field_<%= select_or_add_div_id -%>').keydown(function(e) {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        $('#tag_text_submit_<%= select_or_add_div_id -%>').click();
+        return false;
+      }
+    });
+
+    $(document).off('click', '#tag_text_new_<%= select_or_add_div_id -%>');
+    $(document).on('click', '#tag_text_new_<%= select_or_add_div_id -%>', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      var params = {
+        'tag[name]': $('#tag_text_field_<%= select_or_add_div_id -%>').val(),
+        select_or_add_field_name: '<%= select_or_add_field_name -%>',
+        select_or_add_div_id: '<%= select_or_add_div_id -%>',
+        exclude_tags: '<%= exclude_tags -%>',
+        autofocus: '<%= autofocus.to_s -%>'
+      }
+
+      <% if allow_cgt_assignments %>
+        var cgt = {
+          'tag[campaign_id]': $('#tag_campaign_id').val(),
+          'tag[group_id]': $('#tag_group_id').val(),
+          'tag[tag_id]': $('#tag_tag_id').val()
+        }
+
+        params = $.extend({}, params, cgt);
+      <% end %>
+
+      // Submit the form via ajax
+      $.ajax({
+        url: '<%= new_tag_path -%>',
+        method: 'GET',
+        dataType: 'script',
+        data: params
+      });
+    });
+
+    $(document).off('click', '#tag_text_submit_<%= select_or_add_div_id -%>');
+    $(document).on('click', '#tag_text_submit_<%= select_or_add_div_id -%>', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      var params = {
+        'tag[name]': $('#tag_text_field_<%= select_or_add_div_id -%>').val(),
+        select_or_add_field_name: '<%= select_or_add_field_name -%>',
+        select_or_add_div_id: '<%= select_or_add_div_id -%>',
+        exclude_tags: '<%= exclude_tags -%>',
+        autofocus: '<%= autofocus.to_s -%>'
+      }
+
+      <% if allow_cgt_assignments %>
+        var cgt = {
+          'tag[campaign_id]': $('#tag_campaign_id').val(),
+          'tag[group_id]': $('#tag_group_id').val(),
+          'tag[tag_id]': $('#tag_tag_id').val(),
+          'tag[color]': $('#tag_color_hidden_field').val()
+        }
+
+        params = $.extend({}, params, cgt);
+      <% end %>
+
+      console.log(params);
+      $('#tag_text_submit_<%= select_or_add_div_id -%>').prop('value', '<%= "#{button_text}ing..." -%>')
+
+      // Submit the form via ajax
+      $.ajax({
+        url:      '<%= ( @tag.new_record? ? tags_path : tag_path(@tag.id) ) -%>',
+        method:   '<%= ( @tag.new_record? ? "POST" : "PATCH" ) -%>',
+        dataType: 'script',
+        data:     params
+      }).always(function() {
+        $('#tag_text_submit_<%= select_or_add_div_id -%>').prop('value', '<%= "#{button_text}e" -%>')
+      });
+    });
+
+    <% if allow_cgt_assignments %>
+      $(document).off('click', '#tag_color_clear');
+      $(document).on('click', '#tag_color_clear', function (e) {
+        e.preventDefault();
+        document.querySelector('#tag_color').style.backgroundColor = '';
+        document.querySelector('#tag_color').style.borderColor = '';
+        document.querySelector('#tag_color_hidden_field').value = '';
+        document.querySelector('#tag_color').style.color = '';
+      });
+
+      var picker = new Picker( {
+        parent: document.querySelector('#tag_color'),
+        color: '<%= tag_color -%>',
+        popup: 'right',
+        onChange: function(color) {
+          document.querySelector('#tag_color').style.backgroundColor = color.hex;
+          document.querySelector('#tag_color').style.borderColor = color.hex;
+          document.querySelector('#tag_color_hidden_field').value = color.hex;
+          document.querySelector('#tag_color').style.color = contrastColor(color.hex, true);
+        },
+      });
+    <% end %>
+  });
+</script>

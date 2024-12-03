@@ -1,0 +1,429 @@
+<%
+  # app/views/messages/_email_message_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/email_message_fields', locals: { presenter: Messages::Email::Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   (req) presenter:            (Messages::Email::Presenter)
+  #   (opt) contacts_array:       (Array) contacts to send a group message to
+  #   (opt) show_payment_request: (Boolean) show request payment button
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Email::Presenter)
+
+  contacts_array        = [] if local_assigns[:contacts_array].nil? || !contacts_array.is_a?(Array)
+  show_payment_request  = true if local_assigns[:show_payment_request].nil? && presenter.client.ok2cardx?
+  message               = @message || presenter.contact.messages.new
+  email_address         = presenter.contact.email || ''
+  fieldset_disabled     = (email_address&.empty? || (presenter.contact.ok2email.to_i.zero? && contacts_array.empty?)) && !presenter.contact.new_record?
+
+  uuid = RandomCode.new.create(20)
+%>
+<%= hidden_field_tag :msg_type, 'email', id: nil %>
+<%= hidden_field_tag :contact_id, presenter.contact.id, id: nil %>
+<%= hidden_field_tag :user_id, current_user.id, id: nil %>
+<%= hidden_field_tag :contacts_array, contacts_array, id: nil %>
+
+<div id="email_message_fields_<%= uuid %>" class="row w-100 email_message_fields">
+  <%= hidden_field_tag 'message[file_attachments]', presenter.file_attachments.to_json, class: 'email_file_attachments', id: nil %>
+  <div class="col-8">
+    <div class="media-body">
+
+      <% unless fieldset_disabled %>
+        <%= render partial: 'email_templates/shared/email_template_select_field', locals: {
+              client:                 presenter.client,
+              field_prefix:           'message',
+              id:                     uuid,
+              left_border:            true,
+              email_template_id:      presenter.email_template_id,
+              email_template_yield:   presenter.email_template_yield,
+              email_template_subject: presenter.email_template_subject
+            } %>
+
+        <div class="scheduler_options form-group" style="display:none;">
+          <div class="input-group input-group-alt flatpickr" value="">
+            <div class="input-group-prepend">
+              <%= button_tag '', { class: 'button_text_scheduler_calendar_open btn btn-secondary fa fa-calendar', title: 'toggle', type: 'button' } %>
+              <%= button_tag '', { class: 'button_text_scheduler_calendar_clear btn btn-secondary fa fa-times', type: 'button' } %>
+            </div>
+            <%= text_field_tag 'message[msg_delay]',
+                               '',
+                               {
+                                 class:        'text_scheduler_calendar form-control',
+                                 placeholder:  'Select Date / Time',
+                                 disabled:     fieldset_disabled,
+                                 autocomplete: 'off'
+                               } %>
+          </div>
+        </div>
+      <% else %>
+        <p class="p-2">
+          <em>
+            <% if email_address&.empty? %>
+              Please add an email address for this contact.
+            <% end %>
+          </em>
+        </p>
+      <% end %>
+
+      <% if show_payment_request %>
+        <div class="email_payment_request_options form-group" style="display:none;">
+          <div class="input-group input-group-alt flatpickr" value="">
+            <div class="input-group-prepend">
+              <span class="input-group-text">$</span>
+            </div>
+            <%= text_field_tag 'message[payment_request]',
+                               presenter.payment_request,
+                               {
+                                 class:        'form-control email_text_payment_request_field',
+                                 placeholder:  'Request amount',
+                                 disabled:     fieldset_disabled,
+                                 type:         'number',
+                                 min:          '0',
+                                 step:         '0.01',
+                                 autocomplete: 'off'
+                               } %>
+          </div>
+        </div>
+      <% end %>
+
+      <div class="attachment_button_options form-group" style="display:none;">
+        <%= bootstrap_file_field(
+              file_field:      { field: 'message[attachment]', id: 'attachment', name: 'attachment_id', disabled: fieldset_disabled },
+              col:             { class: 'attachment-col' },
+              image_container: { class: 'attachment-image-container' },
+              label:           { title: 'Attachment' },
+              javascript:      nil
+            ) %>
+        <div class="email_message_files d-flex flex-wrap justify-content-center"></div>
+      </div>
+    </div>
+  </div>
+  <div class="col-4">
+    <div>
+      <div class="ml-2 pr-2 pb-1">
+        <% unless fieldset_disabled || browser.device.mobile? %>
+          <button type="button" class="button_emoji_email_template_select btn btn-light btn-icon"><i class="fa fa-smile"></i></button>
+        <% end %>
+
+        <% if !fieldset_disabled && !presenter.contact&.new_record? && !email_address.empty? && presenter.show_calendar %>
+          <%= button_tag(type: 'button', class: 'scheduler_button btn btn-light btn-icon', disabled: fieldset_disabled) do %>
+            <i class="fa fa-clock"></i>
+          <% end %>
+        <% end %>
+
+        <% if !fieldset_disabled && !presenter.contact&.new_record? && !email_address.empty? && presenter.show_calendar %>
+          <%= button_tag(type: 'button', class: 'email_copy_button btn btn-light btn-icon', disabled: fieldset_disabled) do %>
+            <i class="fa fa-envelope"></i>
+          <% end %>
+        <% end %>
+
+        <% if !fieldset_disabled %>
+          <%= button_tag(type: 'button', class: 'attachment_button btn btn-light btn-icon', disabled: fieldset_disabled) do %>
+            <i class="fa fa-paperclip"></i>
+          <% end %>
+        <% end %>
+
+        <% if !fieldset_disabled && show_payment_request %>
+          <%= button_tag(type: 'button', class: 'email_payment_button btn btn-light btn-icon', disabled: fieldset_disabled) do %>
+            <i class="fa fa-dollar-sign"></i>
+          <% end %>
+        <% end %>
+
+        <% if presenter.show_ok2email %>
+          <% if !presenter.contact&.new_record? && presenter.contact.ok2email.to_i == 1 %>
+            <%= button_tag(type: 'button', class: 'email_ok_button btn btn-light rounded-pill') do %>
+              <i class="fa fa-check text-success pr-1" style="line-height:inherit;"></i>OK to Email
+            <% end %>
+          <% elsif !presenter.contact&.new_record? %>
+            <%= button_tag(type: 'button', class: 'email_ok_button btn btn-light rounded-pill') do %>
+              <i class="fa fa-times text-danger pr-1" style="line-height:inherit;"></i>Not OK to Email
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <% unless fieldset_disabled %>
+        <div class="ml-2 pr-2 pb-1">
+
+          <% if presenter.show_submit %>
+            <%= button_tag(type: 'submit', class: 'btn btn-light rounded-pill', id: 'send_button', style: 'width:auto;', disabled: fieldset_disabled) do %>
+              <i class="fa fa-paper-plane"></i> Send
+            <% end %>
+          <% end %>
+        </div>
+
+        <div class="email_copy_button_options form-group" style="display:none;">
+          <%= bootstrap_email_field(
+                field:        'message[email_template_cc]',
+                label:        { title: 'CC' },
+                row:          { columns: [0, 12] },
+                form_group:   { class: 'mb-0' },
+                html_options: { class: 'email_template_cc_field_' },
+                messages:     { note: 'Copy email to this address.' },
+                input_group:  { class: 'input-group-alt' }
+              ) %>
+          <%= bootstrap_email_field(
+                field:        'message[email_template_bcc]',
+                label:        { title: 'BCC' },
+                row:          { columns: [0, 12] },
+                form_group:   { class: 'mb-0' },
+                html_options: { class: 'email_template_bcc_field_' },
+                messages:     { note: 'Blind copy email to this address.' },
+                input_group:  { class: 'input-group-alt' }
+              ) %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    Dropzone.autoDiscover = false;
+    var send_to_contact_ok = false;
+    var file_attachments = <%= presenter.file_attachments.to_json.html_safe -%>;
+
+    var $root = $('#email_message_fields_<%= uuid %>');
+    var $yield_field = $root.find('.email_template_yield_field');
+    var $email_template_select_field = $root.find('#email_template_select_field_<%= uuid %>');
+
+    var $drop_container = $root.find('.attachment-col');
+    var $drop_container_icon = $root.find('.attachment-image-container');
+    var $spinner = $drop_container.find('.spinner-border');
+    var $files_container = $root.find('.email_message_files');
+    var $file_attachments_input_field = $root.find('.email_file_attachments');
+    var $email_payment_request_options = $root.find('.email_payment_request_options');
+    var $attachment_button_options = $root.find('.attachment_button_options');
+    var $email_copy_button_options = $root.find('.email_copy_button_options');
+    var $text_scheduler_calendar = $root.find('.text_scheduler_calendar');
+
+    var $email_payment_button = $root.find('.email_payment_button');
+    var $email_copy_button = $root.find('.email_copy_button');
+    var $attachment_button = $root.find('.attachment_button');
+    var $scheduler_button = $root.find('.scheduler_button');
+    var $button_text_scheduler_calendar_open = $root.find('.button_text_scheduler_calendar_open');
+    var $button_text_scheduler_calendar_clear = $root.find('.button_text_scheduler_calendar_clear');
+
+    $drop_container.dropzone({
+      url: ' ',
+      autoQueue: false,
+      maxFilesize: 150,
+      addRemoveLinks: false,
+      acceptedFiles: '<%= UploadableMimeTypes.all_mime_types.join(',') %>',
+      clickable: [$drop_container.get(0), $drop_container_icon.get(0)],
+      dragover: function() {
+        $drop_container.addClass('hover');
+      },
+      dragleave: function() {
+        $drop_container.removeClass('hover');
+      },
+      removedfile: function() {
+        // console.log('removedfile')
+        toggleSpinner();
+      },
+      addedfile: function(file, response) {
+        // console.log('file', file);
+        toggleSpinner();
+
+        const input = document.querySelector('#attachment');
+        const url = input.dataset.directUploadUrl;
+        const upload = new ActiveStorage.DirectUpload(file, url);
+        upload.create((error, blob) => {
+          // console.log('blob', blob)
+          file_attachments.push({id: blob.signed_id, type: 'user', filename: blob.filename, content_type: blob.content_type});
+          updateImages();
+
+          this.removeFile(file);
+        })
+      }
+    });
+
+    $file_attachments_input_field.parents('form').on('ajax:success', clearAttachments);
+
+    $file_attachments_input_field.on('hide', function(e) {
+      $attachment_button_options.hide();
+    });
+
+    function toggleSpinner() {
+      $drop_container_icon.toggleClass('d-none');
+      $spinner.toggleClass('d-none');
+    }
+
+    function createTag(item) {
+      return '<div class="d-flex flex-column align-items-center" style="display:inline-block;"><span id="message_image_close_' + item.id + '" class="message_image_close">&times;</span><i style="font-size: xxx-large;" class="fa-regular fa-file"></i>' + item.filename + '</div>';
+    }
+
+    function deleteAttachment(value, index, array) {
+      return value.id != image_id;
+    }
+
+    function clearAttachments() {
+      file_attachments = [];
+      updateImages();
+    }
+
+    function updateImages() {
+      // console.log('file_attachments', file_attachments)
+      if ( file_attachments.length > 0 ) {
+        $files_container.css('padding','5px');
+        $files_container.html(file_attachments.map(createTag));
+        $spinner.hide();
+        $files_container.fadeTo( "slow", 1 );
+
+        $('.message_image_close').on('mouseover', function() {
+          $(this).css('cursor', 'pointer');
+        });
+
+        $('.message_image_close').on('click', function() {
+          image_id = $(this).attr('id').replace('message_image_close_', '');
+          file_attachments = file_attachments.filter(deleteAttachment);
+          updateImages();
+        });
+      } else {
+        $files_container.html('');
+        $files_container.css('padding','0px');
+      }
+
+      $file_attachments_input_field.val(JSON.stringify(file_attachments));
+    }
+
+    updateImages();
+
+    <% unless fieldset_disabled %>
+      autosize($yield_field);
+
+      // handle clear trigger on root; used by central/js/show partial
+      $root.off('clear');
+      $root.on('clear', function(e) {
+        e.stopPropagation();
+
+        // template select fields
+        $email_template_select_field.trigger('clear');
+
+        // attachments
+        clearAttachments();
+        $attachment_button_options.hide();
+
+        // copy / cc / bcc fields
+        $email_copy_button_options.hide();
+        $root.find('.email_template_cc_field_').val('');
+        $root.find('.email_template_bcc_field_').val('');
+
+        // payment request
+        $root.find('.email_text_payment_request_field').val('');
+        $email_payment_request_options.hide();
+
+        // scheduler
+        $text_scheduler_calendar.get(0)._flatpickr.clear();
+        $root.find('.scheduler_options').hide();
+      });
+
+
+      <% unless browser.device.mobile? %>
+        $yield_field.emojiPicker({
+          width: '280px',
+          height: '250px',
+          button: false,
+          position: 'right',
+          onShow: function(picker, settings, isActive) {
+            // $('.emojiPicker').css({top: 100});
+            if ((parseInt(picker.css('top')) + parseInt(picker.css('height'))) >= $(window).height()) {
+              var distance = $(window).height() - (parseInt(picker.css('height')) + 50);
+              picker.css('top', distance + 'px');
+            }
+          },
+          onHide: function(picker, settings, isActive) {
+          }
+        });
+
+        $root.find('.button_emoji_email_template_select').on('click', function(e) {
+          // console.log($yield_field)
+          $yield_field.emojiPicker('toggle');
+        });
+      <% end %>
+
+      // payment request
+      $email_payment_button.off('click');
+      $email_payment_button.on('click', function (e) {
+        e.preventDefault();
+        $email_payment_request_options.toggle();
+      });
+      $email_payment_button.off('hide');
+      $email_payment_button.on('hide', function (e) {
+        e.preventDefault();
+        $email_payment_request_options.hide();
+      });
+      if ($email_payment_request_options.find('input').val() != '' && $email_payment_request_options.find('input').val() != '0.0') $email_payment_request_options.show();
+
+      // copy button
+      $email_copy_button.off('click');
+      $email_copy_button.on('click', function (e) {
+        e.preventDefault();
+        $email_copy_button_options.toggle();
+      });
+      $email_copy_button.off('hide');
+      $email_copy_button.on('hide', function (e) {
+        e.preventDefault();
+        $email_copy_button_options.hide();
+      });
+
+      // attachment button
+      $attachment_button.off('click');
+      $attachment_button.on('click', function (e) {
+        e.preventDefault();
+        $attachment_button_options.toggle();
+      });
+      if (file_attachments.length > 0) $attachment_button_options.show();
+
+      // scheduler calendar
+      $scheduler_button.off('click');
+      $scheduler_button.on('click', function (e) {
+        e.preventDefault();
+        $root.find('.scheduler_options').toggle();
+      });
+
+      $text_scheduler_calendar.flatpickr({
+        altFormat: 'm/d/Y G:i K',
+        allowInput: false,
+        dateFormat: 'm/d/Y G:i K',
+        defaultDate: '',
+        enableTime: true,
+        mode: 'single', // single, multiple, range
+        minDate: '<%= Time.current.in_time_zone(presenter.contact.client.time_zone).strftime('%m/%d/%Y %H:%M %p') -%>',
+        maxDate: '',
+        plugins: [
+          new confirmDatePlugin({
+            showAlways: true
+          })
+        ]
+      });
+
+      $button_text_scheduler_calendar_open.on('click', function(e) {
+        setTimeout(function(){
+          $text_scheduler_calendar.get(0)._flatpickr.open();
+        }, 0);
+      });
+      $button_text_scheduler_calendar_clear.on('click', function(e) {
+        $text_scheduler_calendar.get(0)._flatpickr.clear();
+        $text_scheduler_calendar.get(0)._flatpickr.close();
+      });
+    <% end %>
+
+    <% unless presenter.contact&.new_record? %>
+      // toggle ok 2 email
+      $root.find('.email_ok_button').off('click');
+      $root.find('.email_ok_button').on('click', function (e) {
+        e.preventDefault();
+        $.ajax({
+          method: 'POST',
+          dataType: 'script',
+          url: '<%= central_toggle_ok_2_email_path(presenter.contact) -%>'
+        });
+      });
+    <% end %>
+  });
+</script>

@@ -1,0 +1,37 @@
+<%
+  # app/views/clients/dlc10/v2/phone_numbers/_phone_number.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/phone_numbers/phone_number', collection: Twnumbers, as: :phone_number, locals: { presenter: presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:    (Clients::Dlc10::V2::Presenter)
+  #   (req) phone_number: (PhoneNumber)
+  #
+  return unless local_assigns.dig(:phone_number).is_a?(Twnumber) && local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+
+  presenter.phone_number = phone_number
+-%>
+<tr>
+  <td class="align-middle text-left"> <%= number_to_phone(phone_number.phonenumber) -%> </td>
+  <td class="align-middle text-left"> <%= phone_number.name -%> </td>
+  <td class="align-middle text-left">
+    <%= bootstrap_select_tag(
+          field:        "campaign_phone_numbers[#{phone_number.id}]",
+          row:          { class: 'mb-0', columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          form_group:   { class: 'mb-0' },
+          label:        { class: 'mt-0' },
+          html_options: { disabled: presenter.phone_number_locked },
+          options:      { array: presenter.options_for_dlc10_campaigns, selected: phone_number.dlc10_campaign_id, blank: 'Select a Campaign' }
+        ) %>
+  </td>
+  <td class="align-middle text-left"> <%= presenter.campaign_shared_at -%> </td>
+  <td class="align-middle text-left"> <%= presenter.campaign_accepted_at -%> </td>
+  <td class="align-middle text-center">
+    <i class="fa <%= presenter.phone_number_locked ? 'fa-lock' : 'fa-lock-open' -%>"></i>
+  </td>
+</tr>

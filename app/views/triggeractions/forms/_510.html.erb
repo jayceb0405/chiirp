@@ -1,0 +1,114 @@
+<%
+  # /app/views/triggeractions/forms/_510.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/510", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # assign Contact to User
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<% presenter.triggeraction_assign_to_users.each do |user| %>
+  <%= hidden_field_tag 'triggeraction[all_users][]', user[0].to_s %>
+<% end %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[assign_to]',
+      label:        { title: 'Assign Contact (in a "round robin" method) To' },
+      html_options: { id: "users_include_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled?, multiple: true },
+      options:      { array: presenter.triggeraction_assign_to_users.invert.to_a, selected: presenter.triggeraction.assign_to.keys }
+    ) %>
+
+<% presenter.triggeraction_assign_to_users.each do |user_id, fullname| %>
+  <div class="form-row mb-3" id="user_div_<%= presenter.triggeraction.id -%>_<%= user_id -%>" style="<%= presenter.triggeraction.assign_to.key?(user_id) ? '' : 'display:none;' -%>">
+    <div class="col-md-3">
+      <%= fullname -%>:
+    </div>
+    <div class="col-md-9">
+      <input type="text" id="percentage_<%= presenter.triggeraction.id -%>_<%= user_id -%>" name="triggeraction[percentages][]" value="" autocomplete="off">
+    </div>
+  </div>
+<% end %>
+
+<script>
+  $(function () {
+    var user_data = {};
+
+    <% presenter.triggeraction_assign_to_users.each do |user_id, fullname| %>
+      user_data['<%= user_id -%>'] = parseInt(<%= presenter.triggeraction.assign_to[user_id] || 0 -%>);
+
+      $('#percentage_<%= presenter.triggeraction.id -%>_<%= user_id -%>').ionRangeSlider({
+          min: 0,
+          max: 100,
+          from: parseInt(<%= presenter.triggeraction.assign_to[user_id] || 0 -%>),
+          type: 'single',
+          prefix: '',
+          grid: true,
+          grid_num: 5,
+          postfix: ' %',
+          skin: 'round',
+          disable: <%= presenter.campaign_disabled? -%>,
+          onChange: function (data) {
+            updateAllSliders('<%= user_id -%>', data);
+          },
+          onFinish: function (data) {
+            updateUserPercentagesHash();
+          }
+      });
+    <% end %>
+
+    function updateAllSliders(user_id, data) {
+      var others_count = 0;
+      var others_total = 0;
+
+      $.each(user_data, function(key, value) {
+        if ( key != user_id && value > 0 ) {
+          others_total = ( others_total + value );
+          others_count = ( others_count + 1 );
+        };
+      });
+
+      $.each(user_data, function(key, value) {
+        if ( key != user_id && value > 0 ) {
+          instance = $('#percentage_<%= presenter.triggeraction.id -%>_' + key).data('ionRangeSlider');
+          var new_from = (user_data[key] - ((others_total - (100 - data.from)) / others_count));
+          instance.update({ from: new_from });
+          user_data[key] = parseInt(new_from);
+        };
+      });
+
+      user_data[user_id] = data.from;
+    };
+
+    function updateUserPercentagesHash() {
+
+    }
+
+    $('#users_include_<%= presenter.triggeraction.id -%>').on('change', function(e) {
+      var selected = [];
+
+      $.each($(this).val(), function(i, val) {
+        selected[i] = val;
+      });
+
+      $.each(user_data, function(user_id, percentage) {
+        instance = $('#percentage_<%= presenter.triggeraction.id -%>_' + user_id).data('ionRangeSlider');
+
+        if ($.inArray(user_id, selected) >= 0) {
+          $('#user_div_<%= presenter.triggeraction.id -%>_' + user_id).show();
+          user_data[user_id] = (100 / selected.length);
+        } else {
+          $('#user_div_<%= presenter.triggeraction.id -%>_' + user_id).hide();
+          user_data[user_id] = 0;
+        };
+
+        instance.update({ from: user_data[user_id] });
+      });
+    });
+  });
+</script>

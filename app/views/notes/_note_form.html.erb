@@ -1,0 +1,28 @@
+<%
+  # app/views/notes/_note_form.html.erb
+  #
+  # Example:
+  #   render partial: 'notes/note_form', locals: { contact_note: Contacts::Note, presenter: Contacts::Notes::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) contact_note: (Contacts::Note)
+  #   (req) presenter:    (Contacts::Notes::Presenter)
+  #
+  return unless local_assigns.dig(:contact_note).is_a?(Contacts::Note) && local_assigns.dig(:presenter).is_a?(Contacts::Notes::Presenter)
+-%>
+<%= form_with(model: contact_note, url: contact_note.new_record? ? contact_notes_path(presenter.contact.id) : contact_note_path(presenter.contact.id, contact_note.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'contact_form', novalidate: true }) do |f| %>
+  <%= bootstrap_text_area(
+        field:        'note',
+        value:        contact_note.note,
+        row:          { columns: [2, 10] },
+        label:        { title: "#{contact_note.new_record? ? 'New ' : ''}Note" },
+        html_options: { id: "text_area_note_#{contact_note.id.to_i}", placeholder: 'Enter your note...' }
+      ) %>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Save Note', id: 'submit_button', disable_with: 'Saving New Note' }]
+      ) %>
+<% end %>

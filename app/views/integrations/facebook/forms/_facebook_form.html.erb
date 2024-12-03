@@ -1,0 +1,56 @@
+<%
+  # app/views/integrations/facebook/forms/_facebook_form.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/forms/facebook_form', collection: presenter.page_forms, as: :facebook_form, locals: { user_id: String, presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Facebook::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+  form_id   = facebook_form.dig(:id).to_s
+  presenter.facebook_form = form_id
+-%>
+<div class="card card-expansion-item">
+  <div class="card-header border-0" id="form_header_id_<%= form_id %>">
+    <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#form_id_<%= form_id %>" aria-expanded="false" aria-controls="form_id_<%= form_id %>">
+      <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+      <span><%= "Facebook Form: #{facebook_form[:name]} <small>(#{facebook_form[:status].downcase}/#{presenter.facebook_form_defined? ? '<span class="text-success">defined</span>' : '<span class="text-danger">undefined</span>'})</small>".html_safe %></span>
+    </button>
+  </div>
+  <div class="card-body collapse page_form" id="form_id_<%= form_id %>" aria-labelledby="form_header_id_<%= form_id %>" data-parent="#forms_accordion">
+    <div class="mt-3 text-center" id="form_id_<%= form_id %>_spinner">
+      <div><%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %></div>
+      <div class="ml-3 pb-3">Loading Facebook Form...</div>
+    </div>
+    <div id="form_id_<%= form_id %>_form"></div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    $(document).off('show.bs.collapse', '.page_form');
+    $(document).on('show.bs.collapse', '.page_form', function(e) {
+      var form_id = e.target.id.replace('form_id_', '');
+
+      $('#form_id_' + form_id + '_spinner').show();
+      $('#form_id_' + form_id + '_form').hide();
+
+      if ($(this).is(e.target)) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/integrations/facebook/leads/forms/' + form_id + '/edit',
+          data: {
+            page_id: '<%= facebook_form.dig(:page, :id) %>',
+            user_id: '<%= local_assigns.dig(:user_id).to_s -%>'
+          }
+        });
+      }
+    });
+  });
+</script>

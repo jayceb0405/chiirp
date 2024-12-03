@@ -1,0 +1,85 @@
+<%
+  # app/views/integrations/housecall/import_jobs/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/import_jobs/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Jobs from Housecall Pro</span>
+      <span>
+        <span class="text-muted" id="job_imports_remaining"><%= presenter.job_imports_remaining -%></span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <p>Import all of your Housecall pro jobs into <%= I18n.t('tenant.name') -%>.</p>
+
+      <%= form_with url: integrations_housecall_import_jobs_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= bootstrap_select_tag(
+              field:        'import_job[status]',
+              label:        { title: 'Job Statuses' },
+              html_options: { multiple: true, count_selected_text: 'string' },
+              options:      { array: presenter.options_for_status, selected: '' },
+              messages:     { note: 'Select Job Statuses' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_job[date_range_type]',
+              value:    'start',
+              values:   %w[start end],
+              label:    { title: 'Job Scheduled Date (Start/End)', checked: 'Start', unchecked: 'End' },
+              messages: { note: 'Import jobs based on scheduled start or end date.' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:     'import_job[date_range]',
+              value:     '',
+              row:       { class: 'mb-0' },
+              label:     { title: 'Job Scheduled Date Range' },
+              flatpickr: { include_time: true, mode: 'range' },
+              messages:  { note: 'Import jobs whose scheduled start or end date (as selected) falls within the selected range.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:    'import_job[process_events]',
+              value:    false,
+              values:   [true, false],
+              label:    { title: 'Process Event Actions' },
+              messages: { note: 'Switch "on" to process matching event actions as well as Specific Actions selected below.' }
+            ) %>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Specific Actions</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client:                  presenter.client,
+                campaign_id_field:       'import_job[actions][campaign_id]',
+                group_id_field:          'import_job[actions][group_id]',
+                tag_id_field:            'import_job[actions][tag_id]',
+                stage_id_field:          'import_job[actions][stage_id]',
+                stop_campaign_ids_field: 'import_job[actions][stop_campaign_ids]',
+                first_trigger_types:     [115, 120, 125, 130, 135, 136, 137, 138, 139, 140, 143, 144, 145, 146, 147, 148, 149]
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons buttons: [{ title: 'Import Jobs', id: 'import_jobs_button', disable_with: 'Preparing to Import Jobs...', disabled: presenter.job_imports_remaining.present? || !presenter.valid_credentials? }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('.nav-link').removeClass('active');
+    $('#link_import_jobs').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

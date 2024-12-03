@@ -1,0 +1,28 @@
+<%
+  # app/views/triggeractions/forms/_610.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/610", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # save data to a Contact or ContactCustomField
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[client_custom_field_id]',
+      label:        { title: 'Select Contact Info to Update' },
+      html_options: { id: "client_custom_field_id_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_client_custom_field_id_610, selected: presenter.triggeraction.client_custom_field_id, blank: 'Select a Custom Field' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'triggeraction[description]',
+      value:        presenter.triggeraction.description,
+      label:        { title: 'Contact Info' },
+      html_options: { disabled: presenter.campaign_disabled? }
+    ) %>

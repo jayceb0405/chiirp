@@ -1,0 +1,269 @@
+// app/assets/stylesheets/common/common.scss.erb
+
+// Bootstrap
+@import 'looper/scss/custom.scss';
+@import 'common/dash_buttons.scss';
+@import 'common/publisher.scss.erb';
+
+@import 'bootstrap-colorpicker/dist/css/bootstrap-colorpicker';
+@import 'bootstrap-select/dist/css/bootstrap-select';
+@import 'ajax-bootstrap-select/dist/css/ajax-bootstrap-select';
+
+// font styles
+// @import url('https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600');
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&display=swap');
+
+@import 'animate.css/animate.min';
+@import 'common/spinning_logo.scss.erb';
+
+// icons
+@import "font-awesome";
+@import 'mdi/materialdesignicons.scss.erb';
+
+// fullcalendar theme
+@import 'fullcalendar/main';
+
+// ion rangeSlider styles
+@import 'ion-rangeslider/css/ion.rangeSlider';
+
+// toastr
+@import 'toastr/toastr';
+
+// emojipicker styles
+@import 'jquery-emoji-picker/css/jquery.emojipicker';
+@import 'jquery-emoji-picker/css/jquery.emojipicker.a';
+
+// Star Rating styles
+@import 'star-rating-svg2/src/css/star-rating-svg';
+
+html,
+body {
+  margin: 0 !important;
+}
+label {
+  margin-bottom: 0rem;
+}
+.page-inner {
+  padding: 1.5rem 0.5rem;
+}
+.custom-number {
+  flex: 1 1 auto;
+}
+.tooltip-big {
+  max-width: 400px !important; //define whatever width you want
+}
+
+.tooltip-inner {
+    max-width: 400px !important;
+    text-align: left;
+}
+
+.modal {
+  overflow-y:auto;
+}
+.card-margins-mobile {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  margin-left: 0.25rem;
+  margin-right: 0.25rem;
+
+  @media only screen and (min-width: $breakpoint-screen-md-min) {
+    margin-left: 1rem;
+    margin-right: 1rem;
+  }
+  @media only screen and (min-width: $breakpoint-screen-lg-min) {
+    margin-left: 3rem;
+    margin-right: 3rem;
+  }
+}
+.figure-attachment {
+  background-color: transparent;
+}
+.no-left-border .bootstrap-select .custom-select {
+  border-left: none;
+}
+
+// message central bubble colors
+$app-is-textin: #222;
+$app-is-textin-bg: #e8e8e8;
+$app-is-textout: #fff;
+$app-is-textout-bg: #3583f6;
+$app-is-textout-automated: #fff;
+$app-is-textout-automated-bg: #69cb6a;
+$app-is-textinuser: #fff;
+$app-is-textinuser-bg: #ed6a5a;
+$app-is-textoutuser: #fff;
+$app-is-textoutuser-bg: #ed6a5a;
+$app-is-textoutaiagent: #fff;
+$app-is-textoutaiagent-bg: #2d488b;
+$app-is-textinother: #fff;
+$app-is-textinother-bg: #909cc2;
+$app-is-textoutother: #fff;
+$app-is-textoutother-bg: #909cc2;
+$app-is-emailout: #222;
+$app-is-emailout-bg: #fcecc9;
+$app-is-emailin: #222;
+$app-is-emailin-bg: #fcecc9;
+$app-is-fbin: #fff;
+$app-is-fbin-bg: #5D675B;
+$app-is-fbout: #fff;
+$app-is-fbout-bg: #3B5998;
+$app-is-fbout-automated: #fff;
+$app-is-fbout-automated-bg: #53131E;
+$app-is-gglin: #fff;
+$app-is-gglin-bg: #4285F4;
+$app-is-gglout: #fff;
+$app-is-gglout-bg: #EA4336;
+$app-is-gglout-automated: #fff;
+$app-is-gglout-automated-bg: #34A753;
+$app-is-rvmout: #222;
+$app-is-rvmout-bg: #f4ccb6;
+$app-is-voicein: #222;
+$app-is-voicein-bg: #93b7be;
+$app-is-voiceout: #222;
+$app-is-voiceout-bg: #93b7be;
+$app-is-voicemail: #fff;
+$app-is-voicemail-bg: #4196b1;
+$app-is-widgetin: #fff;
+$app-is-widgetin-bg: #9f4a54;
+$app-is-video: #fff;
+$app-is-video-bg: #995D81;
+$app-is-unknown: #222;
+$app-is-unknown-bg: #e5c2c0;
+
+.color {
+
+  &_is_textin {
+    color: $app-is-textin !important;
+    background-color: $app-is-textin-bg !important;
+  }
+
+  &_is_textout {
+    color: $app-is-textout !important;
+    background-color: $app-is-textout-bg !important;
+  }
+
+  &_is_textout_automated {
+    color: $app-is-textout-automated !important;
+    background-color: $app-is-textout-automated-bg !important;
+  }
+
+  &_is_textinuser {
+    color: $app-is-textinuser !important;
+    background-color: $app-is-textinuser-bg !important;
+  }
+
+  &_is_textoutuser {
+    color: $app-is-textoutuser !important;
+    background-color: $app-is-textoutuser-bg !important;
+  }
+
+  &_is_textoutaiagent {
+    color: $app-is-textoutaiagent !important;
+    background-color: $app-is-textoutaiagent-bg !important;
+  }
+
+  &_is_textinother {
+    color: $app-is-textinother !important;
+    background-color: $app-is-textinother-bg !important;
+  }
+
+  &_is_textoutother {
+    color: $app-is-textoutother !important;
+    background-color: $app-is-textoutother-bg !important;
+  }
+
+  &_is_emailout {
+    color: $app-is-emailout !important;
+    background-color: $app-is-emailout-bg !important;
+  }
+
+  &_is_emailin {
+    color: $app-is-emailin !important;
+    background-color: $app-is-emailin-bg !important;
+  }
+
+  &_is_fbin {
+    color: $app-is-fbin !important;
+    background-color: $app-is-fbin-bg !important;
+  }
+
+  &_is_fbout {
+    color: $app-is-fbout !important;
+    background-color: $app-is-fbout-bg !important;
+  }
+
+  &_is_fbout_automated {
+    color: $app-is-fbout-automated !important;
+    background-color: $app-is-fbout-automated-bg !important;
+  }
+
+  &_is_gglin {
+    color: $app-is-gglin !important;
+    background-color: $app-is-gglin-bg !important;
+  }
+
+  &_is_gglout {
+    color: $app-is-gglout !important;
+    background-color: $app-is-gglout-bg !important;
+  }
+
+  &_is_gglout_automated {
+    color: $app-is-gglout-automated !important;
+    background-color: $app-is-gglout-automated-bg !important;
+  }
+
+  &_is_rvmout {
+    color: $app-is-rvmout !important;
+    background-color: $app-is-rvmout-bg !important;
+  }
+
+  &_is_voicein {
+    color: $app-is-voicein !important;
+    background-color: $app-is-voicein-bg !important;
+  }
+
+  &_is_voiceout {
+    color: $app-is-voiceout !important;
+    background-color: $app-is-voiceout-bg !important;
+  }
+
+  &_is_voicemail {
+    color: $app-is-voicemail !important;
+    background-color: $app-is-voicemail-bg !important;
+  }
+
+  &_is_widgetin {
+    color: $app-is-widgetin !important;
+    background-color: $app-is-widgetin-bg !important;
+  }
+
+  &_is_video {
+    color: $app-is-video !important;
+    background-color: $app-is-video-bg !important;
+  }
+
+  &_is_unknown {
+    color: $app-is-unknown !important;
+    background-color: $app-is-unknown-bg !important;
+  }
+}
+.dropdown-menu {
+  min-width: 225px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+.message-header {
+  display: block;
+  height: initial;
+
+  @media only screen and (min-width: $breakpoint-screen-md-min) {
+    display: flex;
+    height: 4.5rem;
+  }
+}
+#toast-container > div {
+  opacity: 0.9;
+  -ms-filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=90);
+  filter: alpha(opacity=90);
+}

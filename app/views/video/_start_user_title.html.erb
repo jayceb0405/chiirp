@@ -1,0 +1,36 @@
+<%
+  # app/views/video/_start_user_title.html.erb
+  #
+  # Example:
+  #   render partial: 'video/start_user_title'
+  #
+  # Required Instance Variables:
+  #   @contact: (Contact)
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="d-flex justify-content-between">
+  <h1 class="mr-sm-auto page-title"><i class="fa fa-desktop mr-2"></i>Video Call w/ <%= @contact.fullname -%></h1>
+
+  <div class="btn-toolbar">
+    <%= button_tag 'Join Conversation', { type: 'button', class: 'btn btn-light', id: 'button_join' } %>
+    <%= button_tag 'Leave', { type: 'button', class: 'btn btn-light', id: 'button_leave' } %>
+    <div class="dropdown">
+      <button type="button" class="btn btn-light" data-toggle="dropdown">
+        <span>More</span>
+        <span class="fa fa-caret-down"></span>
+      </button>
+      <div class="dropdown-menu dropdown-menu-right">
+        <div class="dropdown-arrow"></div>
+        <%= button_tag 'Mute', { type: 'button', class: 'dropdown-item', id: 'button_mute' } %>
+        <%= button_tag 'Pause', { type: 'button', class: 'dropdown-item', id: 'button_pause' } %>
+        <%= button_tag 'Share Screen', { type: 'button', class: 'dropdown-item', id: 'button_share_screen' } %>
+        <%= button_tag 'Stop Sharing Screen', { type: 'button', class: 'dropdown-item', id: 'button_unshare_screen' } %>
+        <%= button_tag 'Send Email Invitation', { type: 'button', class: 'dropdown-item', id: 'send_email_invite' } %>
+        <%= button_tag 'Send Text Invitation', { type: 'button', class: 'dropdown-item', id: 'send_text_invite' } %>
+      </div>
+    </div>
+  </div>
+</div>

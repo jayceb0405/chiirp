@@ -1,0 +1,49 @@
+<%
+  # app/views/integrations/housecall/update_contacts/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/update_contacts/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Contacts from Housecall Pro</span>
+      <span>
+        <span class="text-muted<%= presenter.contact_imports_remaining == '0' ? ' d-none' : '' -%>" id="contact_imports_remaining">Housecall Pro customers awaiting import: <span class="badge badge-lg badge-success" id="contact_imports_remaining_count"><%= presenter.contact_imports_remaining -%></span></span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <p>Import all of your Housecall pro customers into <%= I18n.t('tenant.name') -%>.</p>
+
+      <%= form_with url: integrations_housecall_update_contacts_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= f.radio_button :new_contacts_only, {
+              label:   { title: "Add/Update #{I18n.t('tenant.name')} Contacts" },
+              buttons: [
+                { label: 'Only Add New Contacts from Housecall Pro', value: 'true', id: 'add_only_radio_button', checked: true },
+                { label: 'Add New and Update Existing Contacts from Housecall Pro', value: 'false', id: 'add_update_radio_button', checked: false }
+              ]
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Import Contacts', id: 'import_contacts_button', disable_with: 'Preparing to Import Contacts...', disabled: presenter.contact_imports_remaining != '0' || !presenter.valid_credentials? }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $('.nav-link').removeClass('active');
+    $('#link_update_contacts').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

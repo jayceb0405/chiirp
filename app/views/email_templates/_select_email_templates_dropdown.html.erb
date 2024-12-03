@@ -1,0 +1,24 @@
+<%
+# app/views/email_templates/_select_email_templates_dropdown.html.erb
+#
+# Example:
+#   render partial: 'email_templates/select_email_templates_dropdown'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select an Email Template</span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% @email_templates.each do |email_template| %>
+    <a href="#" class="dropdown-item option_email_template ml-3" id="<%= email_template.id -%>"><%= email_template.name -%></a>
+  <% end %>
+</div>

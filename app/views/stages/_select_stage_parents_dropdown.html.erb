@@ -1,0 +1,30 @@
+<%
+  # app/views/stages/_select_stage_parents_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/select_stage_parents_dropdown', locals: { stages_presenter: StagesPresenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   stages_presenter: (StagesPresenter)
+  #
+  sp = local_assigns.dig(:stages_presenter)
+  return unless sp&.client.is_a?(Client)
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header">
+  <span>Select a <%= StageParent.title -%></span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% sp.stage_parents.each do |stage_parent| %>
+    <%= link_to stage_parent.name, stage_path(stage_parent.id), {
+      class: 'dropdown-item',
+      remote: true,
+      method: :get
+    } %>
+  <% end %>
+</div>

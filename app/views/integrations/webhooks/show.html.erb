@@ -1,0 +1,59 @@
+<%
+  # app/views/integrations/webhooks/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: ClientApiIntegration
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Webhooks::Presenter)
+  #
+  presenter = Integrations::Webhooks::Presenter.new(client_api_integration: @client_api_integration) unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div class="user-avatar user-avatar-xl"><i class="mdi mdi-webhook img-fluid"></i></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">Webhooks & APIs Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_webhook_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'Webhooks', integrations_webhook_webhooks_path, { class: 'nav-link', id: 'link_webhooks', remote: true } %>
+        <%= link_to 'APIs', integrations_webhook_apis_path, { class: 'nav-link', id: 'link_apis', remote: true } %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_webhook_integration_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <% if local_assigns.dig(:partial_to_show).to_s.present? && @client_api_integration.is_a?(ClientApiIntegration) %>
+        <%= render partial: partial_to_show, locals: { presenter: } %>
+      <% else %>
+        <%= render partial: 'integrations/webhooks/overview', locals: { presenter: } %>
+      <% end %>
+    </div>
+  </div>
+</div>

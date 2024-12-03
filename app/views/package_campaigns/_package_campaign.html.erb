@@ -1,0 +1,28 @@
+<%
+  # app/views/package_campaigns/_package_campaign.html.erb
+  # 
+  # Example:
+  #   render partial: 'package_campaigns/package_campaign', collection: @package_campaigns.order( :name )
+  # 
+  # Required Instance Variables:
+  #   @package:         (Package)
+  # 
+  # Required Local Variables:
+  #   package_campaign: (PackageCampaign)
+  # 
+-%>
+<% unless package_campaign.new_record? %>
+  <tr>
+    <td class="align-middle">
+      <%= package_campaign.campaign_id.to_i.positive? ? "Campaign: #{package_campaign.campaign.name}" : (package_campaign.campaign_group_id.to_i.positive? ? "Group: #{package_campaign.campaign_group.name}" : 'Unknown' ) %>
+    </td>
+    <td class="align-middle text-right">
+      <%= link_to '', package_campaign_path(@package.id, package_campaign.id), {
+          class:  'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          remote: true,
+          method: :delete,
+        }
+      %>
+    </td>
+  </tr>
+<% end %>

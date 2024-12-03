@@ -1,0 +1,23 @@
+<%
+  # app/views/clients/statements/_transaction.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/statements/transaction', collection: presenter.client_transactions, as: :transaction, locals: { presenter: ClientPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (ClientPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(ClientPresenter)
+-%>
+<tr>
+  <td class="text-left"><%= Friendly.new.date(transaction.created_at, presenter.client.time_zone, true) %></td>
+
+  <% if presenter.transaction_type == 'dlc10_charges' %>
+    <td class="text-left"><%= ClientTransaction.description(transaction.setting_key) -%></td>
+  <% end %>
+
+  <td class="text-right"><%= number_to_currency(transaction.setting_value, unit: "#{ClientTransaction.name_hash_type(transaction.setting_key)} ") -%></td>
+</tr>

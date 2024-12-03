@@ -1,0 +1,32 @@
+<%
+  # app/views/integrations/responsibid/webhooks/_event_inner.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/responsibid/webhooks/event_inner', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<td class="text-left" colspan="3" id="td_webhook_<%= presenter.webhook_event_id -%>">
+  <%= presenter.webhook_name %>
+</td>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_campaign&.name.to_s } if presenter.client.campaigns_count.positive? %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_group&.name.to_s } if presenter.client.groups_count.positive? %>
+<td class="text-left"><%= presenter.webhook_event_tag&.name.to_s -%></td>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_stage&.name.to_s } if presenter.client.stages_count.positive? %>
+<%= content_tag(:td, class: 'text-left') { presenter.webhook_event_stop_campaigns.join(', ') } if presenter.client.campaigns_count.positive? %>
+<td class="text-right">
+  <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#webhook_edit_tr_<%= presenter.webhook_event_id -%>">
+    <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+  </button>
+  <%= link_to '', '#', {
+        class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_webhook',
+        style: 'text-decoration: none;',
+        data:  { id: presenter.webhook_event_id, event: presenter.webhook_object, name: presenter.webhook_name }
+      } %>
+</td>

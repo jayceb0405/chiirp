@@ -1,0 +1,52 @@
+<%
+	# /Users/Kevin/Rails Projects/funyl/app/views/users/_user.html.erb
+	# 
+	# Example:
+	# 	render partial: "users/user"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	if user.avatar.present?
+		image_tag = cl_image_tag( user.avatar.my_public_id, { class: "sidebar-user__avatar rounded-circle m-0", secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: "png" } )
+	else
+		image_tag = image_tag( "tenant/#{I18n.t("tenant.id")}/logo-600.png", class: "sidebar-user__avatar rounded-circle m-0" )
+	end
+-%>
+<% unless user.new_record? %>
+	<tr>
+		<td class="p-2 text-center">
+			<%= image_tag %>
+		</td>
+		<td>
+			<% unless user.id == current_user.id %>
+				<%= link_to "", client_user_path(user.client, user),
+					method: :delete,
+					class: "fa fa-trash-alt text-dark pr-0",
+					remote: true,
+					style: "text-decoration: none;",
+					data: {
+						confirm_swal: "DELETE #{user.fullname}?",
+						text_swal: "Are you sure?"
+					}
+				%>
+			<% end %>
+			<%= link_to '', client_user_path(user.client, user),
+				method: :get,
+				local: true,
+				class: 'fa fa-pencil-alt text-dark pr-0',
+				style: 'text-decoration: none;'
+			%>
+			<%= link_to user.fullname, client_user_path(user.client, user), method: :get, local: true %>
+			<div class="pl-5 text-muted"></div>
+			<div class="pl-5 text-muted"><i class="pr-2 <%= user.twnumbers.any? ? " text-app fa fa-exclamation-triangle" : "text-danger fa fa-times" -%>"></i><%= Twnumber.model_name.human( count: user.twnumbers.count ) -%></div>
+			<% if user.phone.empty? %>
+				<div class="pl-5 text-muted"><i class="pr-2 text-danger fa fa-times"></i>Missing Mobile Phone Number</div>
+			<% end %>
+			<div class="pl-5 text-muted"><i class="pr-2 <%= user.contacts.any? ? " text-app fa fa-exclamation-triangle" : "text-danger fa fa-times" -%>"></i><%= Contact.model_name.human( count: user.contacts.count ) -%></div>
+		</td>
+	</tr>
+<% end -%>

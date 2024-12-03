@@ -1,0 +1,103 @@
+<%
+  # app/views/integrations/system_settings/integrations/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/system_settings/integrations/edit', locals: { presenter: SystemSettings::IntegrationsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (SystemSettings::IntegrationsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(SystemSettings::IntegrationsPresenter)
+-%>
+<td colspan="9">
+  <div class="row">
+    <div class="col-2 text-center p-3">
+
+      <% unless presenter.integration.new_record? %>
+        <div class="mb-3">
+          <div class="fileinput-button">
+            <%= form_with(url: system_settings_integration_logo_upload_path(presenter.integration.id.to_i), builder: LooperFormBuilder, method: :patch, remote: true, html: { multipart: true, id: "integration_logo_form_#{presenter.integration.id}" }) do |f| %>
+              <div class="fileinput-button-label">Change image</div>
+              <span id="integration_logo_span_<%= presenter.integration.id -%>"><%= presenter.integration_logo -%></span>
+              <%= f.file_field :logo_image %>
+              <input class="integration_logo_input" id="integration_logo_input_<%= presenter.integration.id -%>" type="file" name="logo_image">
+            <% end %>
+          </div>
+        </div>
+
+        <div class="pl-3">
+          <h3 class="card-title"><%= presenter.integration.company_name -%></h3>
+          <h6 class="card-subtitle text-muted">Click the current logo to change.</h6>
+          <p class="card-text">
+            <small>JPG, GIF or PNG<br />400x400, &lt; 2 MB.</small>
+          </p>
+          <div class="progress progress-xs fade" id="progress_integration_logo">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <%= form_with model: presenter.integration, builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+        <%= f.text_field :company_name, {
+              label:        { title: 'Company Name' },
+              html_options: { placeholder: 'Company Name', minlength: 2, autofocus: true },
+              messages:     { note: 'Must be a minimum of 2 characters. Must be unique.' }
+            } %>
+        <%= f.switch :show_company_name, {
+              label:      { title: 'Show Company Name?' },
+              checkboxes: [{ field: 'show_company_name', checked: presenter.integration.show_company_name, values: [true, false] }],
+              messages:   { note: 'Should the company name be shown under the company logo?' }
+            } %>
+        <%= f.text_field :contact, {
+              label:        { title: 'Contact Name' },
+              html_options: { placeholder: 'Contact Name' }
+            } %>
+        <%= f.text_field :phone_number, {
+              label:        { title: 'Phone Number' },
+              html_options: { placeholder: 'Phone Number' }
+            } %>
+        <%= f.text_field :short_description, {
+              label:        { title: 'Short Description' },
+              html_options: { placeholder: 'Short Description', maxlength: 110 },
+              messages:     { note: 'Short descriptions are displayed within the Integrations grid. Maximum length: 110 characters.' }
+            } %>
+        <%= f.text_area :description, {
+              label:        { title: 'Description' },
+              html_options: { class: 'pr-5', id: 'emoji_textarea', placeholder: 'Type Description...' },
+              messages:     { note: 'HTML & Bootstrap tags are acceptable.' }
+            } %>
+        <%= f.switch :preferred, {
+              label:      { title: 'Featured?' },
+              checkboxes: [{ field: 'preferred', checked: presenter.integration.preferred, values: [true, false] }],
+              messages:   { note: 'Preferred Integrations will be listed above non-preferred Integrations.' }
+            } %>
+        <%= f.text_field :website_url, {
+              label:        { title: 'Website URL' },
+              html_options: { placeholder: 'URL' },
+              messages:    { note: 'When present a button will be shown linking to the entered URL.' }
+
+            } %>
+        <%= f.text_field :youtube_url, {
+              label:        { title: 'YouTube Embed Code' },
+              html_options: { placeholder: 'Embed Code' },
+              messages:     { note: 'Copy/Paste the YouTube embed code here. An Image URL will be ignored when a YouTube video embed code is provided.' }
+            } %>
+        <%= f.text_field :image_url, {
+              label:        { title: 'Image URL' },
+              html_options: { placeholder: 'URL' },
+              messages:     { note: 'The image will be ignored when a YouTube video embed code is provided.' }
+            } %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: "Save Integration", disable_with: "Saving Integration" }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</td>

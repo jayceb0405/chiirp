@@ -1,0 +1,52 @@
+<%
+  # app/views/integrations/webhooks/apis/_webhook.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/webhook', collection: , collection: Webhooks, as: :webhook, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Webhooks::Presenter)
+  #   (req) webhook:   (Webhook)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#webhook_edit_<%= webhook.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="align-left" colspan="2">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#webhook_edit_<%= webhook.id -%>">
+      <%= webhook.name -%>
+    </button>
+  </td>
+  <%= content_tag(:td, class: 'text-left align-middle') { webhook.campaign&.name.to_s } if presenter.campaigns_allowed? %>
+  <%= content_tag(:td, class: 'text-left align-middle') { webhook.group&.name.to_s } if presenter.groups_allowed? %>
+  <td class="text-left align-middle"><%= webhook.tag&.name.to_s -%></td>
+  <%= content_tag(:td, class: 'text-left align-middle') { webhook.stage&.name.to_s } if presenter.stages_allowed? %>
+  <%= content_tag(:td, class: 'text-left align-middle') { webhook.stop_campaigns_names&.join(', ') } if presenter.campaigns_allowed? %>
+  <td class="align-left"> <%= Friendly.new.date(webhook.created_at, webhook.client.time_zone, false) -%> </td>
+  <td class="align-middle text-center"> <%= (webhook.testing.to_i.positive? ? '<i class="fa fa-times text-danger"></i>' : '<i class="fa fa-check text-success"></i>').html_safe -%> </td>
+  <td class="align-middle text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#webhook_edit_<%= webhook.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to_unless webhook&.new_record?, '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt webhook_delete',
+          data:  {
+            webhookid:   webhook.id,
+            webhookname: webhook.name
+          }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse webhook_edit" id="webhook_edit_<%= webhook.id -%>" data-webhookid="<%= webhook.id -%>">
+  <td colspan="<%= presenter.table_colspan -%>" class="mt-3 text-center">
+    <%= render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Webhook API' } %>
+  </td>
+</tr>

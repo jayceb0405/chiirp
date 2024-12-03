@@ -1,0 +1,44 @@
+<%
+# app/views/central/v1/_frame_init.js.erb
+#
+# Example:
+#   render partial: 'central/v1/frame_init'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+(function() {
+  document.onreadystatechange = function () {
+    if (document.readyState === 'complete') {
+      var iframe = document.createElement('iframe');
+      iframe.id = 'message-central-frame';
+      iframe.src = '<%= api_v1_central_show_url -%>';
+      iframe.style = 'z-index:2147483647;padding:0px;margin:0px;border:0px;height:100%;width:100%;';
+      iframe.seamless = true;
+      document.getElementById('message-central-div').appendChild(iframe);
+
+      window.addEventListener('message', function(event) {
+        console.log('_frame_init event.origin: ' + event.origin);
+        console.log('_frame_init tenant.domain: <%= I18n.t('tenant.domain') -%>');
+        if ( ~event.origin.indexOf('<%= I18n.t('tenant.domain') -%>') ) {
+          try { var obj = JSON.parse(event.data); }
+          catch(e) { var obj = event.data }
+
+          if ( obj.action === 'setatt_central_frame' ) {
+            document.getElementById('message-central-div').style.width = obj.width + 'px';
+            document.getElementById('message-central-div').style.height = obj.height + 'px';
+          }
+          else if (obj.action === 'loaded') {
+            iframe.contentWindow.postMessage(JSON.stringify({ action: "load_iframe", account_data: accountData() }), '*');
+          }
+        } else {
+          return;
+        }
+      });
+    }
+  }
+}).call(this)

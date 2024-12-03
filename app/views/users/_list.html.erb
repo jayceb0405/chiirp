@@ -1,0 +1,55 @@
+<%
+	# app/views/users/_list.html.erb
+	# 
+	# Example:
+	# 	render partial: "users/list"
+	# 
+	# Required Instance Variables:
+	# 	@client: (Client)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	# section_header_options = current_user.admin? ? "<button class=\"btn btn-app text-white pl-2 pr-2\" id=\"new_user\"><i class=\"fa fa-plus\"></i></button>" : ""
+	section_header_options = current_user.admin? && @client.users.count < @client.max_users_count ? link_to( "", new_client_user_path(current_user.client), { class: "btn btn-app fa fa-plus text-white pl-2 pr-2" } ) : ""
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@user] } %>
+<%= render partial: "layouts/shared/section_header", locals: { 
+		heading: "<i class=\"fa fa-users\"></i> Users",
+		options: section_header_options
+	}
+%>
+<div class="container-body">
+
+	<% if @client.users.any? %>
+		<table class="table table-no-border table-striped">
+			<thead>
+				<tr>
+					<th class="p-2 text-center">Avatar</th>
+					<th class="p-2">Name</th>
+				</tr>
+			</thead>
+			<tbody>
+				<%= render partial: "users/user", collection: @client.users.order( :lastname, :firstname ) -%>
+			</tbody>
+		</table>
+	<% else %>
+		<h5 class="p-2 m-0">No Users found.</h5>
+	<% end -%>
+</div>
+
+<script>
+	$(document).ready( function() {
+	  $("#new_user").on("click", function (e) {
+	  	e.preventDefault();
+			e.stopPropagation();
+
+			$.ajax({
+				method: 'GET',
+				dataType: 'html',
+				url: '<%= new_client_user_path(current_user.client) -%>',
+				data: { collapsed: "false" }
+			});
+	  });
+	 });
+</script>

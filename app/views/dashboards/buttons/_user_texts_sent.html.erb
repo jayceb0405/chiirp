@@ -1,0 +1,29 @@
+<%
+  # app/views/dashboards/buttons/_user_texts_sent.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/user_texts_sent', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  user_text_messages_sent            = Messages::Message.texts_sent_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count
+  user_text_messages_sent_successful = Messages::Message.texts_delivered_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count
+-%>
+<%= render partial: 'dashboards/dash_button', locals: {
+      id:               'user_texts_sent',
+      stats:            "#{user_text_messages_sent} / #{user_text_messages_sent_successful}",
+      description:      'Texts Sent',
+      description_icon: 'u',
+      icon:             'fa fa-comments',
+      link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'user', last_msg_direction: 'sent', last_msg_absolute: 'last', user_setting_id: presenter.user_settings_buttons.id) : '#',
+      chart_id:         'user_texts_sent_chart',
+      chart_type:       'circle_progress',
+      chart_value:      (user_text_messages_sent.to_f.positive? ? (user_text_messages_sent_successful.to_f / user_text_messages_sent).round(2) : 0.0),
+      button_movable:   true
+    } %>

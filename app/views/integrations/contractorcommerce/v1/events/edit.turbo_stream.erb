@@ -1,0 +1,20 @@
+<%
+  # app/views/integrations/contractorcommerce/v1/events/edit.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/contractorcommerce/v1/events/edit'
+  #
+  # Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #   @event:                  (Hash)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Contractorcommerce::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update "edit_event_#{@event.dig(:event_id)}" do %>
+  <%= render partial: 'integrations/contractorcommerce/v1/events/edit', locals: { presenter:, event: @event } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

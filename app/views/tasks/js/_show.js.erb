@@ -1,0 +1,46 @@
+<%
+	# app/views/tasks/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: 'tasks/js/show', locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	cards[1]
+	# 		@tasks: ()
+	# 	cards[2]
+	# 		@task: (Task)
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 		cards[1]
+	# 			none
+	# 		cards[2]
+	# 			none
+	# 
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('index') %>
+	$('#tasks_index_content').html('<%= j render partial: 'tasks/index_content', locals: { task: local_assigns.dig(:task), contact: local_assigns.dig(:contact) } -%>');
+<% end %>
+<% if cards.include?('edit') %>
+  $('#task_modal_title').html('<i class="fa fa-tasks"></i> Edit Task')
+  $('#task_modal_body').html('<%= j render partial: 'tasks/edit', locals: { task: local_assigns.dig(:task), contact: local_assigns.dig(:contact) } -%>');
+<% end %>
+
+<% if cards.include?('task_edit_show') %>
+  $('#task_modal').modal('show');
+<% end %>
+<% if cards.include?('task_edit_hide') %>
+  $('#task_modal').modal('hide');
+<% end %>
+
+<% if @task&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save Task',
+    'body': '<%= @task.errors.full_messages.join("<br />") -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

@@ -1,0 +1,38 @@
+<%
+# app/views/surveys/show/_info.html.erb
+#
+# Example:
+#   render partial: 'surveys/info'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<% if @survey_screen.question.present? %>
+  <h5>
+    <%= @survey_screen.question.html_safe %>
+  </h5>
+<% end %>
+
+<% if @survey_screen.info.present? %>
+  <div class="my-3">
+    <%= @survey_screen.info.html_safe %>
+  </div>
+<% end %>
+
+<% if @survey_screen.actions&.dig('redirect_screen_id').to_i.zero? && @survey_screen.actions&.dig('redirect_url').to_s.present? %>
+  <div class="mt-auto">
+    <div class="form-actions d-flex flex-column flex-md-row justify-content-center">
+      <%= link_to 'Continue', @survey_screen.actions&.dig('redirect_url').to_s, { class: 'btn btn-info mb-1 mb-md-0' } %>
+    </div>
+  </div>
+<% elsif @survey_screen.actions&.dig('redirect_screen_id').to_i.positive? && (next_screen = @survey.screens.find_by(id: @survey_screen.actions&.dig('redirect_screen_id').to_i)) %>
+  <div class="mt-auto">
+    <div class="form-actions d-flex flex-column flex-md-row justify-content-center">
+      <%= link_to 'Continue', survey_path(@survey.survey_key, next_screen.screen_key, cid: @cid, rid: @rid), { class: 'btn btn-info mb-1 mb-md-0' } %>
+    </div>
+  </div>
+<% end %>

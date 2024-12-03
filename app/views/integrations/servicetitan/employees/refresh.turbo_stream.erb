@@ -1,0 +1,14 @@
+<%
+  # /app/views/integrations/servicetitan/employees/refresh.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (opt) contact:      (Contact)
+  #   (opt) user_setting: (Users::Setting)
+  #
+  # Local Variables:
+  #
+  presenter = Integrations::Servicetitan::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render 'integrations/servicetitan/employees/show', presenter: %>
+<% end %>

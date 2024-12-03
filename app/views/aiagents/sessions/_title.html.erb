@@ -1,0 +1,27 @@
+<%
+presenter ||= AiagentPresenter.new(@aiagent)
+%>
+
+<i class="fas fa-comment-dots"></i> Test AI Agent
+
+<%= bootstrap_select_tag(
+        field:        'contact_id',
+        label:        { title: 'Select a Contact' },
+        html_options: { id: "contact_select_#{@session.id}_test" },
+        options:      { for_select: options_from_collection_for_select(presenter.client.contacts, :id, :fullname, @session.contact_id), blank: 'Search for a Contact', lookup: { url: contact_task_path, client: presenter.client } }
+      ) %>
+
+<script>
+  $(function () {
+    $('#contact_select_<%= @session.id %>_test').on('change', function() {
+      var contact_id = $(this).val();
+      
+      $.ajax({
+        type: 'PUT',
+        url: '<%= aiagent_test_path %>',
+        dataType: 'script',
+        data: { contact_id: contact_id }
+      });
+    });
+  });
+</script>

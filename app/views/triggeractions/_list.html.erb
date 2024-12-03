@@ -1,0 +1,17 @@
+<%
+  # /app/views/triggeractions/_list.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/list", locals: { presenter:  }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger && !presenter.trigger.new_record?
+-%>
+<div class="card-expansion" id="<%= presenter.triggeraction_accordion_id -%>">
+  <%= render partial: 'triggeractions/triggeraction', collection: presenter.trigger.triggeractions.order(:sequence), as: :triggeraction, locals: { presenter: } %>
+</div>

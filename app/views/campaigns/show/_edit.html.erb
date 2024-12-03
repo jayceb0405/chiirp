@@ -1,0 +1,115 @@
+<%
+  # app/views/campaigns/show/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/show/edit'
+  #
+  # Instance Variables:
+  #   (req) @campaign: Campaign
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @campaign.is_a?(Campaign)
+-%>
+<% if !@campaign.new_record? || @campaign.name.present? %>
+
+  <%= form_with model: @campaign, builder: LooperFormBuilder, role: 'form', remote: true do |f| %>
+    <%= f.text_field :name, {
+          label:        { title: 'Campaign Name' },
+          html_options: { disabled: @campaign.marketplace, autofocus: true }
+        } %>
+
+    <% if !@campaign.new_record? && current_user.client.share_funnels_allowed %>
+      <%= f.copy_field nil, {
+            label:        { title: 'Campaign Share Code' },
+            html_options: { value: @campaign.campaign_share_code.share_code.to_s }
+          } %>
+    <% end %>
+
+    <%= f.select :campaign_group_id, {
+          label:        { title: 'Campaign Group' },
+          html_options: { id: 'select_campaign_group', disabled: @campaign.marketplace, mobile: browser.device.mobile? },
+          choices:      { array: current_user.client.campaign_groups.order(:name).pluck(:name, :id), blank: 'Not Grouped', selected: @campaign.campaign_group_id }
+        } %>
+
+    <% unless @campaign.new_record? %>
+      <%= f.select :default_phone, {
+            label:        { title: 'Default Campaign Phone Number' },
+            html_options: { id: 'select_default_phone_number', mobile: browser.device.mobile? },
+            choices:      { for_select: options_for_phone_numbers(client: @campaign.client, selected: @campaign.default_phone, options: [['user_number', 'User\'s Default Number']]), blank: 'Last Number Used' },
+            prepends:     [{ button: true, label: "<i class=\"fa #{@campaign.lock_phone ? 'fa-lock' : 'fa-lock-open'}\"></i>", id: 'button_lock_phone', disabled: @campaign.marketplace }],
+            messages:     { note: "Actions are #{@campaign.lock_phone ? '' : 'NOT '}locked to this default phone number." }
+          } %>
+    <% end %>
+
+    <%= f.switch :allow_repeat, {
+          label:      { title: 'Allow Repeats' },
+          checkboxes: [{ id: 'allow_repeat_campaign_switch', checked: @campaign.allow_repeat, values: [true, false] }],
+          messages:   { note: 'Allow Campaigns to be started more than once for a Contact.' }
+        } %>
+
+    <div class="form-row mb-3" id="allow_repeat_campaign_row" style="<%= @campaign.allow_repeat ? '' : 'display:none;' -%>">
+      <%= label_tag 'allow_repeat_campaign_select', 'Allow repeats after...', { class: 'col-md-3 pt-2' } %>
+      <div class="col-md-9">
+        <div class="form-group d-flex flex-row">
+          <span id="allow_repeat_interval_select_span">
+          <%= select_tag('campaign[allow_repeat_interval]',
+                         options_for_select((1..90).to_a, @campaign.allow_repeat_interval.to_s),
+                         { class: 'form-control mr-2',
+                           id:    'allow_repeat_interval_select',
+                           data:  { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? } }) %>
+          </span>
+          <%= select_tag('campaign[allow_repeat_period]',
+                         options_for_select(%w[immediately minutes hours days weeks months years], @campaign.allow_repeat_period),
+                         { class: 'form-control',
+                           id:    'allow_repeat_period_select',
+                           data:  { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? } }) %>
+        </div>
+      </div>
+    </div>
+
+    <%= bootstrap_info_field(
+          info:  Friendly.new.date(@campaign.updated_at, @campaign.client.time_zone, true),
+          label: { title: 'Last Updated' }
+        ) %>
+
+    <%= f.submit_buttons(buttons: [{ title: "#{@campaign.new_record? ? 'Create' : 'Save'} Campaign", disable_with: (@campaign.new_record? ? 'Creating' : 'Saving'), disabled: @campaign.marketplace }]) %>
+  <% end %>
+<% end %>
+
+<script>
+  $(function () {
+    toggleAllowRepeatIntervalSelect();
+
+    $(document).off('change', '#allow_repeat_period_select');
+    $(document).on('change', '#allow_repeat_period_select', function(e) {
+      toggleAllowRepeatIntervalSelect();
+    });
+
+    <% unless @campaign.new_record? %>
+      <% if @campaign.lock_phone %>
+        <%= render partial: 'snippets/js/confirm_alert', locals: {
+              element:     '#button_lock_phone',
+              alert:       { body: 'Unlocking will allow actions in this Campaign to operate on any phone number. Is this your intention?', type: 'danger', persistent: true },
+              ajax_action: { type: 'PATCH', url: campaign_path(@campaign.id, lock_phone: false) }
+            } %>
+      <% else %>
+        <%= render partial: 'snippets/js/confirm_alert', locals: {
+              element:     '#button_lock_phone',
+              alert:       { body: 'Locking this number will require all actions in this Campaign to operate on this phone number only. Is this your intention?', type: 'danger', persistent: true },
+              ajax_action: { type: 'PATCH', url: campaign_path(@campaign.id, lock_phone: true) }
+            } %>
+      <% end %>
+    <% end %>
+  });
+
+  function toggleAllowRepeatIntervalSelect() {
+
+    if ($('#allow_repeat_period_select').val() === 'immediately') {
+      $('#allow_repeat_interval_select_span').hide();
+    } else {
+      $('#allow_repeat_interval_select_span').show();
+    }
+  }
+</script>

@@ -1,0 +1,167 @@
+<%
+# app/views/clients/widget/show_widget.html.erb
+#
+# Example:
+# 	render partial: "clients/widget/show_widget"
+#
+# Required Instance Variables:
+# 	@client_widget_user:   (User)
+# 	@client_widget: (Clients::Widget)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <title><%= '' -%></title>
+
+  <%= csp_meta_tag %>
+
+  <!-- stylesheet & javascript -->
+  <%= stylesheet_link_tag 'widget_button' %>
+  <%= javascript_include_tag 'widget_button' %>
+
+  <!-- sweetalert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+  <style type="text/css">
+    .m-central__messages-message-text::after {
+      background: <%= @client_widget.background_color.to_s -%> !important;
+    }
+
+    <% if @client_widget.show_user_avatar.to_i == 1 && @client_widget_user && @client_widget_user.avatar.present? %>
+      .app-widget-box .launch-button .header .title {
+        padding-top: 45px;
+        left: -40px;
+      }
+    <% end %>
+  </style>
+</head>
+<body>
+  <div id="app-widget-box" class="app-widget-box">
+    <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'launch-button-image', height: 35 } %>
+    <!-- <i class="fa fa-comments" aria-hidden="true"></i> -->
+    <div class="launch-button">
+      <div class="header">
+        <% if @client_widget.show_user_avatar.to_i == 1 && @client_widget_user && @client_widget_user.avatar.present? %>
+          <div class="user-avatar">
+            <%= cl_image_tag(@client_widget_user.avatar.my_public_id, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' }) %>
+          </div>
+        <% end %>
+
+        <div id="app-widget-box-title" class="title">
+          <%= @client_widget.title.to_s.present? ? @client_widget.title.to_s.html_safe : '' %>
+        </div>
+
+        <button id="close-button">
+          <i class="fa fa-times" aria-hidden="true"></i>
+        </button>
+      </div>
+      <p id="app-widget-box-tag" class="small">
+        <%= @client_widget.tag_line.to_s.present? ? @client_widget.tag_line.to_s.html_safe : '' %>
+      </p>
+      <div class="m-central__messages-body">
+        <div class="m-central__messages-message is-interlocutor">
+          <div class="m-central__messages-wrap">
+            <div class="m-central__messages-message-text">
+              <%= @client_widget.text_message.to_s.presence || '' %>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-central__messages-message is-self">
+          <div class="m-central__messages-wrap">
+            <div class="m-central__messages-message-text" style="padding-top:15px;padding-bottom:15px;">
+              <%= form_tag save_widget_contact_url(@client_widget.client, @client_widget.widget_key) do %>
+                <div class="form-group">
+                  <%= text_field_tag 'client_widget[fullname]', (current_user ? current_user.fullname : ''), { class: 'form-control', placeholder: 'Your Name', required: true } %>
+                </div>
+
+                <div class="form-group">
+                  <%= text_field_tag 'client_widget[phone]', (current_user ? current_user.phone : ''), { class: 'form-control', placeholder: 'Your Phone Number', required: true } %>
+                </div>
+
+                <div class="form-group">
+                  <%= text_area_tag 'question', '', { class: 'form-control', placeholder: 'Your Question?', required: true } %>
+                </div>
+
+                <p class="small">By submitting you agree to receive text messages at the number provided. Message/data rates may apply.</p>
+
+                <div style="text-align: center;">
+                  <%= submit_tag ( @client_widget.submit_button_text.to_s.presence || ''), { id: 'contact_form_submit', data: { 'disable-with': 'Submitting...' }, class: 'btn btn-app', style: "background-color:#{@client_widget.submit_button_color};border-color:#{@client_widget.submit_button_color};" } %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="footer">
+        <%= link_to image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { height: 15 }) + "&nbsp;Powered by #{I18n.t('tenant.name')}".html_safe, root_url, { style: 'text-decoration:none;', target: '_blank', rel: 'noopener' } %>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready( function() {
+      <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+      document.getElementById('contact_form_submit').setAttribute('color', contrastColor('<%= @client_widget.submit_button_color.to_s -%>', true));
+
+      var element = $('.app-widget-box');
+
+      element.find('.header button').css({'color':contrastColor('<%= @client_widget.background_color.to_s -%>')});
+      element.find('#contact_form_submit').css({'color':contrastColor('<%= @client_widget.background_color.to_s -%>', true)});
+      element.find('#app-widget-box-title').css({'color':contrastColor('<%= @client_widget.background_color.to_s -%>')});
+      element.find('#app-widget-box-tag').css({'color':contrastColor('<%= @client_widget.background_color.to_s -%>')});
+
+      setTimeout(function() {
+        element.addClass('enter');
+      }, 1000);
+
+      element.click(openElement);
+
+      <% if @client_widget.auto_popup.to_i == 1 %>
+        setTimeout(function() {
+          element.click();
+        }, 4000);
+      <% end %>
+
+      function openElement() {
+        window.parent.postMessage('{"action":"setatt","width":"350","height":"500"}', '*');
+        element.css({'background-color':'<%= @client_widget.background_color.to_s -%>'});
+        element.find('.launch-button').addClass('enter');
+        element.find('>i').hide();
+        element.find('.launch-button-image').hide();
+        element.addClass('expand');
+        element.find('.header button').click(closeElement);
+        element.off('click', openElement);
+      }
+
+      function closeElement() {
+        $('#app-widget-box').css({'background-color':'#ffffff'});
+        element.find('.launch-button').removeClass('enter').hide();
+        element.find('>i').show();
+        element.find('.launch-button-image').show();
+        element.removeClass('expand');
+        element.find('.header button').off('click', closeElement);
+
+        setTimeout(function() {
+          element.find('.launch-button').removeClass('enter').show()
+          element.click(openElement);
+          window.parent.postMessage('{"action":"setatt","width":"70","height":"70"}', '*');
+        }, 500);
+      }
+    });
+  </script>
+</body>
+</html>

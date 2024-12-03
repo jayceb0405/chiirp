@@ -1,0 +1,101 @@
+<%
+  # app/views/clients/custom_fields/_custom_field.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/custom_fields/custom_field', collection: custom_fields, locals: { client_presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   custom_field: (custom_field)
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#custom_field_<%= custom_field.id.to_s -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_custom_field_name_<%= custom_field.id -%>"> <%= custom_field.var_name -%> </td>
+  <td class="text-left align-middle"> <%= custom_field.var_type.gsub('string', 'text').titleize -%> </td>
+  <td class="text-left align-middle"> <%= custom_field.var_var -%> </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(custom_field.created_at, cp.client.time_zone, true) -%> </td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#custom_field_#{custom_field.id}"
+                   }) %>
+    <%= link_to_unless custom_field.new_record?, '', important_client_custom_field_path(cp.client.id, (custom_field.id || 0)),
+                       remote: true,
+                       method: :patch,
+                       class:  "btn btn-sm btn-icon btn-secondary fa fa-star text-#{custom_field.var_important ? 'warning' : 'dark'} pr-0 mr-0" %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_custom_field_#{custom_field.id}"
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="custom_field_<%= custom_field.id -%>">
+  <!-- custom_field -->
+
+  <% if custom_field.new_record? %>
+    <%= render partial: 'clients/custom_fields/edit' %>
+  <% end %>
+</tr>
+
+<script>
+  $(function() {
+
+    <% if custom_field.new_record? %>
+      $('#custom_field_<%= custom_field.id -%>').collapse('show');
+
+      $('#button_delete_custom_field_<%= custom_field.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= client_custom_fields_path(cp.client) -%>'
+        });
+      });
+    <% else %>
+      $('#custom_field_<%= custom_field.id -%>').on('show.bs.collapse', function () {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= edit_client_custom_field_path(cp.client, custom_field) -%>'
+        });
+      });
+
+      $('#button_delete_custom_field_<%= custom_field.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= custom_field.var_name -%>" can NOT be un-done. Is it your intention to delete this custom field?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{custom_field.id}" }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_<%= custom_field.id -%>');
+        $(document).on('click', '#button_dump_it_<%= custom_field.id -%>', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= client_custom_field_path(cp.client.id, custom_field.id) -%>'
+          });
+        });
+      });
+    <% end %>
+
+  });
+</script>

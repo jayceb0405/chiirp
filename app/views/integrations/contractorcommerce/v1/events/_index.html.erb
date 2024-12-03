@@ -1,0 +1,221 @@
+<%
+  # app/views/integrations/contractorcommerce/v1/events/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/contractorcommerce/v1/events/index', locals: { presenter: Integrations::Contractorcommerce::V1::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Contractorcommerce::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Contractorcommerce::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Contractor Commerce Events</span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Event'.html_safe, new_integrations_contractorcommerce_v1_event_path, {
+              class: 'btn btn-light',
+              data:  {
+                turbo:        true,
+                turbo_stream: true
+              }
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 200px">Contractor Commerce Event</th>
+              <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed %>
+              <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed %>
+              <th class="text-left">Tag</th>
+              <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed %>
+              <th style="min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody id="events_body">
+
+            <% if presenter.events.present? %>
+              <%= render partial: 'integrations/contractorcommerce/v1/events/event', collection: presenter.events.sort_by { |event| event[:event_id] }, as: :event, locals: { presenter: } %>
+            <% else %>
+              <tr>
+                <td colspan="9" class="text-center p-5">
+                  Events were NOT found.
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_events').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.edit_event');
+    $(document).on('show.bs.collapse', '.edit_event', function (e) {
+
+      if (e.target.id.replace('edit_event_', '')) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '/integrations/contractorcommerce/v1/events/' + e.target.id.replace('edit_event_', '') + '/edit'
+        });
+      }
+    });
+
+    $(document).off('click', '.button_delete_event');
+    $(document).on('click', '.button_delete_event', function(e) {
+      e.preventDefault();
+
+      var id    = $(this).data('id');
+      var event = $(this).data('event');
+      var name  = $(this).data('name');
+
+      if (id) {
+        ChiirpAlert({
+          'body':'Deleting ' + name + ' can NOT be un-done. Is it your intention to delete this Event?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_event' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_delete_event');
+        $(document).on('click', '#button_dump_it_delete_event', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'turbo_stream',
+            accepts: {
+              'turbo_stream': 'text/vnd.turbo-stream.html'
+            },
+            converters: {
+              'text turbo_stream': function (data) {
+                Turbo.renderStreamMessage(data);
+              }
+            },
+            url: '/integrations/contractorcommerce/v1/events/' + id,
+            data: { event: event }
+          });
+        });
+      } else {
+          $.ajax({
+            type: 'GET',
+            dataType: 'turbo_stream',
+            accepts: {
+              'turbo_stream': 'text/vnd.turbo-stream.html'
+            },
+            converters: {
+              'text turbo_stream': function (data) {
+                Turbo.renderStreamMessage(data);
+              }
+            },
+            url: '<%= integrations_contractorcommerce_v1_events_path -%>'
+          });
+      }
+    });
+  });
+  function formOptionsController(event_event_id) {
+    if ($('#event_' + event_event_id).val()) {
+      $('#row_tag_ids_include_' + event_event_id).show();
+      $('#row_tag_ids_exclude_' + event_event_id).show();
+      $('#row_actions_fieldset_' + event_event_id).show();
+
+      if ($('#event_' + event_event_id).val().indexOf('request') >= 0 || $('#event_' + event_event_id).val().indexOf('client') >= 0) {
+        $('#row_customer_types_' + event_event_id).hide();
+     } else {
+        $('#row_customer_types_' + event_event_id).show();
+      }
+
+      if ($('#event_' + event_event_id).val().indexOf('quote') >= 0) {
+        $('#row_status_' + event_event_id).show();
+      } else if ($('#event_' + event_event_id).val().indexOf('job') >= 0) {
+        $('#row_status_' + event_event_id).show();
+      } else if ($('#event_' + event_event_id).val().indexOf('invoice') >= 0) {
+        $('#row_status_' + event_event_id).show();
+      } else if ($('#event_' + event_event_id).val().indexOf('request') >= 0) {
+        $('#row_status_' + event_event_id).show();
+      } else if ($('#event_' + event_event_id).val().indexOf('visit') >= 0) {
+        $('#row_status_' + event_event_id).show();
+      } else {
+        $('#row_status_' + event_event_id).hide();
+      }
+
+      if ($('#event_' + event_event_id).val().indexOf('update') >= 0) {
+        $('#row_event_new_' + event_event_id).show();
+        $('#row_event_updated_' + event_event_id).show();
+      } else {
+        $('#row_event_new_' + event_event_id).hide();
+        $('#row_event_updated_' + event_event_id).hide();
+      }
+
+      if ($('#event_' + event_event_id).val().indexOf('client') >= 0 || $('#event_' + event_event_id).val().indexOf('quote') >= 0 || $('#event_' + event_event_id).val().indexOf('invoice') >= 0 || $('#event_' + event_event_id).val().indexOf('request') >= 0) {
+        $('#row_ext_tech_ids_' + event_event_id).hide();
+        $('#row_tech_updated_' + event_event_id).hide();
+        $('#row_start_date_updated_' + event_event_id).hide();
+      } else {
+        $('#row_ext_tech_ids_' + event_event_id).show();
+
+        if ($('#event_' + event_event_id).val().indexOf('update') >= 0) {
+          $('#row_tech_updated_' + event_event_id).show();
+          $('#row_start_date_updated_' + event_event_id).show();
+        } else {
+          $('#row_tech_updated_' + event_event_id).hide();
+          $('#row_start_date_updated_' + event_event_id).hide();
+        }
+      }
+
+      if ($('#event_' + event_event_id).val().indexOf('request') >= 0) {
+        $('#row_source_' + event_event_id).show();
+      } else {
+        $('#row_source_' + event_event_id).hide();
+      }
+    } else {
+      $('#row_actions_fieldset_' + event_event_id).hide();
+      $('#row_customer_types_' + event_event_id).hide();
+      $('#row_event_new_' + event_event_id).hide();
+      $('#row_event_updated_' + event_event_id).hide();
+      $('#row_ext_tech_ids_' + event_event_id).hide();
+      $('#row_source_' + event_event_id).hide();
+      $('#row_start_date_updated_' + event_event_id).hide();
+      $('#row_status_' + event_event_id).hide();
+      $('#row_tag_ids_include_' + event_event_id).hide();
+      $('#row_tag_ids_exclude_' + event_event_id).hide();
+      $('#row_tech_updated_' + event_event_id).hide();
+    }
+  }
+  function eventNewToggle(event_event_id) {
+    if (!$('#event_new_' + event_event_id).is(':checked')) {
+      $('#event_updated_' + event_event_id).prop('checked', true);
+    }
+  }
+  function eventUpdatedToggle(event_event_id) {
+    if (!$('#event_updated_' + event_event_id).is(':checked')) {
+      $('#event_new_' + event_event_id).prop('checked', true);
+    }
+  }
+</script>

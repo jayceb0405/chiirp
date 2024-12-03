@@ -1,0 +1,113 @@
+<%
+  # app/views/clients/widgets/index.html.erb
+  #
+  # Example:
+  #   render 'clients/widgets/index'
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar">
+      <div class="d-flex justify-content-between">
+        <h1 class="page-title"><i class="fa fa-cog mr-2"></i>SiteChat</h1>
+
+        <div class="btn-toolbar">
+          <%= if presenter.widgets.count < presenter.client.widgets_count
+                link_to '<i class="fa fa-plus mr-2"></i>New SiteChat'.html_safe, new_api_v3_clients_widget_path, {
+                  class:  'btn btn-light',
+                  id:     'button_new_sitechat',
+                  remote: true,
+                  method: :get
+                }
+              end %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit SiteChat</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_widget_dropdown">
+              <%= render partial: 'clients/widgets/index/select_widget_dropdown', locals: { widget_presenter: presenter } %>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <span>More</span>
+              <span class="fa fa-caret-down"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-arrow"></div>
+              <%= if presenter.widgets.count < presenter.client.widgets_count && current_user.client.share_widgets_allowed
+                    link_to('<i class="fa fa-cloud-download-alt mr-2"></i>Import Shared SiteChat'.html_safe,
+                            clients_import_widget_show_path,
+                            class:  'dropdown-item',
+                            id:     'button_import_shared_campaign',
+                            remote: true,
+                            method: :get)
+                  end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="widgets_body">
+
+      <% if @client_widget.present? %>
+        <%= render partial: "clients/widgets/#{@client_widget.version}/edit" %>
+      <% else %>
+        <%= render partial: 'clients/widgets/index/list', locals: { widget_presenter: presenter } %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_sitechat').addClass('has-active');
+
+    $(document).off('click', '.button_delete_client_widget');
+    $(document).on('click', '.button_delete_client_widget', function(e) {
+      e.preventDefault();
+
+      var client_widget_id      = $(this).data('id');
+      var client_widget_name    = $(this).data('name');
+
+      ChiirpAlert({
+        'body':'Deleting "' + client_widget_name + '" can NOT be un-done. Is it your intention to delete this SiteChat?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/clients/widgets/' + client_widget_id
+        });
+      });
+    });
+
+    $(document).on('click', '.option_widget', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/api/' + $(this).data('version') + '/clients/widgets/' + $(this).data('id') + '/edit'
+      });
+    });
+  });
+</script>

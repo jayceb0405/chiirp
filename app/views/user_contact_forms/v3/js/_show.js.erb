@@ -1,0 +1,52 @@
+<%
+  # app/views/user_contact_forms/v3/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: 'user_contact_forms/v3/js/show', locals: { cards: (Array) }
+  # 
+  # Required Instance Variables:
+  #   cards[1]
+  #     @user_contact_forms: (UserContactForms)
+  #   cards[2]
+  #     @user_contact_form:  (UserContactForm)
+  #   cards[3]
+  #     none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('edit_form') %>
+  $('#user_contact_forms_body').html('<%= j render partial: 'user_contact_forms/v3/edit/edit' -%>');
+<% end %>
+<% if cards.include?('edit_template') %>
+  $('#user_contact_form_modal_title').html('Edit <%= @user_contact_form.form_name -%> Template');
+  $('#user_contact_form_modal_body').html('<%= j render partial: 'user_contact_forms/v3/edit/edit_template' -%>');
+  $('#user_contact_form_modal').modal('show');
+<% end %>
+<% if cards.include?('show_form_fields') %>
+  $('#user_contact_form_form_fields_outer').html('<%= j render partial: 'user_contact_forms/v3/edit/form_fields' -%>');
+  $('#user_contact_form_form_fields_body').collapse('show');
+<% end %>
+<% if cards.include?('show_form_formatting') %>
+  $('#user_contact_form_form_formatting_outer').html('<%= j render partial: 'user_contact_forms/v3/edit/form_formatting' -%>');
+  $('#user_contact_form_form_formatting_body').collapse('show');
+<% end %>
+<% if cards.include?('show_links') %>
+  $('#user_contact_form_links_outer').html('<%= j render partial: 'user_contact_forms/v3/edit/links' -%>');
+  $('#user_contact_form_links_body').collapse('show');
+<% end %>
+<% if cards.include?('update_button_view_in_new_tab') %>
+  $(document).off('click', '#button_view_in_new_tab');
+  $(document).on('click', '#button_view_in_new_tab', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    window.open('<%= @user_contact_form.landing_page_url -%>', '_blank', 'noreferrer noopener');
+  });
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

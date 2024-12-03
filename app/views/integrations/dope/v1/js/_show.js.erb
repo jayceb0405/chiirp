@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/dope/v1/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/dope/v1/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards: Array
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:dope_presenter) || Integrations::Dope::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Automations
+<% if cards.include?('automations_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/dope/v1/automations/index', locals: { dope_presenter: presenter } -%>');
+<% end %>
+
+// Connection
+<% if cards.include?('connection_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/dope/v1/connections/show', locals: { dope_presenter: presenter } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/dope/v1/instructions/show', locals: { dope_presenter: presenter } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/dope/v1/overview', locals: { dope_presenter: presenter } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

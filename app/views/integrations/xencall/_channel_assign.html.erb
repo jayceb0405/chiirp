@@ -1,0 +1,135 @@
+<%
+  # app/views/integrations/xencall/_channel_assign.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/xencall/channel_assign"
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  channels = @client_api_integration.channels
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Channel Assignments</h6>
+  <div class="card-body">
+
+    <%= form_tag integrations_xencall_channel_assign_update_path, { builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+      <!-- channels: { channel_id => tag_id, channel_id => tag_id } -->
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px"> Channel </th>
+              <th> Tag </th>
+              <th style="width:100px;min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td class="px-1 align-middle" style="width: 1.5rem">
+                <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#edit_channel_new_tr">
+                  <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                </button>
+              </td>
+              <td class="align-left" colspan="2"> New Channel </td>
+              <td class="align-left"> Undefined </td>
+              <td class="align-middle text-right">
+                <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_channel_new_tr">
+                  <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+                </button>
+              </td>
+            </tr>
+
+            <tr class="row-details bg-light collapse" id="edit_channel_new_tr">
+              <td colspan="6" id="edit_channel_new_td">
+                <%= bootstrap_text_field(
+                      field:        'new_channel[channel_id]',
+                      value:        '',
+                      row:          { columns: [3, 5] },
+                      label:        { title: 'Channel' },
+                      html_options: { placeholder: 'Channel' }
+                    ) %>
+                <div id="channel_tag_new">
+                  <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: @client_api_integration.client.tags.new, select_or_add_field_name: 'new_channel[tag_id]', select_or_add_div_id: 'channel_tag_new' } %>
+                </div>
+              </td>
+            </tr>
+
+            <% channels.each do |channel_id, tag_id| %>
+              <% tag = @client_api_integration.client.tags.find_by(id: tag_id.to_i) %>
+
+              <tr>
+                <td class="px-1 align-middle" style="width: 1.5rem">
+                  <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#edit_channel_<%= channel_id -%>_tr">
+                    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                  </button>
+                </td>
+                <td class="align-left" colspan="2"> <%= channel_id -%> </td>
+                <td class="align-left"> <%= tag.name -%> </td>
+                <td class="align-middle text-right">
+                  <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_channel_<%= channel_id -%>_tr">
+                    <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+                  </button>
+                  <%= link_to '', '#', {
+                        class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete',
+                        id:    channel_id
+                      } %>
+                </td>
+              </tr>
+
+              <tr class="row-details bg-light collapse" id="edit_channel_<%= channel_id -%>_tr">
+                <td colspan="6" id="edit_channel_<%= channel_id -%>_td">
+                  <div id="channel_tag_<%= channel_id -%>">
+                    <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: (tag || @client_api_integration.client.tags.new), select_or_add_field_name: "channels[#{channel_id}]", select_or_add_div_id: "channel_tag_#{channel_id}" } %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+
+          </tbody>
+        </table>
+      </div>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [{ title: 'Save', disable_with: 'Saving' }]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_channels').addClass('active');
+    $('#breadcrumb').show();
+
+    $('.button_delete').on('click', function(e) {
+      e.preventDefault();
+
+      var channel_id = $(this).attr('id');
+
+      ChiirpAlert({
+        'body':'Deleting Channel "' + channel_id + '" can NOT be un-done. Is it your intention to delete this Channel?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it' }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it');
+      $(document).on('click', '#button_dump_it', function(e) {
+        $.ajax({
+          type: 'PUT',
+          dataType: 'script',
+          url: '<%= integrations_xencall_channel_assign_update_path -%>',
+          data: { commit: 'delete_channel', channel_id: channel_id }
+        });
+      });
+    });
+  });
+</script>

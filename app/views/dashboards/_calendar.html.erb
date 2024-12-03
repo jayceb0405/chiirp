@@ -1,0 +1,93 @@
+<%
+  # app/views/dashboards/_calendar.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/calendar', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+
+  user_api_integration = current_user.user_api_integrations.find_by(target: 'google', name: '')
+-%>
+<div class="card p-3">
+  <div id="calendar">
+    <!-- CALENDAR -->
+  </div>
+</div>
+
+<script>
+  $(function() {
+    var calDefaultView = '<%= @user_setting_cal_tasks.data[:cal_default_view] -%>';
+    var calendarEl = document.getElementById('calendar');
+
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      themeSystem: 'bootstrap',
+      initialView: calDefaultView, // dayGridMonth, dayGridWeek, timeGridDay, listWeek
+      headerToolbar: {
+        left: 'prev,next today',
+        center: 'title',
+        right: 'dayGridMonth,dayGridWeek,timeGridDay,listWeek'
+      },
+      timeZone: 'local',
+      editable: true,
+      // plugins: [ googleCalendarPlugin ],
+      // googleCalendarApiKey: 'AIzaSyDGw1tAoS4gj_lMvu5GMuD5zZROA8Crx6A',
+      googleCalendarApiKey: '<%= Rails.application.credentials[:google][:api_key] -%>',
+      eventSources: [
+        {
+          googleCalendarId: 'en.usa#holiday@group.v.calendar.google.com',
+          color: '#3686A0',
+          textColor: 'white'
+        },
+        <%= presenter.google_calendar_events.html_safe -%>,
+        {
+          url: '<%= cal_msgs_dashboard_path -%>',
+          color: '#F7C46C',
+          textColor: 'black'
+        },
+        {
+          url: '<%= cal_actions_dashboard_path -%>',
+          color: '#B76BA3',
+          textColor: 'white'
+        },
+        {
+          url: '<%= cal_tasks_dashboard_path -%>',
+          color: '#346CB0',
+          textColor: 'white'
+        }
+      ],
+      eventClick: function(info) {
+        // console.log(info);
+        // console.log(info.event.extendedProps.contact_id);
+
+        if (info.event.extendedProps.user_id) {
+          info.jsEvent.preventDefault();
+          window.location.href = "/my_contacts";
+        }
+        else if (info.event.extendedProps.contact_id) {
+          info.jsEvent.preventDefault();
+          window.location.href = "/central?contact_id=" + info.event.extendedProps.contact_id;
+        }
+      },
+      viewClassNames: function (args) {
+
+        if (args.view.type !== calDefaultView) {
+          $.ajax({
+            type: 'PATCH',
+            url: '<%= cal_tasks_dashboard_path -%>',
+            data: 'cal_default_view=' + args.view.type
+          });
+
+          calDefaultView = args.view.type;
+        }
+      }
+    });
+
+    calendar.render();
+  });
+</script>

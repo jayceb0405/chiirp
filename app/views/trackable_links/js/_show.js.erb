@@ -1,0 +1,28 @@
+<%
+  # app/views/trackable_links/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: "trackable_links/js/show", locals: { cards: Array }
+  # 
+  # Required Instance Variables:
+  #   cards[1]
+  #     none
+  #   cards[2]
+  #     none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('edit') %>
+  $('#trackable_links_body').html('<%= j render( partial: 'trackable_links/edit' ) -%>');
+<% end %>
+<% if cards.include?('dropdown') %>
+  $('#select_trackable_links_dropdown').html('<%= j render partial: 'trackable_links/select_trackable_links_dropdown' -%>');
+<% end %>
+<% if cards.include?('index') %>
+  $('#trackable_links_body').html('<%= j render( partial: 'trackable_links/index' ) -%>');
+<% end %>
+
+Looper.init();

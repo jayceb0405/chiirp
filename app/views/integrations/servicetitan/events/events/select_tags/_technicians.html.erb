@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_technicians.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/technicians', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[ext_tech_ids]',
+      row:          { class: 'event_criteria_row', id: "technicians_row_#{presenter.event_id}" },
+      label:        { title: "Technicians<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_technicians_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Technicians', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.ext_tech_ids_for_select, selected: presenter.ext_tech_ids },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Job Technician includes any of the selected technicians.' }
+    ) %>

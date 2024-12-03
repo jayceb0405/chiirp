@@ -1,0 +1,56 @@
+<%
+  # app/views/integrations/cardx/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/cardx/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">CardX Integration Help</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <p>To set up the integration with CardX please follow the below proceedure.</p>
+      <p>Email CardX at <a href="mailto:support@cardx.com">support@cardx.com</a> with the following information:</p>
+      <ol>
+        <li>
+          <p>Include the following snippet:</p>
+          <pre style="white-space: pre-line;">
+            We would like to set up a webhook endpoint to use with Hosted Lightbox submissions.
+
+            First, would you please provide us with the Hosted Lightbox URL that we can use?
+
+            Below are the details for the webhook.
+
+            Hosted Lightbox Webhook URL endpoint:
+            POST <%= integrations_cardx_endpoint_url(presenter.client_api_integration.webhook_api_key) %>
+
+            Please hide/disable the invoiceIdentifier and accountIdentifier fields in the Hosted Lightbox from customers.
+
+            Required Authenication Header:
+            <%= Integrations::Cardx::IntegrationsController::HTTP_REQUEST_HEADER_KEY %>: <%= presenter.client_api_integration.webhook_header_token %>
+          </pre>
+        </li>
+      </ol>
+      <p>Click the Connection tab at the top of this screen and enter the last portion of the hosted lightbox URL that was given to you to complete setup. For example if you were given the URL: <code>https://cardx.com/pay-company</code>, please enter <code>company</code> in the CardX Link Name field.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

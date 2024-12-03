@@ -1,0 +1,45 @@
+<%
+# app/views/integrations/servicetitan/jobs/_job_types.html.erb
+#
+# Example:
+# 	render partial: "integrations/servicetitan/jobs/job_types"
+#
+# Instance Variables:
+#   (opt) @job_type_id: (Integer)
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= bootstrap_select_tag(
+      field:        'job_type_id',
+      label:        { title: "Select a Job Type<span class=\"ml-2\">#{link_to '', edit_integrations_servicetitan_contact_booking_path(@contact, commit: 'refresh_job_types'), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', remote: true, title: 'Refresh Job Types', data: { toggle: 'tooltip' } }}</span>" },
+      html_options: { id: 'job_type_select', required: true },
+      options:      { for_select: options_for_select(@job_types, @job_type_id), blank: 'Job Types' },
+      messages:     { note: @form_type == 'message_central' ? 'Required to select a Time Slot' : 'Required.' }
+    ) %>
+
+<script>
+  $(function () {
+
+    <% unless @form_type == 'aiagents' %>
+      $('#job_type_select').on('change', function(e) {
+
+        if ($('#business_unit_select').val() && $('#job_type_select').val()) {
+          $.ajax({
+            type: 'GET',
+            dataType: 'script',
+            url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+            data: {
+              commit: 'get_availability',
+              business_unit_id: $('#business_unit_select').val(),
+              job_type_id: $('#job_type_select').val(),
+              ext_tech_id: $('#technician_select').val(),
+              form_type: '<%= @form_type %>'
+            }
+          });
+        }
+      });
+    <% end %>
+  });
+</script>

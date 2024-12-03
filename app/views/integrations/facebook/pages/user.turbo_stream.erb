@@ -1,0 +1,19 @@
+<%
+  # app/views/integrations/facebook/pages/user.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/pages/user'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return if @fb_user_id.blank?
+-%>
+<%= turbo_stream.hide("fb_user_id_#{@fb_user_id}_spinner") %>
+<%= turbo_stream.show("fb_user_id_#{@fb_user_id}_pages") %>
+<%= turbo_stream.update "fb_user_id_#{@fb_user_id}_pages" do %>
+  <%= render partial: 'integrations/facebook/pages/index_users' %>
+<% end %>

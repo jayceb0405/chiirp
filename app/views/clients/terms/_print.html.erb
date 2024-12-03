@@ -1,0 +1,57 @@
+<%
+  # app/views/clients/terms/_print.html.erb
+  #
+  # Example:
+  #   render 'clients/terms/print'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   destination: (String)
+  #
+  cp          = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+  destination = (local_assigns.dig(:destination) || 'dashboard').to_s
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">
+    <%= I18n.t('tenant.name') -%> Terms & Conditions <small>(September 13, 2019)</small>
+    <% if @client.terms_accepted.to_s.present? %>
+      <br><small>Terms Accepted: <%= Time.use_zone(@client.time_zone) { Chronic.parse(@client.terms_accepted) }.strftime('%m/%d/%Y (%l:%M%P)') -%></small>
+    <% end %>
+  </h6>
+
+  <div class="card-body">
+
+    <div class="overflow-auto border p-3">
+      <%= render partial: 'clients/terms/terms' %>
+    </div>
+
+    <%= form_with url: clients_term_path(@client, dest: destination), builder: LooperFormBuilder, class: 'd-print-none', remote: (destination == 'client'), method: :patch do |f| %>
+      <%= f.submit_buttons(
+            buttons: [
+              { title: 'Return to Terms', id: 'terms_form_print', disable_with: 'Returning' }
+            ]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('#terms_div').scroll(function() {chk_scroll($('#terms_div'));});
+
+    $('.nav-link').removeClass('active');
+    $('#link_terms').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_terms').addClass('has-active');
+
+    <% if @phone_number_assigned && @contact_created && @user_phone_defined %>
+      $('#breadcrumb').show();
+    <% end %>
+  });
+</script>

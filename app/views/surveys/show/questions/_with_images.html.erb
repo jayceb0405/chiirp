@@ -1,0 +1,34 @@
+<%
+  # app/views/surveys/show/questions/_with_images.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/show/questions/with_images'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="row justify-content-md-center">
+
+  <% @survey_screen.responses.each do |option_id, features| %>
+
+    <% if features.dig('string').to_s.present? && ((features.dig('screen').to_i.positive? && (next_screen = @survey.screens.find_by(id: features.dig('screen').to_i))) || features.dig('url').to_s.present?) %>
+      <div class="col mx-5 my-2 px-auto pt-4" style="max-width:300px;background-color:#d8dff9;font-size:1.5rem;font-weight:500;">
+        <%= link_to((features.dig('screen').to_i.positive? && next_screen) ? survey_path(@survey_screen.survey.survey_key, next_screen.screen_key, cid: @cid, rid: @rid, ssid: @survey_screen.id, sel: features[1].dig('string').to_s) : features.dig('url').to_s, class: 'stretched-link text-decoration-none') do %>
+          <% if @survey_screen.send("question_#{option_id.gsub('option_', '')}_image").attached? %>
+            <%= cl_image_tag(@survey_screen.send("question_#{option_id.gsub('option_', '')}_image").key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [ width: 250, height: 250, crop: 'fit' ], format: 'png' }) %>
+          <% end %>
+
+          <i class="fa fa-circle pt-4"></i>
+
+          <p class="py-3">
+            <%= features.dig('string').to_s %>
+          </p>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>

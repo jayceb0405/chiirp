@@ -1,0 +1,48 @@
+<%
+  # app/views/integrations/responsibid/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/responsibid/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards: Array
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Responsibid::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Connections
+<% if cards.include?('connections_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/responsibid/connections/show', locals: { presenter: } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/responsibid/instructions/show', locals: { presenter: } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/responsibid/overview', locals: { presenter: } -%>');
+<% end %>
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+// Webhooks
+<% if cards.include?('webhooks_created') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/responsibid/webhooks/index', locals: { presenter: } -%>');
+  $('#webhook_edit_tr_<%= @webhook_event.dig(:event_id).to_s -%>').collapse('show');
+<% end %>
+<% if cards.include?('webhooks_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/responsibid/webhooks/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  <% presenter.webhook_event = @webhook_event %>
+  $('#webhook_event_listing_<%= @webhook_event.dig(:event_id).to_s -%>').html('<%= j render partial: 'integrations/responsibid/webhooks/event_inner', locals: { presenter: } -%>');
+  $('#webhook_edit_td_<%= @webhook_event.dig(:event_id).to_s -%>').html('<%= j render partial: 'integrations/responsibid/webhooks/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('webhooks_open_new') %>
+  $('#webhook_edit_tr_').collapse('show');
+<% end %>
+
+Looper.init();

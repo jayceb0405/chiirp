@@ -1,0 +1,25 @@
+<%
+  # app/views/surveys/_select_survey_dropdown.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/select_survey_dropdown', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<div class="dropdown-arrow"></div>
+<h6 class="dropdown-header stop-propagation">
+  <span>Select a <%= ::Surveys::Survey.title -%></span>
+</h6>
+<div class="dropdown-divider"></div>
+<div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+  <% presenter.surveys.each do |survey| %>
+    <a href="#" class="dropdown-item option_survey ml-3" id="<%= survey.id -%>"><%= survey.name -%></a>
+  <% end %>
+</div>

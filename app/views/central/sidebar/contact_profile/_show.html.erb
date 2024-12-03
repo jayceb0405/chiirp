@@ -1,0 +1,139 @@
+<%
+  # app/views/central/sidebar/contact_profile/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'central/sidebar/contact_profile/show', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+  return if presenter.contact.new_record?
+-%>
+<div class="card card-reflow border-bottom">
+  <div class="card-body text-center">
+    <h3 class="card-title text-truncate">
+      <a href="#"><%= presenter.contact.fullname -%></a>
+    </h3>
+    <h6 class="card-subtitle text-muted mb-3">Created: <%= presenter.contact_created_at_formatted -%></h6>
+    <div class="row">
+      <div class="col-4">
+        <div class="metric">
+          <h6 class="metric-value"> <%= presenter.contact.contact_campaigns.count -%> </h6>
+          <p class="metric-label mt-1"> Campaigns </p>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="metric">
+          <h6 class="metric-value"> <%= TrackableLink.clicked_by_contact(presenter.contact.id).count -%> / <%= TrackableLink.delivered_to_contact(presenter.contact.id).count -%> </h6>
+          <p class="metric-label mt-1"> Trackable<br>Links </p>
+        </div>
+      </div>
+      <div class="col-4">
+        <div class="metric">
+          <h6 class="metric-value"> <%= presenter.contact_message_thread.count -%> </h6>
+          <p class="metric-label mt-1"> Messages </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body text-center pt-0">
+    <%= link_to('<i class="fa fa-pencil-alt"></i>'.html_safe,
+                edit_contact_path(presenter.contact.id),
+                class:  'btn btn-icon btn-light',
+                method: :get,
+                remote: true,
+                title:  'Edit',
+                data:   {
+                  toggle: 'tooltip'
+                }) %>
+    <%= link_to('<i class="fa fa-filter"></i>'.html_safe,
+                central_campaigns_path(presenter.contact.id),
+                class:  'btn btn-icon btn-light',
+                method: :get,
+                remote: true,
+                title:  'Campaigns',
+                data:   {
+                  toggle: 'tooltip'
+                }) %>
+    <%= link_to('<i class="fa fa-tasks"></i>'.html_safe,
+                central_tasks_path(contact_id: presenter.contact.id),
+                class:  'btn btn-icon btn-light',
+                method: :get,
+                remote: true,
+                title:  'Tasks',
+                data:   {
+                  toggle: 'tooltip'
+                }) %>
+    <%= link_to('<i class="fa fa-comments"></i>'.html_safe,
+                contact_scheduled_actions_path(presenter.contact.id),
+                class:  'btn btn-icon btn-light',
+                method: :get,
+                remote: true,
+                title:  'Scheduled Messages',
+                data:   {
+                  toggle: 'tooltip'
+                }) %>
+    <%= link_to('<i class="fa fa-eye-slash"></i>'.html_safe,
+                contact_sleep_path(presenter.contact.id),
+                class:  (%w[btn btn-icon btn-light] << (presenter.contact.sleep ? 'text-danger' : '')).join(' '),
+                method: :post,
+                remote: true,
+                title:  'Sleep',
+                data:   {
+                  toggle: 'tooltip'
+                }) %>
+    <%= link_to('<i class="fa fa-bell-slash"></i>'.html_safe,
+                contact_block_path(presenter.contact.id),
+                class:  (%w[btn btn-icon btn-light] << (presenter.contact.block ? 'text-danger' : '')).join(' '),
+                method: :post,
+                remote: true,
+                title:  'Block',
+                data:   {
+                  toggle: 'tooltip'
+                }) %>
+  </div>
+
+  <% if presenter.servicetitan_contact_api_integration %>
+    <div class="card-body text-center pt-0 pb-3">
+      <%= link_to("#{image_tag('integrations/servicetitan/logo.png', { class: 'mr-2', style: 'height:20px;' })}Book Service".html_safe,
+                  edit_integrations_servicetitan_contact_booking_path(presenter.contact.id),
+                  class:  'btn btn-secondary',
+                  style:  'text-decoration: none;',
+                  method: :get,
+                  remote: true) %>
+
+      <% if presenter.contact_servicetitan_ext_reference_id.present? %>
+        <%= link_to("#{image_tag('integrations/servicetitan/logo.png', { class: 'mr-2', style: 'height:20px;' })}Customer Record".html_safe,
+                    "https://go.servicetitan.com/#/customer/#{presenter.contact_servicetitan_ext_reference_id}",
+                    class:  'btn btn-secondary',
+                    style:  'text-decoration: none;',
+                    target: '_blank', rel: 'noopener') %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="card-header border-top">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Address</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <%= presenter.contact_address_formatted -%>
+  </div>
+
+  <div class="card-header border-top border-bottom-0">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Lead Source:<span class="font-weight-normal small ml-2"><%= presenter.contact_lead_source_name -%></span></h6>
+    </div>
+  </div>
+</div>
+
+<%= render partial: 'tags/cloud/index', locals: { contact: presenter.contact } %>
+<%= render partial: 'notes/cloud/index', locals: { contact: presenter.contact } %>

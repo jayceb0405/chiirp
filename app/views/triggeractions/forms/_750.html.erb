@@ -1,0 +1,65 @@
+<%
+  # app/views/triggeractions/forms/_750.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/750", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # call a Contact
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<ul>
+  <li><%= I18n.t('tenant.name') -%> will call the selected User and then make the connection.</li>
+  <li>If the User does NOT answer, the retry limit & retry interval determine when to make additional attempts.</li>
+  <li>Call answer detection (human or machine) is required for this action - an additional 0.5 credits will be charged for each call.</li>
+  <li class="text-danger"><strong>This action should be carefully considered before activating.</strong></li>
+
+  <ul>
+    <li>Using this action in a Campaign that is started in bulk (ie: My Contacts, Imports) is NOT recommended.</li>
+  </ul>
+</ul>
+
+<%= bootstrap_select_tag(
+      field:        'triggeraction[send_to]',
+      label:        { title: 'Who to Call' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_sent_to_750, selected: presenter.triggeraction.send_to, blank: 'Select a Recipient' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[user_id]',
+      label:        { title: 'User to Connect Call To' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_users_182_700_750, selected: presenter.triggeraction.user_id, blank: 'Select a User' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[from_phone]',
+      label:        { title: 'Phone Number to Send From' },
+      html_options: { disabled: presenter.campaign_disabled? || presenter.campaign.lock_phone },
+      options:      { for_select: options_for_phone_numbers(client: presenter.client, selected: presenter.triggeraction.from_phone, options: [['user_number', 'User\'s Default Number']]), blank: 'Last Number Used' },
+      messages:     { note: "Actions are #{presenter.campaign_disabled? || presenter.campaign.lock_phone ? '' : 'NOT '}locked to the Campaign default phone number." }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[retry_count]',
+      label:        { title: 'Retry Limit' },
+      html_options: { id: "retry_count_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 100, from: presenter.triggeraction.retry_count, step: 1, grid: true, grid_num: 10, disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_range_slider(
+      field:        'triggeraction[retry_interval]',
+      label:        { title: 'Retry Interval (Minutes)' },
+      html_options: { id: "retry_interval_#{presenter.triggeraction.id}" },
+      range_slider: { type: 'single', min: 0, max: 120, from: presenter.triggeraction.retry_interval, step: 1, grid: true, grid_num: 10, disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_switch_field(
+      field:        'triggeraction[stop_on_connection]',
+      value:        presenter.triggeraction.stop_on_connection,
+      values:       [true, false],
+      html_options: { disabled: presenter.campaign_disabled? },
+      label:        { title: 'When the User answers the call stop the Campaign' }
+    ) %>

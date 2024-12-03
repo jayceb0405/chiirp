@@ -1,0 +1,51 @@
+<%
+  # app/views/user_chats/chats/_chat.html.erb
+  #
+  # Example:
+  # 	render partial: "user_chats/chats/chat", collection: @user_chats
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  recipient_user_id = local_assigns.include?(:recipient_user_id) && local_assigns[:recipient_user_id].is_a?(Integer) ? local_assigns[:recipient_user_id] : chat.to_user_id
+
+  if chat.from_user_id == recipient_user_id
+    # message was sent from User
+    msg_class   = 'is-self'
+    show_status = false
+    agent_info  = ''
+  elsif chat.to_user_id == recipient_user_id
+    # message was sent to User
+
+    msg_class = if chat.automated
+                  # message was automated (Triggeraction or group action)
+                  'is-triggeraction'
+                else
+                  # message was sent out by User
+                  'is-interlocutor'
+                end
+    show_status = true
+    agent_info  = ''
+
+  else
+    msg_class          = 'is-unknown-out'
+    show_status        = true
+    to_user_fullname   = (chat.to_user_id.positive? ? chat.to_user.fullname : 'Undefined')
+    from_user_fullname = (chat.from_user_id.positive? ? chat.from_user.fullname : 'Undefined')
+    agent_info         = '<br />'.html_safe + "(From: #{from_user_fullname})" + '<br />'.html_safe + "(To: #{to_user_fullname})"
+  end
+-%>
+<div class="m-central__messages-message <%= msg_class -%>">
+  <div class="m-central__messages-wrap">
+    <span class="m-central__messages-date">
+      <% if show_status %><span id="user_chat_msg_status_<%= chat.id -%>">(<%= chat.read_at.nil? ? 'sent' : 'read' -%>)</span><% end -%>
+      <%= Friendly.new.date(chat.created_at, chat.from_user.client.time_zone, true) %>
+    </span>
+    <div class="m-central__messages-message-text" style="max-width:90%; min-width:90%;">
+      <%= chat.content.presence || '&nbsp;'.html_safe -%><%= agent_info %>
+    </div>
+  </div>
+</div>

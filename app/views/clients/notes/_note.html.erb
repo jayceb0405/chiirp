@@ -1,0 +1,44 @@
+<%
+  # app/views/clients/notes/_note.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/notes/note', collection: Notes, as: :note, , locals: { presenter: Clients::Notes::Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @note: (Note)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Clients::Notes::Presenter)
+  #   (opt) note:      (Note)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Notes::Presenter)
+
+  presenter.note = note
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_note_row_<%= presenter.note.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#edit_note_row_<%= presenter.note.id -%>">
+      <%= presenter.note.user&.firstname_last_initial.to_s -%>
+    </button>
+  </td>
+  <td class="text-left align-middle"><%= Friendly.new.date(presenter.note.created_at, presenter.client.time_zone, true) -%></td>
+  <td class="text-left align-middle"><%= truncate(presenter.note.note, length: 30) -%></td>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_note_row_<%= presenter.note.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt note_delete',
+          data:  { id: presenter.note.id, name: presenter.note.note }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_note_row" id="edit_note_row_<%= presenter.note.id -%>">
+  <!-- Note Edit -->
+</tr>

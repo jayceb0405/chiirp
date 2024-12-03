@@ -1,0 +1,104 @@
+<%
+  # app/views/snippets/_custom_modal.html.erb
+  #
+  # Example:
+  #   render partial: 'snippets/custom_modal', locals: { id: String, max_width: String, max_height: String, large: Boolean, centered: Boolean, scrollable: Boolean, close: Boolean, full_size: Boolean }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   id:         (String)
+  #   max_width:  (String)
+  #   max_height: (String)
+  #   large:      (Boolean)
+  #   centered:   (Boolean)
+  #   scrollable: (Boolean)
+  #   close:      (Boolean)
+  #   full_size:  (Boolean)
+  #
+  id = (local_assigns.dig(:id) || "dash_modal_#{rand(1000)}").to_s
+
+  modal_dialog_class   = ['modal-dialog']
+  modal_dialog_style   = []
+  modal_content_style  = []
+
+  modal_dialog_class  << 'modal_lg' if local_assigns.dig(:large).to_bool || local_assigns.dig(:full_size).to_bool
+  modal_dialog_class  << 'modal-dialog-centered' if local_assigns.dig(:centered).to_bool
+  modal_dialog_class  << 'modal-dialog-scrollable' if local_assigns.dig(:scrollable).to_bool
+
+  if local_assigns.dig(:full_size).to_bool
+    modal_dialog_style << 'max-width:100vw;'
+    modal_dialog_style << 'max-height:100vh;'
+
+    modal_content_style << 'max_width:100vw;'
+    modal_content_style << 'max-height:100vh;'
+    modal_content_style << 'width:100vw;'
+    modal_content_style << 'height:100vh;'
+  else
+    modal_dialog_style  << "max-width:#{max_width};" if local_assigns.dig(:max_width).present?
+    modal_dialog_style  << 'max-width:500px;' if local_assigns.dig(:max_width).nil? && !local_assigns.dig(:large).to_bool
+    modal_dialog_style  << "max-height:#{local_assigns.dig(:max_height).presence || '90vh'};"
+    modal_dialog_style  << 'top:3vh;' if local_assigns.dig(:max_height).blank?
+  end
+-%>
+<div class="modal fade" id="<%= id -%>" tabindex="-1" role="dialog" aria-labelledby="<%= id -%>_title" aria-hidden="true">
+  <div class="<%= modal_dialog_class.join(' ') -%>" id="<%= id -%>_dialog" style="<%= modal_dialog_style.join(' ') -%>" role="document">
+    <div class="modal-content" id="<%= id -%>_content" style="<%= modal_content_style.join(' ') -%>">
+
+      <div class="modal-header border-bottom mb-3" id="<%= id -%>_header">
+        <!-- MODAL HEADER -->
+        <h5 class="modal-title w-100 pr-4" id="<%= id -%>_title">
+          <!-- MODAL TITLE -->
+        </h5>
+        <% if local_assigns.dig(:close).to_bool %>
+          <button type="button" class="close" id="<%= id %>_close_button" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        <% end %>
+      </div>
+
+      <div class="modal-body" id="<%= id -%>_body">
+        <!-- MODAL BODY -->
+      </div>
+
+      <div class="modal-footer border-top-0" id="<%= id -%>_footer">
+        <!-- MODAL FOOTER -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    var modal = $('#<%= id -%>');
+    var headerOriginal = $('#<%= id -%>_header').html();
+
+    // requires click on close button only to close modal
+    // use this to close only one modal when more than are visible
+    // do not use this for all modals
+    // modal.modal({ backdrop: 'static' });
+
+    modal.on('show.bs.modal', function(e) {
+      var zIndex = 1040 + (10 * $('.modal:visible').length);
+      modal.css('z-index', zIndex);
+      setTimeout(function() {
+        $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
+      }, 0);
+
+      $('#<%= id -%>_close_button').off('click');
+      $('#<%= id -%>_close_button').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        modal.modal('hide');
+      });
+    });
+
+    modal.on('hidden.bs.modal', function(e) {
+      // reset the modal
+      $('#<%= id -%>_header').html(headerOriginal);
+      $('#<%= id -%>_body').html('');
+      $('#<%= id -%>_footer').html('');
+    });
+  });
+</script>

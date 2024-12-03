@@ -1,0 +1,74 @@
+<%
+# app/views/devise/sessions/new.html.erb
+#
+# Devise Login
+#
+# Example:
+# 	render partial: 'devise/sessions/new'
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'devise/shared/header' %>
+
+<%= form_for resource, as: resource_name, url: session_path(resource_name), builder: LooperFormBuilder, html: { class: 'auth-form-noborder needs-validation mb-5', novalidate: true } do |f| %>
+  <h4 class="text-left pb-3">Log in</h4>
+
+  <% unless flash[:notice].blank? %>
+    <div class="text-info">
+      <%= flash[:notice] %>
+    </div>
+  <% end %>
+
+  <% unless flash[:alert].blank? %>
+    <div class="text-danger">
+      <%= flash[:alert] %>
+    </div>
+  <% end %>
+
+  <% if params[:expired] == 'true' %>
+    <div class="text-danger">
+      Your session has expired. You will need to sign in again.
+    </div>
+  <% end %>
+
+  <%= f.text_field :email, {
+        row:          { columns: [3, 9] },
+        label:        { title: 'Email' },
+        html_options: { placeholder: 'Email', autocomplete: 'email', required: true, autofocus: true }
+      } %>
+  <%= f.password_field :password, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'Password' },
+        html_options: { placeholder: 'Password', autocomplete: 'current-password', required: true },
+        prepends:     []
+      } %>
+  <%= bootstrap_info_field(
+        info:         link_to('Forgot password?', new_user_password_path, { class: 'link' }).to_s,
+        info_wrapper: { class: 'mb-0' },
+        row:          { class: 'mb-0', columns: [3, 9] },
+        col:          { class: 'mt-0 mb-0' },
+        label:        { class: 'mt-0 mb-0' }
+      ) %>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Log in' }]
+      ) %>
+<% end %>
+
+<% if devise_mapping.omniauthable? %>
+  <%= render partial: 'devise/shared/links' %>
+<% end %>
+
+<script>
+  $(function() {
+    if (typeof window.ReactNativeWebView !== 'undefined') {
+      window.ReactNativeWebView.postMessage('user_login');
+    }
+  });
+</script>

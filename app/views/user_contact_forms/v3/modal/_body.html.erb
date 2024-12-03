@@ -1,0 +1,26 @@
+<%
+  # app/views/user_contact_forms/v3/modal/_body.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/v3/modal/body'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  rendered_by = local_assigns.include?(:rendered_by) && %w[page frame modal].include?(local_assigns[:rendered_by].to_s) ? local_assigns[:rendered_by].to_s : 'page'
+  form_html   = render partial: 'user_contact_forms/v3/shared/form', locals: { rendered_by: }
+-%>
+<div class="container" id="tenant-quicklead-container" style="max-width:none;">
+  <button id="close-button" style="border:0;position:absolute;top:10px;right:10px;background-color:transparent;">
+    <i class="fa fa-times text-muted"></i>
+  </button>
+
+  <div class="row mt-4">
+    <div class="col-10 col-sm-6 col-lg-4 offset-1 offset-sm-3 offset-lg-4 border rounded" id="tenant-quicklead-form" style="background-color:<%= @user_contact_form.form_bg_color.to_s -%>;border-color:<%= @user_contact_form.form_bg_color.to_s -%>;">
+      <%= @user_contact_form.template.gsub('#{form}', form_html).html_safe %>
+    </div>
+  </div>
+</div>

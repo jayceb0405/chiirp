@@ -1,0 +1,9 @@
+//= link_tree ../fonts
+//= link_tree ../images
+//= link_tree ../images .svg
+//= link_directory ../javascripts .js
+//= link_directory ../javascripts .json
+//= link_directory ../stylesheets .css
+//= link_directory ../stylesheets .scss
+//= link_tree ../../javascript .js
+//= link_tree ../../../vendor/javascript .js

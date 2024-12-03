@@ -1,0 +1,18 @@
+<div class="cover-controls cover-controls-bottom">
+  <button class="btn btn-icon btn-light" id="button_help"><i class="fa fa-question"></i></button>
+</div>
+<script>
+  $(function () {
+    $(document).off('click', '#button_help')
+    $(document).on('click', '#button_help', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/aiagents',
+        data: { cards: ['help'] }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,42 @@
+<%
+  # app/views/triggeractions/forms/_182.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/forms/182', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # add Users to a Slack channel
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[slack_channel]',
+      label:        { title: 'Slack Channel' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.slack_channels, selected: presenter.triggeraction.slack_channel, blank: 'Select a Slack Channel' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'triggeraction[slack_channel_new]',
+      value:        presenter.slack_channels.include?(presenter.triggeraction.slack_channel) ? '' : presenter.triggeraction.slack_channel,
+      label:        { title: 'Create Slack Channel' },
+      html_options: { id: "slack_channel_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      messages:     { note: presenter.triggeraction_note_for_slack_message }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[users]',
+      label:        { title: 'Select Who to Add to Channel' },
+      html_options: { multiple: true, disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.triggeraction_options_for_users_182_700_750, selected: presenter.triggeraction.users }
+    ) %>
+
+<script>
+  $(function() {
+    // provide #hashtag variable selector
+    MultiTypeahead('#slack_channel_<%= presenter.triggeraction.id -%>', <%= options_for_hashtag(client: presenter.client, include_estimate_hashtags: true, include_invoice_hashtags: true, include_job_hashtags: true, include_subscription_hashtags: true).to_json.html_safe %>, '#', false);
+  });
+</script>

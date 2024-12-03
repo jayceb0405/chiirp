@@ -1,0 +1,36 @@
+<%
+  # app/views/campaigns/index/starting_this_campaign/_widgets.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/index/starting_this_campaign/widgets', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+
+  widgets_starting_this_campaign = presenter.widgets_starting_this_campaign(presenter.campaign.id)
+-%>
+<% if widgets_starting_this_campaign.present? %>
+  <div class="dropdown d-inline-block">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary fa fa-cog" data-toggle="dropdown"></button>
+    <div class="dropdown-menu dropdown-menu-right">
+      <div class="dropdown-arrow"></div>
+      <h6 class="dropdown-header stop-propagation">
+        <span>Select a SiteChat</span>
+      </h6>
+      <div class="dropdown-divider"></div>
+      <div class="dropdown-scroll perfect-scrollbar" style="max-height:344px;">
+
+        <% widgets_starting_this_campaign.each do |w| %>
+          <%= link_to "<i class=\"fa fa-pencil-alt mr-2\"></i>#{w.widget_name}".html_safe,
+                      w.version == 'v2' ? edit_api_v2_clients_widget_path(w.id) : edit_api_v3_clients_widget_path(w.id),
+                      class: 'dropdown-item' %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+<% end %>

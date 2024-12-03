@@ -1,0 +1,44 @@
+<%
+  # app/views/messages/texts/_submit_options.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/submit_options', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return unless presenter.show_submit?
+-%>
+<%= button_tag(type: 'submit', class: 'btn btn-light rounded-pill', id: "send_to_contact_button_#{presenter.message_id}", style: 'width:auto;', disabled: presenter.disabled?) do %>
+  <i class="fa fa-paper-plane mr-2"></i>Send
+<% end %>
+
+<script>
+  $(function() {
+    $('#send_to_contact_button_<%= presenter.message_id -%>').on('click', function(e) {
+
+      if (send_to_contact_ok) {
+        send_to_contact_ok = false;
+      } else {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':       'Sending message to <%= presenter.contact.fullname -%>!',
+          'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: "button_no_wait_#{presenter.message_id}" }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: "button_yup_go_for_it_#{presenter.message_id}" }].to_json) -%>,
+          'type':       'danger',
+          'persistent': true
+        });
+
+        $(document).off('click', '#button_yup_go_for_it_<%= presenter.message_id -%>');
+        $(document).on('click', '#button_yup_go_for_it_<%= presenter.message_id -%>', function(e) {
+          send_to_contact_ok = true;
+          $('#send_to_contact_button_<%= presenter.message_id -%>').click();
+        });
+      }
+    });
+  });
+</script>

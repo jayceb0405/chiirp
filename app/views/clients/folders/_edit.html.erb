@@ -1,0 +1,42 @@
+<%
+  # app/views/clients/folders/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/folders/edit'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #   @folder:  (folder)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+  cp.folder = @folder
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= cp.folder.name.to_s.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= cp.folder.name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: cp.folder, url: cp.folder.new_record? ? client_folders_path(cp.client.id) : client_folder_path(cp.client.id, cp.folder.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "folder_form_#{cp.folder.id}", novalidate: true } do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: "#{Folder.title} Name" },
+              html_options: { minlength: 2, placeholder: "#{Folder.title} Name", required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', id: "folder_button_#{cp.folder.id}", disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

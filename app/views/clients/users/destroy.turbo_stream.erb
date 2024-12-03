@@ -1,0 +1,21 @@
+<%
+   # app/views/clients/users/destroy.turbo_stream.erb
+   #
+   # Example:
+   #   render partial: 'clients/users/destroy'
+   #
+   # Instance Variables:
+   #   @user: (User)
+   #
+   # Local Variables:
+   #   none
+   #
+   return unless @user.is_a?(User)
+
+   presenter = ClientPresenter.new(client: @client)
+-%>
+<%= turbo_stream.update 'client_page_section' do %>
+  <%= render partial: 'clients/users/index', locals: { client_presenter: presenter } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

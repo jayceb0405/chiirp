@@ -1,0 +1,279 @@
+<%
+  # app/views/layouts/_credit_card.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/credit_card', locals: { card_token_id: String, submit_button_id: String }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) form_id:       (String)
+  #   (req) card_token_id: (String)
+  #   (opt) submit_button_text: (String)
+  #   (opt) submit_button_id:   (String)
+  #   (opt) package:            (String)
+  #
+  form_id                       = local_assigns.dig(:form_id).to_s
+  card_token_id                 = local_assigns.dig(:card_token_id).to_s
+  submit_button_id              = (local_assigns.dig(:submit_button_id) || 'credit_card_submit_button').to_s
+  submit_button_text            = (local_assigns.dig(:submit_button_text) || 'Save Credit Card').to_s
+  submit_button_disable_with    = (local_assigns.dig(:submit_button_disable_with) || 'Saving Credit Card').to_s
+  zipcode_field_name            = local_assigns.dig(:zipcode_field, :name).to_s
+  zipcode_field_val             = local_assigns.dig(:zipcode_field, :val).to_s
+  base_form_validation_function = (local_assigns.dig(:base_form_validation_function) || 'ccFormValidation').to_s
+  months_array                  = (1..12).map { |m| [Date::MONTHNAMES[m], m] }
+-%>
+<%= bootstrap_text_field(
+      field:        'card_number',
+      value:        '',
+      row:          { columns: [0, 12] },
+      col:          { class: 'mb-0' },
+      label:        { title: 'Credit Card Number<i class="bi bi-superscript">*</i>' },
+      html_options: { id: 'card_number', placeholder: 'Card Number' }
+    ) %>
+
+<% if zipcode_field_name.present? %>
+  <div class="form-row">
+    <div class="col-md-6 mb-3">
+      <div class="form-group">
+        <%= text_field_tag 'card_cvv', '', { class: 'form-control', id: 'card_cvv', placeholder: 'CVV', autocomplete: 'off' } %>
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="form-group">
+        <%= text_field_tag zipcode_field_name, zipcode_field_val, { class: 'form-control', id: 'zipcode', placeholder: 'Billing Zip Code', maxlength: 6, autocomplete: 'off' } %>
+      </div>
+    </div>
+  </div>
+<% else %>
+  <%= bootstrap_text_field(
+        field:        'card_cvv',
+        value:        '',
+        row:          { columns: [0, 12] },
+        col:          { class: 'mb-0' },
+        label:        { title: 'CVV<i class="bi bi-superscript">*</i>' },
+        html_options: { id: 'card_cvv', placeholder: 'CVV' }
+      ) %>
+<% end %>
+
+<div class="row mb-3">
+  <div class="col-6">
+    <%= bootstrap_select_tag(
+          field:        'exp_month',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          label:        { title: 'Expiration Month<i class="bi bi-superscript">*</i>' },
+          html_options: { id: 'card_exp_month' },
+          options:      { array: months_array, selected: Date.current.month }
+        ) %>
+  </div>
+  <div class="col-6">
+    <%= bootstrap_select_tag(
+          field:        'exp_year',
+          row:          { columns: [0, 12] },
+          col:          { class: 'mb-0' },
+          label:        { title: 'Expiration Year<i class="bi bi-superscript">*</i>' },
+          html_options: { id: 'card_exp_year' },
+          options:      { for_select: options_for_select(Date.current.year..Date.current.year + 10), selected: Date.current.year }
+        ) %>
+  </div>
+</div>
+
+<div class="row mb-0">
+  <div class="col-lg-6">
+    <%= image_tag 'visa.jpg', { id: 'visa' } %>
+    <%= image_tag 'mastercard.jpg', { id: 'mastercard' } %>
+    <%= image_tag 'amex.jpg', { id: 'amex' } %>
+  </div>
+
+  <%= bootstrap_submit_buttons(
+        row:     { class: 'col-lg-6' },
+        buttons: [{ title: submit_button_text, id: submit_button_id, disable_with: submit_button_disable_with }]
+      ) %>
+</div>
+
+<script>
+  $(function() {
+    var owner = $('#owner'),
+        cardNumber = $('#card_number'),
+        cardYear = $('#card_exp_year'),
+        cardMonth = $('#card_exp_month'),
+        cardCvv = $('#card_cvv'),
+        submitButton = $('#<%= submit_button_id -%>'),
+        mastercard = $('#mastercard'),
+        visa = $('#visa'),
+        amex = $('#amex');
+
+    cardNumber.payform('formatCardNumber');
+    cardCvv.payform('formatCardCVC');
+    cardNumber.keyup(function() {
+      amex.css('opacity', 1.0);
+      visa.css('opacity', 1.0);
+      mastercard.css('opacity', 1.0);
+
+      if ($.payform.parseCardType(cardNumber.val()) == 'visa') {
+        mastercard.css('opacity', 0.25);
+        amex.css('opacity', 0.25);
+      } else if ($.payform.parseCardType(cardNumber.val()) == 'amex') {
+        mastercard.css('opacity', 0.25);
+        visa.css('opacity', 0.25);
+      } else if ($.payform.parseCardType(cardNumber.val()) == 'mastercard') {
+        amex.css('opacity', 0.25);
+        visa.css('opacity', 0.25);
+      }
+    });
+    submitButton.click(function(e) {
+      e.preventDefault();
+
+      var isCardValid = $.payform.validateCardNumber(cardNumber.val());
+      var isCvvValid = $.payform.validateCardCVC(cardCvv.val(), $.payform.parseCardType(cardNumber.val()));
+
+      if (!<%= base_form_validation_function -%>()) {
+
+      } else if (!isCardValid) {
+        // invalid credit card number
+        ChiirpAlert({
+          'title':      'Invalid Credit Card',
+          'body':       'Your credit card number is not valid.',
+          'type':       'warning',
+          'persistent': true
+        });
+      } else if (!isCvvValid) {
+        // invalid credit card cvv
+        ChiirpAlert({
+          'title':      'Invalid Credit Card',
+          'body':       'Your security code is not valid.',
+          'type':       'warning',
+          'persistent': true
+        });
+      } else if ($.payform.validateCardExpiry(cardMonth.val(), cardYear.val()) == false) {
+        // invalid credit card expiration date
+        ChiirpAlert({
+          'title':      'Invalid Credit Card',
+          'body':       'Your credit card expiration date is not valid.',
+          'type':       'warning',
+          'persistent': true
+        });
+      } else {
+        // credit card info is acceptable...process card
+        var submit_element_val = submitButton.val();
+        submitButton.val('<%= submit_button_disable_with -%>');
+        submitButton.prop('disabled', true);
+
+        <% case Creditcard::Base.credit_card_processor %>
+        <% when %'stripe' %>
+          getStripeToken();
+        <% when 'authorizenet' %>
+          getAuthorizeNetToken();
+        <% end %>
+
+        // submitButton.prop('disabled', false);
+        // submitButton.val(submit_element_val);
+      }
+    });
+
+    function ccFormValidation() { return true; }
+
+    function getStripeToken() {
+      Stripe.setPublishableKey('<%= Creditcard::Base.stripe_credit_card_pub_key -%>');
+      Stripe.card.createToken({
+        number: cardNumber.val(),
+        cvc: cardCvv.val(),
+        exp_month: cardMonth.val(),
+        exp_year: cardYear.val(),
+      }, stripeResponseHandler);
+    }
+
+    function getAuthorizeNetToken() {
+      var authData = {};
+          authData.clientKey = '<%= Rails.application.credentials[:creditcard][:authorizenet][:pub_key] -%>';
+          authData.apiLoginID = '<%= Rails.application.credentials[:creditcard][:authorizenet][:login_id] -%>';
+
+      var cardData = {};
+          cardData.cardNumber = cardNumber.val().replace(/\s/g, '');
+          cardData.month = cardMonth.val();
+          cardData.year = cardYear.val();
+          cardData.cardCode = cardCvv.val();
+
+      var secureData = {};
+          secureData.authData = authData;
+          secureData.cardData = cardData;
+
+      Accept.dispatchData(secureData, authorizeNetResponseHandler);
+    }
+  });
+
+  var authorizeNetResponseHandler = function(response) {
+    if (response.messages.resultCode === 'Error') {
+      var message = '';
+      var i = 0;
+      while (i < response.messages.message.length) {
+        // console.log('AuthorizeNet Error:');
+        // console.log(
+        //  response.messages.message[i].code + ': ' +
+        //  response.messages.message[i].text
+        // );
+        if (i > 0) {
+          message = message + ', ';
+        }
+        message = message + response.messages.message[i].code + ': ' + response.messages.message[i].text;
+        i = i + 1;
+      }
+      ChiirpAlert({
+        'title':      'Credit Card Processing Error',
+        'body':       'Your credit card could not be processed.<br />Error: ' + message,
+        'type':       'warning',
+        'persistent': true
+      });
+
+      submitButton.prop('disabled', false);
+      submitButton.val('<%= submit_button_text -%>');
+    } else {
+      // console.log('AuthorizeNet Success:');
+      // console.log(response.opaqueData);
+
+      // clear credit card form
+      $('#card_number').val('');
+      $('#card_exp_year').val('');
+      $('#card_exp_month').val('');
+      $('#card_cvv').val('');
+
+      $('#<%= card_token_id -%>').val(response.opaqueData.dataValue);
+      $('#<%= form_id -%>').submit();
+    }
+  }
+
+  var stripeResponseHandler = function(status, response) {
+    if (response.error) {
+      console.log('Stripe Error:');
+      console.log(response);
+      ChiirpAlert({
+        'title':      'Credit Card Processing Error',
+        'body':       'Your credit card could not be processed.<br />Error: ' + response.error,
+        'type':       'warning',
+        'persistent': true
+      });
+
+      submitButton.prop('disabled', false);
+      submitButton.val('<%= submit_button_text -%>');
+    } else {
+      console.log('Stripe Success:');
+      console.log(response);
+
+      // clear credit card form
+      $('#card_number').val('');
+      $('#card_exp_year').val('');
+      $('#card_exp_month').val('');
+      $('#card_cvv').val('');
+
+      var token = response.id;
+      $('#<%= card_token_id -%>').val(token);
+      // var elem = document.getElementById('<%= form_id -%>')
+      // Rails.fire(elem, 'submit');
+      // Rails.fire($('#<%= form_id -%>')[0], 'submit');
+      console.log('<%= form_id -%>');
+      $('#<%= form_id -%>').submit();
+    }
+  }
+</script>

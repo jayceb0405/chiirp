@@ -1,0 +1,28 @@
+<%
+  # app/views/integrations/five9/campaigns/_campaign.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/campaigns/campaign', collection: five9_campaigns, as: :campaign, locals: { servicetitan_campaigns: servicetitan_campaigns }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   servicetitan_campaigns: Array
+  #
+-%>
+<tr>
+  <td class="text-left">
+    <%= campaign %>
+  </td>
+  <td class="text-left">
+    <%= bootstrap_select_tag(
+      field: "campaigns[#{campaign.gsub(' ', '_')}]",
+      row: { columns: [0, 12] },
+      col: { class: 'mb-0' },
+      form_group: { class: 'mb-0' },
+      label: { class: 'mt-0' },
+      options: { array: servicetitan_campaigns, selected: @client_api_integration.campaigns.dig(campaign.gsub(' ', '_')).to_i, blank: 'Select a ServiceTitan Campaign' }
+    ) %>
+  </td>
+</tr>

@@ -1,0 +1,16 @@
+<%
+  # app/views/messages/texts/_active_aiagent_message.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/active_aiagent_message', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return unless presenter.active_aiagents?
+-%>
+<small id="aiagent_active_message" class="text-muted">AI Agent Active</small>

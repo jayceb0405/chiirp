@@ -1,0 +1,10 @@
+<%= @header %>
+
+<%= yield %>
+
+Chiirp
+
+<% if params[:link_url].present? %>
+<%= params[:link_text] %>:
+<%= params[:link_url] %>
+<% end %>

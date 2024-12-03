@@ -1,0 +1,40 @@
+<%
+	# app/views/trainings/_edit.html.erb
+	# 
+	# Example:
+	# 	render partial: 'trainings/edit', locals: { trainings_presenter: TrainingsPresenter }
+	# 
+	# Required Instance Variables:
+	# 	@training: (Training)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training, training_page: @training_page)
+-%>
+<div class="card-header border-0">
+  <div class="d-flex justify-content-between">
+    <h6>Course Editor</h6>
+  </div>
+</div>
+
+<div class="card-body">
+	<%= form_with model: tp.training, builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', novalidate: true } do |f| %>
+    <%= f.text_field :title, {
+        label: { title: 'Course Name' },
+      html_options: { placeholder: 'Course Name', autofocus: true }
+    } %>
+    <%= f.text_field :menu_label, {
+        label: { title: 'Menu Label' },
+      html_options: { placeholder: 'Menu Label' }
+    } %>
+    <%= f.text_area :description, {
+        label: { title: 'Course Description' },
+      html_options: { id: 'course_description_input', placeholder: 'Course Description' }
+    } %>
+
+    <%= f.submit_buttons(
+      buttons: [{ title: 'Save Course', disable_with: 'Saving Course' }]
+    ) %>
+	<% end %>
+</div>

@@ -1,0 +1,18 @@
+<%
+  # /app/views/contacts/destroy.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (opt) broadcast:   (Boolean)
+  #   (opt) cards:       (Array)
+  #   (opt) page_number: (Integer)
+  #
+  # Local Variables:
+  #
+  cards     = @cards
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast   = @broadcast
+  presenter.page_number = @page_number
+-%>
+<%= turbo_stream.update 'my_contacts' do %>
+  <%= render 'my_contacts/broadcast/contacts', presenter: %>
+<% end %>

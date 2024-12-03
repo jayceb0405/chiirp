@@ -1,0 +1,104 @@
+<%
+	# app/views/system_settings/integrations/_index.html.erb
+	#
+	# Example:
+	# 	render partial: "system_settings/integrations/index", locals: { presenter: SystemSettings::IntegrationsPresenter }
+	#
+	# Instance Variables:
+	# 	none
+	#
+	# Local Variables:
+  #   (req) presenter: (SystemSettings::IntegrationsPresenter)
+	#
+  presenter = SystemSettings::IntegrationsPresenter.new(user: current_user) unless local_assigns.dig(:presenter).is_a?(SystemSettings::IntegrationsPresenter)
+-%>
+<div class="card card-fluid">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-puzzle-piece mr-2"></i>Integrations <span class="badge"><%= presenter.integrations.count -%></span></h6>
+      <%= link_to '<i class="fa fa-plus mr-2"></i>New Integration'.html_safe,
+                  new_system_settings_integration_path,
+                  method: :get,
+                  remote: true,
+                  class:  'btn btn-light' %>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="2" style="min-width: 240px"> Integration </th>
+            <th class="text-left d-none d-md-table-cell"> Created </th>
+            <th style="min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="integrations_table_body">
+          <%= render partial: "system_settings/integrations/integration", collection: presenter.integrations, as: :integration, locals: { presenter: } -%>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_integrations').addClass('active');
+
+    $(document).off('show.bs.collapse', '.integration_edit');
+    $(document).on('show.bs.collapse', '.integration_edit', function (e) {
+
+      if (e.target.id > 'integration_') {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/system_settings/integrations/' + e.target.id.replace('integration_', '') + '/edit'
+        })
+      }
+    });
+
+    $(document).off('change', '.integration_logo_input');
+    $(document).on('change', '.integration_logo_input', function (e) {
+      var elem = document.getElementById('integration_logo_form_' + e.target.id.replace('integration_logo_input_', ''));
+      Rails.fire(elem, 'submit');
+    });
+
+    $(document).off('click', '.button_delete_integration');
+    $(document).on('click', '.button_delete_integration', function(e) {
+      e.preventDefault();
+
+      var id           = $(this).data('id');
+      var company_name = $(this).data('company_name');
+
+      if (id) {
+        ChiirpAlert({
+          'body':'Deleting ' + company_name + ' can NOT be un-done. Is it your intention to delete this Integration',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_integration' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_delete_integration');
+        $(document).on('click', '#button_dump_it_delete_integration', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '/system_settings/integrations/' + id
+          });
+        });
+      } else {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= system_settings_integrations_path -%>'
+        });
+      }
+    });
+  });
+</script>

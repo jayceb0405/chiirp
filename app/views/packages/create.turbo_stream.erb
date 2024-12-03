@@ -1,0 +1,10 @@
+<%= turbo_stream.update 'packages_body', partial: 'packages/index' %>
+<%= turbo_stream.update 'select_package_dropdown', partial: 'packages/select_package_dropdown' %>
+
+<%= turbo_stream.bootstrap_init %>
+
+<% if @package.onetime %>
+  <%= turbo_stream.update 'dash_modal_title', 'Onetime Package Created' %>
+  <%= turbo_stream.update 'dash_modal_body', partial: 'packages/onetime' %>
+  <%= turbo_stream.show_modal 'dash_modal' %>
+<% end %>

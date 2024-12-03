@@ -1,0 +1,452 @@
+<%
+	# app/views/video/js/_video_call.html.erb
+	# 
+	# Example:
+	# 	render partial: "video/js/video_call", locals: { full_name: String, room_name: String, token: String }
+	# 
+	# Required Instance Variables:
+	# 	@contact: (Contact)
+	# 	@user:    (User)
+	# 
+	# Required Local Variables:
+	#   full_name: (String)
+	# 	room_name: (String)
+	# 	token:     (String)
+	# 
+	full_name = local_assigns.include?(:full_name) ? local_assigns[:full_name].to_s : ""
+	user      = local_assigns.include?(:user) && local_assigns[:user].is_a?(Boolean) ? local_assigns[:user] : false
+	room_name = local_assigns.include?(:room_name) ? local_assigns[:room_name].to_s : ""
+	token     = local_assigns.include?(:token) ? local_assigns[:token].to_s : ""
+-%>
+<script>
+	$(function () {
+		const Video = Twilio.Video;
+
+		var activeRoom;
+		var videoTrack;
+		var screenTrack;
+		var audioMuted = false;
+		var videoPaused = false;
+		var user = <%= user -%>;
+		var identity = '<%= full_name -%>';
+		var roomName = '<%= room_name -%>';
+		var participantContainer = document.getElementById('participant-container');
+		var localParticipantContainer = document.getElementById('local-participant-container');
+		var primaryParticipantContainer = document.getElementById('primary-video-container');
+		canShareScreen = canShareScreen();
+
+		document.getElementById('button_mute').style.display = 'none';
+		document.getElementById('button_pause').style.display = 'none';
+		document.getElementById('button_leave').style.display = 'none';
+
+		if (canShareScreen) {
+			document.getElementById('button_share_screen').style.display = 'none';
+			document.getElementById('button_unshare_screen').style.display = 'none';
+		}
+
+		// when we are about to transition away from this page, disconnect from the room, if joined.
+		window.addEventListener('beforeunload', leaveRoomIfJoined);
+
+		document.getElementById('button_join').onclick = function() {
+
+			if (!roomName) {
+				alert('Error: Room name NOT defined.');
+				return;
+			}
+
+			log("Joining conversation...");
+			var connectOptions = {
+				name: roomName,
+				audio: true,
+				video: { width: 800 },
+				logLevel: 'debug'
+			};
+
+			// Join the Room with the token from the server and the LocalParticipant's Tracks.
+			Video.connect('<%= token -%>', connectOptions).then(roomJoined, function(error) {
+				log('Could not connect to conversation: ' + error.message);
+			});
+		};
+
+		document.getElementById('button_mute').onclick = function() {
+			if (audioMuted) {
+				getTracks(activeRoom.localParticipant).forEach(function(track) {
+					if (track.kind == 'audio') {
+						track.enable();
+					}
+				});
+				audioMuted = false;
+				document.getElementById('button_mute').innerHTML = 'Mute';
+			} else {
+				getTracks(activeRoom.localParticipant).forEach(function(track) {
+					if (track.kind == 'audio') {
+						track.disable();
+					}
+				});
+				audioMuted = true;
+				document.getElementById('button_mute').innerHTML = 'UnMute';
+			}
+		}
+
+		document.getElementById('button_pause').onclick = function() {
+			if (videoPaused) {
+				getTracks(activeRoom.localParticipant).forEach(function(track) {
+					if (track.kind == 'video') {
+						track.enable();
+					}
+				});
+				videoPaused = false;
+				document.getElementById('button_pause').innerHTML = 'Pause';
+			} else {
+				getTracks(activeRoom.localParticipant).forEach(function(track) {
+					if (track.kind == 'video') {
+						track.disable();
+					}
+				});
+				videoPaused = true;
+				document.getElementById('button_pause').innerHTML = 'UnPause';
+			}
+		}
+
+		document.getElementById('button_leave').onclick = function() {
+			log('Leaving conversation...');
+			videoTrack = null;
+			screenTrack = null;
+			audioMuted = false;
+			videoPaused = false;
+			activeRoom.disconnect();
+			document.getElementById('button_mute').innerHTML = 'Mute';
+			document.getElementById('button_pause').innerHTML = 'Pause';
+			$('#video_modal').modal('hide');
+		}
+
+		if (user) {
+			document.getElementById('video_modal_close_button').onclick = function() {
+				leaveRoomIfJoined;
+			};
+
+			document.getElementById('button_share_screen').onclick = function() {
+				log('Sharing Screen...');
+
+				invokeGetDisplayMedia( function(screen) {
+					screenTrack = screen.getVideoTracks()[0];
+					// console.log('screenTrack:');
+					// console.log(screenTrack);
+					activeRoom.localParticipant.publishTrack(screenTrack);
+					// console.log("Screen Published.");
+
+					document.getElementById('button_share_screen').style.display = 'none';
+					document.getElementById('button_unshare_screen').style.display = 'inline';
+				}, function(e) {
+
+					var error = {
+						name: e.name || 'UnKnown',
+						message: e.message || 'UnKnown',
+						stack: e.stack || 'UnKnown'
+					};
+
+					if(error.name === 'PermissionDeniedError') {
+						if(location.protocol !== 'https:') {
+							error.message = 'Please use HTTPs.';
+							error.stack   = 'HTTPs is required.';
+						}
+					}
+
+					console.error(error.name);
+					console.error(error.message);
+					console.error(error.stack);
+
+					alert('Unable to capture your screen.\n\n' + error.name + '\n\n' + error.message + '\n\n' + error.stack);
+				});
+			};
+
+			document.getElementById('button_unshare_screen').onclick = function() {
+				log('Stopping Share Screen...');
+				activeRoom.localParticipant.unpublishTrack(screenTrack);
+				screenTrack.stop();
+				screenTrack = null;
+				document.getElementById('button_share_screen').style.display = 'inline';
+				document.getElementById('button_unshare_screen').style.display = 'none';
+			}
+		}
+
+		$('#video_modal').on('hidden.bs.modal', function (e) {
+			completeRoom();
+		})
+
+		// Attach the Track to the DOM.
+		function attachTrack(track, container) {
+			// console.log('Attaching track (' + track.kind + ') to container (' + container.id + ')');
+
+			if (container.innerHTML) {
+				// container.innerHTML = '';
+			}
+			container.appendChild(track.attach());
+		}
+
+		// Attach array of Tracks to the DOM.
+		function attachTracks(tracks, container) {
+			tracks.forEach(function(track) {
+				attachTrack(track, container);
+			});
+		}
+
+		// Detach given track from the DOM.
+		function detachTrack(track) {
+			track.detach().forEach(function(element) {
+				element.remove();
+			});
+		}
+
+		// Attach array of Tracks to the DOM.
+		function detachTracks(tracks) {
+			tracks.forEach(function(track) {
+				track.detach().forEach(function(element) {
+					element.remove();
+				});
+				track.stop();
+			});
+		}
+
+		// a new RemoteTrack was published to the room
+		function trackPublished(publication, container) {
+
+			if (publication.isSubscribed) {
+				// console.log('Publication is subscribed.');
+				attachTrack(publication.track, container);
+			} else {
+				// console.log('Publication is NOT subscribed.');
+			}
+
+			publication.on('subscribed', function(track) {
+				// console.log('Subscribed to ' + publication.kind + ' track: ' + track.name);
+
+				if (publication.kind == 'video') {
+
+					if (container == participantContainer) {
+
+						if (track != screenTrack) {
+							// console.log('Attaching ' + track.kind + ' (' + track.name + ') to ' + container.id);
+							attachTrack(track, container);
+						}
+					} else {
+
+						if (videoTrack == null) {
+							videoTrack = track;
+						} else if (screenTrack == null) {
+							screenTrack = track;
+						} else if (track.name != videoTrack.name) {
+							// console.log('Track ' + track.kind + ' (' + track.name + ') is not the video Track.')
+						} else if (track.name != screenTrack.name) {
+							// console.log('Track ' + track.kind + ' (' + track.name + ') is not the screen Track.')
+						}
+
+						// console.log('Clearing ' + videoTrack.kind + ' (' + track.name + ') from ' + container.id);
+						container.innerHTML = '';
+
+						// console.log('Attaching ' + track.kind + ' (' + track.name + ') to ' + container.id);
+						attachTrack(track, container);
+					}
+				} else {
+					attachTrack(track, container);
+				}
+			});
+
+			publication.on('unsubscribed', detachTrack);
+		}
+
+		// A RemoteTrack was unpublished from the Room.
+		function trackUnpublished(publication) {
+			log('Track was unpublished: ' + publication.kind);
+
+			if (videoTrack) {
+				primaryParticipantContainer.innerHTML = '';
+				attachTrack(videoTrack, primaryParticipantContainer);
+			}
+
+			if (screenTrack) {
+				screenTrack = null;
+			}
+		}
+
+		// A new RemoteParticipant joined the Room
+		function participantConnected(participant, container) {
+
+			participant.tracks.forEach(function(publication) {
+				trackPublished(publication, container);
+			});
+
+			participant.on('trackPublished', function(publication) {
+				trackPublished(publication, container);
+			});
+
+			participant.on('trackUnpublished', trackUnpublished);
+		}
+
+		// detach a participant's tracks from the DOM
+		function detachParticipantTracks(participant) {
+			var tracks = getTracks(participant);
+			tracks.forEach(detachTrack);
+			videoTrack = null;
+			screenTrack = null;
+		}
+
+		// get a participant's tracks
+		function getTracks(participant) {
+			return Array.from(participant.tracks.values()).filter(function(publication) {
+				return publication.track;
+			}).map(function(publication) {
+				return publication.track;
+			});
+		}
+
+		// Successfully connected!
+		function roomJoined(room) {
+			window.room = activeRoom = room;
+
+			log("Joined as '" + identity + "'");
+			document.getElementById('button_join').style.display = 'none';
+			document.getElementById('button_mute').style.display = 'inline-flex';
+			document.getElementById('button_pause').style.display = 'inline-flex';
+			document.getElementById('button_leave').style.display = 'inline-flex';
+
+			if (canShareScreen) {
+				document.getElementById('button_share_screen').style.display = 'inline-flex';
+			}
+
+			// attach LocalParticipant's tracks, if not already attached
+			if (!localParticipantContainer.querySelector('video')) {
+				attachTracks(getTracks(room.localParticipant), localParticipantContainer);
+			}
+
+			// Attach the Tracks of the Room's Participants.
+			room.participants.forEach(function(participant) {
+				log("Already in conversation: '" + participant.identity + "'");
+				participantConnected(participant, primaryParticipantContainer);
+				participantConnected(participant, participantContainer);
+			});
+
+			// When a Participant joins the Room, log the event.
+			room.on('participantConnected', function(participant) {
+				log("Joining: '" + participant.identity + "'");
+				participantConnected(participant, primaryParticipantContainer);
+				participantConnected(participant, participantContainer);
+			});
+
+			// When a Participant leaves the Room, detach its Tracks.
+			room.on('participantDisconnected', function(participant) {
+				log("RemoteParticipant '" + participant.identity + "' left the conversation");
+				detachParticipantTracks(participant);
+
+				if (!user) {
+					videoTrack = null;
+					screenTrack = null;
+					audioMuted = false;
+					videoPaused = false;
+					activeRoom.disconnect();
+					document.getElementById('button_mute').innerHTML = 'Mute';
+					document.getElementById('button_pause').innerHTML = 'Pause';
+				}
+			});
+
+			// Once the LocalParticipant leaves the room, detach the Tracks
+			// of all Participants, including that of the LocalParticipant.
+			room.on('disconnected', function() {
+				log('Left');
+
+				detachParticipantTracks(room.localParticipant);
+				room.participants.forEach(detachParticipantTracks);
+				activeRoom = null;
+				document.getElementById('button_join').style.display = 'inline-flex';
+				document.getElementById('button_mute').style.display = 'none';
+				document.getElementById('button_pause').style.display = 'none';
+				document.getElementById('button_leave').style.display = 'none';
+
+				if (canShareScreen) {
+					document.getElementById('button_share_screen').style.display = 'none';
+					document.getElementById('button_unshare_screen').style.display = 'none';
+				}
+			});
+		}
+
+		// Activity log.
+		function log(message) {
+			if (user) {
+				var logDiv = document.getElementById('log');
+				logDiv.innerHTML += '<p>&gt;&nbsp;' + message + '</p>';
+				logDiv.scrollTop = logDiv.scrollHeight;
+			}
+			console.log(message);
+		}
+
+		// Leave Room.
+		function leaveRoomIfJoined() {
+			if (activeRoom) {
+				activeRoom.disconnect();
+			}
+		}
+
+		function completeRoom() {
+			var xmlhttp = new XMLHttpRequest();
+
+			xmlhttp.onreadystatechange = function() {
+				if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+					if (xmlhttp.status == 200) {
+						// document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+						// alert('Completed successfully!')
+					}
+					else if (xmlhttp.status == 400) {
+						// alert('There was an error 400.');
+					}
+					else {
+						// alert('Something else other than 200 or 400 was returned.');
+					}
+				}
+			};
+
+			xmlhttp.open('POST', '<%= video_callback_url -%>?RoomName=' + roomName + '&StatusCallbackEvent=complete-room', true);
+			xmlhttp.send();
+		}
+
+		function invokeGetDisplayMedia(success, error) {
+
+			var displayMediaStreamConstraints = {
+				video: true // or pass HINTS
+			};
+
+			if (navigator.mediaDevices.getDisplayMedia) {
+				// Safari
+				// console.log('Getting screen through mediaDevices.');
+				navigator.mediaDevices.getDisplayMedia(displayMediaStreamConstraints).then(success).catch(error);
+			} else {
+				// console.log('Getting screen without mediaDevices.');
+				navigator.getDisplayMedia(displayMediaStreamConstraints).then(success).catch(error);
+			}
+		}
+
+		function canShareScreen() {
+
+			if (!navigator.getDisplayMedia && !navigator.mediaDevices.getDisplayMedia) {
+				return false;
+			} else if (!user) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+
+		function windowWidth() {
+			return window.innerWidth 
+				|| document.documentElement.clientWidth 
+				|| document.body.clientWidth 
+				|| 0;
+		}
+
+		function windowHeight() {
+			return window.innerHeight 
+				|| document.documentElement.clientHeight 
+				|| document.body.clientHeight 
+				|| 0;
+		}
+	});
+</script>

@@ -1,0 +1,31 @@
+<%
+  # app/views/integrations/outreach/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/outreach/instructions/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integrations: (UserApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Outreach Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Outreach integration provides lead generation and 2-way text messaging capabilities at every point of customer communications.</li>
+      <li>An Outreach connection is required.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

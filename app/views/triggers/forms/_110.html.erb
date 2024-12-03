@@ -1,0 +1,42 @@
+<%
+  # app/views/triggers/forms/_110.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/110", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # text message with a keyword
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Keyword Conversations...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Respond to a specific keyword received in a text message.</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Start ONLY when the keyword is received.</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Can NOT be applied to a Contact or selected as a Campaign to start on various actions in <%= I18n.t('tenant.name') -%>.</li>
+      </ul>
+    </small>
+  </div>
+</div>
+
+<%= bootstrap_text_field(
+      field:        'data[keyword]',
+      value:        presenter.trigger.data&.dig(:keyword).to_s,
+      label:        { title: "Enter the Keyword that #{I18n.t('tenant.name')} will watch for" },
+      html_options: { placeholder: 'Keyword', disabled: presenter.campaign_disabled? }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'data[keyword_location]',
+      label:        { title: "Where should #{I18n.t('tenant.name')} look for the keyword?" },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: [['The Only Word in a Text Message', 1], ['The First Word in a Text Message', 2], ['Anywhere in a Text Message', 3]], selected: (presenter.trigger.data&.dig(:keyword_location) || 1).to_i }
+    ) %>

@@ -1,0 +1,21 @@
+<%
+# app/views/messages/show_video.html.erb
+#
+# Example:
+# 	render "messages/show_video"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="container">
+  <div class="row mt-5">
+    <div class="col-12 d-flex justify-content-center">
+      <%= cl_video_tag(@contact_attachment.image.my_public_id, { controls: true }) %>
+      <% video_tag(@contact_attachment.image.url(resource_type: @contact_attachment.image.resource_type), size: '400x400', controls: true, poster: @contact_attachment.image.thumb.url(resource_type: @contact_attachment.image.resource_type, secure: true)) %>
+    </div>
+  </div>
+</div>

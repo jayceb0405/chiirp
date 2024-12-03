@@ -1,0 +1,33 @@
+<%
+  # app/views/integrations/servicemonster/push_leads/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/push_leads/edit', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Push Contacts to ServiceMonster</h6>
+  <div class="card-body">
+
+    <%= form_with url: integrations_servicemonster_push_leads_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+      <%= render partial: 'integrations/common/push_leads/edit', locals: { integration: 'servicemonster', presenter: } %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_push_leads').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

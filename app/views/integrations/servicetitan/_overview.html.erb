@@ -1,0 +1,182 @@
+<%
+  # app/views/integrations/servicetitan/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/overview'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  customer_count          = Integration::Servicetitan::V2::Base.new(@client_api_integration).import_contacts_remaining_count(current_user.id)
+  custom_fields           = @client_api_integration.custom_field_assignments.keys.count
+  custom_fields_assigned  = @client_api_integration.custom_field_assignments.values.delete_if(&:zero?).count
+  custom_fields_completed = custom_fields.positive? ? custom_fields_assigned.to_f / custom_fields : 0
+  technicians             = Integration::Servicetitan::V2::Base.new(@client_api_integration).technicians.length
+  technicians_linked      = technicians.positive? ? @client_api_integration.employees&.values&.delete_if(&:zero?)&.count.to_f / technicians : 0
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'servicetitan' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_connection_path, { class: 'metric metric-bordered align-items-center', id: 'link_api_key', remote: true }) do %>
+            <h2 class="metric-label"> Connection </h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if Integration::Servicetitan::V2::Base.new(@client_api_integration).valid_credentials? %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_import_path, { class: 'metric metric-bordered align-items-center', id: 'link_import_contacts', remote: true }) do %>
+            <h2 class="metric-label"> Contact Imports </h2>
+            <p class="metric-value h3">
+              <span class="value text-success" id="job_imports_remaining_count">
+                <%= customer_count.zero? ? 'NOT in progress' : "~#{customer_count} Contacts remaining" %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to integrations_servicetitan_events_path, { class: 'metric metric-bordered align-items-center', id: 'link_job_events', data: { turbo: true, turbo_stream: true } } do %>
+            <h2 class="metric-label"> Events </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= @client_api_integration.events.length %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_employees_path, { class: 'metric metric-bordered align-items-center', id: 'link_employees', remote: true }) do %>
+            <h2 class="metric-label"> Linked Technicians </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <div id="technicians" class="dash-button-statistic-g__chart">
+                  <span class="dash-button-statistic-g__chart-text text-success" style="text-shadow:1px 1px 2px white;"></span>
+                </div>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_balance_update_path, { class: 'metric metric-bordered align-items-center', id: 'link_balance_update', remote: true }) do %>
+            <h2 class="metric-label"> Auto Update Open Estimates </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= pluralize(@client_api_integration.update_balance_actions['update_open_estimate_window_days'], 'Day', 'Days') %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_balance_update_path, { class: 'metric metric-bordered align-items-center', id: 'link_balance_update', remote: true }) do %>
+            <h2 class="metric-label"> Auto Update Open Jobs </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= pluralize(@client_api_integration.update_balance_actions['update_open_job_window_days'], 'Day', 'Days') %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_balance_update_path, { class: 'metric metric-bordered align-items-center', id: 'link_balance_update', remote: true }) do %>
+            <h2 class="metric-label"> Auto Update Invoices </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= pluralize(@client_api_integration.update_balance_actions['update_invoice_window_days'], 'Day', 'Days') %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(integrations_servicetitan_balance_update_path, { class: 'metric metric-bordered align-items-center', id: 'link_balance_update', remote: true }) do %>
+            <h2 class="metric-label"> Auto Update Account Balances </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <%= pluralize(@client_api_integration.update_balance_actions['update_balance_window_days'], 'Day', 'Days') %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_servicetitan_custom_fields_path, { class: 'metric metric-bordered align-items-center', id: 'link_custom_fields', remote: true }) do %>
+            <h2 class="metric-label"> Custom Field Assignments </h2>
+            <p class="metric-value h3">
+              <span class="value text-success">
+                <div id="custom_fields" class="dash-button-statistic-g__chart">
+                  <span class="dash-button-statistic-g__chart-text text-success" style="text-shadow:1px 1px 2px white;"></span>
+                </div>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+
+    $('#custom_fields').circleProgress({
+      value: <%= custom_fields_completed -%>,
+      size: 60,
+      thickness: 8,
+      startAngle: 1.5 * Math.PI,
+      lineCap: 'round',
+      emptyFill: '#e8ebef',
+      fill: {
+        gradient: ['#ff9100', '#ffffff']
+      }
+    }).on('circle-animation-progress', function(event, progress, stepValue) {
+      if (progress >= <%= custom_fields_completed -%>) {
+        progress = <%= custom_fields_completed -%>;
+        $(this).find('.dash-button-statistic-g__chart-text').text(Math.round(100 * progress) + '%');
+      }
+    });
+
+    $('#technicians').circleProgress({
+      value: <%= technicians_linked -%>,
+      size: 60,
+      thickness: 8,
+      startAngle: 1.5 * Math.PI,
+      lineCap: 'round',
+      emptyFill: '#e8ebef',
+      fill: {
+        gradient: ['#ff9100', '#ffffff']
+      }
+    }).on('circle-animation-progress', function(event, progress, stepValue) {
+      if (progress >= <%= technicians_linked -%>) {
+        progress = <%= technicians_linked -%>;
+        $(this).find('.dash-button-statistic-g__chart-text').text(Math.round(100 * progress) + '%');
+      }
+    });
+  });
+</script>

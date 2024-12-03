@@ -1,0 +1,62 @@
+<%
+  # app/views/messages/texts/_scheduler_options.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/scheduler_options', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return if presenter.current_phone_number.empty? || !presenter.show_msg_delay?
+-%>
+<div class="form-group" id="scheduler_options_<%= presenter.message_id -%>" style="display:none;">
+  <div class="input-group input-group-alt flatpickr" value="">
+    <div class="input-group-prepend">
+      <%= button_tag '', { class: 'btn btn-secondary fa fa-calendar', title: 'toggle', id: "button_text_scheduler_calendar_open_#{presenter.message_id}", type: 'button' } %>
+      <%= button_tag '', { class: 'btn btn-secondary fa fa-times', id: "button_text_scheduler_calendar_clear_#{presenter.message_id}", type: 'button' } %>
+    </div>
+    <%= text_field_tag 'message[msg_delay]',
+                       '',
+                       {
+                         id:           "text_scheduler_calendar_#{presenter.message_id}",
+                         class:        'form-control',
+                         placeholder:  'Select Date / Time',
+                         disabled:     presenter.disabled?,
+                         autocomplete: 'off'
+                       } %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#text_scheduler_calendar_<%= presenter.message_id -%>').flatpickr({
+      altFormat: 'm/d/Y G:i K',
+      allowInput: false,
+      dateFormat: 'm/d/Y G:i K',
+      defaultDate: '',
+      enableTime: true,
+      mode: 'single', // single, multiple, range
+      minDate: '<%= Time.current.in_time_zone(presenter.contact.client.time_zone).strftime('%m/%d/%Y %H:%M %p') -%>',
+      maxDate: '',
+      plugins: [
+        new confirmDatePlugin({
+          showAlways: true
+        })
+      ]
+    });
+
+    $('#button_text_scheduler_calendar_open_<%= presenter.message_id -%>').on('click', function(e) {
+      setTimeout(function(){
+        document.querySelector('#text_scheduler_calendar_<%= presenter.message_id -%>')._flatpickr.open();
+      }, 0);
+    });
+    $('#button_text_scheduler_calendar_clear_<%= presenter.message_id -%>').on('click', function(e) {
+      document.querySelector('#text_scheduler_calendar_<%= presenter.message_id -%>')._flatpickr.clear();
+      document.querySelector('#text_scheduler_calendar_<%= presenter.message_id -%>')._flatpickr.close();
+    });
+  });
+</script>

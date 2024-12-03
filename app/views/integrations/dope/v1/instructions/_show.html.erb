@@ -1,0 +1,60 @@
+<%
+# app/views/integrations/dope/v1/instructions/_show.html.erb
+#
+# Example:
+#   render partial: 'integrations/dope/v1/instructions/show', locals: {  }
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Dope Marketing Integration Instructions</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your Dope Marketing account.</li>
+      <li>Create Automations in your Dope Marketing account and start automations on your Contacts from <%= I18n.t('tenant.name') -%>.
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>In Dope Merketing:</li>
+      <ul>
+        <li>Click on the "User" <i class="fa fa-user"></i> icon in the top right corner of your Dope Marketing account.</li>
+        <li>Click on the "More" tab.</li>
+        <li>Click the red "Create a Token" button.</li>
+        <li>Name your API Token and click "Create".</li>
+        <li>Copy the token.</li>
+      </ul>
+
+      <li>In <%= I18n.t('tenant.name') -%>:</li>
+      <ul>
+        <li>Click "Integrations" in the left menu.</li>
+        <li>Click on the "Dope Marketing" integration.</li>
+        <li>Click on the "Connection" tab.</li>
+        <li>Paste the copied token into the "Dope API Token" field and click the "Save API Token" button.</li>
+      </ul>
+    </ul>
+
+    <h6>Automations:</h6>
+    <ul>
+      <li>Create "Automations" in your Dope Marketing account.</li>
+      <li>Click "Automations" in your <%= I18n.t('tenant.name') -%> > Dope Marketing Integration to see the Dope Automations.</li>
+      <li>Select a tag for each Automation.</li>
+      <li>When that tag is applied in <%= I18n.t('tenant.name') -%> Dope Marketing will be notified to start that Automation in Dope Marketing.</li>
+      <li>Each Automation triggered will appear in the Contact's Message Central message thread.</li>
+      <li>Dope Marketing also provides "Recent Activity" to gather more details on each Automation activity.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

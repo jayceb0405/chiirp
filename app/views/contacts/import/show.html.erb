@@ -1,0 +1,41 @@
+<%
+  # app/views/contacts/import/show.html.erb
+  #
+  # Example:
+  #   render 'contacts/import/show'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Contacts::Import::Presenter.new(current_user)
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-file-import mr-2"></i>Import Contacts</h1>
+      </div>
+    </header>
+
+    <div class="page-section row">
+      <div class="col-xl-6 col-lg-12" id="contacts_import_form_<%= current_user.id -%>">
+        <%= render partial: 'contacts/import/form', locals: { presenter: } %>
+      </div>
+
+      <div class="col-xl-6 col-lg-12">
+        <%= render partial: 'contacts/import/form_info' %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_import_contacts').addClass('has-active');
+  });
+</script>

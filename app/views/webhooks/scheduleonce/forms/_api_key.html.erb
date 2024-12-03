@@ -1,0 +1,19 @@
+<%
+# app/views/webhooks/scheduleonce/forms/_api_key.html.erb
+#
+# Example:
+# 	render partial: "webhooks/scheduleonce/forms/api_key"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= hidden_field_tag :webhook_event, 'api_key' %>
+
+<div class="form-group">
+  <%= label_tag('api_key', 'API Key', class: 'form-control-label') %>
+  <%= text_field_tag('api_key', '', class: 'form-control') %>
+</div>

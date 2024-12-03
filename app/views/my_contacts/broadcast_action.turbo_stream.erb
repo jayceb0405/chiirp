@@ -1,0 +1,19 @@
+<%
+  # /app/views/my_contacts/broadcast_action.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (opt) broadcast:   (Boolean)
+  #   (opt) cards:       (Array)
+  #   (opt) page_number: (Integer)
+  #
+  # Local Variables:
+  #
+  cards     = @cards
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast   = @broadcast
+  presenter.page_number = @page_number
+-%>
+<%= turbo_stream.update 'broadcast_action' do %>
+  <%= render "my_contacts/broadcast/actions/#{cards.first}", presenter: %>
+<% end %>
+<%= turbo_stream.bootstrap_init %>

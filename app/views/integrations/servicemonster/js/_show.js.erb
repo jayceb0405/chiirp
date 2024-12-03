@@ -1,0 +1,62 @@
+<%
+  # app/views/integrations/servicemonster/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards:            (Array)
+  #   (opt) webhook_event_id: (String)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook_event = @webhook_event if (cards & %w[webhooks_edit]).present?
+-%>
+// Employees
+<% if cards.include?('employees') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/employees/index', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Import Customers
+<% if cards.include?('update_contacts_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/update_contacts/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Import Jobs
+<% if cards.include?('import_jobs_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/import_jobs/show' -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/instructions/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/overview', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Push Contacts
+<% if cards.include?('push_leads_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/push_leads/edit', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Webhooks
+<% if cards.include?('webhooks_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicemonster/webhooks/index', locals: { presenter: presenter } -%>');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  $('#webhook_event_listing_<%= @webhook_event.dig(:id).to_s -%>').html('<%= j render partial: 'integrations/servicemonster/webhooks/event_inner', locals: { presenter: presenter } -%>');
+  $('#webhook_edit_td_<%= @webhook_event.dig(:id).to_s -%>').html('<%= j render partial: 'integrations/servicemonster/webhooks/edit', locals: { presenter: presenter } -%>');
+<% end %>
+<% if cards.include?('webhooks_edit_new') %>
+  $('#servicemonster_events_list').prepend('<%= j render partial: 'integrations/servicemonster/webhooks/event_outer', locals: { presenter: presenter, webhook_event: @webhook_event, collapse: false } -%>');
+  $('#webhook_edit_td_<%= @webhook_event.dig(:id).to_s -%>').html('<%= j render partial: 'integrations/servicemonster/webhooks/edit', locals: { presenter: presenter } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

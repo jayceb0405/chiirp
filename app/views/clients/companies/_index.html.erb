@@ -1,0 +1,230 @@
+<%
+  # app/views/clients/companies/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/index', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+-%>
+<% if current_user.team_member? || current_user.agent? %>
+  <div class="page">
+    <div class="page-inner">
+
+      <header class="page-title-bar">
+        <div class="d-flex justify-content-between">
+          <h1 class="page-title"><%= "<i class=\"#{presenter.heading_icon}\"></i> Company #{presenter.list_type.capitalize}".html_safe -%></h1>
+        </div>
+      </header>
+
+      <div class="page-section">
+        <div class="card card-fluid card-margins-mobile">
+
+          <div class="card-header nav-scroller">
+            <ul class="nav nav-tabs card-header-tabs">
+
+              <% %w[clients statistics contacts texting voice automation activity].each do |this_list_type| %>
+                <% class_elements = (presenter.list_type == this_list_type ? 'nav-link active show' : 'nav-link') %>
+                <li class="nav-item">
+                  <%= link_to this_list_type.capitalize, clients_companies_path(list_type: this_list_type), { class: class_elements } %>
+                </li>
+              <% end %>
+            </ul>
+
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+              <div class="col">
+                <div class="has-clearable">
+                  <button type="button" class="close" aria-label="Close"><span aria-hidden="true"><i class="fa fa-times-circle"></i></span></button>
+
+                  <%= form_tag clients_companies_path, { builder: LooperFormBuilder, remote: true, method: :get, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+                    <%= hidden_field_tag :list_type, presenter.list_type %>
+                    <%= bootstrap_text_field(
+                          field:        'search_text',
+                          value:        presenter.search_text,
+                          row:          { class: 'mb-0' },
+                          label:        { title: 'Search Text' },
+                          html_options: { placeholder: 'Search Text' },
+                          prepends:     [{ button: false, label: '<i class="fa fa-search"></i>' }]
+                        ) %>
+                    <%= bootstrap_calendar_field(
+                          field:     'search_period',
+                          value:     presenter.search_period,
+                          row:       { class: 'mb-0' },
+                          label:     { title: 'Search Period' },
+                          flatpickr: { include_time: false, mode: 'range' },
+                          messages:  { note: presenter.list_type == 'activity' ? 'Searching date text messages or RVMs were sent.' : 'Searching date Client started.' }
+                        ) %>
+
+                    <div class="row">
+                      <div class="col-2 offset-4">
+                        <%= bootstrap_switch_field(
+                              field:        'in_danger',
+                              value:        presenter.in_danger,
+                              values:       [true, false],
+                              row:          { columns: [0, 12] },
+                              label:        { title: 'In Danger' },
+                              html_options: { id: 'clients_in_danger' }
+                            ) %>
+                      </div>
+                      <div class="col-2">
+                        <%= bootstrap_switch_field(
+                              field:        'active_only',
+                              value:        presenter.active_only,
+                              values:       [true, false],
+                              row:          { columns: [0, 12] },
+                              label:        { title: 'Active Only' },
+                              html_options: { id: 'clients_active_only' }
+                            ) %>
+                      </div>
+                      <div class="col-2">
+                        <%= bootstrap_switch_field(
+                              field:        'paying_only',
+                              value:        presenter.paying_only,
+                              values:       [true, false],
+                              row:          { columns: [0, 12] },
+                              label:        { title: 'Paying Only' },
+                              html_options: { id: 'clients_paying_only' }
+                            ) %>
+                      </div>
+                      <div class="col-2">
+                        <%= bootstrap_switch_field(
+                              field:        'delinquent_only',
+                              value:        presenter.delinquent_only,
+                              values:       [true, false],
+                              row:          { columns: [0, 12] },
+                              label:        { title: 'Delinquent Only' },
+                              html_options: { id: 'clients_delinquent_only' }
+                            ) %>
+                      </div>
+                    </div>
+
+                    <%= bootstrap_submit_buttons(
+                          buttons: [{ title: 'Search', disable_with: 'Searching...' }]
+                        ) %>
+                  <% end %>
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="text-muted px-3 mb-2"><%= pluralize(presenter.list_type_list.total_count, 'Company', 'Companies') -%></div>
+
+          <%= render partial: 'snippets/paginate', locals: {
+                page_label:  'Companies per page',
+                per_page:    presenter.per_page,
+                object:      presenter.list_type_list,
+                path_params: { controller: 'clients/companies', action: 'index', list_type: presenter.list_type },
+                div_class:   'justify-content-end',
+                options:     [25, 50, 100, 150, 200]
+              } %>
+
+          <div class="table-responsive">
+            <table class="table">
+
+              <thead>
+                <%= render partial: "clients/companies/headers/#{presenter.list_type}", locals: { presenter: } %>
+              </thead>
+
+              <tbody>
+                <%= render partial: "clients/companies/rows/#{presenter.list_type}", collection: presenter.list_type_list, as: :client, locals: { presenter: } %>
+              </tbody>
+
+            </table>
+          </div>
+
+          <%= render partial: 'snippets/paginate', locals: {
+                page_label:  'Companies per page',
+                per_page:    presenter.per_page,
+                object:      presenter.list_type_list,
+                path_params: { controller: 'clients/companies', action: 'index', list_type: presenter.list_type },
+                div_class:   'justify-content-end',
+                options:     [25, 50, 100, 150, 200]
+              } %>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(function () {
+      $(document).off('change', '.select_agencies_approved');
+      $(document).on('change', '.select_agencies_approved', function(e) {
+        var element_id = $(this).attr('id');
+
+        if (element_id) {
+          $.ajax({
+            method: 'PATCH',
+            dataType: 'script',
+            url: '/clients/' + element_id.replace('select_agencies_approved_', '') + '/update_agency',
+            data: { agencies_approved: $('#' + element_id).val() }
+          });
+        }
+      });
+
+      // button_delete_client is applied in 'clients/companies/rows/action_buttons'
+      $('.button_delete_client').off('click');
+      $('.button_delete_client').on('click', function(e) {
+        e.preventDefault();
+
+        var client_id   = $(this).data('id');
+        var client_name = $(this).data('name');
+
+        ChiirpAlert({
+          'title':      'Danger: Deleting a Client!',
+          'body':       'Deleting "' + client_name + '" can NOT be un-done. Is it your intention to delete this client?',
+          'buttons':    [{label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_go_for_it'}],
+          'type':       'danger',
+          'persistent': true
+        });
+
+        $(document).off('click', '#button_go_for_it');
+        $(document).on('click', '#button_go_for_it', function(e) {
+          e.preventDefault();
+
+          $('#alert_modal').off('hidden.bs.modal');
+          $('#alert_modal').on('hidden.bs.modal', function (e) {
+            $('#alert_modal').off('hidden.bs.modal');
+
+            ChiirpAlert({
+              'title':      'Danger: Deleting a Client!',
+              'body':       'Double checking... <br /><span class="text-danger h6">DELETING "' + client_name + '" CAN NOT BE UN-DONE.</span><br /> Is it your intention to delete this client?',
+              'buttons':    [{label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait_02'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_go_for_it_02'}],
+              'type':       'danger',
+              'persistent': true
+            });
+
+            $(document).off('click', '#button_go_for_it_02');
+            $(document).on('click', '#button_go_for_it_02', function(e) {
+
+              $.ajax({
+                type: 'delete',
+                dataType: 'script',
+                url: '/clients/' + client_id
+              });
+            });
+          });
+        });
+      });
+
+      $('.affiliate_info_link').off('click');
+      $('.affiliate_info_link').on('click', function(e) {
+        $.ajax({
+          type:     'GET',
+          dataType: 'script',
+          url:      '/affiliates/affiliates/' + $(this).attr('id')
+        });
+      });
+
+      <%= render partial: 'snippets/js/login_as', formats: [:js], locals: { element: '.log_in_as' } %>
+    });
+  </script>
+<% end %>

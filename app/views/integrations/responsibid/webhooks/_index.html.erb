@@ -1,0 +1,174 @@
+<%
+  # app/views/integrations/responsibid/webhooks/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/responsibid/webhooks/index'
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: ClientApiIntegration
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Responsibid::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">ResponsiBid Events</span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Event'.html_safe, new_integrations_responsibid_webhook_path, {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 200px">ResponsiBid Event</th>
+              <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.client.campaigns_count.positive? %>
+              <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.client.groups_count.positive? %>
+              <th class="text-left">Tag</th>
+              <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.client.stages_count.positive? %>
+              <%= content_tag(:th, class: 'text-left') { 'Stop Campaigns' } if presenter.client.campaigns_count.positive? %>
+              <th style="min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% if @webhook_event.present? && @webhook_event&.dig(:event_id).to_s.empty? %>
+              <%= render partial: 'integrations/responsibid/webhooks/event_outer', locals: { webhook_event: @webhook_event, presenter: } %>
+            <% end %>
+
+            <%= render partial: 'integrations/responsibid/webhooks/webhooks', collection: @client_api_integration.webhooks.sort, as: :webhooks, locals: { presenter: } %>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_webhooks').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.webhook_edit_row');
+    $(document).on('show.bs.collapse', '.webhook_edit_row', function (e) {
+      var id = $(this).data('id');
+
+      if (id) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/integrations/responsibid/webhooks/' + id + '/edit'
+        });
+      }
+    });
+
+    $(document).off('hide.bs.collapse', '.webhook_edit_row');
+    $(document).on('hide.bs.collapse', '.webhook_edit_row', function (e) {
+      var id = $(this).data('id');
+
+      $('#webhook_edit_td_' + id).html('<%= bootstrap_spinning_logo(message: 'Loading Event') -%>');
+    });
+
+    $(document).off('click', '.button_delete_webhook');
+    $(document).on('click', '.button_delete_webhook', function(e) {
+      e.preventDefault();
+
+      var id    = $(this).data('id');
+      var event = $(this).data('event');
+      var name  = $(this).data('name');
+
+      if (id) {
+        ChiirpAlert({
+          'body':'Deleting ' + name + ' can NOT be un-done. Is it your intention to delete this Webhook?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_webhook' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_delete_webhook');
+        $(document).on('click', '#button_dump_it_delete_webhook', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '/integrations/responsibid/webhooks/' + id,
+            data: { event: event }
+          });
+        });
+      } else {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= integrations_responsibid_webhooks_path -%>'
+        });
+      }
+    });
+  });
+
+  function appointmentStatusDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#appointment_status_' + webhook_event_id).show();
+    } else {
+      $('#appointment_status_' + webhook_event_id).hide();
+    }
+  }
+  function assignUserDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#assign_user_' + webhook_event_id).show();
+    } else {
+      $('#assign_user_' + webhook_event_id).hide();
+    }
+  }
+  function jobEventNewDisplay(webhook_event_id) {
+    if (['OnUpdated', 'OnInvoiced'].includes($('#event_' + webhook_event_id).val().split('_')[1])) {
+      $('#job_event_new_' + webhook_event_id).show();
+    } else {
+      $('#job_event_new_' + webhook_event_id).hide();
+    }
+  }
+  function jobEventUpdatedDisplay(webhook_event_id) {
+    if (['OnUpdated', 'OnInvoiced'].includes($('#event_' + webhook_event_id).val().split('_')[1])) {
+      $('#job_event_updated_' + webhook_event_id).show();
+    } else {
+      $('#job_event_updated_' + webhook_event_id).hide();
+    }
+  }
+  function lineItemsDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'order') {
+      $('#line_items_' + webhook_event_id).show();
+    } else {
+      $('#line_items_' + webhook_event_id).hide();
+    }
+  }
+  function orderTypeDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'order' && $('#event_' + webhook_event_id).val().split('_')[1] != 'OnInvoiced') {
+      $('#order_type_' + webhook_event_id).show();
+    } else {
+      $('#order_type_' + webhook_event_id).hide();
+    }
+  }
+  function eventNewToggle(webhook_event_id) {
+    if (!$('#event_new_' + webhook_event_id).is(':checked')) {
+      $('#event_updated_' + webhook_event_id).prop('checked', true);
+    }
+  }
+  function eventUpdatedToggle(webhook_event_id) {
+    if (!$('#event_updated_' + webhook_event_id).is(':checked')) {
+      $('#event_new_' + webhook_event_id).prop('checked', true);
+    }
+  }
+</script>

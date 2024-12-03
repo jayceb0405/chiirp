@@ -1,0 +1,177 @@
+<%
+  # app/views/clients/billing/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/billing/edit', locals: { client_presenter: ClientPresenter}
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  cp = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<% unless cp.client.new_record? %>
+  <div class="card-deck-xl card-margins-mobile">
+    <div class="card card-fluid ml-0">
+      <h6 class="card-header"> Package </h6>
+      <div class="card-body d-flex flex-column">
+        <%= bootstrap_info_field(
+              info:  cp.package_name,
+              row:   { columns: [6, 6] },
+              label: { title: 'Package' }
+            ) %>
+        <%= if cp.ok_to_enter_max_phone_numbers
+              bootstrap_info_field(
+                info:  pluralize(cp.client.current_max_phone_numbers, 'Phone Number', plural: 'Phone Numbers'),
+                row:   { columns: [6, 6] },
+                label: { title: 'Maximum Phone Numbers' }
+              )
+            end %>
+
+        <%= bootstrap_submit_buttons(buttons: [{ title: 'Review Upgrade Options', id: 'upgrade_now', disable_with: '' }]) if cp.package_upgradable? %>
+      </div>
+    </div>
+
+    <div class="card card-fluid mr-0">
+      <h6 class="card-header"> Billing </h6>
+      <%= form_with model: cp.client, url: clients_billing_path(cp.client.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'billing_form', novalidate: true } do |f| %>
+        <%= bootstrap_info_field(
+              info:  number_to_currency(cp.client.next_payment_due.to_d),
+              row:   { columns: [6, 6] },
+              label: { title: 'Next Monthly Charge' }
+            ) %>
+        <%= bootstrap_info_field(
+              info:         cp.next_payment_date_string,
+              row:          { columns: [6, 6] },
+              label:        { title: "Next Billing Date #{cp.billing_info}".html_safe },
+              html_options: { class: (cp.monthly_payment_past_due ? 'text-danger' : '').to_s }
+            ) %>
+        <%= if cp.client.credit_card_on_file?
+              bootstrap_info_field(
+                info:  cp.credit_card_string,
+                row:   { columns: [6, 6] },
+                label: { title: 'Credit Card on File' }
+              )
+            end %>
+
+        <% if cp.client.credit_card_on_file? && cp.monthly_payment_past_due %>
+          <%= f.submit_buttons buttons: [{ title: 'Charge Monthly Fee', disable_with: 'Charging Monthly Fee' }] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<% if cp.client.message_central_allowed || cp.client.campaigns_count.positive? %>
+  <div class="card-deck-xl card-margins-mobile">
+    <div class="card card-fluid ml-0">
+      <h6 class="card-header"> Credits </h6>
+      <%= form_with model: cp.client, url: clients_billing_path(cp.client.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'billing_form', novalidate: true } do |f| %>
+        <%= bootstrap_info_field(
+              info:  "#{number_to_currency(cp.client.current_mo_credits.to_d.to_i, unit: '', precision: 0)} #{'Credit'.pluralize(cp.client.current_mo_credits.to_d.to_i)}/ Month",
+              row:   { columns: [6, 6] },
+              label: { title: 'Free Monthly Credits' }
+            ) %>
+        <%= f.number_field :auto_add_amount, {
+              row:          { columns: [6, 6] },
+              label:        { title: 'Auto Add Credits' },
+              html_options: { value: cp.client.auto_add_amount, min: cp.minimum_credit_purchase, step: 50 },
+              prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+              messages:     { note: "Must be minimum of #{cp.minimum_credit_purchase} credits." }
+            } %>
+        <%= f.number_field :auto_min_amount, {
+              row:          { columns: [6, 6] },
+              label:        { title: 'Minimum Credit Balance' },
+              html_options: { value: cp.client.auto_min_amount, min: cp.minimum_credit_purchase, step: 50 },
+              prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+              messages:     { note: "Must be minimum of #{cp.minimum_credit_purchase} credits." }
+            } %>
+        <%= f.submit_buttons buttons: [{ title: 'Save Account Auto Credit Settings', id: 'save_billing_info', disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+
+    <div class="card card-fluid mr-0">
+      <h6 class="card-header"> Add Credits </h6>
+      <%= form_with(model: cp.client, url: clients_billing_path(cp.client.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'credits_form', novalidate: true }) do |f| %>
+        <%= bootstrap_info_field(
+              info:         "#{number_to_currency((cp.client.current_balance.to_d / 100).to_i, unit: '', precision: 0)} #{'Credit'.pluralize(cp.client.current_balance.to_d / 100)}",
+              row:          { columns: [6, 6] },
+              label:        { title: 'Available Credits' },
+              html_options: { id: 'credit_balance' }
+            ) %>
+
+        <% if cp.client.credit_card_on_file? %>
+          <%= bootstrap_number_field(
+                field:        'add_credits',
+                value:        cp.default_credits_to_add,
+                row:          { columns: [6, 6] },
+                label:        { title: 'Add Credits ($ 20.00)', id: 'add_credits_label' },
+                html_options: { id: 'input_add_credits', min: cp.minimum_credit_purchase, step: 50 },
+                prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+                messages:     { note: "Must be minimum of #{cp.minimum_credit_purchase} credits." }
+              ) %>
+        <% else %>
+          <%= bootstrap_info_field(
+                info:         'Add Credit Card Below',
+                row:          { columns: [6, 6] },
+                label:        { title: 'Add Credits' },
+                html_options: { class: 'text-danger' }
+              ) %>
+        <% end %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Charge My Card', disable_with: 'Charging' }] %>
+      <% end %>
+    </div>
+  </div>
+<% end %>
+
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header"> <%= "#{cp.client.credit_card_on_file? ? 'Update' : 'Add'} Credit Card" -%> </h6>
+  <div class="card-body">
+    <%= form_with(model: cp.client, url: clients_billing_path(cp.client.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'credit_card_form', novalidate: true }) do |f| %>
+      <%= hidden_field_tag 'client[card_token]', '', { id: 'card_token' } %>
+      <%= render partial: 'layouts/credit_card', locals: { card_token_id: 'card_token', form_id: 'credit_card_form', submit_button_id: 'credit_card_submit_button' } %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% if cp.client.errors.any? %>
+      ChiirpAlert({
+        'body':triggeraction.errors.full_messages.join("<br />").html_safe,
+        'type':'warning',
+        'persistent':true
+      });
+    <% end %>
+
+    $('.nav-link').removeClass('active');
+    $('#link_billing').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_billing').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $('#input_add_credits').on('change keyup', function(event) {
+      var ccCharge = $('#input_add_credits').val() * <%= cp.client.current_credit_charge.to_d.to_s -%>;
+      $('#add_credits_label').html('Add Credits ($ ' + parseFloat(ccCharge, 10).toFixed(2).replace(/(\d)(?=(\d{3})+\.)/g, '$1,').toString() + '):');
+      // alert(ccCharge);
+    });
+
+    $('#upgrade_now').on('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= client_upgrade_path(cp.client.id) -%>'
+      });
+    });
+  });
+</script>

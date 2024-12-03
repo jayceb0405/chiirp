@@ -1,0 +1,25 @@
+<%
+  # app/views/messages/texts/_rvm_options.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/rvm_options', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+-%>
+<div class="form-group" id="rvm_options_<%= presenter.message_id -%>" style="display:none;">
+  <%= select_tag('message[voice_recording_id]',
+                 options_for_select(presenter.contact.client.voice_recording_options),
+                 {
+                   id:            "select_rvm_#{presenter.message_id}",
+                   include_blank: 'Select a Voice Recording',
+                   class:         'form-control',
+                   data:          { toggle: 'selectpicker', width: '100%' },
+                   disabled:      presenter.voice_disabled
+                 }) %>
+</div>

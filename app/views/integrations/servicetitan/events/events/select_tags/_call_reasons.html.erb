@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_call_reasons.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/call_reasons', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[call_reason_ids]',
+      row:          { class: 'event_criteria_row', id: "call_reason_ids_row_#{presenter.event_id}" },
+      label:        { title: "Call Reasons<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_call_reasons_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Call Reasons', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.call_reasons, selected: presenter.call_reason_ids },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Call Reason includes any of the selected reasons.' }
+    ) %>

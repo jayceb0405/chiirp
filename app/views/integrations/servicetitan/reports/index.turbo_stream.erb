@@ -1,0 +1,19 @@
+<%
+  # app/views/integrations/servicetitan/reports/index.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/index'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Servicetitan::ReportsPresenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update('integration_page_section', partial: 'integrations/servicetitan/reports/index', locals: { presenter: }) %>
+
+<%= turbo_stream.bootstrap_init %>

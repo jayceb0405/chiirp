@@ -1,0 +1,51 @@
+<%
+  # app/views/clients/dlc10/v2/campaign_types/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/campaign_types/show', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<% if presenter.dlc10_ok_to_edit(current_user) %>
+
+  <% if presenter.dlc10_brand_verified? %>
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th class="text-left"> Use Case </th>
+            <th class="text-right"> Monthly Charge </th>
+            <th class="text-center"> Carrier Review </th>
+            <th class="text-left"> Throughput </th>
+            <th class="text-center"> Opt-In </th>
+            <th class="text-center"> Opt-Out </th>
+            <th class="text-center"> Help </th>
+            <th class="text-center"> Links </th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <%= render partial: 'clients/dlc10/v2/campaign_types/type', collection: presenter.dlc10_qualified_campaign_types, as: :type, locals: { presenter: } -%>
+        </tbody>
+      </table>
+    </div>
+  <% else %>
+    <h6>Brand is not complete.</h6>
+  <% end %>
+<% else %>
+  <h6>Access NOT permitted!</h6>
+<% end %>
+
+<script>
+  $(function () {
+    $('.nav-dlc10_link').removeClass('active');
+    $('#link_dlc10_campaign_types').addClass('active');
+  });
+</script>

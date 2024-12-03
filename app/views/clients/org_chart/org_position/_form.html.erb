@@ -1,0 +1,41 @@
+<%
+  # app/views/clients/org_chart/org_position/_form.html.erb
+  #
+  # Example:
+  #   render partial: "clients/org_chart/org_position/form", locals: { form: form }
+  #
+  # Required Instance Variables:
+  #   @client:       (Client)
+  #   @org_position: (OrgPosition)
+  #
+  # Required Local Variables:
+  #   form: (form)
+  #
+  f = local_assigns.dig(:form)
+-%>
+<%= f.text_field :title, {
+      label:        { title: 'Position Title' },
+      html_options: { placeholder: 'Title', required: true },
+      messages:     { note: 'Required' }
+    } %>
+<%= f.select :client_custom_field_id, {
+      label:        { title: 'Custom Field Where Selector is Found' },
+      html_options: { mobile: browser.device.mobile? },
+      choices:      { array: @client.client_custom_fields.where(var_type: 'string').order(:var_name).pluck(:var_name, :id), selected: @org_position.client_custom_field_id, blank: 'Select Custom Field' },
+      messages:     { note: 'A Selector (Custom Field with phone number) may be required when more than one Organization Member is assigned to a Position.' }
+    } %>
+<%= f.submit_buttons(
+      buttons: [
+        { title: 'Save', disable_with: 'Saving' },
+        { title: 'Cancel', id: 'cancel_button' }
+      ]
+    ) %>
+
+<script>
+  $(function() {
+    $('#cancel_button').on('click', function (e) {
+      e.preventDefault();
+      $('#edit_org_position').html('');
+    });
+  });
+</script>

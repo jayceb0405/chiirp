@@ -1,0 +1,20 @@
+<%
+  # app/views/aiagents/_form_quick_response.html.erb
+  # 
+  # Example:
+  #   render 'form_quick_response', presenter: presenter
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   presenter: (Uiagent::Presenter)
+  # 
+-%>
+<%= bootstrap_number_field(
+      field:    'agent[lookback_days]',
+      value:    presenter.agent.lookback_days,
+      label:    { title: 'Lookback in Days' },
+      html_options: { min: '0', step: '1' },
+      messages: { note: 'How many days back should we look at a contacts chat history for context?' }
+    ) %>

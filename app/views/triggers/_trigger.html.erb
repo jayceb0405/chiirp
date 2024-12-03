@@ -1,0 +1,53 @@
+<%
+  # app/views/triggers/_trigger.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/trigger", collection: @campaign.triggers.order(:step_numb), as: :trigger, locals: { presenter: Campaigns::Presenter }
+  #   render partial: 'triggers/trigger', locals: { presenter: Campaigns::Presenter, trigger: trigger }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #   (req) trigger:   (Trigger)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && local_assigns.dig(:trigger).is_a?(Trigger)
+
+  presenter.trigger = trigger
+-%>
+<div class="card card-expansion-item" id="<%= presenter.trigger_card_id -%>">
+  <div class="card-header d-flex align-items-center border-0" id="<%= presenter.trigger_header_id -%>">
+    <%= render partial: 'triggers/trigger_header', locals: { presenter:, trigger_form_id: presenter.trigger_form_id } %>
+  </div>
+  <div class="collapse" id="<%= presenter.trigger_form_id -%>_c" aria-labelledby="<%= presenter.trigger_header_id -%>" data-parent="#trigger-accordion">
+    <div class="card-body pt-0" id="<%= presenter.trigger_form_id -%>">
+      <%= render partial: 'triggers/form', locals: { presenter: } %>
+    </div>
+  </div>
+
+  <% unless presenter.trigger.new_record? %>
+    <div class="card mx-3 mb-3">
+      <div class="card-header">
+        <div class="d-flex align-items-center">
+          <h6 class="mr-auto">Actions</h6>
+
+          <% unless presenter.campaign_disabled? %>
+            <%= link_to '<i class="fa fa-plus mr-2"></i>New Action'.html_safe,
+                        new_trigger_triggeraction_path(presenter.trigger.id, no_load: true),
+                        method: :get,
+                        remote: true,
+                        class:  'btn btn-light text-decoration-none' %>
+          <% end %>
+        </div>
+      </div>
+
+      <div class="card-body bg-light">
+        <div id="triggeractions-list-<%= presenter.trigger.id -%>">
+          <%= render partial: 'triggeractions/list', locals: { presenter: } %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+</div>

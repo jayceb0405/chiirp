@@ -1,0 +1,20 @@
+<%
+# app/views/integrations/servicetitan/jobs/_tag_types.html.erb
+#
+# Example:
+# 	render partial: "integrations/servicetitan/jobs/tag_types"
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= bootstrap_select_tag(
+      field:        'tag_type_names',
+      label:        { title: "Select a Tag(s)<span class=\"ml-2\">#{link_to '', edit_integrations_servicetitan_contact_booking_path(@contact, commit: 'refresh_tag_types'), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', remote: true, title: 'Refresh Tag Types', data: { toggle: 'tooltip' } }}</span>" },
+      html_options: { id: 'tag_type_select', multiple: true, required: true },
+      options:      { for_select: options_for_select(@tag_types, @tag_type_names), blank: 'Tag Types' },
+      messages:     { note: 'Required' }
+    ) %>

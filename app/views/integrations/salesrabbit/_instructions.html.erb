@@ -1,0 +1,57 @@
+<%
+  # app/views/integrations/salesrabbit/_instructions.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/salesrabbit/instructions"
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SalesRabbit Integration Instructions</h6>
+  <div class="card-body">
+    <h6>API Key:</h6>
+    <ul>
+      <li>A SalesRabbit API Key is required to link you account with <%= I18n.t('tenant.name') -%>.</li>
+      <li>Copy your API Key from SalesRabbit / Integrations / API.</li>
+      <li>Paste your API Key in <%= I18n.t('tenant.name') -%>.</li>
+    </ul>
+
+    <h6>Contacts:</h6>
+    <ul>
+      <li>Define actions to be taken when a new SalesRabbit lead comes into <%= I18n.t('tenant.name') -%>.</li>
+      <li>Actions will be processed when a new lead arrives in <%= I18n.t('tenant.name') -%>.</li>
+      <li>Actions will be processed for both initially imported leads as well as new leads in the future.</li>
+    </ul>
+
+    <h6>Leads:</h6>
+    <ul>
+      <li>Contacts in <%= I18n.t('tenant.name') -%> are matched to Leads in SalesRabbit based on SalesRabbit phone numbers.</li>
+      <li>Imported Leads/Contacts will be assigned to Users based on SalesRabbit assignments and User/<%= I18n.t('tenant.name') -%> User assignments.</li>
+      <li>Contacts in <%= I18n.t('tenant.name') -%> are NOT deleted.</li>
+    </ul>
+
+    <h6>Statuses:</h6>
+    <ul>
+      <li>Define actions to be taken when a SalesRabbit status changes.</li>
+      <li>Actions will be processed when a SalesRabbit status changes.</li>
+    </ul>
+
+    <h6>Users:</h6>
+    <ul>
+      <li>Link SalesRabbit Users with <%= I18n.t('tenant.name') -%> Users.</li>
+      <li>New Contacts coming into <%= I18n.t('tenant.name') -%> will be assigned to the linked <%= I18n.t('tenant.name') -%> User.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

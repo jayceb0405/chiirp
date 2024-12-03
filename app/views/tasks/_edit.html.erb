@@ -1,0 +1,134 @@
+<%
+  # app/views/tasks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "tasks/edit"
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Optional Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   task: (Task)
+  #
+  # Optional Local Variables:
+  #   user:    (User)
+  #   contact: (Contact)
+  #   client:  (Client)
+  #
+  tp = TasksPresenter.new(user: current_user, client: current_user.client, task: local_assigns.dig(:task), contact: local_assigns.dig(:contact))
+-%>
+<div class="p-2">
+  <%= form_with model: tp.task, builder: LooperFormBuilder, remote: true do |f| %>
+    <%= hidden_field_tag 'contact_id', tp.contact.id %>
+
+    <%= f.text_field :name, {
+          label: { title: 'Task Name' }
+        } %>
+    <%= f.select :user_id, {
+          label:        { title: 'Assigned To' },
+          html_options: { mobile: browser.device.mobile? },
+          choices:      { for_select: options_for_select(tp.client.users.where.not(id: nil).order(:lastname, :firstname).pluck(:id, :firstname, :lastname).map { |user| [Friendly.new.fullname(user[1], user[2]), user[0]] }, tp.task.user_id) }
+        } %>
+    <%= bootstrap_select_tag(
+          field:        'task[contact_id]',
+          label:        { title: 'Contact' },
+          html_options: { id: 'contact_select_new' },
+          options:      { array: [[tp.contact.fullname, tp.contact.id]], selected: tp.contact.id, blank: 'Search for a Contact', lookup: { url: contact_task_path, client: tp.client } }
+        ) %>
+    <%= bootstrap_calendar_field(
+          field:        'task[due_at]',
+          value:        tp.due_at_string,
+          modal:        { id: 'task_modal' },
+          label:        { title: 'Due Date' },
+          html_options: { id: 'due_at', placeholder: 'Click to Select' },
+          flatpickr:    { include_time: true, mode: 'single' }
+        ) %>
+    <%= bootstrap_calendar_field(
+          field:        'task[deadline_at]',
+          value:        tp.deadline_at_string,
+          modal:        { id: 'task_modal' },
+          label:        { title: 'Deadline' },
+          html_options: { id: 'deadline_at', placeholder: 'Click to Select' },
+          flatpickr:    { include_time: true, mode: 'single' }
+        ) %>
+    <%= f.text_area :description, {
+          label:        { title: 'Description' },
+          html_options: { id: 'task_description', placeholder: 'Description', rows: [(tp.task.description.length / 100).to_i, 1].max }
+        } %>
+    <%= f.select :from_phone, {
+          label:        { title: 'Send Notifications From' },
+          html_options: { mobile: browser.device.mobile? },
+          choices:      { for_select: options_for_phone_numbers(user: tp.task.user || current_user, selected: tp.task.from_phone) }
+        } %>
+    <%= f.select :campaign_id, {
+          label:        { title: 'Campaign to Start on Completion' },
+          html_options: { id: 'task_campaign_id', mobile: browser.device.mobile? },
+          choices:      { for_select: options_for_campaign(client: tp.client, selected_campaign_id: tp.task.campaign_id, grouped: true), blank: 'Select a Campaign' },
+          messages:     { note: 'Contact MUST be selected to start a Campaign.' }
+        } %>
+    <%= bootstrap_range_slider(
+          field:        'task[cancel_after]',
+          label:        { title: 'Days After Deadline to Auto-Complete' },
+          html_options: { id: 'cancel_after' },
+          range_slider: { type: 'single', min: 0, max: 90, from: tp.task.cancel_after, grid: true, grid_num: 10, prefix: ' days' }
+        ) %>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [
+            { title: 'Save Task', disable_with: 'Saving Task' },
+            { title: 'Cancel', id: 'task_edit_cancel_button', disable_with: 'Canceling' }
+          ]
+        ) %>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    var data = {
+      id: '<%= tp.contact.id -%>',
+      text: '<%= tp.contact_name -%>'
+    };
+
+    var newOption = new Option(data.text, data.id, false, false);
+    $('#contact_select').append(newOption).trigger('change');
+
+    $('#contact_select').select2({
+      // theme: 'classic',
+      ajax: {
+        delay: 250, // wait 250 milliseconds before triggering the request
+        url: '<%= contact_task_path -%>',
+        dataType: 'json',
+        data: function (params) {
+          var query = {
+            client_id: '<%= tp.client.id -%>',
+            searchchars: params.term
+          }
+
+          return query;
+        },
+        processResults: function (data, params) {
+
+          if (data.results.length > 0) {
+            $('#task_campaign_id').prop('disabled', false);
+          }
+
+          return {
+            results: data.results
+          }
+        }
+      }
+    });
+
+    $('#task_edit_cancel_button').on('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $('#task_modal_title').html('');
+      $('#task_modal_body').html('');
+      $('#task_modal').modal('hide');
+    });
+  });
+</script>

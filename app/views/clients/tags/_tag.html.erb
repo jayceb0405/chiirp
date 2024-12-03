@@ -1,0 +1,99 @@
+<%
+  # app/views/clients/tags/_tag.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/tags/tag', collection: tags, locals: { client_presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   tag: (tag)
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#tag_<%= tag.id.to_s -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_tag_name_<%= tag.id -%>">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#tag_<%= tag.id.to_s -%>">
+      <i class="fa fa-square <%= tag.color.present? ? '' : 'text-primary' -%> mr-2" style="color:<%= tag.color -%>;"></i>
+      <%= tag.name -%>
+    </button>
+  </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(tag.created_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-left align-middle"> <%= tag.campaign&.name -%> </td>
+  <td class="text-center align-middle"> <%= tag.new_record? ? 0 : tag.contact_count.to_s -%> </td>
+  <td class="text-right align-middle">
+    <%= button_tag('',
+                   class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                   type:  'button',
+                   data:  {
+                     toggle: 'collapse',
+                     target: "#tag_#{tag.id}"
+                   }) %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          id:    "button_delete_tag_#{tag.id}"
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="tag_<%= tag.id -%>">
+  <!-- tag -->
+</tr>
+
+<script>
+  $(function() {
+
+    <% if tag.new_record? %>
+      $('#tag_<%= tag.id -%>').html('<%= j render partial: 'clients/tags/edit' -%>');
+      $('#tag_<%= tag.id -%>').collapse('show');
+
+      $('#button_delete_tag_<%= tag.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= client_tags_path(presenter.client) -%>'
+        });
+      });
+    <% else %>
+      $('#tag_<%= tag.id -%>').on('show.bs.collapse', function () {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= edit_client_tag_path(presenter.client, tag) -%>'
+        });
+      });
+
+      $('#button_delete_tag_<%= tag.id -%>').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= tag.name -%>" can NOT be un-done. Is it your intention to delete this tag?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{tag.id}" }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_<%= tag.id -%>');
+        $(document).on('click', '#button_dump_it_<%= tag.id -%>', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= client_tag_path(presenter.client.id, tag.id) -%>'
+          });
+        });
+      });
+    <% end %>
+
+  });
+</script>

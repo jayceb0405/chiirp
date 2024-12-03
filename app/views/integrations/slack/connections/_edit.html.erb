@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/slack/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/slack/connections/edit"
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Slack::Presenter.new(user_api_integration: @user_api_integration) unless local_assigns.dig(:presenter).is_a?(Integrations::Slack::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect <%= I18n.t('tenant.name') -%> to Slack</h6>
+  <div class="card-body">
+
+    <% if presenter.connection_valid? %>
+      <%= bootstrap_info_field(
+            info: '<i class="fa fa-link text-success mr-2"></i>Slack connection is valid.',
+            row:  { columns: [0, 12] }
+          ) %>
+    <% else %>
+      <%= bootstrap_info_field(
+            info: '<i class="fa fa-link text-danger mr-2"></i>Slack connection must be established. Click "Add to Slack".',
+            row:  { columns: [0, 12] }
+          ) %>
+    <% end %>
+
+    <div class="mt-auto">
+     <div class="form-actions">
+
+        <% if presenter.connection_valid? %>
+          <%= link_to('Remove Slack Connection', integrations_slack_connections_path, method: :delete, class: 'btn btn-info ml-auto', remote: true) %>
+        <% else %>
+          <%= link_to(send(Tenant.omniauth_authorize_path(request, 'slack')), method: :post, class: 'ml-auto') do %>
+            <img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x">
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connection').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

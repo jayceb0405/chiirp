@@ -1,0 +1,135 @@
+<%
+  # app/views/integrations/fieldpulse/v1/events/_event_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/fieldpulse/v1/events/event_edit', locals: { presenter: Integrations::Fieldpulse::V1::Events::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldpulse::V1::Events::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::Events::Presenter)
+-%>
+<td colspan="13" class="p-3">
+  <%= form_tag integrations_fieldpulse_v1_event_path(presenter.event_id), builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do %>
+    <%= hidden_field_tag 'event[id]', presenter.event_id %>
+
+    <fieldset class="border rounded p-2 my-3">
+      <legend class="w-auto mb-0"><h6>FieldPulse Event Criteria</h6></legend>
+
+      <%= bootstrap_select_tag(
+            field:        'event[event_type]',
+            label:        { title: 'FieldPulse Event' },
+            html_options: { class: 'event_type_select', id: "event_type_select_#{presenter.event_id}" },
+            options:      { array: Integration::Fieldpulse::V1::Base::EVENT_TYPE_OPTIONS, selected: presenter.event.dig(:criteria, :event_type).to_s }
+          ) %>
+      <span id="event_workflow_id_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/fieldpulse/v1/events/select_tags/workflow_id', locals: { presenter: } %>
+      </span>
+      <span id="event_workflow_status_ids_<%= presenter.event_id -%>">
+        <%= render partial: 'integrations/fieldpulse/v1/events/select_tags/workflow_status_ids', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_switch_field(
+            field:        'event[event_new]',
+            value:        presenter.event.dig(:criteria, :event_new).to_bool,
+            values:       [true, false],
+            row:          { id: "row_event_new_#{presenter.event_id}" },
+            label:        { title: 'First Event' },
+            html_options: { id: "event_new_#{presenter.event_id}" },
+            messages:     { note: 'Event actions will trigger only on receipt of first event.' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:        'event[event_updated]',
+            value:        presenter.event.dig(:criteria, :event_updated).to_bool,
+            values:       [true, false],
+            row:          { id: "row_event_updated_#{presenter.event_id}" },
+            label:        { title: 'Subsequent Events' },
+            html_options: { id: "event_updated_#{presenter.event_id}" },
+            messages:     { note: 'Event actions will trigger on receipt of all subsequent events.' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:    'event[tech_updated]',
+            value:    presenter.event.dig(:criteria, :tech_updated).to_bool,
+            values:   [true, false],
+            row:      { class: 'event_criteria_row', id: "row_tech_updated_#{presenter.event_id}" },
+            label:    { title: 'Employee Changed' },
+            messages: { note: 'Event actions will trigger on receipt of all subsequent events received where the employee has changed.' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:    'event[start_date_updated]',
+            value:    presenter.event.dig(:criteria, :start_date_updated).to_bool,
+            values:   [true, false],
+            row:      { class: 'event_criteria_row', id: "row_start_date_updated_#{presenter.event_id}" },
+            label:    { title: 'Start Date Changed' },
+            messages: { note: 'Event actions will trigger on receipt of all subsequent events received where the scheduled start date has changed.' }
+          ) %>
+      <span id="event_ext_tech_ids_<%= presenter.event_id -%>">
+        <%#= render partial: 'integrations/fieldpulse/v1/events/select_tags/employees', locals: { presenter: } %>
+      </span>
+      <%= bootstrap_number_field(
+            field:        'event[range_max]',
+            value:        presenter.range_max,
+            row:          { class: 'event_criteria_row', id: "row_range_max_#{presenter.event_id}" },
+            label:        { title: 'Maximum Total Range' },
+            html_options: { class: 'range_max', id: "range_max_#{presenter.event_id}", min: 0, step: 1 },
+            prepends:     [{ button: false, label: '$' }]
+          ) %>
+      <%= bootstrap_range_slider(
+            field:        'event[total]',
+            row:          { class: 'event_criteria_row', id: "row_range_slider_total_#{presenter.event_id}" },
+            label:        { title: 'Total Range' },
+            range_slider: { id: "range_slider_total_#{presenter.event_id.tr('-', '_')}", type: 'double', min: 0, max: presenter.range_max, from: presenter.total_min, to: presenter.total_max, step: 1, grid: true, grid_num: 10, prefix: '$', separator: ',' },
+            messages:     { note: 'Event actions will trigger when FieldPulse Total is within selected range.' }
+          ) %>
+      <%= bootstrap_range_slider(
+            field:        'event[total_due]',
+            row:          { class: 'event_criteria_row', id: "row_range_slider_total_due_#{presenter.event_id}" },
+            label:        { title: 'Total Due Range' },
+            range_slider: { id: "range_slider_total_due_#{presenter.event_id.tr('-', '_')}", type: 'double', min: 0, max: presenter.range_max, from: presenter.total_due_min, to: presenter.total_due_max, step: 1, grid: true, grid_num: 10, prefix: '$', separator: ',' },
+            messages:     { note: 'Event actions will trigger when FieldPulse Total Due is within selected range.' }
+          ) %>
+      <%= bootstrap_select_tag(
+            field:        'event[ext_tech_ids]',
+            row:          { class: 'event_criteria_row', id: "row_ext_tech_ids_#{presenter.event_id}" },
+            label:        { title: 'FieldPulse Technicians' },
+            html_options: { multiple: true },
+            options:      { array: presenter.technicians_array, selected: presenter.event.dig(:criteria, :ext_tech_ids) }
+          ) %>
+    </fieldset>
+
+    <fieldset class="border rounded p-2 my-3">
+      <legend class="w-auto mb-0"><h6><%= I18n.t('tenant.name') -%> Actions</h6></legend>
+
+      <%#= bootstrap_switch_field(
+            field:    'event[assign_contact_to_user]',
+            value:    presenter.event.dig(:criteria, :assign_contact_to_user).to_bool,
+            values:   [true, false],
+            label:    { title: 'Assign Contact to Employee' },
+            messages: { note: "Employee must be matched to a #{I18n.t('tenant.name')} User." }
+          ) %>
+
+      <%= render partial: 'campaigns/action_fields', locals: {
+            client: presenter.client,
+            campaign_id: presenter.campaign_id, campaign_id_field: 'event[campaign_id]',
+            stop_campaign_ids: presenter.stop_campaign_ids, stop_campaign_ids_field: 'event[stop_campaign_ids]',
+            group: presenter.group, group_id_field: 'event[group_id]',
+            tag: presenter.tag, tag_id_field: 'event[tag_id]',
+            stage_id: presenter.stage_id, stage_id_field: 'event[stage_id]',
+            first_trigger_types: [115, 120, 125, 130, 133, 134, 135, 140, 143, 144, 145]
+          } %>
+
+    </fieldset>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Save Actions', disable_with: 'Saving Actions' }]
+        ) %>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    displayInputs('<%= presenter.event_id -%>');
+  });
+</script>

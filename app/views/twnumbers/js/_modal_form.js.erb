@@ -1,0 +1,17 @@
+<%
+# app/views/twnumbers/js/_modal_form.js.erb
+#
+# Example:
+#   render partial: 'twnumbers/js/modal_form'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (opt) referer: (String)
+#
+-%>
+$('#dash_modal_title').html('Select a Phone Number');
+$('#dash_modal_body').html('<%= j render partial: 'twnumbers/modal_form', locals: { referer: local_assigns.dig(:referer).presence || 'phone_numbers' } -%>');
+$('#dash_modal_footer').html('');
+$('#dash_modal').modal('show');

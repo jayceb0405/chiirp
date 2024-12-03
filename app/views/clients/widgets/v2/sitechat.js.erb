@@ -1,0 +1,75 @@
+<%
+# app/views/clients/widgets/v2/sitechat.js.erb
+#
+# Example:
+#   render 'clients/widgets/v2/sitechat'
+#
+# Required Instance Variables:
+#   @client_widget_user:   (User)
+#   @client_widget:        (Clients::Widget)
+#
+# Required Local Variables:
+#   none
+#
+# Notes:
+#   similar code in (all 3 must be updated)...
+#     app/views/clients/widgets/v2/_sitechat.js.erb
+#     app/views/user_contact_forms/v2/modal/_init.js.erb
+#     app/views/user_contact_forms/v2/frame/_init.js.erb
+#
+-%>
+(function() {
+  var sitechat_frame = '<iframe id=\'tenant-sitechat-frame\' name=\'tenantSitechatFrame\' src=\'<%= api_v2_clients_show_widget_url(@client_widget.widget_key.to_s) -%>\' style=\'position:fixed;right:10px;bottom:10px;z-index:2147483647;padding:0px;margin:0px;border:0px;\' scrolling=\'no\' frameborder=\'0\' height=\'70px\' width=\'70px\' allow=\'autoplay\'></iframe>';
+
+  if ( '<%= @client_widget.show_bubble.to_s %>' == 'true' ) {
+    var sitechat_bubble_frame = '<iframe id=\'tenant-sitechat-bubble-frame\' name=\'tenantSitechatBubbleFrame\' src=\'<%= api_v2_clients_show_widget_bubble_url(@client_widget.widget_key.to_s) -%>\' style=\'position:fixed;right:50px;bottom:75px;z-index:2147482998;padding:0px;margin:0px;border:0px;\' scrolling=\'no\' frameborder=\'0\' height=\'125px\' width=\'325px\' allow=\'autoplay\'></iframe>';
+  }
+
+  window.addEventListener('load', function() {
+  // addLoadEvent( function() {
+    if (document.readyState === 'complete') {
+      document.body.insertAdjacentHTML('afterbegin', sitechat_frame);
+
+      if ( '<%= @client_widget.show_bubble.to_s %>' == 'true' ) {
+        document.body.insertAdjacentHTML('afterbegin', sitechat_bubble_frame);
+      }
+
+      window.addEventListener('message', function(event) {
+        if ( ~event.origin.indexOf('<%= I18n.t('tenant.domain') -%>') ) {
+          try { var obj = JSON.parse(event.data); }
+          catch(e) { var obj = event.data }
+
+          if ( obj.action === 'setatt_sitechat' ) {
+            document.getElementById('tenant-sitechat-frame').setAttribute('width', obj.width);
+            document.getElementById('tenant-sitechat-frame').setAttribute('height', obj.height);
+          } else if (obj.action === 'open_sitechat') {
+            window.frames.tenantSitechatFrame.postMessage('{"action":"open_sitechat"}', '*');
+          } else if (obj.action === 'close_sitechat_bubble') {
+            var sitechat_bubble_frame = document.getElementById('tenant-sitechat-bubble-frame')
+
+            if (sitechat_bubble_frame) {
+              sitechat_bubble_frame.style.display = 'none';
+            }
+          } else if (obj.action === 'viewport') {
+            var vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+            var vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+            window.frames.tenantSitechatFrame.postMessage('{"vw":"' + vw + '","vh":"' + vh + '"}', '*');
+          } else if (obj.action === 'setatt_quicklead_modal' ) {
+            var frame_height = Math.min(obj.height, window.innerHeight - 100);
+            document.getElementById('tenant-quicklead-modal').width = obj.width;
+            document.getElementById('tenant-quicklead-modal').height = frame_height;
+            document.getElementById('tenant-quicklead-modal').style.marginLeft = ((obj.width / 2) * -1).toString() + 'px';
+            document.getElementById('tenant-quicklead-modal').style.top = '25px';
+          } else if ( obj.action === 'setatt_quicklead_frame' ) {
+            document.getElementById('tenant-quicklead-frame').setAttribute('width', obj.width);
+            document.getElementById('tenant-quicklead-frame').setAttribute('height', obj.height);
+          } else if (obj.action === 'close_quicklead_modal') {
+            document.getElementById('tenant-quicklead-modal').style.display = 'none';
+          }
+        } else {
+          return;
+        }
+      });
+    }
+  });
+}).call(this)

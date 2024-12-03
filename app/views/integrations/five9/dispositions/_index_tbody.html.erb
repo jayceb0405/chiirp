@@ -1,0 +1,25 @@
+<%
+  # app/views/integrations/five9/dispositions/_index_tbody.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/dispositions/index_tbody'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  f9_client = Integrations::FiveNine::Base.new(@client_api_integration.credentials)
+  f9_client.call(:dispositions)
+  dispositions = f9_client.result.sort_by { |disposition| disposition[:name] }
+-%>
+<% if dispositions.present? %>
+  <%= render partial: 'integrations/five9/dispositions/disposition', collection: dispositions, as: :disposition %>
+<% else %>
+  <tr>
+    <td colspan="6">
+      Dispositions have NOT been defined.
+    </td>
+  </tr>
+<% end %>

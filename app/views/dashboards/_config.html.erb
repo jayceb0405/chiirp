@@ -1,0 +1,54 @@
+<%
+  # app/views/dashboards/_config.html.erb
+  #
+  # Example:
+  #   render partial: "dashboards/config"
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   new_dashboard: (Boolean)
+  #
+  # Optional Local Variables:
+  #   presenter: (Presenter)
+  #
+  new_dashboard = local_assigns.dig(:new_dashboard).to_bool
+  presenter     = local_assigns.dig(:presenter) || DashboardPresenter.new(user: current_user, new_dashboard:)
+-%>
+<%= form_with(url: presenter.config_form_url, method: presenter.config_form_method, remote: true, html: { class: 'needs-validation', id: 'config_form', novalidate: true }) do %>
+
+  <%= bootstrap_text_field(
+        field:        'user_setting[name]',
+        value:        presenter.dashboard_name,
+        row:          { columns: [0, 12] },
+        label:        { title: 'Dashboard Configuration Name' },
+        html_options: { id: 'config_name', required: true },
+        messages:     { note: 'Dashboard Configuration Name is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'user_setting[dashboard_buttons]',
+        row:          { columns: [0, 12] },
+        label:        { title: 'Select Dashboard Buttons' },
+        html_options: { id: 'dashboard_buttons_select', data: { 'max-options': '15' }, multi_actions: false, multiple: true },
+        options:      { for_select: grouped_options_for_select(presenter.button_options, presenter.dashboard_buttons) },
+        messages:     { note: 'Select a maximum of 15 Buttons.' }
+      ) %>
+
+  <% if presenter.user.access_controller?('dashboard', 'all_contacts', session) %>
+    <%= bootstrap_select_tag(
+          field:        'user_setting[buttons_user_id]',
+          row:          { columns: [0, 12] },
+          label:        { title: 'Select User' },
+          html_options: { id: 'dashboard_buttons_select' },
+          options:      { for_select: options_for_select(presenter.client.users.collect { |user| [user.fullname, user.id] }, presenter.dashboard_buttons_user_id) },
+          messages:     { note: 'All User buttons will be shown using this User.' }
+        ) %>
+  <% else %>
+    <%= hidden_field_tag :buttons_user_id, presenter.dashboard_buttons_user_id %>
+  <% end %>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Update Dashboard', disable_with: 'Updating Dashboard...' }]
+      ) %>
+<% end %>

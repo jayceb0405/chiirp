@@ -1,0 +1,42 @@
+<%
+	# app/views/trainings/_training.html.erb
+	# 
+	# Example:
+	# 	render partial: 'trainings/training', collection: @trainings, locals: { trainings_presenter: TrainingsPresenter }
+	# 
+	# Required Instance Variables:
+	# 	training: (Training)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	return if training.new_record?
+  truncated_menu_label = TrainingPage.user_authorized?(current_user, training, 'edit') || TrainingPage.user_authorized?(current_user, training, 'destroy') ? truncate(training.menu_label, length: 25) : training.menu_label
+-%>
+<div class="d-flex justify-content-between py-2">
+  <span>
+    <%= link_to truncated_menu_label,
+      training_path(training.id),
+      remote: true,
+      method: :get
+    %>
+  </span>
+
+  <span>
+    <% if TrainingPage.user_authorized?(current_user, training, 'edit') %>
+      <%= link_to '',
+        edit_training_path(training.id),
+        remote: true,
+        method: :get,
+        class: 'fa fa-pencil-alt btn btn-sm btn-icon btn-secondary'
+      %>
+    <% end %>
+    <% if TrainingPage.user_authorized?(current_user, training, 'destroy') %>
+      <%= link_to '',
+        '#',
+        class: 'fa fa-trash-alt btn btn-sm btn-icon btn-secondary prevent-default training_delete',
+        data: { trainingid: training.id, name: training.menu_label }
+      %>
+    <% end %>
+  </span>
+</div>

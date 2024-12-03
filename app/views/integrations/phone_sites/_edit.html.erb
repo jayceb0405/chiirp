@@ -1,0 +1,52 @@
+<%
+# app/views/integrations/phone_sites/_edit.html.erb
+#
+# Example:
+# 	render partial: "integrations/phone_sites/edit"
+#
+# Required Instance Variables:
+# 	@client_api_integration: (ClientApiIntegration)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <div class="card-header d-flex justify-content-between">
+    <div class="h6 pt-2">Generate API Keys for Websites</div>
+    <%= link_to '<i class="fa fa-plus mr-2"></i>New API Key'.html_safe, integrations_phone_sites_integration_path, {
+          class:  'btn btn-light',
+          remote: true,
+          method: :post
+        } %>
+  </div>
+  <div class="card-body">
+
+    <h6>Websites (<%= @user_api_integrations.count -%>):</h6>
+
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th> Name </th>
+            <th> API Key </th>
+            <th style="width:150px;min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <%= render partial: 'integrations/phone_sites/website', collection: @user_api_integrations, as: :user_api_integration -%>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_api_keys').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

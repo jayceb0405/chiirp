@@ -1,0 +1,19 @@
+<%
+# app/views/user_contact_form_marketplaces/_show_footer.html.erb
+#
+# Example:
+# 	render partial: "user_contact_form_marketplaces/show_footer"
+#
+# Required Instance Variables:
+# 	@user_contact_form: (user_contact_form)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<%= link_to "#{@user_contact_form.marketplace_ok && @user_contact_form.price.positive? ? 'Buy' : 'Get'} This QuickPage!",
+            buy_user_contact_form_path(@user_contact_form.id),
+            remote: true,
+            method: :post,
+            class:  'btn btn-info ml-auto' %>
+<%= button_tag 'Close', { type: 'button', class: 'btn btn-info', data: { dismiss: 'modal' } } %>

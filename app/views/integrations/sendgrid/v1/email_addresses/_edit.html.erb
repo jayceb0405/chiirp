@@ -1,0 +1,38 @@
+<%
+  # app/views/integrations/v1/email_addresses/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendgrid/v1/email_addresses/edit', locals: { presenter: Integrations::Sendgrid::V1::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Sendgrid::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Sendgrid::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Email Addresses</h6>
+  <div class="card-body">
+
+    <%= form_with model: presenter.client_api_integration, url: integrations_sendgrid_v1_email_addresses_path, builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+      <%= f.text_area :email_addresses, {
+            label:        { title: 'Email Addresses' },
+            html_options: { value: presenter.email_addresses_to_s, autofocus: true },
+            messages:     { note: 'Enter email addresses separated by a comma ",".' }
+          } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Email Addresses', disable_with: 'Saving Email Addresses' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_email_addresses').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

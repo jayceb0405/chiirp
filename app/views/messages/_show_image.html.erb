@@ -1,0 +1,32 @@
+<%
+# app/views/messages/_show_image.html.erb
+#
+# Example:
+# 	render partial: "messages/_show_image", locals: { contact_attachment: ContactAttachment }
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   contact_attachment = (Object) ContactAttachment
+#
+-%>
+<div class="modal modal-primary fade" id="modal-image-<%= contact_attachment.id -%>">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Message Attachment</h4>
+        <button type="button" class="close" data-dismiss="modal">
+          <span aria-hidden="true"><i class="fa fa-times"></i></span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="row justify-content-center"><%= cl_image_tag(contact_attachment.image.standard.my_public_id, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' }) %></div>
+        <div class="row justify-content-center mt-2"><%= link_to 'Full Size Image', contact_attachment.image.url(secure: true), { class: 'btn btn-app', target: '_blank', rel: 'noopener' } -%></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-app pull-left" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

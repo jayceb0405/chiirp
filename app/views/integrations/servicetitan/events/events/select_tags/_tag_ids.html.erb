@@ -1,0 +1,30 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_tag_ids.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/tag_ids', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[tag_ids_include]',
+      row:          { class: 'event_criteria_row', id: "tag_ids_include_row_#{presenter.event_id}" },
+      label:        { title: "ServiceTitan Tags Included<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_tag_ids_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Tags', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.tags_for_select, selected: presenter.tag_ids_include },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Customer tags applied include any of the selected tags.' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'events[tag_ids_exclude]',
+      row:          { class: 'event_criteria_row', id: "tag_ids_exclude_row_#{presenter.event_id}" },
+      label:        { title: "ServiceTitan Tags Excluded<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_tag_ids_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Tags', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.tags_for_select, selected: presenter.tag_ids_exclude },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Customer tags applied do NOT include any of the selected tags.' }
+    ) %>

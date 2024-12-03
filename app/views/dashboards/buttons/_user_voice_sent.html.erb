@@ -1,0 +1,25 @@
+<%
+  # app/views/dashboards/buttons/_user_voice_sent.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/user_voice_sent', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<%= render partial: 'dashboards/dash_button', locals: {
+      id:               'user_voice_sent',
+      stats:            Messages::Message.voice_sent_by_user(presenter.user_settings_buttons.data[:buttons_user_id], presenter.date_range[0], presenter.date_range[1]).count.to_s,
+      description:      'Calls Placed',
+      description_icon: 'u',
+      icon:             'fa fa-phone',
+      link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'user', last_msg_direction: 'rcvd', last_msg_absolute: 'last', user_setting_id: presenter.user_settings_buttons.id) : '#',
+      chart_id:         '',
+      chart_value:      0,
+      button_movable:   true
+    } %>

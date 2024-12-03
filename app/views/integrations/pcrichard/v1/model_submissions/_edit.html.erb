@@ -1,0 +1,58 @@
+<%
+  # app/views/integrations/pcrichard/v1/model_submissions/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/v1/model_submissions/edit', locals: ( presenter: Presenter)
+  #
+  # Instance Variables:
+  #   (req) @contact: (Contact)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.contact = @contact
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+
+<%= form_tag integrations_pcrichard_v1_model_submissions_path(presenter.contact.id), { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+
+  <% presenter.client_custom_fields_for_models.each_with_index do |client_custom_field, index| %>
+    <%= contact_custom_field_input(
+          custom_field: client_custom_field,
+          object_name:  "custom_fields[option_0#{index + 1}]",
+          contact:      presenter.contact,
+          var_value:    presenter.contact_custom_field(client_custom_field.id)&.var_value,
+          label:        { title: "Model Option # #{index + 1}" }
+        ) %>
+  <% end %>
+
+  <%= contact_custom_field_input(
+        custom_field: presenter.client.client_custom_fields.find_by(id: presenter.client_api_integration.custom_fields&.dig('installation_charge')),
+        object_name:  'custom_fields[installation_charge]',
+        contact:      presenter.contact,
+        var_value:    presenter.contact_custom_field(presenter.client_api_integration.custom_fields&.dig('installation_charge'))&.var_value,
+        label:        { title: 'Installation Charge' }
+      ) %>
+  <% contact_custom_field_input(
+       custom_field: presenter.client.client_custom_fields.find_by(id: presenter.client_api_integration.custom_fields&.dig('receipt_notes')),
+       object_name:  'custom_fields[receipt_notes]',
+       contact:      presenter.contact,
+       var_value:    presenter.contact_custom_field(presenter.client_api_integration.custom_fields&.dig('receipt_notes'))&.var_value,
+       label:        { title: 'Receipt Notes' }
+     ) %>
+  <%= contact_custom_field_input(
+        custom_field: presenter.client.client_custom_fields.find_by(id: presenter.client_api_integration.custom_fields&.dig('internal_notes')),
+        object_name:  'custom_fields[internal_notes]',
+        contact:      presenter.contact,
+        var_value:    presenter.contact_custom_field(presenter.client_api_integration.custom_fields&.dig('internal_notes'))&.var_value,
+        label:        { title: 'Internal Notes' }
+      ) %>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [
+          { title: 'Save Models', disable_with: 'Saving Models' },
+          { title: 'Save & Submit to PC Richard', disable_with: 'Saving & Submitting to PC Richard' }
+        ]
+      ) %>
+<% end %>

@@ -1,0 +1,29 @@
+<%= link_to '<i class="fa fa-plus mr-2"></i>New AI Agent'.html_safe, new_aiagent_path, {
+  class:  'btn btn-light',
+  id:     'button_aiagent_link',
+  remote: true,
+  method: :get
+} %>
+<div class="dropdown">
+  <button type="button" class="btn btn-light" data-toggle="dropdown">
+    <i class="fa fa-pencil-alt"></i>
+    <span class="ml-1">Edit AI Agent</span>
+  </button>
+  <div class="dropdown-menu dropdown-menu-right" id="select_aiagents_dropdown">
+    <%= render partial: 'aiagents/select_aiagents_dropdown' %>
+  </div>
+</div>
+<% if current_user.client.share_aiagents_allowed %>
+  <div class="dropdown">
+    <button type="button" class="btn btn-light" data-toggle="dropdown">
+      <span>More</span>
+      <span class="fa fa-caret-down"></span>
+    </button>
+    <div class="dropdown-menu dropdown-menu-right">
+      <div class="dropdown-arrow"></div>
+      <button type="button" class="dropdown-item btn" id="button_import_aiagent">
+        <i class="fa fa-cloud-download-alt mr-2"></i>Import Shared AI Agent
+      </button>
+    </div>
+  </div>
+<% end %>

@@ -1,0 +1,60 @@
+<%
+  # app/views/integrations/jobnimbus/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: Presenter
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/jobnimbus/logo.svg', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">JobNimbus Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_jobnimbus_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'Automation', integrations_jobnimbus_connections_path, { class: 'nav-link', id: 'link_connection', remote: true } %>
+        <%= link_to 'Events', integrations_jobnimbus_webhooks_path, { class: 'nav-link', id: 'link_webhooks', remote: true } %>
+        <%= link_to 'Push Contacts', edit_integrations_jobnimbus_push_contacts_path, { class: 'nav-link', id: 'link_push_contacts', remote: true } if presenter.client_api_integration.api_key.present? %>
+        <%= link_to 'Import Contacts', integrations_jobnimbus_update_contacts_path, { class: 'nav-link', id: 'link_update_contacts', remote: true } %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_jobnimbus_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <%= render partial: 'integrations/jobnimbus/overview', locals: { presenter: presenter } %>
+    </div>
+  </div>
+</div>

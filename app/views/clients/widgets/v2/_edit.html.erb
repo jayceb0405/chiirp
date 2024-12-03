@@ -1,0 +1,190 @@
+<%
+  # app/views/clients/widgets/v2/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v2/edit'
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @client_widget.new_record? && @client_widget.widget_name.to_s.empty?
+
+  presenter        = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+  presenter.widget = @client_widget
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.widget] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= presenter.widget.widget_name -%></span>
+
+      <% unless presenter.widget.new_record? %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_clients_widget_delete'
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+      <%= f.text_field :widget_name, {
+            label:        { title: 'SiteChat Button Name' },
+            html_options: { id: 'clients_widget_widget_name', minlength: 2, placeholder: 'SiteChat Button Name', required: true, autofocus: true },
+            messages:     { note: 'Must be minimum of 2 characters.' }
+          } %>
+
+      <% if current_user.client.share_widgets_allowed && !presenter.widget.new_record? %>
+        <%= f.copy_field :share_code, {
+              label: { title: 'SiteChat Button Share Code' }
+            } %>
+      <% end %>
+
+      <%= f.text_field :title, {
+            label:        { title: 'SiteChat Button Title' },
+            html_options: { id: 'clients_widget_title', placeholder: 'Widget Title' }
+          } %>
+
+      <% unless presenter.widget.new_record? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'SiteChat Button Embed Code' },
+              html_options: { value: "<script src='#{presenter.sitechat_url}'></script>" },
+              messages:     { note: 'Place this code in the HTML of your website between the <head> & <\head> tags.' }
+            } %>
+      <% end %>
+
+      <%= f.text_area :text_message, {
+            label:        { title: 'Text Message' },
+            html_options: { placeholder: 'Text Message', rows: 3 }
+          } %>
+      <%= bootstrap_text_field(
+            field:        'clients_widget[tag_line]',
+            value:        presenter.widget.tag_line.to_s,
+            label:        { title: 'Tag Line' },
+            html_options: { id: 'tag_line', placeholder: 'Tag Line' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'clients_widget[submit_button_text]',
+            value:        presenter.widget.submit_button_text.to_s,
+            label:        { title: 'Submit Button Text' },
+            html_options: { id: 'submit_button_text', placeholder: 'Submit' }
+          ) %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[submit_button_color]',
+            value:        presenter.widget.submit_button_color,
+            label:        { title: 'Submit Button Color' },
+            html_options: { id: 'submit_button_color' }
+          ) %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[background_color]',
+            value:        presenter.widget.background_color.to_s,
+            label:        { title: 'Background Color' },
+            html_options: { id: 'background_color' }
+          ) %>
+      <%= f.select :image_user_id, {
+            label:        { title: 'Assign New Contacts To' },
+            html_options: { id: 'image_user_id', mobile: browser.device.mobile? },
+            choices:      { array: current_user.client.users.where.not(id: nil).order(:lastname, :firstname).map { |user| [user.fullname, user.id] }, selected: presenter.widget.image_user_id.to_i }
+          } %>
+      <%= bootstrap_switch_field(
+            field:  'clients_widget[show_user_avatar]',
+            value:  presenter.widget.show_user_avatar.to_i == 1,
+            values: %w[1 0],
+            label:  { title: 'Show Assignee Image?' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:  'clients_widget[auto_popup]',
+            value:  presenter.widget.auto_popup.to_i == 1,
+            values: %w[1 0],
+            label:  { title: 'Auto Open Widget?' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:  'clients_widget[show_bubble]',
+            value:  presenter.widget.show_bubble,
+            values: %w[1 0],
+            label:  { title: 'Text Bubble Popup' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'clients_widget[bubble_text]',
+            value:        presenter.widget.bubble_text.to_s,
+            label:        { title: 'Text Bubble Prompt' },
+            html_options: { id: 'bubble_text', placeholder: 'Bubble Text' }
+          ) %>
+      <%= bootstrap_color_picker(
+            field:        'clients_widget[bubble_color]',
+            value:        presenter.widget.bubble_color,
+            label:        { title: 'Text Bubble Color' },
+            html_options: { id: 'bubble_color' }
+          ) %>
+      <%= bootstrap_switch_field(
+            field:  'clients_widget[show_question]',
+            value:  presenter.widget.show_question,
+            values: [true, false],
+            label:  { title: 'Show Question Input Box' }
+          ) %>
+      <%= bootstrap_text_field(
+            field:        'clients_widget[default_question]',
+            value:        presenter.widget.default_question.to_s,
+            label:        { title: 'Default Question Text' },
+            html_options: { id: 'default_question', placeholder: 'Question Text' }
+          ) %>
+
+      <% unless presenter.widget.new_record? %>
+        <%= render partial: 'snippets/f_file_field', locals: {
+              form:            f,
+              file_field:      { field: 'button_image', id: 'button_image_input', name: 'clients_widget[button_image]', url: presenter.button_image_path },
+              col:             { id: 'button_image_dropzone' },
+              label:           { title: 'Button Image' },
+              image_container: { id: 'button_image_container' },
+              image:           presenter.widget.button_image.attached? ? { key: presenter.widget.button_image.key, width: 50, height: 50, crop: 'fit', format: 'png' } : {}
+            } %>
+      <% end %>
+
+      <%= bootstrap_select_tag_campaign(
+            client:  presenter.widget.client,
+            field:   'clients_widget[campaign_id]',
+            label:   { title: 'Start a Campaign' },
+            options: { selected: presenter.widget.campaign_id, active_only: true, blank: 'Select a Campaign' }
+          ) %>
+
+      <% if presenter.widget.client.groups_count.positive? %>
+        <div id="clients_widget_group">
+          <%= render partial: 'groups/select_or_add', locals: { user: current_user, group: presenter.widget.group || presenter.widget.client.groups.new, select_or_add_field_name: 'clients_widget[group_id]', select_or_add_div_id: 'clients_widget_group' } %>
+        </div>
+      <% end %>
+
+      <div id="clients_widget_tag">
+        <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: presenter.widget.tag || presenter.widget.client.tags.new, select_or_add_field_name: 'clients_widget[tag_id]', select_or_add_div_id: 'clients_widget_tag' } %>
+      </div>
+
+      <%= bootstrap_select_tag(
+            field:   'clients_widget[stage_id]',
+            label:   { title: 'Move to Stage' },
+            options: { for_select: option_groups_from_collection_for_select(StageParent.where(client: presenter.widget.client_id), :stages, :name, :id, :name, presenter.widget.stage_id), blank: 'Select a Stage' }
+          ) %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save SiteChat', id: 'clients_widget_form_submit', disable_with: 'Saving SiteChat' }] %>
+  <% end %>
+</div>
+
+<script>
+  $(function() {
+    $('#submit_button_text').on('keyup', function() {
+      $('#submit_button_color').html($(this).val());
+    });
+
+    <% unless presenter.widget.new_record? %>
+      <%= render partial: 'snippets/js/confirm_alert', formats: :js, locals: {
+            element:     '#button_clients_widget_delete',
+            alert:       { body: "Deleting \"#{presenter.widget.widget_name}\" can NOT be un-done. Is it your intention to delete this SiteChat?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: presenter.widget_delete_path }
+          } %>
+    <% end %>
+  });
+</script>

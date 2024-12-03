@@ -1,0 +1,44 @@
+<%
+  # app/views/welcome/join_min.html.erb
+  #
+  # Example:
+  #   render partial: "welcome/join_min"
+  #
+  # Instance Variables:
+  #   (req) @client:         (Client)
+  #   (req) @package:        (Package)
+  #   (req) @package_page:   (PackagePage)
+  #
+  # Local Variables:
+  #   none
+  #
+-%>
+<div id="bg_style" class="row">
+  <div class="col-lg-6 offset-lg-3 mb-2 p-3">
+    <div class="card border shadow-lg mb-5 rounded">
+      <div class="card-body p-0 rounded">
+        <div class="card-title bg-info p-2 mb-0 rounded-top">
+          <h2 class="p-0 m-0 text-white">Almost there!</h2>
+        </div>
+
+        <div class="p-3">
+          <h3><%= @package.name -%></h3>
+
+          <p class="card-text">
+            <div id="client_form">
+              <%= render partial: 'clients/new_min', locals: { self_create: true } %>
+            </div>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    <% if @package.join_form_image.attached? %>
+      $('#banner_logo_image').attr('src', '<%= cl_image_path(@package.join_form_image.key, secure: true) -%>');
+    <% end %>
+  });
+</script>

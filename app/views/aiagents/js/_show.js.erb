@@ -1,0 +1,83 @@
+<%
+  # app/views/aiagents/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "aiagents/js/show", locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  #
+  cards = [local_assigns.dig(:cards) || []].flatten
+  presenter = AiagentPresenter.new(@aiagent)
+-%>
+<% if cards.include?('close_modal') %>
+  $('#dash_modal').modal('hide');
+<% end %>
+<% if cards.include?('dropdown') %>
+  $('#select_aiagents_dropdown').html('<%= j render partial: 'aiagents/select_aiagents_dropdown' -%>');
+<% end %>
+<% if cards.include?('edit') %>
+  $('#aiagents_body').html('<%= j render(partial: 'aiagents/edit') -%>');
+<% end %>
+<% if cards.include?('form_booking_st') %>
+  $('#form_custom_data').html('<%= j render('aiagents/form_booking_st', presenter:) -%>');
+<% end %>
+<% if cards.include?('form_conversation') %>
+  $('#form_custom_data').html('<%= j render('aiagents/form_conversation', presenter:) -%>');
+<% end %>
+<% if cards.include?('form_extract_data') %>
+  $('#form_custom_data').html('<%= j render('aiagents/form_extract_data', presenter:) -%>');
+<% end %>
+<% if cards.include?('form_quick_response') %>
+  $('#form_custom_data').html('<%= j render('aiagents/form_quick_response', presenter:) -%>');
+<% end %>
+<% if cards.include?('help') %>
+  $('#aiagents_body').html('<%= j render(partial: 'aiagents/help') -%>');
+<% end %>
+<% if cards.include?('index') %>
+  $('#aiagents_body').html('<%= j render(partial: 'aiagents/index') -%>');
+<% end %>
+<% if cards.include?('index_aiagent_sessions') %>
+  $('#dash_modal_title').html('');
+  $('#dash_modal_body').html('<%= j render partial: 'aiagents/contact/index' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('purchase') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('');
+  $('#dash_modal_body').html('<%= j render(partial: 'aiagents/purchase') -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('test') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<%= j render(partial: 'aiagents/sessions/title') -%>');
+  $('#dash_modal_body').html('<%= j render(partial: 'aiagents/sessions/test') -%>');
+  $('#dash_modal_footer').html('<%= j render(partial: 'aiagents/sessions/footer') -%>');
+  $('#<%= dom_id(@aiagent, 'test') %>').val('');
+  $(window).off('shown.bs.modal');
+  $(window).on('shown.bs.modal', function() {
+    $(".message-body").animate({ scrollTop: $(".message-body").prop('scrollHeight')});
+  });
+  $('#<%= dom_id(@aiagent, 'test') %>').focus();
+<% end %>
+<% if cards.include?('terms') %>
+  $('#aiagents_body').html('<%= j render(partial: 'aiagents/terms') -%>');
+<% end %>
+<% if cards.include?('toolbar') %>
+  $('#aiagents_toolbar').html('<%= j render partial: 'aiagents/toolbar' -%>');
+<% end %>
+Looper.init();
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+<% if @email_template&.errors&.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save AI Agent',
+    'body': '<%= @email_template.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>

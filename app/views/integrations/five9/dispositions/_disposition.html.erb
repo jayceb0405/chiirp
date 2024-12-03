@@ -1,0 +1,48 @@
+<%
+  # app/views/integrations/five9/dispositions/_disposition.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/dispositions/disposition', collection: dispositions, as: :disposition
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  this_disposition = @client_api_integration.dispositions.find { |disp| disp['id'] == disposition[:name].tr(' ', '_') } || {}
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#disposition_<%= disposition[:name].tr(' ', '_') -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left" colspan="2" id="td_disposition_name_<%= disposition[:name].tr(' ', '_') -%>"> <%= disposition[:name] -%> </td>
+  <td class="text-left" id="disposition_campaign_<%= disposition[:name].tr(' ', '_') -%>"> <%= Campaign.find_by(client_id: @client_api_integration.client_id, id: this_disposition.dig('campaign_id'))&.name -%> </td>
+  <td class="text-left" id="disposition_group_<%= disposition[:name].tr(' ', '_') -%>"> <%= Group.find_by(client_id: @client_api_integration.client_id, id: this_disposition.dig('group_id'))&.name -%> </td>
+  <td class="text-left" id="disposition_tag_<%= disposition[:name].tr(' ', '_') -%>"> <%= Tag.find_by(client_id: @client_api_integration.client_id, id: this_disposition.dig('tag_id'))&.name -%> </td>
+  <td class="text-left" id="disposition_stage_<%= disposition[:name].tr(' ', '_') -%>"> <%= Stage.for_client(@client_api_integration.client_id).find_by(id: this_disposition.dig('stage_id').to_i)&.name -%> </td>
+  <td class="text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#disposition_<%= disposition[:name].tr(' ', '_') -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse" id="disposition_<%= disposition[:name].tr(' ', '_') -%>">
+  <!-- Disposition -->
+</tr>
+
+<script>
+  $(function() {
+
+    $('#disposition_<%= disposition[:name].tr(' ', '_') -%>').on('show.bs.collapse', function () {
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '<%= edit_integrations_five9_disposition_path(disposition[:name].tr(' ', '_'), name: disposition[:name]) -%>'
+      });
+    });
+  });
+</script>

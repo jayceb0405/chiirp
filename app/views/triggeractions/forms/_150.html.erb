@@ -1,0 +1,29 @@
+<%
+  # app/views/triggeractions/forms/_150.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/150", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # send an RVM
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[voice_recording_id]',
+      label:        { title: 'Select A Voice Recording to Send' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.client.voice_recording_options, selected: presenter.triggeraction.voice_recording_id, blank: 'Select a Voice Recording' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[from_phone]',
+      label:        { title: 'Select A Phone Number to Send From' },
+      html_options: { disabled: (presenter.campaign_disabled? || presenter.campaign.lock_phone) },
+      options:      { for_select: options_for_phone_numbers(client: presenter.client, selected: presenter.triggeraction.from_phone, options: [['user_number', 'User\'s Default Number']]), blank: 'Last Number Used' },
+      messages:     { note: "Actions are #{presenter.campaign_disabled? || presenter.campaign.lock_phone ? '' : 'NOT '}locked to the Campaign default phone number." }
+    ) %>

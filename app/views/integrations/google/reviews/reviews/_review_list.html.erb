@@ -1,0 +1,47 @@
+<%
+  # app/views/integrations/google/reviews/reviews/_review_list.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/reviews/review_list', locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+  presenter.account  = local_assigns.dig(:account).presence || (presenter.options_for_selected_accounts.length == 1 ? presenter.options_for_selected_accounts[0][1] : '')
+  presenter.location = local_assigns.dig(:location).presence || (presenter.options_for_selected_locations_reviews(presenter.account).length == 1 ? presenter.options_for_selected_locations_reviews(presenter.account)[0][1] : '')
+  presenter.page     = (local_assigns.dig(:page) || 1).to_i
+  presenter.per_page = (local_assigns.dig(:per_page) || 20).to_i
+-%>
+<% if presenter.account.present? && presenter.location.present? %>
+  <tr>
+    <td colspan="9">
+      <%= render partial: 'snippets/paginate', locals: {
+            page_label:  'Reviews per page',
+            per_page:    presenter.per_page,
+            object:      presenter.google_reviews,
+            path_params: { controller: 'integrations/google/reviews/reviews', action: 'index', account: presenter.account, location: presenter.location },
+            div_class:   'justify-content-end',
+            options:     [10, 25, 50, 100]
+          } %>
+    </td>
+  </tr>
+
+  <%= render partial: 'integrations/google/reviews/reviews/review', collection: presenter.google_reviews, as: :review, locals: { presenter: } %>
+
+  <tr>
+    <td colspan="9">
+      <%= render partial: 'snippets/paginate', locals: {
+            page_label:  'Reviews per page',
+            per_page:    presenter.per_page,
+            object:      presenter.google_reviews,
+            path_params: { controller: 'integrations/google/reviews/reviews', action: 'index', account: presenter.account, location: presenter.location },
+            div_class:   'justify-content-end',
+            options:     [10, 25, 50, 100]
+          } %>
+    </td>
+  </tr>
+<% end %>

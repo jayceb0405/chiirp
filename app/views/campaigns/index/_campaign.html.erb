@@ -1,0 +1,74 @@
+<%
+  # app/views/campaigns/index/_campaign.html.erb
+  #
+  # Example:
+  # 	render partial: "campaigns/index/campaign", collection: @campaigns, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  # 	(req) campaign: (Campaign)
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+
+  presenter.campaign = campaign
+-%>
+<tr>
+  <td class="text-left align-middle">
+    <%= link_to presenter.campaign.name,
+                campaign_path(presenter.campaign),
+                class:  'text-decoration-none text-reset',
+                remote: true,
+                method: :get %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"><%= Friendly.new.date(presenter.campaign.created_at, presenter.campaign.client.time_zone, true) -%></td>
+  <td class="text-center align-middle d-none d-md-table-cell"><%= (presenter.campaign.active ? '<i class="fa fa-check text-success"></i>' : '<i class="fa fa-times text-danger"></i>').html_safe -%></td>
+  <td class="text-center align-middle d-none d-md-table-cell">
+    <%= render partial: 'campaigns/index/starting_this_campaign/campaigns', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/tags', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/widgets', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/stages', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/callrail/v3/callrail', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/cardx', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/dropfunnels', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/housecallpro', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/jobber', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/servicemonster', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/servicetitan', locals: { presenter: } %>
+    <%= render partial: 'campaigns/index/starting_this_campaign/webhook_api', locals: { presenter: } %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"><%= Friendly.new.date(presenter.campaign.last_started_at, presenter.campaign.client.time_zone, true) -%></td>
+  <td class="text-center align-middle d-none d-md-table-cell"><%= (presenter.campaign.analyzed ? '<i class="fa fa-check text-success"></i>' : '<i class="fa fa-times text-danger"></i>').html_safe -%></td>
+  <td class="text-center align-middle d-none d-md-table-cell"><%= presenter.allow_repeat_icon.html_safe -%></td>
+  <td class="text-right align-middle">
+    <%= link_to '',
+                campaign_path(presenter.campaign),
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                title: 'Edit',
+                data:  {
+                  method: 'get',
+                  remote: 'true',
+                  toggle: 'tooltip'
+                } %>
+    <%= link_to '',
+                edit_campaign_marketplace_path(presenter.campaign.campaign_share_code.id),
+                class: "btn btn-sm btn-icon btn-secondary fa fa-funnel-dollar #{presenter.campaign.marketplace ? 'text-success' : ''}",
+                title: 'Campaign Marketplace',
+                data:  {
+                  method: 'get',
+                  remote: 'true',
+                  toggle: 'tooltip'
+                } %>
+    <%= link_to '',
+                campaign_path(presenter.campaign, confirm: 'activate', return_to: 'index'),
+                class: "btn btn-sm btn-icon btn-secondary fa fa-hand-paper button_campaign_active #{presenter.campaign.active ? 'text-success' : 'text-danger'}",
+                title: presenter.campaign.active ? 'Active' : 'Inactive',
+                data:  {
+                  id:     presenter.campaign.id,
+                  name:   presenter.campaign.name,
+                  active: presenter.campaign.active.to_s,
+                  toggle: 'tooltip'
+                } %>
+  </td>
+</tr>

@@ -1,0 +1,97 @@
+<%
+# app/views/clients/onboard/_edit.html.erb
+#
+# Example:
+#   render partial: "clients/onboard/edit"
+#
+# Required Instance Variables:
+#   @client:   (Client)
+#
+# Required Local Variables:
+#   collapsed: (Boolean)
+#
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@client] } %>
+<div class="row mt-5">
+  <div class="col-1">
+    <% if @user_phone_defined %>
+      <h3><i class="text-success fa fa-check-double"></i></h3>
+    <% else %>
+      <h3><i class="text-warning fa fa-exclamation-triangle"></i></h3>
+    <% end %>
+  </div>
+  <div class="col-11">
+    <h4 class="mb-0">Verify your Mobile Number</h4>
+    <p><%= I18n.t('tenant.name') -%> sends notifications and updates to you with information about your contacts and account.</p>
+    <%= link_to 'Verify My Mobile Phone Number',
+                user_edit_mobile_path(current_user.id),
+                class:  ' btn-info mt-3',
+                remote: true,
+                method: :get %>
+  </div>
+</div>
+
+<div class="row mt-5">
+  <div class="col-1">
+    <% if @phone_number_assigned %>
+      <h4><i class="text-success fa fa-check-double"></i></h4>
+    <% else %>
+      <h4><i class="text-warning fa fa-exclamation-triangle"></i></h4>
+    <% end %>
+  </div>
+  <div class="col-11">
+    <h4 class="mb-0">Select your First Phone Number</h4>
+
+    <% if current_user.admin? %>
+      <p>Select your first <%= I18n.t('tenant.name') -%> phone number and begin texting now!</p>
+      <%= link_to "Select My First #{I18n.t('tenant.name')} Phone Number",
+                  client_twnumbers_path(current_user.client, referer: 'dashboard', commit: 'search'),
+                  class:  'btn btn-info mt-3',
+                  remote: true,
+                  method: :post %>
+    <% else %>
+      <p>The Admin on your account must select a phone number to beginning using <%= I18n.t('tenant.name') -%>.</p>
+    <% end %>
+  </div>
+</div>
+
+<div class="row mt-5">
+  <div class="col-1">
+    <% if @contact_created %>
+      <h4><i class="text-success fa fa-check-double" id="client_onboarding_new_contact"></i></h4>
+    <% else %>
+      <h4><i class="text-warning fa fa-exclamation-triangle" id="client_onboarding_new_contact"></i></h4>
+    <% end %>
+  </div>
+  <div class="col-11">
+    <h4 class="mb-1">Create your First Contact</h4>
+    <p>Add yourself as your first Contact to begin learning & testing.</p>
+    <%= link_to 'Create My First Contact',
+                new_contact_path,
+                method: :get,
+                remote: true,
+                class:  'btn btn-info mt-3' %>
+  </div>
+</div>
+
+<% if 1 == 2 %>
+  <div class="row mt-5">
+    <div class="col-1">
+      <% if @client.onboarding_scheduled.nil? %>
+        <h4><i class="text-warning fa fa-exclamation-triangle"></i></h4>
+      <% else %>
+        <h4><i class="text-success fa fa-check-double"></i></h4>
+      <% end %>
+    </div>
+    <div class="col-11">
+      <h4 class="mb-1">Schedule your Free Onboarding Session</h4>
+      <% if @client.onboarding_scheduled.nil? %>
+        <%= link_to 'Book Now',
+                    "https://go.oncehub.com/#{I18n.t('tenant.oncehub')}?company=#{@client.name}&name=#{@client.users.first.fullname}&mobile=#{@client.phone}&email=#{@client.users.first.email}&skip=1",
+                    class:  'btn btn-info ml-auto',
+                    style:  'text-decoration: none;',
+                    target: '_blank', rel: 'noopener' %>
+      <% end %>
+    </div>
+  </div>
+<% end %>

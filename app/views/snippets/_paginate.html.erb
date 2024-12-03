@@ -1,0 +1,38 @@
+<%
+  # app/views/snippets/_paginate.html.erb
+  #
+  # Example:
+  #   render partial: 'snippets/paginate', locals: {}
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   object:      (ActiveRecord)
+  #   path_params: (Hash)
+  #
+  # Optional Local Variables:
+  #   path_method: (String)
+  #   page_label:  (String)
+  #   per_page:    (Integer)
+  #   div_class:   (String)
+  #   remote:      (Boolean)
+  #   turbo:       (Boolean)
+  #
+  object      = local_assigns.dig(:object)
+  path_params = local_assigns.dig(:path_params)
+  page_label  = (local_assigns.dig(:page_label) || 'Per Page').to_s
+  per_page    = [(local_assigns.dig(:per_page) || 25).to_i, 10].max
+  div_class   = local_assigns.dig(:div_class).to_s
+  window      = (local_assigns.dig(:window) || 4).to_i
+  options     = [local_assigns.dig(:options) || [10, 25, 50, 100, 150, 200]].flatten
+  remote      = local_assigns.include?(:remote) ? local_assigns.dig(:remote) : true
+  turbo       = local_assigns.include?(:turbo) ? local_assigns.dig(:turbo) : false
+-%>
+<% if object.present? && path_params.present? %>
+  <div class="form-inline pt-2 pb-2 <%= div_class -%>">
+    <%= page_label -%>:
+    <%= select_tag(:per_page, options_for_select(options, per_page), { class: 'form-control ml-2 mr-2 w-auto', data: { toggle: 'selectpicker' }, onchange: "if(this.value){$.ajax({method:'GET',#{turbo ? "accepts:{turbo_stream:'text/vnd.turbo-stream.html'},converters:{'text turbo_stream':function(data){Turbo.renderStreamMessage(data);}},dataType:'turbo_stream'" : "dataType:'script'"},url:'#{url_for(path_params.merge(only_path: true))}',data:{per_page:this.value}});}" }) %>
+    <%= paginate(object, window:, outer_window: 0, left: 0, right: 0, remote:, params: path_params) %>
+  </div>
+<% end %>

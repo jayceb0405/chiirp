@@ -1,0 +1,26 @@
+<%
+  # app/views/aiagents/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "aiagents/js/show", locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   @aiagent Aiagent
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<%= form_tag aiagent_test_path(@aiagent), { builder: LooperFormBuilder, remote: true, method: :post } do %>
+  <%= bootstrap_text_field(
+        field:    'aiagent_test[message]',
+        label:    { title: 'New Message' },
+        html_options: { id: dom_id(@aiagent, 'test'), disabled: @session.ended?, autofocus: true },
+        messages: { note: 'Send a message to the AI Agent.' }
+      ) %>
+  <%= link_to 'Reset', aiagent_test_reset_path(@aiagent, contact_id: @session.contact_id), remote: true, method: :post, class: 'btn btn-secondary', style: 'float: left;' %>
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Send', disable_with: 'Sending', disabled: @session.ended? }],
+        html_options: { disabled: @session.ended? },
+      ) %>
+<% end %>

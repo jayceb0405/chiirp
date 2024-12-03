@@ -1,0 +1,25 @@
+<%
+# app/views/packages/_onetime.html.erb
+#
+# Example:
+#   render partial: 'packages/onetime'
+#
+# Required Instance Variables:
+#   @package: (Package)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<p>Onetime Package: "<%= @package.name %>" was created.</p>
+
+<p>
+  <em>This is the only time you will be able to see this URL. <strong>Please copy it now.</strong></em>
+</p>
+
+<%= bootstrap_copy_field(
+      field: 'package-url',
+      value: welcome_join_url(@package.package_key),
+      row:   { class: 'mb-2' },
+      label: { title: 'Package URL' }
+    ) %>

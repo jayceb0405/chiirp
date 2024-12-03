@@ -1,0 +1,25 @@
+<%
+  # /app/views/triggers/js/_analysis_results.js.erb
+  #
+  # Example:
+  #   render partial: 'triggers/js/analysis_results', locals: { trigger: Trigger }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) trigger: Trigger
+  #
+  return unless local_assigns.dig(:trigger).is_a?(Trigger)
+-%>
+$('#trigger_analysis_results').html('<%= j render partial: 'triggers/analyze_icon', locals: { trigger: } -%>');
+$('#trigger_analysis_results').tooltip('dispose');
+$('#trigger_analysis_results').tooltip({
+  html: true,
+  placement: 'right',
+  container: 'body',
+  title: '<div class="text-left"><%= j render partial: 'triggers/show/analysis_info', locals: { trigger: } -%></div>',
+  template: '<div class="tooltip" role="tooltip"><div class="arrow"></div><div class="tooltip-inner tooltip-big"></div></div>'
+});
+$('#trigger_analyzed_<%= trigger.id -%>').html('<%= j render partial: 'triggers/analyze_icon_with_name', locals: { trigger: } -%>');
+$('#trigger_analysis_results_help').html('<%= j render partial: 'triggers/show/analysis_info', locals: { trigger: } -%>');

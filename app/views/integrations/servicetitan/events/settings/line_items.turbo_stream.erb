@@ -1,0 +1,19 @@
+<%
+  # app/views/integrations/servicetitan/events/events/line_items.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/line_items'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Servicetitan::EventsPresenter.new(@client_api_integration)
+-%>
+<%= turbo_stream.update 'servicetitan_line_items_dropdown' do %>
+  <%= render partial: 'integrations/servicetitan/events/settings/line_items_dropdown', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

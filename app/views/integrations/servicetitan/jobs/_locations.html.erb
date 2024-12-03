@@ -1,0 +1,40 @@
+<%
+# app/views/integrations/servicetitan/jobs/_locations.html.erb
+#
+# Example:
+# 	render partial: "integrations/servicetitan/jobs/locations"
+#
+# Instance Variables:
+# 	(req) @servicetitan_locations: (Array)
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= bootstrap_select_tag(
+      field:        'location_id',
+      label:        { title: 'Select a Location' },
+      html_options: { id: 'location_select', required: true },
+      options:      { for_select: options_for_select([['Create New Location', -1]] + @servicetitan_locations, 0), blank: 'Locations' },
+      messages:     { note: 'Required' }
+    ) %>
+
+<div id="locations_new"></div>
+
+<script>
+  $(function () {
+
+    $('#location_select').on('change', function(e) {
+      if ($('#location_select').val() == -1) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+          data: { commit: 'get_locations_new' }
+        });
+      } else {
+        $('#locations_new').html('');
+      }
+    });
+  });
+</script>

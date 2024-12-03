@@ -1,0 +1,66 @@
+<%
+  # app/views/integrations/callrail/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">CallRail Integration Help</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <h6>Step 1:</h6>
+      <p>From the Integrations Tab on your CallRail dashboard.</p>
+      <ol>
+        <li>Click on Api Key under Data Access in the left hand menu.</li>
+        <li>Click Create API V3 Key button in the top right corner.</li>
+        <li>Copy the new API Key that was generated, it looks something like: 11c1ac11ab1e1b111111c1f11111ee1a.</li>
+        <li>Paste that key into <%= I18n.t('tenant.name') %> in the CallRail API V3 Key field under Connections.</li>
+        <li>Click save credentials.</li>
+      </ol>
+
+      <h6>Step 2:</h6>
+      <p>From the Connection Tab on <%= I18n.t('tenant.name') %>.</p>
+      <ol>
+        <li>Determine which webhook you want to integrate with. We currently support the following webhooks: <%= Integration::Callrail::V3::Base::WEBHOOK_TYPES.map(&:first).join(', ') %>.</li>
+        <li>Copy the Webhook Url from the corresponding webhook type that you want to use.</li>
+      </ol>
+
+      <p>From the Integrations Tab on your CallRail dashboard.</p>
+      <ol>
+        <li>Click on library under integrations.</li>
+        <li>Find the Webhooks integration and click on it.</li>
+        <li>Under Post-Call, Outbound Post-Call, and/or Form Submission fields: paste the matching URL that you copied from <%= I18n.t('tenant.name') %>.</li>
+        <li>Scroll down to the bottom of the Call Rail Webhook page.</li>
+        <li>Click on Advanced Settings.</li>
+        <li>Copy the Webhook Signature Secret Token.</li>
+        <li>Click update.</li>
+      </ol>
+
+      <p>From the Connection Tab on <%= I18n.t('tenant.name') %>.</p>
+      <ol>
+        <li>Paste the Webhook Signature Secret Token into the CallRail Webhook Signature Secret Token field on <%= I18n.t('tenant.name') %>.</li>
+        <li>Click on Save Credentials.</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

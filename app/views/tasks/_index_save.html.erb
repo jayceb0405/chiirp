@@ -1,0 +1,255 @@
+<%
+  # app/views/tasks/_index.html.erb
+  #
+  # Example:
+  #   render partial: "tasks/index"
+  #
+  # Required Instance Variables:
+  #   @tasks:        (Tasks)
+  #   @user_setting: (Users::Setting)
+  #
+  # Optional Instance Variables:
+  #   @contact: (Contact)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  all_tasks    = @user_setting.data.dig(:all_tasks).to_i
+  my_tasks     = @user_setting.data.dig(:my_tasks).to_i
+  contact_id   = @contact && !@contact.new_record? ? @contact.id : 0
+  user_id      = @user && !@user.new_record? ? @user.id : 0
+  section_header_options = '<button class="btn btn-app text-white ml-3 pl-2 pr-2" id="new_task"><i class="fa fa-plus"></i></button>'
+
+  new_sort_dir = if @user_setting.data.dig(:task_list, :sort, :dir).to_s.present?
+                   if @user_setting.data.dig(:task_list, :sort, :dir).to_s == 'asc'
+                     'desc'
+                   else
+                     @user_setting.data.dig(:task_list, :sort, :dir).to_s == 'desc' ? '' : 'asc'
+                   end
+                 else
+                   'asc'
+                 end
+  sort_tooltip = new_sort_dir.present? ? "Sort #{new_sort_dir.capitalize}" : 'Clear Sort'
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@task] } %>
+<%= render partial: 'layouts/shared/section_header', locals: {
+      heading:     "<i class=\"fa fa-tasks\"></i> #{my_tasks == 1 ? 'My' : "Everyone's"} Tasks",
+      description: "#{all_tasks == 1 ? 'All' : 'Incomplete'} Tasks: #{@tasks.total_count}",
+      options:     section_header_options
+    } %>
+<div class="container-body">
+
+  <div class="d-flex justify-content-between">
+    <label class="switch-inline mb-2">
+      <span class="switch-inline__text pr-2">All Tasks</span>
+      <span class="switch switch--info">
+        <%= check_box_tag 'all_tasks', '1', (all_tasks == 1), { id: 'all_tasks' } %>
+        <span class="switch-slider" id="all_tasks_slider"></span>
+      </span>
+
+      <% if current_user.admin? %>
+        <span class="switch-inline__text pr-2">Only My Tasks</span>
+        <span class="switch switch--info">
+          <%= check_box_tag 'my_tasks', '1', (my_tasks == 1), { id: 'my_tasks' } %>
+          <span class="switch-slider" id="my_tasks_slider"></span>
+        </span>
+      <% end %>
+    </label>
+
+    <%= render partial: 'snippets/paginate', locals: {
+          per_page:      @user_setting.data[:task_list][:per_page],
+          object:        @tasks,
+          path_params:   { controller: 'tasks', action: 'index', contact_id: contact_id },
+          next_sort_dir: new_sort_dir
+        } %>
+  </div>
+
+  <div id="task_edit_container">
+    <!-- EDIT TASK -->
+  </div>
+
+  <div class="js-scrollable">
+
+    <%= form_tag task_path(0), { builder: LooperFormBuilder, id: 'task_form', remote: true, multipart: true, method: :delete } do %>
+
+      <table class="table table-no-border table-striped">
+        <thead>
+          <tr>
+            <th class="text-left">
+              <div class="input-group mb-0 pr-1">
+                <div class="custom-control custom-checkbox">
+                  <%= check_box_tag 'select_switch', true, false, { class: 'custom-control-input' } %>
+                  <%= label_tag 'select_switch', '', { class: 'custom-control-label' } %>
+                </div>
+                <%= link_to '', '#',
+                            class: 'fa fa-trash-alt text-unmuted pl-1 pr-2',
+                            id:    'delete_selected_tasks_link',
+                            style: 'text-decoration: none;',
+                            title: 'Delete ALL Selected',
+                            data:  {
+                              toggle: 'tooltip'
+                            } %>
+                <%= render partial: 'snippets/sort_column', locals: {
+                      column_heading:     'Task',
+                      column_name:        'name',
+                      selected_column:    @user_setting.data.dig(:task_list, :sort, :col).to_s,
+                      selected_direction: @user_setting.data.dig(:task_list, :sort, :dir).to_s
+                    } %>
+              </div>
+            </th>
+
+            <th class="text-left">
+              <%= render partial: 'snippets/sort_column', locals: {
+                    column_heading:     'Assigned To',
+                    column_name:        'assign_to',
+                    selected_column:    @user_setting.data.dig(:task_list, :sort, :col).to_s,
+                    selected_direction: @user_setting.data.dig(:task_list, :sort, :dir).to_s
+                  } %>
+            </th>
+
+            <% if contact_id == 0 %>
+              <th class="text-left">
+                <%= render partial: 'snippets/sort_column', locals: {
+                      column_heading:     'Contact',
+                      column_name:        'contact',
+                      selected_column:    @user_setting.data.dig(:task_list, :sort, :col).to_s,
+                      selected_direction: @user_setting.data.dig(:task_list, :sort, :dir).to_s
+                    } %>
+              </th>
+            <% end %>
+
+            <th class="text-left">
+              <%= render partial: 'snippets/sort_column', locals: {
+                    column_heading:     'Due Date',
+                    column_name:        'due_date',
+                    selected_column:    @user_setting.data.dig(:task_list, :sort, :col).to_s,
+                    selected_direction: @user_setting.data.dig(:task_list, :sort, :dir).to_s
+                  } %>
+            </th>
+
+            <% if @user_setting.data[:all_tasks].to_i == 1 %>
+              <th class="text-left">
+                <%= render partial: 'snippets/sort_column', locals: {
+                      column_heading:     'Completed',
+                      column_name:        'completed',
+                      selected_column:    @user_setting.data.dig(:task_list, :sort, :col).to_s,
+                      selected_direction: @user_setting.data.dig(:task_list, :sort, :dir).to_s
+                    } %>
+              </th>
+            <% end %>
+          </tr>
+        </thead>
+        <tbody>
+          <% if @tasks.any? %>
+            <%= render partial: 'tasks/task', collection: @tasks %>
+          <% else %>
+          <tr>
+            <td colspan="<%= 3 + (contact_id.zero? ? 1 : 0) + (@user_setting.data[:all_tasks].to_i == 1 ? 1 : 0) -%>">
+              <h5 class="p-2 m-0">No Tasks found.</h5>
+            </td>
+          <% end -%>
+        </tbody>
+      </table>
+    <% end %>
+  </div>
+</div>
+<script>
+  $(document).ready( function() {
+    $('[data-toggle="tooltip"], .tooltip').tooltip( {
+      placement: 'auto',
+      container: 'body'
+    });
+
+    $("a").on("click", function () {
+      $('[data-toggle="tooltip"], .tooltip').tooltip("hide");
+    });
+
+    $('#delete_selected_tasks_link').on('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      ChiirpAlert({
+        'body':       'Delete ALL selected Tasks?',
+        'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump them!', id: 'button_dump_tasks' }].to_json) -%>,
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_dump_tasks');
+      $(document).on('click', '#button_dump_tasks', function(e) {
+        $.ajax({
+          method: 'DELETE',
+          dataType: 'script',
+          url: '<%= task_path(0) -%>',
+          data: { tasks_checked: checked, contact_id: <%= contact_id -%> }
+        });
+      });
+    });
+
+    $("#new_task").on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= new_task_path -%>',
+        data: { contact_id: <%= contact_id -%> }
+      });
+
+      $('#task-list-collapse').show();
+    });
+
+    $("#all_tasks_slider").on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      $('#all_tasks').prop('checked', !$('#all_tasks').is(':checked'));
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= tasks_path -%>',
+        data: { contact_id: <%= contact_id -%>, user_id: <%= user_id -%>, all_tasks: getAllTasks(), my_tasks: getMyTasks(), collapsed: false }
+      });
+    });
+
+    <% if current_user.admin? %>
+      $("#my_tasks_slider").on("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $('#my_tasks').prop('checked', !$('#my_tasks').is(':checked'));
+
+        $.ajax({
+          method: 'GET',
+          dataType: 'script',
+          url: '<%= tasks_path -%>',
+          data: { contact_id: <%= contact_id -%>, user_id: <%= user_id -%>, all_tasks: getAllTasks(), my_tasks: getMyTasks(), collapsed: false }
+        });
+      });
+    <% end %>
+
+    SortColumn({
+      'path':   '<%= tasks_path -%>',
+      'next_sort_dir': '<%= new_sort_dir -%>',
+      'params': {
+        'contact_id': '<%= contact_id -%>'
+      }
+    });
+
+    function getAllTasks() {
+      if ( $('#all_tasks').is(':checked') ) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+
+    function getMyTasks() {
+      if ( $('#my_tasks').length && $('#my_tasks').is(':checked') ) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+   });
+</script>

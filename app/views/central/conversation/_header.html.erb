@@ -1,0 +1,140 @@
+<%
+  # app/views/central/conversation/_header.html.erb
+  #
+  # Example:
+  #   render partial: 'central/conversation/header', locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+-%>
+<h1 class="page-title"><span class="menu-icon fa fa-comments mr-2"></span><%= presenter.contact.new_record? ? 'Message Central' : presenter.contact.fullname -%></h1>
+
+<div class="message-header-actions">
+  <div class="dropdown d-flex flex-row-reverse">
+    <div class="ml-2 mt-1">
+      <button class="btn btn-sm btn-icon btn-light d-xl-none" data-toggle="sidebar"><i class="fa fa-angle-double-left"></i></button>
+    </div>
+
+    <% unless presenter.contact.new_record? %>
+      <span style="width:250px;">
+        <%= select('', 'selected_number', options_for_phone_numbers(contact: presenter.contact, current_user: (current_user.access_controller?('central', 'all_contacts', session) ? current_user : nil), selected: presenter.current_phone_number), {}, { id: 'live_messenger_selected_number', class: 'form-control', data: { toggle: 'selectpicker' } }) %>
+      </span>
+
+      <div class="dropdown mr-2 mt-1" id="contact_options_dropdown">
+        <button class="btn btn-sm btn-icon btn-light" data-toggle="dropdown"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+        <div class="dropdown-menu dropdown-menu-right" id="contact_options_menu_div">
+          <div class="dropdown-arrow mr-n1"></div>
+        </div>
+      </div>
+
+      <% if presenter.client.folders_count.positive? %>
+        <div class="dropdown mr-2 mt-1">
+          <button class="btn btn-sm btn-icon btn-light" data-toggle="dropdown"><i class="fa fa-folder"></i></button>
+          <%= render partial: 'central/conversation/folder_options_menu', locals: { presenter: } %>
+        </div>
+      <% end %>
+
+      <div class="mr-2 mt-1">
+        <%= link_to("<i class=\"fa fa-sticky-note #{presenter.contact_notes_count.positive? ? 'text-success' : ''}\" id=\"button_notes\"></i>".html_safe,
+                    contact_notes_path(presenter.contact.id),
+                    class:  'btn btn-sm btn-icon btn-light',
+                    style:  'text-decoration: none;',
+                    method: :get,
+                    remote: true) %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    validateSelectedNumber('<%= presenter.current_phone_number -%>');
+
+    // updateMessages('<%= presenter.current_phone_number -%>');
+
+    $('#live_messenger_selected_number').on('change', function(e) {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      var selected_number = $('#live_messenger_selected_number').val();
+      updateMessages(selected_number);
+      validateSelectedNumber(selected_number);
+    });
+
+    <% unless presenter.contact.new_record? %>
+      $(document).off('show.bs.dropdown', '#contact_options_dropdown');
+      $(document).on('show.bs.dropdown', '#contact_options_dropdown', function (e) {
+        $.ajax({
+          method: 'GET',
+          dataType: 'script',
+          url: '<%= central_contact_options_path(presenter.contact) -%>'
+        });
+      });
+
+      $(document).off('hide.bs.dropdown', '#contact_options_dropdown');
+      $(document).on('hide.bs.dropdown', '#contact_options_dropdown', function (e) {
+        $('#contact_options_menu_div').html('');
+      });
+
+      $(document).off('click', '#button_notes');
+      $(document).on('click', '#button_notes', function (e) {
+        $.ajax({
+          method: 'GET',
+          dataType: 'script',
+          url: '<%= contact_notes_path(presenter.contact.id) -%>'
+        });
+      });
+    <% end %>
+
+    function validateSelectedNumber( selected_number ) {
+      if ($.inArray(selected_number, <%= (Twnumber.user_phone_numbers([presenter.contact&.user_id] << (current_user.access_controller?('central', 'all_contacts', session) ? current_user.id : 0)).pluck(:phonenumber) + %w[all fb ggl email widget]).inspect.html_safe -%>) !== -1) {
+        // selected_number is a usable number for User
+
+        if (<%= presenter.contact.ok2text.to_i -%> === 1 || selected_number === 'fb' || selected_number === 'ggl') {
+          disableFormFields(false);
+          disableVoiceFormFields(false);
+        } else {
+          disableFormFields(true);
+          disableVoiceFormFields(false);
+        }
+
+        $('#phone_number_tag').val(selected_number);
+      } else {
+        // selected_number is NOT a usable number for User
+        disableFormFields(true);
+        disableVoiceFormFields(true);
+        $('#phone_number_tag').val('');
+      }
+    }
+
+    function disableFormFields(disabled) {
+      $('#emoji_textarea').prop( "disabled", disabled );
+      $('#check_box_attachments').prop( "disabled", disabled );
+      $('#scheduler_calendar').prop( "disabled", disabled );
+      $('#send_button').prop( "disabled", disabled );
+      $('#scheduler_button').prop( "disabled", disabled );
+      $('#emoji_icon').prop( "disabled", disabled );
+      $('#file_upload_button').prop( "disabled", disabled );
+    }
+
+    function disableVoiceFormFields(disabled) {
+      $('#call_contact').prop( "disabled", disabled );
+      $('#rvm_contact').prop( "disabled", disabled );
+    }
+
+    function updateMessages(phone_number) {
+      <% if presenter.contact && !presenter.contact.new_record? %>
+        $.ajax({
+          method: 'GET',
+          dataType: 'script',
+          url: '<%= central_conversation_path(presenter.contact) -%>',
+          data: { phone_number: phone_number }
+        });
+      <% end %>
+    }
+  });
+</script>

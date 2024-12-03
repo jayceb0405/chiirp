@@ -1,0 +1,76 @@
+<%
+  # app/views/triggeractions/forms/_901.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/901", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # Push data to PC Richard
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[install_method]',
+      label:        { title: 'Select Process to Push' },
+      html_options: { id: "pcrichard_install_method_select_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled?, multiple: false },
+      options:      { array: [%w[Scheduled scheduled], %w[Completed completed], ['Out of Service Area', 'invalid_zone']], selected: presenter.triggeraction.install_method || 'scheduled' },
+      messages:     { note: 'Select the process pushed to PC Richard.' }
+    ) %>
+
+<fieldset class="border p-2 mb-2 rounded" id="push_scheduled_<%= presenter.triggeraction.id -%>" style="<%= presenter.triggeraction.install_method.to_s == 'completed' ? 'display: none;' : '' -%>">
+  <legend class="w-auto mb-0">Scheduled Process Custom Fields</legend>
+  <%= bootstrap_select_tag(
+        field:    'triggeraction[scheduled][date]',
+        label:    { title: 'Scheduled Date' },
+        options:  { array: presenter.client_custom_fields_hash_date, selected: presenter.triggeraction.scheduled.dig('date'), blank: 'Select a Custom Field' },
+        messages: { note: 'Select a Custom Field to pull the scheduled installation date from.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:    'triggeraction[scheduled][notes]',
+        label:    { title: 'Notes' },
+        options:  { array: presenter.client_custom_fields_hash_string, selected: presenter.triggeraction.scheduled.dig('notes'), blank: 'Select a Custom Field' },
+        messages: { note: 'Select a Custom Field to pull the Notes from.' }
+      ) %>
+</fieldset>
+
+<fieldset class="border p-2 mb-2 rounded" id="push_completed_<%= presenter.triggeraction.id -%>" style="<%= presenter.triggeraction.install_method.to_s == 'completed' ? '' : 'display: none;' -%>">
+  <legend class="w-auto mb-0">Completed Process Custom Fields</legend>
+  <%= bootstrap_select_tag(
+        field:    'triggeraction[completed][serial_number]',
+        label:    { title: 'Installed Model Serial Number' },
+        options:  { array: presenter.client_custom_fields_hash_string, selected: presenter.triggeraction.completed.dig('serial_number'), blank: 'Select a Custom Field' },
+        messages: { note: 'Select a Custom Field to pull the installed model serial number from.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:    'triggeraction[completed][date]',
+        label:    { title: 'Completed Date' },
+        options:  { array: presenter.client_custom_fields_hash_date, selected: presenter.triggeraction.completed.dig('date'), blank: 'Select a Custom Field' },
+        messages: { note: 'Select a Custom Field to pull the completed installation date from.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:    'triggeraction[completed][notes]',
+        label:    { title: 'Notes' },
+        options:  { array: presenter.client_custom_fields_hash_string, selected: presenter.triggeraction.completed.dig('notes'), blank: 'Select a Custom Field' },
+        messages: { note: 'Select a Custom Field to pull the Notes from.' }
+      ) %>
+</fieldset>
+
+<script>
+  $(function() {
+    $('#pcrichard_install_method_select_<%= presenter.triggeraction.id -%>').on('change', function(e) {
+
+      if ($('#pcrichard_install_method_select_<%= presenter.triggeraction.id -%>').val() == 'scheduled') {
+        $('#push_completed_<%= presenter.triggeraction.id -%>').hide();
+        $('#push_scheduled_<%= presenter.triggeraction.id -%>').show();
+      } else {
+        $('#push_scheduled_<%= presenter.triggeraction.id -%>').hide();
+        $('#push_completed_<%= presenter.triggeraction.id -%>').show();
+      }
+    });
+  });
+</script>

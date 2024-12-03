@@ -1,0 +1,29 @@
+<%
+  # app/views/tags/cloud/_contacttag.html.erb
+  #
+  # Example:
+  #   render partial: 'tags/cloud/contacttag', collection: ContactTags, locals: { contact: Contact, tags_presenter: TagsPresenter }
+  #
+  # Required Instance Variables:
+  #   contacttag: (ContactTag)
+  #
+  # Required Local Variables:
+  #   tags_presenter: (TagsPresenter)
+  #
+  tp = local_assigns.dig(:tags_presenter) || TagsPresenter.new(contact: local_assigns.dig(:contact))
+-%>
+<div class="list-group-item justify-content-between align-items-center">
+  <span>
+    <i class="fa fa-square <%= contacttag.tag.color.present? ? '' : 'text-primary' -%> mr-2" style="color:<%= contacttag.tag.color -%>;"></i>
+    <%= contacttag.tag.name %>
+  </span>
+  <span class="text-muted">
+    <%= Friendly.new.date(contacttag.created_at, tp.client.time_zone, true) %>
+    <%= link_to '', contact_tag_remove_path(tp.contact, contacttag, show_modal: false), {
+          class:  'btn btn-sm btn-icon btn-secondary fa fa-trash-alt',
+          style:  'text-decoration: none;',
+          method: :delete,
+          remote: true
+        } %>
+  </span>
+</div>

@@ -1,0 +1,41 @@
+<%
+  # app/views/integrations/successware/v202311/push_contacts/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/successware/push_leads/edit', locals: { presenter: Integrations::Successware::V202311::PushContactsPresenter }
+  #
+  # Instance Variables:
+  #   (req) @push_contact: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Successware::V202311::PushContactsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Successware::V202311::PushContactsPresenter)
+
+  presenter.push_contact_tag = @push_contact_tag
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<td colspan="11" class="p-3">
+  <%= form_with model: presenter.client_api_integration, url: integrations_successware_v202311_push_contact_path(presenter.push_contact_tag_id), builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+    <div id="tag_id_<%= presenter.push_contact_tag_id -%>">
+      <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: presenter.push_contact_tag_tag, select_or_add_field_name: 'push_contact_tag[tag_id]', select_or_add_div_id: "tag_id_#{presenter.push_contact_tag_id}" } %>
+    </div>
+
+    <%= bootstrap_select_tag(
+          field:   'push_contact_tag[customer_type]',
+          label:   { title: 'SuccessWare Customer Type' },
+          options: { array: presenter.customer_type_options, selected: presenter.push_contact_tag_customer_type }
+        ) %>
+    <%= bootstrap_select_tag(
+          field:   'push_contact_tag[lead_source_id]',
+          row:     { id: "push_contact_lead_source_id_row_#{presenter.push_contact_tag_id}" },
+          label:   { title: 'SuccessWare Lead Source' },
+          options: { array: presenter.successware_lead_source_options, selected: presenter.push_contact_tag_lead_source_id, blank: 'Not Selected' }
+        ) %>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ title: 'Save Push Tag', disable_with: 'Saving Push Tag' }]
+        ) %>
+  <% end %>
+</td>

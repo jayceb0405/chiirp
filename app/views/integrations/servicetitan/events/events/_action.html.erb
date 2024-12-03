@@ -1,0 +1,24 @@
+<%
+  # app/views/integrations/servicetitan/events/events/_action.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/action', collection: Hash, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) action:   (Hash)
+  #   (req) presenter (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+
+  presenter.event = action
+-%>
+<tr id="list_event_<%= presenter.event_id -%>">
+  <%= render partial: 'integrations/servicetitan/events/events/list_event', locals: { presenter: } %>
+</tr>
+
+<tr class="row-details bg-light collapse" id="edit_event_<%= presenter.event_id -%>">
+  <!-- Edit Event Here -->
+</tr>

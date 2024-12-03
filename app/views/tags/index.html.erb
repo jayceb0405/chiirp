@@ -1,0 +1,63 @@
+<%
+  # app/views/tags/index.html.erb
+  # 
+  # Example:
+  #   render partial: "tags/index"
+  # 
+  # Required Instance Variables:
+  #   @tag:  (Tag)
+  #   @tags: (Tags)
+  # 
+  # Required Local Variables:
+  #   select_or_add_field_name: (String)
+  #   select_or_add_div_id:     (String)
+  #   exclude_tags:             (Array)
+  # 
+  # Optional Local Variables:
+  #   none
+  # 
+  select_or_add_field_name = local_assigns.include?(:select_or_add_field_name) ? local_assigns[:select_or_add_field_name].to_s : "tag_id"
+  select_or_add_div_id     = local_assigns.include?(:select_or_add_div_id) ? local_assigns[:select_or_add_div_id].to_s : "client_tag"
+  exclude_tags             = local_assigns.include?(:exclude_tags) && local_assigns[:exclude_tags].is_a?(Array) ? local_assigns[:exclude_tags] : []
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@user] } %>
+<div class="container-body">
+  <div class="mb-2" id="<%= select_or_add_div_id -%>_tag_name_field">
+    <%= render partial: "tags/tag_name_field", locals: { select_or_add_field_name: select_or_add_field_name, select_or_add_div_id: select_or_add_div_id, exclude_tags: exclude_tags, autofocus: true } -%>
+  </div>
+
+  <div class="js-scrollable">
+
+    <table class="table table-no-border table-striped" id="tags_table">
+      <thead>
+        <tr>
+          <th class="text-left">Name</th>
+          <%= '<th class="text-center">Campaign Actions</th>'.html_safe if @tag.client.campaigns_count.positive? %>
+          <%= '<th class="text-center">QuickPages</th>'.html_safe if @tag.client.quick_leads_count.positive? %>
+          <%= '<th class="text-center">SiteChats</th>'.html_safe if @tag.client.widgets_count.positive? %>
+          <%= '<th class="text-center">Trackable Links</th>'.html_safe if @tag.client.trackable_links_count.positive? %>
+          <th class="text-center">Contacts Tagged</th>
+        </tr>
+      </thead>
+      <tbody id="tag_collection">
+
+        <% if @tags.any? %>
+          <%= render partial: "tags/tag", collection: @tags, locals: { select_or_add_field_name: select_or_add_field_name, select_or_add_div_id: select_or_add_div_id, exclude_tags: exclude_tags } %>
+        <% else %>
+          <tr>
+            <th colspan=6>
+              <h5 class="p-2 m-0">No Tags found.</h5>
+            </th>
+          </tr>
+        <% end %>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#navbar_inner_container').html('<%= j render partial: "layouts/dashboard/navbar_inner/navbar_inner", locals: { heading: "<i class=\"fa fa-user-tag\"></i> Tags Manager", description: "Using Tags helps in organizing your Contacts for specific processes.", show_toggler: false } -%>');
+  });
+</script>

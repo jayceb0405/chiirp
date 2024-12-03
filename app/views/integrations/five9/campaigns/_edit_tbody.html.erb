@@ -1,0 +1,33 @@
+<%
+  # app/views/integrations/five9/campaigns/_edit_tbody.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/campaigns/edit_tbody'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  f9_client = Integrations::FiveNine::Base.new(@client_api_integration.credentials)
+  f9_client.call(:campaigns)
+  five9_campaigns        = f9_client.success? ? f9_client.result.sort : []
+  st_model               = Integration::Servicetitan::V2::Base.new(@client_api_integration_for_servicetitan)
+  servicetitan_campaigns = st_model.campaigns
+-%>
+<% if five9_campaigns.empty? %>
+  <tr>
+    <td colspan="2">
+      Campaigns have NOT been defined in Five9.
+    </td>
+  </tr>
+<% elsif servicetitan_campaigns.empty? %>
+  <tr>
+    <td colspan="2">
+      Campaigns have NOT been defined in ServiceTitan.
+    </td>
+  </tr>
+<% else %>
+  <%= render partial: 'integrations/five9/campaigns/campaign', collection: five9_campaigns, as: :campaign, locals: { servicetitan_campaigns: } %>
+<% end %>

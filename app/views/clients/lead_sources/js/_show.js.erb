@@ -1,0 +1,32 @@
+<%
+  # app/views/clients/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'clients/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Parameters:
+  #   cards: (Array)
+  #
+  # Optional Parameters:
+  #   none
+  #
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  presenter = Clients::LeadSourcePresenter.new(client: @client)
+-%>
+<% if cards.include?('index') %>
+  $('#client_page_section').html('<%= j render partial: 'clients/lead_sources/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('edit') %>
+  $('#edit_lead_source_<%= @lead_source.id -%>').html('<%= j render partial: 'clients/lead_sources/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('new') %>
+  $('#lead_sources_body').prepend('<%= j render partial: 'clients/lead_sources/lead_source', locals: { lead_source: @lead_source, presenter: } -%>');
+  $('#edit_lead_source_<%= @lead_source.id -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

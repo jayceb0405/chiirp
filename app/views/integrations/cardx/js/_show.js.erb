@@ -1,0 +1,56 @@
+<%
+  # app/views/integrations/cardx/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/cardx/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards: Array
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Menu
+<% if cards.include?('menu') %>
+  $('#callrail_page_nav').html('<%= j render partial: 'integrations/cardx/menu', locals: { presenter: } -%>');
+<% end %>
+
+// Connection
+<% if cards.include?('connections_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/cardx/connections/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/cardx/instructions/show', locals: { presenter: } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/cardx/overview', locals: { presenter: } -%>');
+<% end %>
+
+// Events
+<% if cards.include?('events_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/cardx/events/index', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('events_edit') %>
+  $('#edit_event_<%= @event['event_id'] -%>').html('<%= j render partial: 'integrations/cardx/events/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('events_edit_company') %>
+  $('#edit_event_account_company_<%= @event['event_id'] -%>').html('<%= j render partial: 'integrations/cardx/events/company_fields', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('events_open_new') %>
+  $('#edit_event_<%= @event['event_id'] -%>').collapse('show');;
+<% end %>
+
+// ServiceTitan
+<% if cards.include?('service_titan_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/cardx/service_titan/edit', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

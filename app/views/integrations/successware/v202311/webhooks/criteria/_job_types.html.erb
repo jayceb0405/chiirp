@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/successware/v202311/criteria/_job_types.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/successware/v202311/criteria/job_types', locals: { presenter: Integrations::Successware::V202311::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Successware::V202311::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Successware::V202311::Presenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'webhook[criteria][job_type]',
+      row:          { class: 'event_criteria_row', id: "row_job_types_#{presenter.webhook_id}" },
+      label:        { title: "Job Types<span class=\"ml-2\">#{link_to '', integrations_successware_v202311_webhooks_refresh_job_types_path(id: presenter.webhook_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Job Types', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { grouped_array: presenter.job_types_array, selected: presenter.job_type },
+      messages:     { note: 'Event actions will trigger when Job Type includes any of the selected types.' }
+    ) %>

@@ -1,0 +1,36 @@
+<%
+  # app/views/triggers/forms/_149.html.erb
+  #
+  # Example:
+  #   render partial: 'triggers/forms/149.html', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions leading up to a Contacts::Estimate date (JobNimbus)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Lead up to a JobNimbus Estimate or Work Order Date...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Are dynamic (they get their date from an Estimate or Work Order date).</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will fire thier first Trigger as defined in Actions leading up to the date.</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Task dates are saved to estimate data. Select estimate date fields for Task dates.</li>
+      </ul>
+    </small>
+  </div>
+</div>
+
+<%= bootstrap_select_tag(
+      field:        'data[client_custom_field_id]',
+      label:        { title: 'Date Field' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { grouped_array: presenter.trigger_options_for_client_custom_field_id('jobnimbus', %w[estimates workorders]), selected: presenter.trigger_client_custom_field_id }
+    ) %>

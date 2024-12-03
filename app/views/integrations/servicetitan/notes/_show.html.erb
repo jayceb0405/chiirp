@@ -1,0 +1,75 @@
+<%
+  # app/views/integrations/servicetitan/notes/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/notes/show', locals: { presenter: Integrations::Servicetitan::NotesPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::NotesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::NotesPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Notes Processing</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_servicetitan_notes_path, builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+        <%= f.switch :push_notes, {
+              row:        { class: 'mb-0' },
+              label:      { title: 'Push Notes to ServiceTitan' },
+              checkboxes: [{ field: 'push_notes', checked: presenter.push_notes, values: [true, false] }],
+              messages:   { note: 'All notes created for a Contact will be pushed to ServiceTitan when selected.' }
+            } %>
+        <%= f.switch :textin, {
+              row:        { class: 'mb-0' },
+              label:      { title: 'Push Rcvd Texts to ServiceTitan' },
+              checkboxes: [{ field: 'textin', checked: presenter.push_textin, values: [true, false] }],
+              messages:   { note: 'All texts received from a Contact will be pushed to ServiceTitan as a note when selected.' }
+            } %>
+        <%= f.switch :textout_manual, {
+              row:        { class: 'mb-0' },
+              label:      { title: 'Push Manually Sent Texts to ServiceTitan' },
+              checkboxes: [{ field: 'textout_manual', checked: presenter.push_textout_manual, values: [true, false] }],
+              messages:   { note: 'All texts manually sent to a Contact will be pushed to ServiceTitan as a note when selected.' }
+            } %>
+        <%= f.switch :textout_aiagent, {
+              row:        { class: 'mb-0' },
+              label:      { title: 'Push Texts sent by AI Agents to ServiceTitan' },
+              checkboxes: [{ field: 'textout_aiagent', checked: presenter.push_textout_aiagent, values: [true, false] }],
+              messages:   { note: 'All texts sent to a Contact by AI Agents will be pushed to ServiceTitan as a note when selected.' }
+            } %>
+        <%= f.switch :textout_auto, {
+              row:        { class: 'mb-0' },
+              label:      { title: 'Push Automated Texts to ServiceTitan' },
+              checkboxes: [{ field: 'textout_auto', checked: presenter.push_textout_auto, values: [true, false] }],
+              messages:   { note: 'All automated texts sent to a Contact will be pushed to ServiceTitan as a note when selected.' }
+            } %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Notes Settings', disable_with: 'Saving Notes Settings' }]
+            ) %>
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_notes').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

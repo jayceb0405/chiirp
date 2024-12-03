@@ -1,0 +1,263 @@
+<%
+  # app/views/my_contacts/broadcast/_action_list.html.erb
+  #
+  # Example:
+  # 	render partial: 'my_contacts/broadcast/action_list', locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+-%>
+<% if presenter.group_actions.any? %>
+  <%= form_with url: my_contacts_groupactions_path, builder: LooperFormBuilder, method: :put, id: 'scheduled_actions_form', data: { turbo: true } do |f| %>
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="6" class="align-left px-2">
+              <div class="d-flex flex-row">
+                <div class="thead-dd dropdown">
+                  <span class="custom-control custom-control-nolabel custom-checkbox">
+                    <input type="checkbox" name="select_all_switch" value="false" class="custom-control-input" id="action_switch">
+                    <label class="custom-control-label" for="action_switch"></label>
+                  </span>
+                  <div class="thead-btn" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <span class="selected-row-info text-muted pl-1" id="action_switch_selected_count">Select Actions</span>
+                    <span class="fa fa-caret-down"></span>
+                  </div>
+                  <div class="dropdown-menu">
+                    <div class="dropdown-arrow"></div>
+                    <a class="dropdown-item" id="action_switch_all" href="#" data-turbo="false">Select All <%= pluralize(presenter.group_actions.count, 'Action') -%></a>
+
+                    <a class="dropdown-item" id="action_switch_reverse" href="#" data-turbo="false">Reverse Selection</a>
+                    <a class="dropdown-item" id="action_switch_none" href="#" data-turbo="false">Unselect All</a>
+                  </div>
+                </div>
+              </div>
+            </th>
+          </tr>
+          <tr>
+            <th></th>
+            <th colspan="2" style="min-width: 240px"> Title </th>
+            <th> Start Date </th>
+            <th> Last Date </th>
+            <th style="width:100px;min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <%= render partial: 'my_contacts/broadcast/action', collection: presenter.group_actions, locals: { action_type: 'action', presenter:, f: } %>
+        </tbody>
+      </table>
+    </div>
+    <div class="mb-2 d-flex">
+      <%= f.submit_buttons buttons: [
+            { title: 'Delete Selected', id: 'delete_selected', disabled: true, disable_with: 'Deleting...' },
+            { title: 'Postpone Selected', id: 'postpone_selected', disabled: true, class: 'btn-secondary' }
+          ] %>
+    </div>
+    <div id="postpone_form" class="d-none my-2">
+      <%= label_tag 'postpone_interval_select', 'Postpone', { class: 'pl-5 pr-3 pt-2' } %>
+      <%= select_tag('postpone[interval]',
+                     options_for_select((1..52).to_a, 1),
+                     { class: 'form-control mr-2',
+                       id:    'postpone_interval_select',
+                       data:  { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? } }) %>
+      <%= select_tag('postpone[period]',
+                     options_for_select(%w[hours days weeks], 'days'),
+                     { class: 'form-control',
+                       id:    'postpone_period_select',
+                       data:  { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? } }) %>
+      <input id="postpone_submit" name="commit" value="Postpone" type="submit" class="btn btn-info ml-2">
+    </div>
+  <% end %>
+
+  <script>
+    $(function() {
+      $('#delete_selected').off('click');
+      $('#delete_selected').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Delete Selected Scheduled Actions can NOT be un-done. Is it your intention to delete these Actions?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_selected' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_selected');
+        $(document).on('click', '#button_dump_selected', function(e) {
+          var form_data = [];
+          $('#scheduled_actions_form input[type="checkbox"]:checked').each((i, elem) => {
+            form_data.push($(elem).val())
+          })
+
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'turbo_stream',
+            accepts: {
+              'turbo_stream': 'text/vnd.turbo-stream.html'
+            },
+            converters: {
+              'text turbo_stream': function (data) {
+                Turbo.renderStreamMessage(data);
+              }
+            },
+            url: '<%= my_contacts_groupactions_path -%>',
+            data: { delete: '1', action_type: 'destroy', action_ids: form_data }
+          });
+        });
+      });
+
+      $('#postpone_selected').off('click');
+      $('#postpone_selected').on('click', function(e) {
+        e.preventDefault();
+
+        if ($('#postpone_form').hasClass('d-flex')) {
+          $('#postpone_form').removeClass('d-flex').addClass('d-none').trigger('hide');
+        } else {
+          $('#postpone_form').removeClass('d-none').addClass('d-flex').trigger('show');
+        }
+      });
+
+      $('#postpone_form').off('show');
+      $('#postpone_form').on('show', function(e) {
+        updateDateChange();
+      });
+
+      $('#postpone_form').off('hide');
+      $('#postpone_form').on('hide', function(e) {
+        updateDateChange();
+      });
+
+      $('#postpone_period_select').off('change');
+      $('#postpone_period_select').on('change', function(e){
+        $(this).selectpicker('refresh');
+        updateDateChange();
+      });
+
+      $('#postpone_interval_select').off('change');
+      $('#postpone_interval_select').on('change', function(e){
+        $(this).selectpicker('refresh');
+        updateDateChange();
+      });
+
+      $(document).off('click', '.action_select');
+      $(document).on('click', '.action_select', function(e) {
+        $('#action_switch').prop('checked', false);
+        $('#action_switch').val('false');
+        countSelectedActions();
+      });
+
+      $(document).off('change', '#action_switch');
+      $(document).on('change', '#action_switch', function() {
+        if ($('#action_switch').is(':checked')) {
+          $('#action_switch').val('true');
+          selectActions('all');
+        } else {
+          $('#action_switch').val('false');
+          selectActions('none');
+        }
+      });
+
+      $(document).off('click', '#action_switch_displayed');
+      $(document).on('click', '#action_switch_displayed', function(e) {
+        $('#action_switch').prop('checked', false);
+        $('#action_switch').val('false');
+        selectActions('displayed');
+      });
+
+      $(document).off('click', '#action_switch_reverse');
+      $(document).on('click', '#action_switch_reverse', function(e) {
+        $('#action_switch').prop('checked', false);
+        $('#action_switch').val('false');
+        selectActions('reverse');
+      });
+
+      $(document).off('click', '#action_switch_all');
+      $(document).on('click', '#action_switch_all', function(e) {
+        $('#action_switch').prop('checked', true);
+        $('#action_switch').val('true');
+        selectActions('all');
+      });
+
+      $(document).off('click', '#action_switch_none');
+      $(document).on('click', '#action_switch_none', function(e) {
+        $('#action_switch').prop('checked', false);
+        $('#action_switch').val('false');
+        selectActions('none');
+      });
+
+      function countSelectedActions() {
+        var selected_count = selectedActionsCount();
+
+        if (selected_count) {
+          $('#action_switch_selected_count').html(selected_count + ' selected');
+          $('#delete_selected').prop('disabled', false);
+          $('#postpone_selected').prop('disabled', false);
+        } else {
+          $('#action_switch_selected_count').html('Select Actions');
+          $('#delete_selected').prop('disabled', true);
+          $('#postpone_selected').prop('disabled', true);
+          $('#postpone_form').addClass('d-none').removeClass('d-flex').trigger('hide');
+        }
+
+        updateDateChange();
+      }
+
+      function updateDateChange() {
+        var interval = $('#postpone_interval_select').val();
+        var period = $('#postpone_period_select').val();
+        var duration = moment.duration(interval, period);
+
+        $('.date-change').each(function (_, elem) {
+          if ($(elem).parent('tr').find('input[type="checkbox"]').prop('checked') && $('#postpone_form').hasClass('d-flex')) {
+            // this uuid is checked, so we need to change it
+            var old_date = moment($(elem).data('date'));
+
+            $(elem).addClass('text-success').html(old_date.add(duration).format('MM/DD/YY (h:mm a)'));
+          } else {
+            $(elem).html($(elem).data('original')).removeClass('text-success');
+          }
+        })
+      }
+
+      function selectActions(action) {
+        $('.action_select').each(function(e) {
+          if (action == 'displayed') {
+            $(this).prop('checked', true);
+          } else if (action == 'none') {
+            $(this).prop('checked', false);
+          } else if (action == 'reverse') {
+            $(this).prop('checked', $(this).is(':checked') == false);
+          } else if (action == 'all') {
+            $(this).prop('checked', true);
+          }
+        });
+
+        countSelectedActions();
+      }
+
+      function selectedActionsCount() {
+        var selected_count = 0;
+
+        if ($('#action_switch').is(':checked')) {
+          selected_count = <%= presenter.group_actions.count %>;
+        } else {
+          $('.action_select').each(function(e) {
+            selected_count += $(this).is(':checked') ? 1 : 0;
+          });
+        }
+
+        return selected_count;
+      }
+    });
+  </script>
+<% else %>
+  Scheduled actions were not found.
+<% end %>

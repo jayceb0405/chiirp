@@ -1,0 +1,78 @@
+<%
+  # app/views/triggers/_form.html.erb
+  #
+  # Example:
+  #   render partial: 'triggers/form', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+-%>
+<%= form_with model: [presenter.campaign, presenter.trigger], builder: LooperFormBuilder, remote: true do |f| %>
+  <% unless presenter.trigger.new_record? %>
+    <%= bootstrap_text_field(
+          field:        'data[name]',
+          value:        presenter.trigger.data[:name],
+          label:        { title: 'Trigger Name' },
+          html_options: { placeholder: 'Trigger Name', disabled: presenter.campaign_disabled? },
+          appends:      [{ button: true, label: 'Rename', disabled: presenter.campaign_disabled? }]
+        ) %>
+  <% end %>
+<% end %>
+
+<% if presenter.trigger.trigger_type == 100 %>
+  <%= bootstrap_info_field(
+        info:  Friendly.new.date(presenter.trigger.updated_at, presenter.campaign.client.time_zone, true),
+        label: { title: 'Last Updated' }
+      ) %>
+<% else %>
+  <%= bootstrap_select_tag(
+        field:        'trigger_type',
+        label:        { title: 'I would like to...' },
+        html_options: { data: { remote: true, url: campaign_triggers_path(presenter.trigger.campaign_id, update_type: true), method: :post, params: { id: presenter.trigger.id }.to_param }, disabled: presenter.campaign_disabled? },
+        options:      { array: [['Start a Keyword Conversation', 110], ['Start a Drip Campaign', (presenter.trigger.trigger_type == 110 ? 115 : presenter.trigger.trigger_type)]], selected: presenter.trigger.trigger_type }
+      ) %>
+
+  <%= form_with model: [presenter.campaign, presenter.trigger], builder: LooperFormBuilder, remote: true do |f| %>
+
+    <% unless presenter.trigger.trigger_type == 110 %>
+      <div class="row">
+        <div class="col-3"></div>
+        <div class="col-9">
+          <small class="text-muted">
+            Drip Campaigns...
+            <ul class="fa-ul">
+              <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Can be applied to a Contact or selected as a Campaign to start on various actions in <%= I18n.t('tenant.name') -%>.</li>
+              <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Can start immediately when applied.</li>
+              <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Can start on a specified date.</li>
+              <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Can start on a Contact's birthdate.</li>
+              <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Can start on a Custom Field date.</li>
+            </ul>
+          </small>
+        </div>
+      </div>
+
+      <%= bootstrap_select_tag(
+            field:        'trigger_type',
+            label:        { title: 'Start this Campaign...' },
+            html_options: { data: { remote: true, url: campaign_triggers_path(presenter.campaign.id, update_type: true), method: :post, params: { id: presenter.trigger.id }.to_param }, disabled: presenter.campaign_disabled? },
+            options:      { array: presenter.trigger.types_abbreviated.invert.to_a, selected: presenter.trigger.trigger_type }
+          ) %>
+    <% end %>
+
+    <%= render partial: "triggers/forms/#{presenter.trigger.trigger_type}", locals: { presenter: } %>
+
+    <%= bootstrap_info_field(
+          info:  Friendly.new.date(presenter.trigger.updated_at, presenter.campaign.client.time_zone, true),
+          label: { title: 'Last Updated' }
+        ) %>
+
+    <%= f.submit_buttons(
+          buttons: [{ title: 'Save Trigger', disable_with: 'Saving', disabled: presenter.campaign_disabled? }]
+        ) %>
+  <% end %>
+<% end %>

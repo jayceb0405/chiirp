@@ -1,0 +1,19 @@
+<%
+   # app/views/clients/profile/update_vitally.html.erb
+   #
+   # Example:
+   #   render partial: 'clients/profile/update_vitally'
+   #
+   # Instance Variables:
+   #   @client: (Client)
+   #
+   # Local Variables:
+   #   none
+   #
+   return unless @client.is_a?(Client)
+
+   presenter = ClientPresenter.new(client: @client)
+-%>
+<%= turbo_stream.update 'vitally' do %>
+  <%= render partial: 'clients/profile/vitally', locals: { presenter: } %>
+<% end %>

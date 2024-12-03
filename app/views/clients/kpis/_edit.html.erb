@@ -1,0 +1,70 @@
+<%
+  # app/views/clients/kpis/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/kpis/edit', locals: {  }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:kpi_presenter) || Clients::KpiPresenter.new(client: @client)
+  presenter.kpi = @kpi
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-md-2 text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.kpi.name.to_s.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.kpi.name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: presenter.kpi, builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+        <%= f.text_field :name, {
+              label:        { title: 'KPI Name' },
+              html_options: { minlength: 2, placeholder: 'KPI Name', required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.select :criteria_01, {
+              label:        { title: 'Criteria #1' },
+              html_options: { id: 'criteria_01', required: true, mobile: browser.device.mobile? },
+              choices:      { grouped_array: presenter.options_for_kpi_criteria, selected: presenter.kpi.criteria_01, blank: 'Select a Criteria' },
+              messages:     { note: 'A criteria must be selected.' }
+            } %>
+        <%= f.switch :c_01_in_period, {
+              label:      { title: 'Criteria #1 In Period' },
+              checkboxes: [{ field: 'c_01_in_period', checked: presenter.kpi.c_01_in_period, values: [true, false], note: 'Criteria #1 must fall within period.' }]
+            } %>
+        <%= f.select :operator, {
+              label:        { title: 'Operator' },
+              html_options: { id: 'operator', required: true, mobile: browser.device.mobile? },
+              choices:      { array: presenter.options_for_operator, selected: presenter.kpi.operator, prompt: 'Select an Operator' },
+              messages:     { note: 'An operator must be selected.' }
+            } %>
+        <%= f.select :criteria_02, {
+              label:        { title: 'Criteria #2' },
+              html_options: { required: true, mobile: browser.device.mobile? },
+              choices:      { grouped_array: presenter.options_for_kpi_criteria, selected: presenter.kpi.criteria_02, prompt: 'Select a Criteria' },
+              messages:     { note: 'A criteria must be selected.' }
+            } %>
+        <%= f.switch :c_02_in_period, {
+              label:      { title: 'Criteria #2 In Period' },
+              checkboxes: [{ field: 'c_02_in_period', checked: presenter.kpi.c_02_in_period, values: [true, false], note: 'Criteria #2 must fall within period.' }]
+            } %>
+        <%= bootstrap_color_picker(
+              field: 'clients_kpi[color]',
+              value: presenter.kpi.color,
+              label: { title: 'Dashboard Button Color' }
+            ) %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', id: "kpi_button_#{presenter.kpi.id}", disable_with: 'Saving' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

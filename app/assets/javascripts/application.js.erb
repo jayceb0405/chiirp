@@ -1,0 +1,144 @@
+// app/assets/javascripts/application.js.erb
+
+//= require jquery3
+//= require rails-ujs
+
+//= require popper.js/dist/umd/popper.js
+
+// Bootstrap
+//= require bootstrap/dist/js/bootstrap
+//= require bootstrap-colorpicker/dist/js/bootstrap-colorpicker.js
+//= require bootstrap-notify/bootstrap-notify.js
+//= require bootstrap-select/dist/js/bootstrap-select.js
+//= require ajax-bootstrap-select/dist/js/ajax-bootstrap-select.js
+
+//= require activestorage
+// require cloudinary
+
+// support waitForElement must be loaded before Looper theme.js
+//= require wait_for_element.js
+
+// access Cookies - https://github.com/js-cookie/js-cookie
+//= require js-cookie/src/js.cookie.js
+
+// form validation - https://github.com/guillaumepotier/Parsley.js/
+
+// Looper Bootstrap Theme
+//= require stacked-menu/dist/js/stacked-menu.min.js
+//= require perfect-scrollbar/dist/perfect-scrollbar.min.js
+//= require looper/javascript/theme.js
+//= require fullcalendar/main.js
+
+// custom Chiirp
+//= require custom/chiirp_alert.js
+//= require custom/stop_campaign_alert.js
+//= require custom/multi_typeahead.js
+//= require custom/contrasting_color.js
+//= require custom/copy_to_clipboard.js
+//= require custom/sort_column.js
+
+//= require admin/ie.assign.fix.js
+//= require text-avatar/jquery.textavatar.js
+//= require wnumb/wNumb.js
+//= require admin/default-dashboard.js
+
+//= require jquery-circle-progress/circle-progress.js
+//= require chartkick
+//= require Chart.bundle
+
+//= require card/card.js
+//= require checkall
+
+//= require flatpickr/dist/flatpickr.js
+//= require flatpickr/dist/plugins/confirmDate/confirmDate.js
+//= require flatpickr/dist/plugins/rangePlugin.js
+
+//= require jquery-emoji-picker/js/jquery.emojipicker.js
+//= require jquery-emoji-picker/js/jquery.emojis.js
+
+//= require ion-rangeslider/js/ion.rangeSlider.js
+//= require moment/moment.js
+//= require typeahead.js/dist/typeahead.bundle.js
+//= require jquery.caret/dist/jquery.caret.js
+//= require autosize/dist/autosize.min.js
+
+//= require toastr/toastr.js
+//= require select2/dist/js/select2.js
+//= require cable.js
+
+//= require dropzone/dist/dropzone.js
+//= require vanilla-picker/dist/vanilla-picker.js
+//= require detect_timezone.js
+//= require twilio/sms-counter.js
+//= require payform/dist/jquery.payform.js
+//= require twilio-video/dist/twilio-video.js
+//= require star-rating-svg2/src/jquery.star-rating-svg.js
+
+//  Sortable.js (javascript sorting library) & jquery-sortablejs (jquery wrapper for Sortable.js)
+//= require sortablejs/Sortable.js
+//= require jquery-sortablejs/jquery-sortable.js
+
+// TinyMCE rich text editor
+//= require tinymce/tinymce.js
+//= require tinymce/themes/silver/theme.js
+//= require tinymce/icons/default/icons.js
+//= require tinymce/models/dom/model.js
+//= require tinymce/plugins/preview/plugin.js
+//= require tinymce/plugins/code/plugin.js
+//= require tinymce/plugins/fullscreen/plugin.js
+//= require tinymce/plugins/table/plugin.js
+//= require tinymce/plugins/emoticons/plugin.js
+//= require tinymce/plugins/emoticons/js/emojis.js
+//= require tinymce/plugins/media/plugin.js
+//= require tinymce/plugins/image/plugin.js
+//= require tinymce/plugins/link/plugin.js
+//= require tinymce/plugins/lists/plugin.js
+//= require tinymce/plugins/wordcount/plugin.js
+
+// Stripo
+//= require custom/stripo_notifications.js
+
+// require mp3-player-button.js
+// require_tree .
+
+$.notifyDefaults({
+  animate: {
+    enter: 'animated fadeInRight',
+    exit: 'animated fadeOutRight'
+  },
+  mouse_over: 'pause',
+  timer: 3000,
+  z_index: 2000
+});
+
+function animateCSS(element, animationName, callback) {
+  var node = document.querySelector(element)
+  node.classList.add('animated', animationName)
+
+  function handleAnimationEnd() {
+    node.classList.remove('animated', animationName)
+    node.removeEventListener('animationend', handleAnimationEnd)
+
+    if (typeof callback === 'function') callback()
+  }
+
+  node.addEventListener('animationend', handleAnimationEnd)
+}
+
+toastr.options = {
+  "closeButton": true,
+  "debug": false,
+  "newestOnTop": false,
+  "progressBar": false,
+  "positionClass": "toast-top-right",
+  "preventDuplicates": true,
+  "onclick": null,
+  "showDuration": "300",
+  "hideDuration": "1000",
+  "timeOut": "6000",
+  "extendedTimeOut": "6000",
+  "showEasing": "linear",
+  "hideEasing": "linear",
+  "showMethod": "show",
+  "hideMethod": "hide"
+}

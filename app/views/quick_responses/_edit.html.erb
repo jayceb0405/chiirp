@@ -1,0 +1,61 @@
+<%
+  # app/views/quick_responses/_new.js.erb
+  #
+  # Example:
+  #   render partial: 'quick_responses/new', locals: { presenter: QuickResponsesPresenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   (req) presenter:  (QuickResponsesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(QuickResponsesPresenter)
+-%>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @quick_response.name -%></span>
+    </div>
+  </div>
+  <div class="card-body">
+    <%= form_tag presenter.form_url, { builder: LooperFormBuilder, remote: true, method: presenter.form_method, id: 'quick_response_form' } do |f| %>
+      <%= hidden_field_tag 'contact_id', @contact&.id %>
+
+      <%= bootstrap_text_field(
+            field:    'quick_response[name]',
+            value:    presenter.quick_response.name,
+            label:    { title: 'Quick Response Name' },
+            messages: { note: 'Enter any name to identify this quick response. This is for your reference only.' }
+          ) %>
+
+      <%= bootstrap_text_area(
+            field:        'quick_response[message]',
+            value:        presenter.quick_response.message,
+            label:        { title: 'Message' },
+            html_options: { typeahead_client: presenter.quick_response.client, required: true, char_count_client: presenter.quick_response.client },
+            messages:     { note: 'The contect of the quick response. This field is hashtag aware.' }
+          ) %>
+
+      <%= bootstrap_submit_buttons(
+            row:     { display: true },
+            buttons: [{ title: 'Cancel', id: 'quick_response_cancel_button', class: 'btn btn-secondary', disabled: false, display: true }, { title: 'Save', disable_with: 'Saving...', disabled: false, display: true }]
+          ) %>
+
+    <% end %>
+  </div>
+</div>
+<script>
+$(function () {
+  $('#quick_response_cancel_button').off('click');
+  $('#quick_response_cancel_button').on('click', function(e){
+    e.preventDefault();
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= quick_responses_path(contact_id: params[:contact_id], message_id: presenter.message_id) %>'
+    });
+  });
+});
+</script>

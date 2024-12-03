@@ -1,0 +1,34 @@
+<%
+	# app/views/campaign_marketplaces/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "campaign_marketplaces/js/show", locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	cards[1]
+	# 		@campaign: (Campaign or CampaignGroup)
+	# 	cards[2]
+	# 		@campaign: (Campaign)
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+// Buy modal
+<% if cards.include?('show') %>
+	$('#dash_modal').modal('show');
+  $('#dash_modal_title').html('Get a Campaign / Campaign Package');
+	$('#dash_modal_body').html('<%= j render partial: 'campaign_marketplaces/show' -%>');
+	$('#dash_modal_footer').html('<%= j render partial: 'campaign_marketplaces/show_footer' -%>');
+<% end %>
+
+// Edit modal
+<% if cards.include?('edit') %>
+  $('#campaign_marketplace_modal').modal({ backdrop: 'static' });
+  $('#campaign_marketplace_modal').modal('show');
+  $('#campaign_marketplace_modal_title').html('<i class="fa fa-funnel-dollar mr-2"></i>Campaign Marketplace Information');
+  $('#campaign_marketplace_modal_body').html('<%= j render partial: 'campaign_marketplaces/edit' -%>');
+<% end %>
+
+Looper.init();

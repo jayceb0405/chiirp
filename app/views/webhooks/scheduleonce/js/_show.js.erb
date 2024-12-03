@@ -1,0 +1,34 @@
+<%
+	# app/views/webhooks/scheduleonce/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "webhooks/scheduleonce/js/show", locals: { elements: Array, event: String }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   elements: (Array) array of integers representing html elements to update
+	# 	event:    (String)
+	# 
+-%>
+<% if elements.include?( 1 ) %>
+	$("#scheduleonce-webhook-form-collapse").collapse('hide');
+	$("#scheduleonce_form").html("");
+<% end %>
+<% if elements.include?( 2 ) %>
+	$("#scheduleonce_form").html("<%= j render partial: "webhooks/scheduleonce/forms/api_key" -%>");
+	$("#scheduleonce-webhook-form-collapse").collapse('show');
+	$("#zapier-webhook-form-collapse").collapse('hide');
+<% end %>
+<% if elements.include?( 3 ) %>
+	$("#scheduleonce_form").html("<%= j render partial: "webhooks/scheduleonce/forms/event", locals: { event: event } -%>");
+	$("#scheduleonce-webhook-form-collapse").collapse('show');
+	$("#zapier-webhook-form-collapse").collapse('hide');
+<% end %>
+
+<% if elements.include?( 20 ) %>
+	$("#scheduleonce_webhooks_list").html("<%= j render partial: "webhooks/scheduleonce/list", locals: { collapsed: false } -%>");
+<% end %>
+
+Looper.init();

@@ -1,0 +1,61 @@
+<%
+  # app/views/contacts/scheduled_actions/edit/_send_text.html.erb
+  #
+  # Example:
+  #   render partial: 'app/views/contacts/scheduled_actions/edit/send_text', locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Contacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+  return unless presenter.delayed_job.is_a?(Delayed::Backend::ActiveRecord::Job)
+
+  messages_text_presenter = Messages::Text::Presenter.new(contact: presenter.contact, user: current_user)
+  messages_text_presenter.file_attachments          = presenter.delayed_job_object_args.dig(:image_id_array).map { |a| { id: a, type: 'contact', url: presenter.contact.contact_attachments.find_by(id: a).image.thumb.url(resource_type: presenter.contact.contact_attachments.find_by(id: a).image.resource_type, secure: true) } }
+  messages_text_presenter.file_type                 = 'contact'
+  messages_text_presenter.include_estimate_hashtags = true
+  messages_text_presenter.include_invoice_hashtags  = true
+  messages_text_presenter.include_job_hashtags      = true
+  messages_text_presenter.message                   = presenter.delayed_job_object_args.dig(:content)
+  messages_text_presenter.show_msg_delay            = false
+  messages_text_presenter.show_ok2text              = false
+  messages_text_presenter.show_payment_request      = false
+  messages_text_presenter.show_phone_call           = false
+  messages_text_presenter.show_submit               = false
+  messages_text_presenter.show_voicemail            = false
+  messages_text_presenter.show_video_calls          = false
+-%>
+<td colspan="6">
+  <%= form_with(url: update_contact_scheduled_action_path(presenter.contact.id, presenter.delayed_job.id), builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', id: 'contact_form', novalidate: true) do |f| %>
+
+    <%= f.select :to_label, {
+          label:        { title: 'Send Message To' },
+          html_options: { mobile: browser.device.mobile? },
+          choices:      { array: presenter.contact_phone_labels_for_select, selected: presenter.delayed_job_object_args.dig(:to_label), blank: 'Primary Number' }
+        } %>
+    <%= f.select :from_phone, {
+          label:        { title: 'Send Message From' },
+          html_options: { mobile: browser.device.mobile? },
+          choices:      { for_select: options_for_phone_numbers(user: current_user, options: [['last', 'Last Number Used']], selected: presenter.delayed_job_object_args.dig(:from_phone)) },
+          messages:     { note: "When 'Last Number Used' is selected the previous phone number used will be used again.".html_safe }
+        } %>
+
+    <%= render partial: 'messages/texts/message', locals: { presenter: messages_text_presenter } %>
+
+    <%= bootstrap_calendar_field(
+          field:        'run_at',
+          value:        presenter.delayed_job.run_at.in_time_zone(current_user.client.time_zone).strftime('%m/%d/%Y %H:%M %p'),
+          label:        { title: 'When?' },
+          html_options: { id: 'contacts-calendar-string', required: true },
+          flatpickr:    { include_time: true, mode: 'single' },
+          messages:     { note: 'A scheduled time must be chosen.' }
+        ) %>
+
+    <%= f.submit_buttons(
+          buttons: [{ title: 'Save', disable_with: 'Saving' }]
+        ) %>
+  <% end %>
+</td>

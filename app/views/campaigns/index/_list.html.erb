@@ -1,0 +1,92 @@
+<%
+  # app/views/campaigns/index/_list.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/index/list', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-filter mr-2"></i>Campaigns <span class="badge"><%= presenter.campaigns.count -%> / <%= presenter.client.campaigns_count -%></span></span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th class="text-left"> Campaign </th>
+              <th class="text-left d-none d-md-table-cell">Created</th>
+              <th class="text-center d-none d-md-table-cell">Active</th>
+              <th class="text-center d-none d-md-table-cell">Started By</th>
+              <th class="text-left d-none d-md-table-cell">Last Started</th>
+              <th class="text-center d-none d-md-table-cell">Configured</th>
+              <th class="text-center d-none d-md-table-cell">Repeatable</th>
+              <th style="width:150px; min-width:150px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <%= render partial: 'campaigns/index/campaign', collection: presenter.campaigns, as: :campaign, locals: { presenter: } -%>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render partial: 'snippets/custom_modal', locals: { id: 'campaign_marketplace_modal', max_width: '900px', close: true } %>
+
+<script>
+  $(function () {
+    $(document).off('click', '.button_campaign_active');
+    $(document).on('click', '.button_campaign_active', function(e) {
+      e.preventDefault();
+
+      StopCampaignAlert({
+        campaign_id: $(this).data('id'),
+        name:        $(this).data('name'),
+        active:      $(this).data('active'),
+        return_to:   'index'
+      });
+    });
+
+    $(document).off('show.bs.collapse', '.edit_triggeraction');
+    $(document).on('show.bs.collapse', '.edit_triggeraction', function (e) {
+      if ($(this).data('triggeractionid') == '') {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/triggers/' +  $(this).data('triggerid') + '/triggeractions/new'
+        });
+      } else {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/triggers/' +  $(this).data('triggerid') + '/triggeractions/' +  $(this).data('triggeractionid') + '/edit'
+        });
+      }
+    });
+
+    $(document).off('hide.bs.collapse', '.edit_triggeraction');
+    $(document).on('hide.bs.collapse', '.edit_triggeraction', function (e) {
+      $('#triggeraction-form-' + $(this).data('triggeractionid')).html('<div class="text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Action' } %></div>');
+    });
+
+    $(document).off('clicked.confirm_alert');
+    $(document).on('clicked.confirm_alert', function(e, data) {
+      $('#' + data).toggleClass('d-none');
+    });
+  });
+</script>

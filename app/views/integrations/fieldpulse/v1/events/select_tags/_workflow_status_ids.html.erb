@@ -1,0 +1,20 @@
+<%
+   # app/views/integrations/fieldpulse/v1/events/select_tags/_workflow_status_ids.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/fieldpulse/v1/events/select_tags/workflow_status_ids', locals: { presenter: Integrations::Fieldpulse::V1::Events::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Fieldpulse::V1::Events::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::Events::Presenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'event[event_workflow_status_ids]',
+      label:        { title: "FieldPulse Workflow Statuses<span class=\"ml-2\">#{link_to '', integrations_fieldpulse_v1_event_refresh_workflows_path(presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Workflow Statuses', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { class: 'event_workflow_status_ids_select', id: "event_workflow_status_ids_select_#{presenter.event_id}", multiple: true },
+      options:      { array: presenter.workflow_statuses(presenter.event.dig(:criteria, :event_workflow_id)), selected: presenter.event.dig(:criteria, :event_workflow_status_ids) }
+    ) %>

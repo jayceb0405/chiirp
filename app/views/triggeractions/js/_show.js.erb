@@ -1,0 +1,75 @@
+<%
+  # app/views/triggeractions/js/_show.js.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/js/show", locals: { cards: Array }
+  #
+  # Instance Variables:
+  # 	(req) @campaign:      (Campaign)
+  # 	(req) @trigger:       (Trigger)
+  # 	(req) @triggeraction: (Triggeraction)
+  #
+  # Local Variables:
+  # 	(req) cards: (Array)
+  #
+  return unless local_assigns.dig(:cards).is_a?(Array)
+
+  presenter = Campaigns::Presenter.new(current_user) if cards.intersect?(%w[client_custom_field hide_triggeraction_form show_triggeraction_form triggeraction triggeraction_edit triggeractions triggeractions_renew triggeractions_new])
+  presenter.campaign      = @trigger.campaign if cards.intersect?(%w[hide_triggeraction_form show_triggeraction_form triggeractions triggeractions_renew triggeractions_new])
+  presenter.trigger       = @trigger if cards.intersect?(%w[hide_triggeraction_form show_triggeraction_form triggeractions triggeractions_renew triggeractions_new])
+  presenter.campaign      = @triggeraction.campaign if cards.intersect?(%w[client_custom_field triggeraction triggeraction_edit])
+  presenter.trigger       = @triggeraction.trigger if cards.intersect?(%w[client_custom_field triggeraction triggeraction_edit])
+  presenter.triggeraction = @trigger.triggeractions.new if cards.intersect?(%w[hide_triggeraction_form show_triggeraction_form triggeractions_renew triggeractions_new])
+  presenter.triggeraction = @triggeraction if cards.intersect?(%w[client_custom_field triggeraction triggeraction_edit])
+-%>
+// Index
+<% if cards.include?('triggeractions') %>
+  $('#triggeractions-list-<%= presenter.trigger.id -%>').html('<%= j render partial: 'triggeractions/list', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('triggeractions_new') %>
+  $('#triggeraction-accordion-<%= presenter.trigger.id -%>').append('<%= j render partial: 'triggeractions/triggeraction', locals: { presenter:, triggeraction: presenter.triggeraction } -%>');
+<% end %>
+<% if cards.include?('triggeractions_renew') %>
+  $('#<%= presenter.triggeraction_form_id -%>').html('<%= j render partial: 'triggeractions/form', locals: { presenter: } -%>');
+<% end %>
+
+// Show
+<% if cards.include?('convert_triggeraction_ids') %>
+  $('#triggeraction-form-header-<%= @triggeraction.trigger_id -%>').attr('id', 'triggeraction-form-header-<%= @triggeraction.id -%>');
+  $('#triggeraction-form-<%= @triggeraction.trigger_id -%>').attr('id', 'triggeraction-form-<%= @triggeraction.id -%>');
+  $('#triggeraction-form-header-<%= @triggeraction.id -%>').attr('href', '#triggeraction-form-<%= @triggeraction.id -%>');
+<% end %>
+<% if cards.include?('triggeraction') %>
+  $('#<%= presenter.triggeraction_header_id -%>').html('<%= j render partial: 'triggeractions/triggeraction_header', locals: { presenter: } -%>');
+  $('#<%= presenter.triggeraction_form_id -%>').html('<%= j render partial: 'triggeractions/form', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('triggeraction_edit') %>
+  $('#<%= presenter.triggeraction_form_id -%>').html('<%= j render partial: 'triggeractions/form', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('client_custom_field') %>
+  $('#triggeraction_client_custom_field_<%= orig_triggeraction_id -%>').html('<%= j render partial: 'triggeractions/forms/custom_field_action/client_custom_field', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('index_801') %>
+  $('#triggeraction_801_clients_<%= @triggeraction.id -%>').html('<%= j render partial: 'triggeractions/forms/801/index', locals: { triggeraction: @triggeraction } -%>');
+<% end %>
+
+// Show/Hide
+<% if cards.include?('hide_triggeraction') %>
+  $('#<%= presenter.triggeraction_form_id -%>').collapse('hide');
+<% end %>
+<% if cards.include?('show_triggeraction_form') %>
+  $('#<%= presenter.triggeraction_form_id -%>').collapse('show');
+<% end %>
+<% if cards.include?('hide_triggeraction_form') %>
+  $('#<%= presenter.triggeraction_form_id -%>').collapse('hide');
+<% end %>
+
+<%= render partial: 'campaigns/js/analysis_results', locals: { campaign: presenter.campaign } if presenter.campaign.present? %>
+<%= render partial: 'triggers/js/analysis_results', locals: { trigger: presenter.trigger } if presenter.trigger.present? %>
+<%= render partial: 'triggeractions/js/analysis_results', locals: { triggeraction: presenter.triggeraction } if presenter.triggeraction.present? %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

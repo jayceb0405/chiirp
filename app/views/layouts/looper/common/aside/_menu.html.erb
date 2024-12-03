@@ -1,0 +1,450 @@
+<%
+  # app/views/layouts/looper/common/aside/_menu.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/aside/menu'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  show_menu_item = @phone_number_assigned && @contact_created && @user_phone_defined
+-%>
+<div class="aside-menu overflow-hidden">
+  <nav id="stacked-menu" class="stacked-menu">
+    <ul class="menu">
+
+      <!-- Main Section -->
+      <% if current_user.access_controller?('dashboard', 'allowed', session) %>
+        <li class="menu-item" id="aside_menu_item_dashboard">
+          <%= link_to(root_path, { class: 'menu-link' }) do %>
+            <span class="menu-icon fa fa-tachometer-alt"></span>
+            <span class="menu-text">Dashboard</span>
+          <% end %>
+        </li>
+      <% end %>
+
+      <% if show_menu_item && current_user.client.active? && current_user.access_controller?('central', 'allowed', session) %>
+        <li class="menu-item" id="aside_menu_item_central">
+          <%= link_to(central_path, { class: 'menu-link' }) do %>
+            <span class="menu-icon fa fa-comments"></span>
+            <span class="menu-text">Message Central</span>
+          <% end %>
+        </li>
+      <% end %>
+
+      <% if show_menu_item && current_user.access_controller?('my_contacts', 'allowed', session) %>
+        <li class="menu-item" id="aside_menu_item_my_contacts">
+          <%= link_to(my_contacts_path, { class: 'menu-link' }) do %>
+            <span class="menu-icon fa fa-address-book"></span>
+            <span class="menu-text">My Contacts</span>
+          <% end %>
+        </li>
+      <% end %>
+
+      <% if show_menu_item && current_user.access_controller?('stages', 'allowed', session) %>
+        <li class="menu-item" id="aside_menu_item_stage_parents">
+          <%= link_to(stages_path, { class: 'menu-link' }) do %>
+            <span class="menu-icon fa fa-project-diagram"></span>
+            <span class="menu-text">My <%= StageParent.title.pluralize -%></span>
+          <% end %>
+        </li>
+      <% end %>
+
+      <% if 1==2 && show_menu_item && current_user.client.active? && current_user.client.user_chat_allowed && current_user.client.users.count > 1 %>
+        <li class="menu-item" id="aside_menu_item_team_chat">
+          <%= link_to(user_chats_path, { class: 'menu-link' }) do %>
+            <span class="menu-icon fa fa-comment-alt"></span>
+            <span class="menu-text">Team Chat</span>
+          <% end %>
+        </li>
+      <% end %>
+
+      <% if show_menu_item && current_user.client.active? && current_user.access_controller?('integrations_servicetitan', 'contact_balances', session) %>
+        <li class="menu-item" id="aside_menu_item_st_contact_balances">
+          <%= link_to(integrations_servicetitan_contacts_balances_path, { class: 'menu-link' }) do %>
+            <span class="menu-icon fa fa-balance-scale"></span>
+            <span class="menu-text">Contact Balances</span>
+          <% end %>
+        </li>
+      <% end %>
+
+      <!-- Automation Section -->
+      <% if show_menu_item && current_user.client.active? && (
+          current_user.access_controller?('campaigns', 'allowed', session) ||
+          current_user.access_controller?('user_contact_forms', 'allowed', session) ||
+          current_user.access_controller?('surveys', 'allowed', session) ||
+          current_user.access_controller?('widgets', 'allowed', session) ||
+          current_user.access_controller?('trackable_links', 'allowed', session) ||
+          current_user.access_controller?('import_contacts', 'allowed', session) ||
+          current_user.access_controller?('integrations', 'client', session) ||
+          current_user.access_controller?('integrations', 'user', session)
+        ) %>
+        <li class="menu-header">Automation </li>
+
+        <% if current_user.access_controller?('campaigns', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_campaigns">
+            <%= link_to(campaigns_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-filter"></span>
+              <span class="menu-text">Campaign Builder</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('aiagents', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_aiagents">
+            <%= link_to(aiagents_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-robot"></span>
+              <span class="menu-text">AI Agents</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('widgets', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_sitechat">
+            <%= link_to(clients_widgets_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-cog"></span>
+              <span class="menu-text">SiteChat</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('trackable_links', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_trackable_links">
+            <%= link_to(trackablelinks_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-link"></span>
+              <span class="menu-text">Trackable Links</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('user_contact_forms', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_quickpages">
+            <%= link_to(user_contact_forms_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-file-invoice"></span>
+              <span class="menu-text">QuickPages</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('surveys', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_surveys">
+            <%= link_to(surveys_surveys_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-poll-h"></span>
+              <span class="menu-text">Survey Builder</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('email_templates', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_email_templates">
+            <%= link_to(email_templates_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-envelope"></span>
+              <span class="menu-text">Email Templates</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('import_contacts', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_import_contacts">
+            <%= link_to(contacts_import_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-file-import"></span>
+              <span class="menu-text">Import Contacts</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('integrations', 'client', session) || current_user.access_controller?('integrations', 'user', session) %>
+          <li class="menu-item" id="aside_menu_item_integrations">
+            <%= link_to(integrations_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-puzzle-piece"></span>
+              <span class="menu-text">Integrations</span>
+            <% end %>
+          </li>
+
+          <% if current_user.client.integrations_allowed.include?('searchlight') %>
+            <li class="menu-item" id="aside_menu_item_searchlight">
+              <%= link_to(integrations_searchlight_v1_dashboard_path, { class: 'menu-link' }) do %>
+                <span class="menu-icon"><%= image_tag('integrations/searchlight/logo-icon.svg', { class: 'mr-2', style: 'height:20px;' }).html_safe -%></span>
+                <span class="menu-text">SearchLight</span>
+              <% end %>
+            </li>
+          <% end %>
+        <% end %>
+      <% end %>
+
+      <!-- Training Section -->
+      <% if current_user.client.active? && current_user.access_controller?('trainings', 'allowed', session) %>
+        <li class="menu-header">Support </li>
+
+        <% if current_user.client.training.any? %>
+          <li class="menu-item has-child" id="aside_menu_item_training">
+            <a href="#" class="menu-link">
+              <span class="menu-icon fa fa-graduation-cap"></span>
+              <span class="menu-text">Training</span>
+              <!-- <span class="badge badge-warning">New</span> -->
+            </a>
+
+            <ul class="menu">
+
+              <% if current_user.super_admin? %>
+                <li class="menu-item" id="aside_menu_item_training_create">
+                  <%= link_to 'Create Training', new_training_path, { class: 'menu-link' } %>
+                </li>
+              <% end %>
+
+              <% Training.where(id: current_user.client.training).find_each do |training| %>
+                <li class="menu-item" id="aside_menu_item_training_<%= training.id -%>">
+                  <%= link_to training.menu_label, training_path(training.id), { class: 'menu-link menu-link-training' } %>
+                </li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
+      <% end %>
+
+      <!-- Admin Section -->
+      <% if show_menu_item && (
+          current_user.team_member? || current_user.access_controller?('users', 'allowed', session) ||
+          current_user.access_controller?('clients', 'allowed', session) || current_user.access_controller?('companies', 'allowed', session)
+        ) %>
+        <li class="menu-header">Admin </li>
+
+        <% if current_user.access_controller?('users', 'allowed', session) %>
+          <li class="menu-item has-child" id="aside_menu_item_my_profile">
+            <%= link_to('#', { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-user"></span>
+              <span class="menu-text">My Profile</span>
+            <% end %>
+
+            <ul class="menu">
+
+              <li class="menu-item" id="aside_menu_item_user_overview">
+                <%= link_to('Overview', edit_users_overview_path(current_user), class: 'menu-link') %>
+              </li>
+
+              <% if current_user.access_controller?('users', 'profile', session) %>
+                <li class="menu-item" id="aside_menu_item_user_profile">
+                  <%= link_to('Profile', edit_client_user_path(current_user.client_id, current_user), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('users', 'tasks', session) %>
+                <li class="menu-item" id="aside_menu_item_user_tasks">
+                  <%= link_to('Tasks', users_tasks_path, class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('users', 'phone_processing', session) %>
+                <li class="menu-item" id="aside_menu_item_user_phone">
+                  <%= link_to('Phone Processing', edit_users_phone_path(current_user), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('users', 'notifications', session) %>
+                <li class="menu-item" id="aside_menu_item_user_notifications">
+                  <%= link_to('Notifications', edit_users_notification_path(current_user), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('users', 'admin_settings', session) %>
+                <li class="menu-item" id="aside_menu_item_user_admin">
+                  <%= link_to('Admin Settings', edit_users_admin_path(current_user), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('users', 'permissions', session) %>
+                <li class="menu-item" id="aside_menu_item_user_permissions">
+                  <%= link_to('Permissions', edit_users_permission_path(current_user), class: 'menu-link') %>
+                </li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('clients', 'allowed', session) %>
+          <li class="menu-item has-child" id="aside_menu_item_company_settings">
+            <%= link_to('#', { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-building"></span>
+              <span class="menu-text">My Company Profile</span>
+            <% end %>
+
+            <ul class="menu">
+
+              <li class="menu-item" id="aside_menu_item_client_overview">
+                <%= link_to('Overview', edit_clients_overview_path(current_user.client_id), class: 'menu-link') %>
+              </li>
+
+              <% if current_user.access_controller?('clients', 'profile', session) %>
+                <li class="menu-item" id="aside_menu_item_client_profile">
+                  <%= link_to('Profile', edit_clients_profile_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'billing', session) %>
+                <li class="menu-item" id="aside_menu_item_client_billing">
+                  <%= link_to('Billing', edit_clients_billing_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'settings', session) || (current_user.agency_user_logged_in_as(session)&.agent? && current_user.agency_user_logged_in_as(session)&.access_controller?('clients', 'settings', session)) %>
+                <li class="menu-item" id="aside_menu_item_client_settings">
+                  <%= link_to('Settings', edit_clients_setting_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.team_member? %>
+                <li class="menu-item" id="aside_menu_item_client_features">
+                  <%= link_to('Features', edit_clients_feature_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'phone_numbers', session) %>
+                <li class="menu-item" id="aside_menu_item_client_phone_numbers">
+                  <%= link_to('Phone Numbers', client_phone_numbers_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'voice_recordings', session) %>
+                <li class="menu-item" id="aside_menu_item_client_voice_recordings">
+                  <%= link_to('Voice Recordings', client_voice_recordings_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'users', session) %>
+                <li class="menu-item" id="aside_menu_item_client_users">
+                  <%= link_to('Users', client_users_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'groups', session) %>
+                <li class="menu-item" id="aside_menu_item_client_groups">
+                  <%= link_to('Groups', client_groups_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'tags', session) %>
+                <li class="menu-item" id="aside_menu_item_client_tags">
+                  <%= link_to('Tags', client_tags_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'custom_fields', session) %>
+                <li class="menu-item" id="aside_menu_item_client_custom_fields">
+                  <%= link_to('Custom Fields', client_custom_fields_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'pipelines', session) %>
+                <li class="menu-item" id="aside_menu_item_client_stage_parents">
+                  <%= link_to(StageParent.title.pluralize, client_stage_parents_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'lead_sources', session) %>
+                <li class="menu-item" id="aside_menu_item_client_lead_sources">
+                  <%= link_to('Lead Sources', client_lead_sources_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'org_chart', session) %>
+                <li class="menu-item" id="aside_menu_item_client_org_chart">
+                  <%= link_to('Org Chart', client_org_chart_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'kpis', session) %>
+                <li class="menu-item" id="aside_menu_item_client_kpis">
+                  <%= link_to('Custom KPIs', clients_kpis_path, class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'task_actions', session) %>
+                <li class="menu-item" id="aside_menu_item_client_task_actions">
+                  <%= link_to('Task Actions', edit_clients_task_action_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'holidays', session) %>
+                <li class="menu-item" id="aside_menu_item_client_holidays">
+                  <%= link_to('Holidays', clients_holidays_path, class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'folder_assignments', session) %>
+                <li class="menu-item" id="aside_menu_item_client_folders">
+                  <%= link_to(Folder.title.pluralize, client_folders_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'dlc10', session) %>
+                <li class="menu-item" id="aside_menu_item_client_dlc10">
+                  <%= link_to('10DLC', edit_clients_dlc10_brand_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'statements', session) %>
+                <li class="menu-item" id="aside_menu_item_client_statements">
+                  <%= link_to('Statements', clients_statement_path(current_user.client_id), class: 'menu-link') %>
+                </li>
+              <% end %>
+
+              <% if current_user.access_controller?('clients', 'terms', session) %>
+                <li class="menu-item" id="aside_menu_item_client_terms">
+                  <%= link_to('Terms', edit_clients_term_path(current_user.client_id, show: true), class: 'menu-link') %>
+                </li>
+              <% end %>
+            </ul>
+          </li>
+        <% end %>
+
+        <% if current_user.access_controller?('companies', 'allowed', session) %>
+          <li class="menu-item" id="aside_menu_item_companies">
+            <%= link_to(clients_companies_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-city"></span>
+              <span class="menu-text">Companies</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.super_admin? %>
+          <li class="menu-item" id="aside_menu_item_analytics">
+            <%= link_to(clients_analytics_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-chart-line"></span>
+              <span class="menu-text"><%= I18n.t('tenant.name') -%> Analytics</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.team_member? %>
+          <li class="menu-item" id="aside_menu_item_packages">
+            <%= link_to(packagemanager_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-cube"></span>
+              <span class="menu-text"><%= I18n.t('tenant.name') -%> Packages</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.super_admin? %>
+          <li class="menu-item" id="aside_menu_item_affiliates">
+            <%= link_to(affiliates_affiliates_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-handshake"></span>
+              <span class="menu-text"><%= I18n.t('tenant.name') -%> Affiliates</span>
+            <% end %>
+          </li>
+        <% end %>
+
+        <% if current_user.super_admin? %>
+          <li class="menu-item" id="aside_menu_item_system_settings">
+            <%= link_to(system_settings_path, { class: 'menu-link' }) do %>
+              <span class="menu-icon fa fa-cogs"></span>
+              <span class="menu-text">System Settings</span>
+            <% end %>
+          </li>
+        <% end %>
+      <% end %>
+    </ul>
+  </nav>
+</div>

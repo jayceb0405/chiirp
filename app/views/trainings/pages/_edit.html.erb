@@ -1,0 +1,81 @@
+<%
+  # app/views/trainings/pages/_edit.html.erb
+  # 
+  # Example:
+  #   render partial: 'trainings/pages/edit', locals: { trainings_presenter: TrainingsPresenter }
+  # 
+  # Required Instance Variables:
+  #   @training:      (Training)
+  #   @training_page: (TrainingPage)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training, training_page: @training_page)
+  save_training_url      = @training_page.new_record? ? training_training_pages_path( @training.id ) : training_training_page_path( @training.id, @training_page.id )
+-%>
+<div class="card-header border-0">
+  <div class="d-flex justify-content-between">
+    <h6>Course Page Editor</h6>
+  </div>
+</div>
+
+<div class="card-body">
+  <%= form_with model: @training_page, url: save_training_url, builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', novalidate: true } do |f| %>
+    <%= f.text_field :title, {
+        label: { title: 'Training Page Name' },
+      html_options: { placeholder: 'Page Name', autofocus: true }
+    } %>
+    <%= f.text_field :menu_label, {
+        label: { title: 'Menu Label' },
+      html_options: { placeholder: 'Menu Label' }
+    } %>
+    <%= f.switch :parent, {
+        label: { title: 'Parent Page' },
+      checkboxes: [{ checked: tp.training_page.parent, values: [true, false] }]
+    } %>
+    <%= f.text_area :video_link, {
+        label: { title: 'Video Embed Code' },
+      html_options: { id: 'video_embed_code_input', placeholder: 'Video Embed Code' }
+    } %>
+
+    <%= f.submit_buttons(
+      buttons: tp.training_pages_edit_buttons
+    ) %>
+  <% end %>
+</div>
+
+<% unless @training_page.new_record? %>
+  <%= render partial: 'snippets/custom_modal', locals: { id: 'training_page_header_modal', max_width: '800px', max_height: '90%', close: true } %>
+  <%= render partial: 'snippets/custom_modal', locals: { id: 'training_page_footer_modal', max_width: '800px', max_height: '90%', close: true } %>
+<% end %>
+
+<script>
+  $(function() {
+    <% unless tp.training_page.new_record? %>
+      $('#training_page_header_button').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('#training_page_header_modal_title').html('Edit Header: <%= tp.training_page.title -%>');
+        $('#training_page_header_modal_body').html('<%= j render partial: 'trainings/pages/edit_header', locals: { trainings_presenter: tp } -%>');
+        $('#training_page_header_modal').modal('show');
+      });
+
+      $('#training_page_footer_button').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $('#training_page_footer_modal_title').html('Edit Footer: <%= tp.training_page.title -%>');
+        $('#training_page_footer_modal_body').html('<%= j render partial: 'trainings/pages/edit_footer', locals: { trainings_presenter: tp } -%>');
+        $('#training_page_footer_modal').modal('show');
+      });
+    <% end %>
+
+    $('#save_training_page_submit').on('click', function(e) {
+      $("#video_embed_code_input").val($("#video_embed_code_input").val().replace(/<script/g, '{script'));
+      $("#video_embed_code_input").val($("#video_embed_code_input").val().replace(/<\/script>/g, '{/script}'));
+      $("#video_embed_code_input").val($("#video_embed_code_input").val().replace(/onload/g, '{onload}'));
+    });
+  });
+</script>

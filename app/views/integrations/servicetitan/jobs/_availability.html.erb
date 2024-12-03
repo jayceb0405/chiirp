@@ -1,0 +1,48 @@
+<%
+  # app/views/integrations/servicetitan/jobs/_availability.html.erb
+  #
+  # Example:
+  # 	render partial: "integrations/servicetitan/jobs/availability"
+  #
+  # Instance Variables:
+  # 	(req) @business_unit_availability: (Array)
+  #
+  # Local Variables:
+  #   (req) @start_time: (Time / UTC)
+  #
+  servicetitan_unit_availability = {}
+  time_zone = current_user.client.time_zone
+
+  @business_unit_availability.each do |range|
+    date_string = "#{Friendly.new.date(range[:from].in_time_zone(time_zone).beginning_of_day, time_zone, false)} (#{range[:from].strftime('%A')})"
+    servicetitan_unit_availability[date_string] = [] unless servicetitan_unit_availability[date_string]
+    servicetitan_unit_availability[date_string] << ["#{range[:from].strftime('%l:%M%P')} - #{range[:to].strftime('%l:%M%P')} (#{range[:availability] ? 'Available' : 'NOT Available'})", "#{range[:from].strftime('%Y-%m-%d %H:%M:%S')}|#{range[:to].strftime('%Y-%m-%d %H:%M:%S')}", { class: range[:availability] ? 'text-success' : 'text-danger' }]
+  end
+-%>
+<%= bootstrap_select_tag(
+      field:        'time_slot',
+      label:        { title: 'Select a Time Slot' },
+      html_options: { id: 'time_slot_select', required: true },
+      options:      { for_select: grouped_options_for_select(servicetitan_unit_availability, 0), blank: @business_unit_availability.present? ? 'Time Slots' : 'Select a Business Unit & Technician First' },
+      messages:     { note: 'Required' }
+    ) %>
+
+<script>
+  $(function () {
+    $('#next_day_button').on('click', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        type:     'GET',
+        dataType: 'script',
+        url:      '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+        data:     {
+          commit: 'get_availability',
+          business_unit_id: $('#business_unit_select').val(),
+          start_time: '<%= @start_time.iso8601 -%>',
+          move: 'next'
+        }
+      });
+    });
+  });
+</script>

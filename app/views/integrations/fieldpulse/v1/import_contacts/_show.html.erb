@@ -1,0 +1,70 @@
+<%
+  # app/views/integrations/fieldpulse/v1/import_contacts/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/fieldpulse/v1/import_contacts/show", locals: { presenter: Integrations::Fieldpulse::V1::ImportContacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldpulse::V1::ImportContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldpulse::V1::ImportContacts::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Contacts from FieldPulse</span>
+      <span class="my-auto text-success small" id="contact_imports_remaining_count"><%= presenter.contact_imports_remaining_string(current_user.id) -%></span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_fieldpulse_v1_import_contacts_path, builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+        <%#= bootstrap_select_tag(
+              field:        'filter[office_ids]',
+              label:        { title: 'Offices' },
+              options:      { for_select: presenter.offices_for_select },
+              html_options: { multiple: true },
+              messages:     { note: 'Import customers from selected Offices.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'filter[active_only]',
+              value:  false,
+              values: [true, false],
+              label:  { title: 'Active Only' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:        'filter[created_period]',
+              value:        '',
+              label:        { title: 'Customers Created Between' },
+              html_options: { id: 'import_type_created_period', placeholder: 'Click to select a period' },
+              flatpickr:    { include_time: false, mode: 'range', max_date: 'today' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:        'filter[updated_period]',
+              value:        '',
+              label:        { title: 'Customers Updated Between' },
+              html_options: { id: 'import_type_updated_period', placeholder: 'Click to select a period' },
+              flatpickr:    { include_time: false, mode: 'range', max_date: 'today' }
+            ) %>
+
+        <%= f.submit_buttons(
+              buttons: [
+                { title: 'Import & Process Actions', disable_with: 'Queuing Imports & Action Processes...' }
+              ]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_import_contacts').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,600 @@
+<%
+  # app/views/packages/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'packages/edit'
+  #
+  # Required Instance Variables:
+  #   @package: (Package)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @package.nil? || (@package.new_record? && @package.name.to_s.empty?)
+
+  client    = Client.find_by(id: I18n.t("tenant.#{Rails.env}.client_id").to_i)
+  group     = @package.group_id.to_i.positive? ? client.groups.find_by(id: @package.group_id) : nil
+  group ||= client.groups.new
+  tag = @package.tag_id.to_i.positive? ? client.tags.find_by(id: @package.tag_id) : nil
+  tag ||= client.tags.new
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@package] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @package.name -%></span>
+
+      <% unless @package.new_record? %>
+        <%= link_to '<i class="fa fa-clone"></i>'.html_safe, package_path(@package.id, commit: 'copy'), {
+              class:  'btn btn-icon btn-light',
+              remote: true,
+              method: :put
+            } %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class:  'btn btn-icon btn-light',
+              id:     'button_delete',
+              remote: true,
+              method: :put
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+
+    <%= form_with model: @package, builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, html: { class: 'needs-validation', id: 'contact_form', novalidate: true } do |f| %>
+      <%= f.hidden_field :onetime %>
+      <%= f.text_field :name, {
+            label:        { title: 'Package Name' },
+            html_options: { placeholder: 'Package Name', minlength: 3, required: true, autofocus: true },
+            messages:     { note: 'Required. Must be minimum of 3 characters.' }
+          } %>
+
+      <% if @package.onetime %>
+        <%= bootstrap_calendar_field(
+              field:     'package[expired_on]',
+              value:     1.month.from_now.iso8601,
+              modal:     { id: 'dash_modal' },
+              label:     { title: 'Expires on' },
+              flatpickr: { include_time: false, mode: 'single' }
+            ) %>
+      <% end %>
+
+      <% unless @package.new_record? %>
+        <% if @package.belongs_to_package_page? %>
+          <%= f.copy_field nil, {
+                label:        { title: 'Package URL' },
+                html_options: { value: welcome_join_url(@package.package_key) }
+              } %>
+          <%= f.copy_field nil, {
+                label:        { title: 'Package URL <small class="text-muted">(minimal page)</small>'.html_safe },
+                html_options: { value: welcome_join_min_url(@package.package_key) }
+              } %>
+        <% else %>
+          <%= bootstrap_info_field(
+                info: 'Does not belong to a Package/Page! Must be added to a Package/Page before Package URLs are provided!',
+                row:  { class: '' },
+                col:  { class: 'text-danger' }
+              ) %>
+        <% end %>
+      <% end %>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Package Settings</h6></legend>
+        <%= bootstrap_number_field(
+              field:        'package[setup_fee]',
+              value:        @package.setup_fee.to_d,
+              label:        { title: 'Setup Fee' },
+              html_options: { min: 0, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[mo_charge]',
+              value:        @package.mo_charge.to_d,
+              label:        { title: 'Monthly Charge' },
+              html_options: { min: 0, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[credit_charge]',
+              value:        @package.credit_charge.to_d,
+              label:        { title: 'Credit Price' },
+              html_options: { min: 0.01, step: 0.001 },
+              prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[searchlight_fee]',
+              value:        @package.searchlight_fee.to_d,
+              label:        { title: 'SearchLight Fee' },
+              html_options: { min: 0, step: 1.00 },
+              prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }],
+              messages:     { note: "The amount #{I18n.t('tenant.name')} pays SearchLight monthly for each Client." }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[mo_credits]',
+              value:        @package.mo_credits.to_f,
+              label:        { title: 'Monthly Credits Received' },
+              html_options: { min: 0, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[max_phone_numbers]',
+              value:        @package.max_phone_numbers.to_i,
+              label:        { title: 'Phone Numbers Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= f.select :phone_vendor, {
+              label:        { title: 'Phone Number Provider' },
+              html_options: { id: 'phone_vendor_id', mobile: browser.device.mobile? },
+              choices:      { for_select: options_for_phone_vendor(@package.phone_vendor), blank: 'Select a Provider' }
+            } %>
+        <%= f.select :affiliate_id, {
+              label:        { title: 'Affiliate' },
+              html_options: { id: 'affiliate_id', mobile: browser.device.mobile? },
+              choices:      { for_select: options_for_affiliate(@package.affiliate_id), blank: 'Select an Affiliate' },
+              messages:     { note: "Affiliate to whom #{I18n.t('tenant.name')} pays a monthly fee." }
+            } %>
+        <%= f.switch :dlc10_charged, {
+              html_options: { id: 'switch_dlc10_charged' },
+              label:        { title: 'Charge for 10dlc Costs' },
+              checkboxes:   [{ field: 'dlc10_charged', checked: @package.dlc10_charged, values: %w[true false] }]
+            } %>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Trial Period</h6></legend>
+
+          <%= f.number_field :first_payment_delay_days, {
+                label:        { title: 'Delay First Payment (days)' },
+                html_options: { min: 0, step: 1 },
+                messages:     { error: 'Must be minimum of 0 days.' }
+              } %>
+          <%= f.number_field :first_payment_delay_months, {
+                label:        { title: 'Delay First Payment (months)' },
+                html_options: { min: 0, step: 1 },
+                messages:     { error: 'Must be minimum of 0 months.' }
+              } %>
+          <%= bootstrap_number_field(
+                field:        'package[trial_credits]',
+                value:        @package.trial_credits.to_f,
+                label:        { title: 'Trial Credits Received' },
+                html_options: { min: 0, step: 'any' },
+                prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+              ) %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>Promotional Period</h6></legend>
+
+          <%= f.number_field :promo_months, {
+                label:        { title: 'Promotional Period (months)' },
+                html_options: { min: 0, step: 1 },
+                messages:     { note: 'Must be minimum of 0 months.' }
+              } %>
+          <%= f.number_field :promo_mo_charge, {
+                label:        { title: 'Monthly Charge' },
+                html_options: { value: @package.promo_mo_charge.to_d, min: 0, step: 0.01 },
+                prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                messages:     { note: 'Must be minimum of $0.00.' }
+              } %>
+          <%= f.number_field :promo_credit_charge, {
+                label:        { title: 'Credit Price' },
+                html_options: { value: @package.promo_credit_charge.to_d, min: 0, step: 0.0001 },
+                prepends:     [{ label: '<i class="fa fa-dollar-sign"></i>' }],
+                messages:     { note: 'Must be minimum of $0.00.' }
+              } %>
+          <%= f.number_field :promo_mo_credits, {
+                label:        { title: 'Monthly Credits Received' },
+                html_options: { value: @package.promo_mo_credits.to_d, min: 0, step: 1 },
+                prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+                messages:     { note: 'Must be minimum of 0 credits.' }
+              } %>
+          <%= f.number_field :promo_max_phone_numbers, {
+                label:        { title: 'Maximum Phone Numbers Permitted' },
+                html_options: { min: 0, step: 1 },
+                messages:     { note: 'Must be minimum of 0 phone numbers.' }
+              } %>
+        </fieldset>
+
+      </fieldset>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Account</h6></legend>
+        <%= bootstrap_number_field(
+              field:        'package[max_users_count]',
+              value:        @package.max_users_count.to_i,
+              label:        { title: 'Maximum Users Permitted' },
+              html_options: { min: 1, step: 1 }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[max_contacts_count]',
+              value:        @package.max_contacts_count.to_i,
+              label:        { title: 'Maximum Contacts Permitted <small class="text-muted">(-1=&#8734;)</small>'.html_safe },
+              html_options: { min: -1, step: 1 }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[message_central_allowed]',
+              value:  @package.message_central_allowed,
+              values: [true, false],
+              label:  { title: 'Message Central Allowed' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[my_contacts_allowed]',
+              value:  @package.my_contacts_allowed,
+              values: [true, false],
+              label:  { title: 'My Contacts Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[custom_fields_count]',
+              value:        @package.custom_fields_count.to_i,
+              label:        { title: 'Maximum Custom Fields Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= f.number_field :folders_count, {
+              label:        { title: "Maximum #{Folder.title.pluralize} Permitted" },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: "Must be minimum of 0 #{Folder.title.downcase.pluralize}." }
+            } %>
+        <%= f.number_field :groups_count, {
+              label:        { title: 'Maximum Groups Permitted' },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: 'Must be minimum of 0 Groups.' }
+            } %>
+        <%= f.number_field :stages_count, {
+              label:        { title: "Maximum #{StageParent.title.pluralize} Permitted" },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: "Must be minimum of 0 #{StageParent.title.downcase.pluralize}." }
+            } %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_stages_allowed]',
+              value:  @package.share_stages_allowed,
+              values: [true, false],
+              label:  { title: "#{StageParent.title} Sharing Allowed" }
+            ) %>
+        <%= f.number_field :max_kpis_count, {
+              label:        { title: 'Maximum KPIs Permitted' },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: 'Must be minimum of 0 KPIs.' }
+            } %>
+        <%= bootstrap_switch_field(
+              field:  'package[user_chat_allowed]',
+              value:  @package.user_chat_allowed,
+              values: [true, false],
+              label:  { title: 'Team Chat Allowed' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[tasks_allowed]',
+              value:  @package.tasks_allowed,
+              values: [true, false],
+              label:  { title: 'User Tasks Allowed' }
+            ) %>
+      </fieldset>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Texting</h6></legend>
+        <%= bootstrap_switch_field(
+              field:  'package[text_message_images_allowed]',
+              value:  @package.text_message_images_allowed,
+              values: [true, false],
+              label:  { title: 'Images in Text Messages Allowed' }
+            ) %>
+        <%= f.switch :dlc10_required, {
+              html_options: { id: 'switch_dlc10_required' },
+              label:        { title: 'Require 10DLC' },
+              checkboxes:   [{ field: 'dlc10_required', checked: @package.dlc10_required, values: %w[true false] }]
+            } %>
+        <%= render partial: 'snippets/radio_field', locals: {
+              field:   'package[text_segment_charge_type]',
+              label:   { title: 'Text Message Pricing Method' },
+              buttons: [
+                { label: 'Fixed Rate', value: 0, id: 'client_fixed_rate', checked: @package.text_segment_charge_type.zero? },
+                { label: 'Graduated Rate', value: 1, id: 'client_graduated_rate', checked: @package.text_segment_charge_type == 1 },
+                { label: 'Flat Fee', value: 2, id: 'client_flat_fee', checked: @package.text_segment_charge_type == 2 }
+              ]
+            } %>
+        <%= bootstrap_number_field(
+              field:        'package[text_message_credits]',
+              value:        @package.text_message_credits.to_f,
+              label:        { title: 'Text Message Price (credits)' },
+              html_options: { min: 0.01, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[text_image_credits]',
+              value:        @package.text_image_credits.to_f,
+              label:        { title: 'Text Image Price (credits)' },
+              html_options: { min: 0.01, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+            ) %>
+      </fieldset>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Voice & Video</h6></legend>
+        <%= bootstrap_switch_field(
+              field:  'package[phone_calls_allowed]',
+              value:  @package.phone_calls_allowed,
+              values: [true, false],
+              label:  { title: 'Phone Calls Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[phone_call_credits]',
+              value:        @package.phone_call_credits.to_f,
+              label:        { title: 'Phone Call Price (credits)' },
+              html_options: { min: 0.01, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[video_calls_allowed]',
+              value:  @package.video_calls_allowed,
+              values: [true, false],
+              label:  { title: 'Video Calls Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[video_call_credits]',
+              value:        @package.video_call_credits.to_f,
+              label:        { title: 'Video Call Price (credits)' },
+              html_options: { min: 0.01, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[max_voice_recordings]',
+              value:        @package.max_voice_recordings.to_i,
+              label:        { title: 'Stored Voice Recordings Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[rvm_allowed]',
+              value:  @package.rvm_allowed,
+              values: [true, false],
+              label:  { title: 'Ringless Voicemail Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[rvm_credits]',
+              value:        @package.rvm_credits.to_f,
+              label:        { title: 'Ringless VM Price (credits)' },
+              html_options: { min: 0.01, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }]
+            ) %>
+      </fieldset>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Automation</h6></legend>
+        <%= bootstrap_switch_field(
+              field:  'package[my_contacts_group_actions_all_allowed]',
+              value:  @package.my_contacts_group_actions_all_allowed,
+              values: [true, false],
+              label:  { title: 'Broadcast Actions for All Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[quick_leads_count]',
+              value:        @package.quick_leads_count.to_i,
+              label:        { title: 'QuickPage Forms Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_quick_leads_allowed]',
+              value:  @package.share_quick_leads_allowed,
+              values: [true, false],
+              label:  { title: 'QuickPage Sharing Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[campaigns_count]',
+              value:        @package.campaigns_count,
+              label:        { title: 'Maximum Campaigns Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_funnels_allowed]',
+              value:  @package.share_funnels_allowed,
+              values: [true, false],
+              label:  { title: 'Campaign Sharing Allowed' }
+            ) %>
+        <%= f.number_field :surveys_count, {
+              label:        { title: "Maximum #{Surveys::Survey.title.pluralize} Permitted" },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: "Must be minimum of 0 #{Surveys::Survey.title.downcase.pluralize}." }
+            } %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_surveys_allowed]',
+              value:  @package.share_surveys_allowed,
+              values: [true, false],
+              label:  { title: "#{Surveys::Survey.title} Sharing Allowed" }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[widgets_count]',
+              value:        @package.widgets_count.to_i,
+              label:        { title: 'SiteChat Buttons Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_widgets_allowed]',
+              value:  @package.share_widgets_allowed,
+              values: [true, false],
+              label:  { title: 'SiteChat Sharing Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[trackable_links_count]',
+              value:        @package.trackable_links_count.to_i,
+              label:        { title: 'Trackable Links Permitted' },
+              html_options: { min: 0, step: 1 }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[max_email_templates]',
+              value:        @package.max_email_templates.to_i,
+              label:        { title: 'Maximum Email Templates Permitted <small class="text-muted">(-1=&#8734;)</small>'.html_safe },
+              html_options: { min: -1, step: 1 }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_email_templates_allowed]',
+              value:  @package.share_email_templates_allowed,
+              values: [true, false],
+              label:  { title: 'Email Template Sharing Allowed' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[import_contacts_count]',
+              value:        @package.import_contacts_count.to_i,
+              label:        { title: 'Maximum Contacts Imported' },
+              html_options: { min: 0, max: 30_000, step: 1_000 },
+              messages:     { note: 'Must be in increments of 1000.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'package[integrations_allowed]',
+              label:        { title: 'Integrations Accessible' },
+              html_options: { id: 'integrations_allowed', multiple: true },
+              options:      { array: options_for_integrations, selected: @package.integrations_allowed }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:        'package[training]',
+              label:        { title: 'Training Accessible' },
+              html_options: { id: 'training', multiple: true },
+              options:      { array: Training.pluck(:menu_label, :id), selected: @package.training }
+            ) %>
+      </fieldset>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>AI Agents</h6></legend>
+        <%= bootstrap_number_field(
+              field:        'package[aiagent_base_charge]',
+              value:        @package.aiagent_base_charge.to_d,
+              label:        { title: 'Base Charge' },
+              html_options: { min: 0, step: '0.01' },
+              prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }],
+              messages:     { note: 'Monthly charge for access to AI Agents.' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[aiagent_included_count]',
+              value:        @package.aiagent_included_count.to_i,
+              label:        { title: 'AI Agents Included in Plan <small class="text-muted">(-1=&#8734;)</small>'.html_safe },
+              html_options: { min: -1, step: 1 }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[aiagent_overage_charge]',
+              value:        @package.aiagent_overage_charge.to_d,
+              label:        { title: 'Monthly Charge' },
+              html_options: { min: 0, step: '0.01' },
+              prepends:     [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }],
+              messages:     { note: 'Monthly charge per AI Agent over the included setting.' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[aiagent_message_credits]',
+              value:        @package.aiagent_message_credits.to_d,
+              label:        { title: 'Message Price (credits)' },
+              html_options: { min: 0, step: 'any' },
+              prepends:     [{ button: false, label: '<i class="fa fa-coins"></i>' }],
+              messages:     { note: 'Cost per training segment in credits.' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[aiagent_trial_period_months]',
+              value:        @package.aiagent_trial_period_months.to_i,
+              label:        { title: 'Trial Period Months' },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: 'How many months should the client get without paying base charge.' }
+            ) %>
+        <%= bootstrap_number_field(
+              field:        'package[aiagent_trial_period_days]',
+              value:        @package.aiagent_trial_period_days.to_i,
+              label:        { title: 'Trial Period Days' },
+              html_options: { min: 0, step: 1 },
+              messages:     { note: 'How many days should the client get without paying base charge.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'package[share_aiagents_allowed]',
+              value:  @package.share_aiagents_allowed,
+              values: [true, false],
+              label:  { title: 'Sharing Allowed' }
+            ) %>
+      </fieldset>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6>Actions to run on each new Client with this Package</h6></legend>
+
+        <%= render partial: 'campaigns/action_fields', locals: {
+              client:,
+              campaign_id: @package.campaign_id, campaign_id_field: 'package[campaign_id]',
+              group:, group_id_field: 'package[group_id]',
+              tag:, tag_id_field: 'package[tag_id]',
+              stage_id: @package.stage_id, stage_id_field: 'package[stage_id]',
+              stop_campaign_ids: @package.stop_campaign_ids, stop_campaign_ids_field: 'package[stop_campaign_ids]'
+            } %>
+      </fieldset>
+
+      <% unless @package.new_record? %>
+        <%= render partial: 'snippets/f_file_field', locals: {
+              form:            f,
+              file_field:      { field: 'join_form_image', id: 'join_form_image_input', name: 'package[join_form_image]', url: image_package_path(@package.id) },
+              col:             { id: 'join_form_image_dropzone' },
+              label:           { title: 'Join Form Image' },
+              image_container: { id: 'join_form_image_container' },
+              image:           @package.join_form_image.attached? ? { key: @package.join_form_image.key, width: 200, height: 200, class: 'rounded', crop: 'fit', format: 'png' } : {}
+            } %>
+      <% end %>
+
+      <%= bootstrap_select_tag(
+            field:        'package[agency_ids]',
+            label:        { title: 'Agencies' },
+            html_options: { id: 'agency_ids', multiple: true },
+            options:      { for_select: options_from_collection_for_select(Client.active, :id, :name, @package.agency_ids) },
+            messages:     { note: 'Assign agencies to any Client created from this package.' }
+          ) %>
+
+      <%= bootstrap_info_field(
+            info:  @package.created_at ? Friendly.new.date(@package.created_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) : 'Not Yet',
+            label: { title: 'Date Created' }
+          ) %>
+      <%= bootstrap_info_field(
+            info:  @package.updated_at ? Friendly.new.date(@package.updated_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) : 'Not Yet',
+            label: { title: 'Date Updated' }
+          ) %>
+
+      <%= f.submit_buttons buttons: [{ title: (@package.onetime ? 'Create Onetime Package' : 'Save Package').to_s, disable_with: 'Saving' }] %>
+    <% end %>
+
+    <% unless @package.new_record? %>
+      <div class="" id="package_campaigns_index">
+        <%= render partial: 'package_campaigns/index' %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+
+    <% unless @package.new_record? %>
+      $('#button_delete').off('click');
+      $('#button_delete').on('click', function(e) {
+        e.preventDefault();
+
+        ChiirpAlert({
+          'body':'Deleting "<%= @package.name -%>" can NOT be un-done. Is it your intention to delete this package?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it');
+        $(document).on('click', '#button_dump_it', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '<%= package_path(@package.id) -%>'
+          });
+        });
+      });
+    <% end %>
+
+    $('#packages_cancel_button').on('click', function (e) {
+      e.preventDefault();
+      $('#package-form-collapse').collapse();
+      $('#package_edit').html('');
+    });
+
+    <% unless 1==1 || @package.new_record? %>
+      // package_campaign index
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= package_campaigns_path(@package) -%>'
+      });
+    <% end %>
+  });
+</script>

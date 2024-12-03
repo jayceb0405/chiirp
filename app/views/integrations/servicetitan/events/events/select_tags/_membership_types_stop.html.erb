@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_membership_types_stop.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/membership_types_stop', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[membership_types_stop]',
+      row:          { class: 'event_criteria_row', id: "membership_types_stop_row_#{presenter.event_id}" },
+      label:        { title: "ServiceTitan Memberships (Stop)<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_membership_types_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Memberships', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.membership_types_select, selected: presenter.membership_types_stop },
+      messages:     { note: 'Selected Event Campaign will be stopped when ServiceTitan Customer Sold/Renewed Memberships include any of the selected memberships.' }
+    ) %>

@@ -1,0 +1,31 @@
+<%
+  # app/views/campaigns/show/_analysis_info.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/show/analysis_info', locals: { campaign: Campaign }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) campaign: Campaign
+  #
+  return unless local_assigns.dig(:campaign).is_a?(Campaign)
+
+  if campaign.new_record?
+    info_string = ['Your Campaign has not been analyzed yet.']
+  elsif campaign.analyzed
+
+    info_string = ['Your Campaign is configured successfully.']
+  else
+    info_string = ['Your Campaign is incomplete.']
+    info_string << '<ul class="fa-ul">'
+
+    campaign.analyze!.each do |result|
+      info_string << "<li><span class=\"fa-li\"><i class=\"fa fa-times text-danger\"></i></span>#{result.dig(:description)}</li>"
+    end
+
+    info_string << '</ul>'
+  end
+-%>
+<%= info_string.join.html_safe %>

@@ -1,0 +1,33 @@
+<%
+  # app/views/dashboards/buttons/_client_keyword.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/client_keyword', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) Campaign id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) && presenter.client.campaigns_count.positive? && (campaign = presenter.client.campaigns.find_by(id: local_assigns.dig(:id).to_i)) %>
+  <%
+    contact_campaigns = Contacts::Campaign.campaign(campaign.id, presenter.date_range[0], presenter.date_range[1]).count.to_i
+    completed_contact_campaigns = Contacts::Campaign.campaign_completed(campaign.id, presenter.date_range[0], presenter.date_range[1]).count.to_i
+    completed_rate = contact_campaigns.to_f.positive? ? (completed_contact_campaigns.to_f / contact_campaigns).round(2) : 0.0
+  %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               "client_keyword_#{campaign.id}",
+        stats:            "#{contact_campaigns} / #{completed_contact_campaigns}",
+        description:      campaign.name,
+        description_icon: 'c',
+        icon:             'fa fa-key',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', campaign_id_completed: 'completed', campaign_id: campaign.id, user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         "client_keyword_chart_#{campaign.id}",
+        chart_value:      completed_rate,
+        button_movable:   true
+      } %>
+<% end %>

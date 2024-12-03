@@ -1,0 +1,50 @@
+<%
+  # app/views/clients/features/forms/_texting.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/features/forms/texting', locals: { presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || ClientPresenter.new(client: @client)
+-%>
+<h6 class="card-header">Texting</h6>
+<%= form_with model: presenter.client, url: clients_feature_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'features_form', novalidate: true } do |f| %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Images in Text Messages Allowed' },
+        checkboxes: [{ field: 'text_message_images_allowed', checked: presenter.client.text_message_images_allowed, values: %w[true false] }]
+      } %>
+  <%= f.switch :dlc10_required, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Require 10DLC' },
+        checkboxes: [{ field: 'text_message_dlc10_required', checked: presenter.client.dlc10_required, values: %w[true false] }]
+      } %>
+  <%= f.radio_button :text_segment_charge_type, {
+        row:     { columns: [6, 6] },
+        label:   { title: 'Text Message Pricing Method' },
+        buttons: presenter.radio_buttons_text_message_pricing_method
+      } %>
+  <%= f.number_field :text_message_credits, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Text Message Price (credits)' },
+        html_options: { value: presenter.client.text_message_credits.to_d, min: 0.01, step: 0.01 },
+        prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+        messages:     { note: 'Must be minimum of 0.01.' }
+      } %>
+  <%= f.number_field :text_image_credits, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Text Image Price (credits)' },
+        html_options: { value: presenter.client.text_image_credits.to_d, min: 0.01, step: 0.01 },
+        prepends:     [{ label: '<i class="fa fa-coins"></i>' }],
+        messages:     { note: 'Must be minimum of 0.01.' }
+      } %>
+  <%= f.submit_buttons buttons: [{ title: 'Save Texting Features', disable_with: 'Saving Texting Features' }] %>
+<% end %>

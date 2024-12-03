@@ -1,0 +1,155 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require 'rubygems'
+require 'commander'
+require 'aws-sdk-ecs'
+
+# Reasons to use ECS Exec over direct SSH
+# * No need to manage SSH keys
+# * No network ACLs to worry about, especially over cellular or VPN
+# * No need to manage security groups or changing client IP addresses
+# * Container task has a reserved capacity, so no need to worry about overloading the host
+
+# Reasons to use direct SSH over ECS Exec
+# * More reliable to connect
+# * Faster to connect, especially when a new task would have to be started
+# * Doesn't require AWS CLI to be installed
+
+$stdout.sync = true
+$stderr.sync = true
+
+AWS_PROFILE = 'chiirp'
+
+Aws.config.update({
+                    profile: AWS_PROFILE,
+                    region:  'us-east-1'
+                  })
+
+class Run
+  include Commander::Methods
+
+  class ExecuteCommandNotEnabledError < StandardError; end
+
+  def run
+    program :name, 'Run'
+    program :version, '0.1.0'
+    program :description, 'CLI for accessing production rails console'
+    default_command :run
+
+    # start an ecs task and attach to it
+    command :run do |c|
+      c.syntax = 'run run [OPTIONS] <command>'
+      c.description = 'Run a production container'
+      c.option '-c', '--cluster=STRING', String, 'Cluster to run task in. Default is production.'
+      # c.option '-t', '--task-definition=STRING', String, 'Task Definition to run. Default is rails-console.'
+      # c.option '--container=STRING', String, 'Container in Task Definition to attach to. Default is console.'
+      c.example 'Run rails console in a production container', 'run rails c'
+      c.action do |args, options|
+        options.default cluster: 'production', task_definition: 'rails-console', container: 'console'
+        args = %w[bundle exec rails console] unless args.any?
+        command = args.join(' ')
+
+        puts "Running command: \"#{command}\" in #{options.cluster} ..."
+
+        # start an ecs task
+        ecs = Aws::ECS::Client.new
+        # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/ECS/Client.html#run_task-instance_method
+        # task = ecs.run_task(run_task_fargate_options(options.cluster, 'rails-console-fargate')).tasks.first
+        task = ecs.run_task(run_task_options(options.cluster, options.task_definition)).tasks.first
+
+        print "Starting task: #{task.task_arn} "
+
+        # wait for task and agent to be in RUNNING state
+        last_status = nil
+        while (res = ecs.describe_tasks(cluster: options.cluster, tasks: [task.task_arn]))
+          task_status = res.tasks&.first&.last_status
+          agent_status = res.tasks&.first&.containers&.first&.managed_agents&.first&.last_status
+
+          # if the task doesn't have the execute command enabled, it will not connect
+          raise ExecuteCommandNotEnabledError, 'Task failed to enable execute command' if task_status != 'PROVISIONING' && !res.tasks&.first&.enable_execute_command
+
+          break if task_status == 'RUNNING' && agent_status == 'RUNNING'
+
+          print last_status == task_status ? '.' : "#{task_status}."
+          last_status = task_status
+
+          sleep 2
+        end
+
+        puts 'Done.'
+
+        # attach to task using aws cli
+        cmd = <<~CMD
+          aws --profile #{AWS_PROFILE} \
+            ecs execute-command \
+            --cluster #{options.cluster} \
+            --task #{task.task_arn} \
+            --container #{options.container} \
+            --interactive \
+            --command "#{command}"
+        CMD
+        puts 'Attaching ...'
+        pid = Process.spawn(cmd)
+
+        # handle ctrl-c and send it to the child process
+        Signal.trap('INT') do
+          Process.kill('INT', pid)
+        end
+
+        # wait for session to finish
+        Process.wait(pid)
+      rescue ExecuteCommandNotEnabledError
+        puts 'Task failed to enable execute command. Trying again...'
+        stop_task(options.cluster, task.task_arn)
+        retry
+      ensure
+        stop_task(options.cluster, task.task_arn) if task # stop task when done
+      end
+    end
+
+    run!
+  end
+
+  private
+
+  def stop_task(cluster, task_arn)
+    puts
+    puts 'Stopping task ...'
+    ecs = Aws::ECS::Client.new
+    ecs.stop_task(cluster:, task: task_arn)
+  end
+
+  def run_task_fargate_options(cluster, task_definition)
+    {
+      cluster:,
+      task_definition:,
+      enable_execute_command: true,
+      launch_type:            'FARGATE',
+      network_configuration:  {
+        awsvpc_configuration: {
+          subnets:          %w[subnet-014e4697e3156a32a subnet-0444457c4a17e0d67 subnet-03141070b1e7044c9],
+          security_groups:  %w[sg-075dffc67bdb8a19f],
+          assign_public_ip: 'ENABLED'
+        }
+      }
+    }
+  end
+
+  def run_task_options(cluster, task_definition)
+    {
+      cluster:,
+      task_definition:,
+      enable_execute_command:     true,
+      capacity_provider_strategy: [
+        {
+          capacity_provider: 'prod-ondemand',
+          weight:            1,
+          base:              1
+        }
+      ]
+    }
+  end
+end
+
+Run.new.run if $PROGRAM_NAME == __FILE__

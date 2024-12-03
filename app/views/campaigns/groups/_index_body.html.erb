@@ -1,0 +1,22 @@
+<%
+# app/views/campaigns/groups/_index_body.html.erb
+#
+# Example:
+#   render partial: 'campaigns/groups/index_body'
+#
+# Instance Variables:
+#   (req) @campaign_groups: (CampaignGroups)
+#
+# Local Variables:
+#   none
+#
+-%>
+<% if @campaign_groups.any? %>
+  <%= render partial: 'campaigns/groups/campaign_group', collection: @campaign_groups -%>
+<% else %>
+  <tr>
+    <td colspan="6">
+      Campaign Groups were not found.
+    </td>
+  </tr>
+<% end %>

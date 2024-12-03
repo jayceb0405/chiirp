@@ -1,0 +1,48 @@
+<%
+  # app/views/integrations/google/reviews/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+// ** MUST be loaded first
+<% if cards.include?('reviews_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/google/reviews/show', locals: { presenter: } -%>');
+<% end %>
+
+// Actions
+<% if cards.include?('actions_edit') %>
+  $('#reviews_page_section').html('<%= j render partial: 'integrations/google/reviews/actions/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Reviews Link
+<% if cards.include?('reviews_links_show') %>
+  $('#reviews_page_section').html('<%= j render partial: 'integrations/google/reviews/reviews_links/show', locals: { presenter: } -%>');
+<% end %>
+
+// Reviews
+<% if cards.include?('reviews_index') %>
+  $('#reviews_page_section').html('<%= j render partial: 'integrations/google/reviews/reviews/index', locals: { presenter:, account: local_assigns.dig(:account), location: local_assigns.dig(:location), page: local_assigns.dig(:page), per_page: local_assigns.dig(:per_page) } -%>');
+<% end %>
+<% if cards.include?('reviews_list_only') %>
+  $('#reviews_list_body').html('<%= j render partial: 'integrations/google/reviews/reviews/review_list', locals: { presenter:, account: local_assigns.dig(:account), location: local_assigns.dig(:location), page: local_assigns.dig(:page), per_page: local_assigns.dig(:per_page) } -%>');
+<% end %>
+<% if cards.include?('review_edit') %>
+  $('#td_review_contact_id_<%= @review.id -%>').html('<%= @review.contact&.fullname || 'Unmatched' -%>');
+  $('#review_edit_<%= @review.id -%>').html('<%= j render partial: 'integrations/google/reviews/reviews/edit', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('show_review_campaigns_excluded') %>
+  $('#review_campaigns_excluded_form').html('<%= j render partial: 'integrations/google/reviews/actions/review_campaigns_excluded_form', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

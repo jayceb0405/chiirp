@@ -1,0 +1,43 @@
+<%
+# app/views/clients/companies/rows/_action_buttons.html.erb
+#
+# Example:
+#   render partial: 'clients/companies/rows/action_buttons', locals: { client: Client }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) client: (Client)
+#
+-%>
+<td class="align-middle text-right" style="width:150px; min-width:150px;">
+  <div class="list-group-item-figure">
+    <% if current_user.access_controller?('clients', 'allowed', session) %>
+      <%= link_to '<i class="fa fa-pencil-alt"></i>'.html_safe, edit_clients_profile_path(client),
+                  class:  'btn btn-sm btn-icon btn-secondary stop-propagation mr-1',
+                  local:  true,
+                  method: :get %>
+    <% end %>
+
+    <% unless session.include?(:agency_user_token) %>
+      <%= link_to '<i class="fa fa-user-cog"></i>'.html_safe, '#',
+                  class: 'btn btn-sm btn-icon btn-secondary mr-1 log_in_as',
+                  id:    "log_in_as_#{client.id}" %>
+
+      <% if current_user.team_member? %>
+        <%= link_to '<i class="fa fa-sticky-note"></i>'.html_safe, client_notes_path(client),
+                    class:  'btn btn-sm btn-icon btn-secondary mr-1 client_notes',
+                    id:     "client_notes_#{client.id}",
+                    remote: true,
+                    method: :get %>
+      <% end %>
+    <% end %>
+
+    <% if current_user.super_admin? %>
+      <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#',
+                  class: 'btn btn-sm btn-icon btn-secondary stop-propagation button_delete_client',
+                  data:  { id: client.id, name: client.name } %>
+    <% end %>
+  </div>
+</td>

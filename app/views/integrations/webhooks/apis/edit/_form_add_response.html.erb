@@ -1,0 +1,21 @@
+<%
+# app/views/integrations/webhooks/apis/edit/_form_add_response.html.erb
+#
+# Example:
+#   render partial: 'integrations/webhooks/apis/edit/form_add_response', locals: { webhook: Webhook, key: String, counter: Integer }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) webhook:   (Webhook)
+#   (req) key:       (String)  external key
+#   (req) counter:   (Integer) next available hash counter
+#
+-%>
+<%= link_to '', integrations_webhook_api_path(webhook.id, commit: 'ar', key:, counter: counter.to_i + 1),
+            method: :put,
+            data:   {},
+            class:  'fa fa-plus text-dark pr-0 mr-0',
+            remote: true,
+            style:  'text-decoration: none;' %>

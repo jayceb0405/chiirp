@@ -1,0 +1,92 @@
+<%
+  # app/views/integrations/google/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/instructions/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Google integrations include Calendar, Business Messages & Reviews.</li>
+      <li>A Google connection is required.</li>
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your Google account.</li>
+      <li><%= I18n.t('tenant.name') -%> must have all requested permissions to support calendar, messages & reviews functions.</li>
+    </ul>
+
+    <h6>Calendar:</h6>
+    <ul>
+      <li>Google Calendar integration supports inclusion of Google Calendars in your <%= I18n.t('tenant.name') -%> Dashboard calendar.</li>
+      <li>Select your Google Calendars to include in your <%= I18n.t('tenant.name') -%> Dashboard calendar.</li>
+    </ul>
+
+    <h6>Accounts:</h6>
+    <ul>
+      <li>Select the Google accounts that you want to access for either Messages or Reviews.</li>
+      <li>Only the User selected as the Google Account Administrator may select accounts.</li>
+    </ul>
+
+    <h6>Locations:</h6>
+    <ul>
+      <li>Select the Google Business Locations for which you want to manage Messages and Reviews.</li>
+      <li>Only the User selected as the Google Account Administrator may select locations.</li>
+    </ul>
+
+    <h6>Messages:</h6>
+    <ul>
+      <li>After the locations for Messages are selected Google Business Messages will be received into Message Central for the Contact that sent the message.</li>
+      <li>Responses may also be sent from Message Central.</li>
+      <li>See "Contact Matching" below for Contact matching criteria used in <%= I18n.t('tenant.name') -%>.</li>
+      <li>A new Contact will be created in <%= I18n.t('tenant.name') -%> if no match is found.</li>
+    </ul>
+
+    <h6>Reviews:</h6>
+    <ul>
+      <li>Select your Google Reviews account to receive & reply to reviews.</il>
+      <li>When <%= I18n.t('tenant.name') -%> can match up a reviewer's name with an existing contact actions can be triggered.</li>
+      <li>See "Contact Matching" below for Contact matching criteria used in <%= I18n.t('tenant.name') -%>.</li>
+      <li>Actions that can be triggered:</li>
+      <ul>
+        <li>Start a campaign.</li>
+        <li>Add contact to a group.</li>
+        <li>Apply a tag to contact.</li>
+        <li>Add contact to a stage.</li>
+      </ul>
+      <li>Review replies may be submitted to Google directly from <%= I18n.t('tenant.name') -%>.</li>
+      <li>Existing replies may be deleted directly from <%= I18n.t('tenant.name') -%>.</li>
+      <li><%= I18n.t('tenant.name') -%> will gather new reviews from Google at every 20 minutes beginning on every hour.</li>
+    </ul>
+
+    <h6>Contact Matching (Messages & Reviews):</h6>
+    <ul>
+      <li>When Messages or Reviews are received <%= I18n.t('tenant.name') -%> searches for a best match to existing Contacts.</li>
+      <li><%= I18n.t('tenant.name') -%> Contact matching criteria:</li>
+      <ol>
+        <li>Last name & first name are matched in a case sensitive search.</li>
+        <li>Last name & first name are matched in a case insensitive search.</li>
+        <li>Last name & first name are matched by searching the name as a portion of the <%= I18n.t('tenant.name') -%> contact name.</li>
+        <li>Last name & first name are matched in a <i>sounds like</i> search.</li>
+      </ol>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

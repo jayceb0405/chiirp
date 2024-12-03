@@ -1,0 +1,116 @@
+<%
+# app/views/layouts/left_menu_header.html.erb
+-%>
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+  <head>
+    <%= render partial: 'layouts/common/meta_tags' %>
+    <%= render partial: 'layouts/common/open_graph' %>
+    <%= render partial: 'layouts/common/structured_data' %>
+
+    <title><%= I18n.t('tenant.name') -%> / Dashboard</title>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- favicons -->
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon-57.png", rel: 'apple-touch-icon', type: 'image/png' %>
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon.ico", rel: 'shortcut icon' %>
+    <meta name="theme-color" content="#3063A0">
+
+    <!-- stylesheets & javascript -->
+    <%= stylesheet_link_tag "application_#{cookies[:skin] || 'default'}", media: 'all' %>
+    <%= javascript_include_tag 'application' %>
+    <%= action_cable_meta_tag %>
+    <%= javascript_importmap_tags 'application-esm' %>
+
+    <!-- UserGuiding initialization -->
+    <script>
+      // (function(g,u,i,d,e,s){g[e]=g[e]||[];var f=u.getElementsByTagName(i)[0];var k=u.createElement(i);k.async=true;k.src='https://static.userguiding.com/media/user-guiding-'+s+'-embedded.js';f.parentNode.insertBefore(k,f);if(g[d])return;var ug=g[d]={q:[]};ug.c=function(n){return function(){ug.q.push([n,arguments])};};var m=['previewGuide','finishPreview','track','identify','hideChecklist','launchChecklist'];for(var j=0;j<m.length;j+=1){ug[m[j]]=ug.c(m[j]);}})(window,document,'script','userGuiding','userGuidingLayer','MDP94469ANZID');
+      // (function(g,u,i,d,e,s){g[e]=g[e]||[];var f=u.getElementsByTagName(i)[0];var k=u.createElement(i);k.async=true;k.src='https://static.userguiding.com/media/user-guiding-'+s+'-embedded.js';f.parentNode.insertBefore(k,f);if(g[d])return;var ug=g[d]={q:[]};ug.c=function(n){return function(){ug.q.push([n,arguments])};};var m=['previewGuide','finishPreview','track','identify','hideChecklist','launchChecklist'];for(var j=0;j<m.length;j+=1){ug[m[j]]=ug.c(m[j]);}})(window,document,'script','userGuiding','userGuidingLayer','MDP94469ANZID');
+      (
+        function (g,u,i,d,e,s) {
+          g[e] = g[e] || [];
+          var f = u.getElementsByTagName(i)[0];
+          var k = u.createElement(i);
+          k.async = true;
+          k.src = 'https://static.userguiding.com/media/user-guiding-'+s+'-embedded.js';
+          f.parentNode.insertBefore(k,f);
+          if (g[d]) return;
+          var ug = g[d] = {q:[]};
+          ug.c = function (n) {
+            return function () {ug.q.push([n,arguments])};
+          };
+          var m = ['previewGuide','finishPreview','track','identify','hideChecklist','launchChecklist'];
+          for (var j=0;j<m.length;j+=1) {ug[m[j]]=ug.c(m[j]);}
+        }
+      )(window,document,'script','userGuiding','userGuidingLayer','MDP94469ANZID');
+      window.userGuiding.identify('<%= current_user.id -%>', {
+        email: '<%= current_user.email -%>',
+        name: '<%= current_user.fullname -%>',
+        company: {
+          id: '<%= current_user.client_id -%>',
+          name: '<%= current_user.client.name -%>',
+        }
+      });
+    </script>
+
+    <!-- credit card processor -->
+    <% case Creditcard::Base.credit_card_processor %>
+    <% when 'stripe' %>
+      <%= javascript_include_tag 'https://js.stripe.com/v2/' %>
+    <% when 'authorizenet' %>
+      <%= javascript_include_tag "https://js#{Rails.env.production? ? '' : 'test'}.authorize.net/v1/Accept.js" %>
+    <% end %>
+
+    <!-- web push notifications -->
+    <script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" async=""></script>
+    <script>
+      window.OneSignal = window.OneSignal || [];
+      let externalUserId = "<%= current_user.id -%>";
+
+      OneSignal.push(function () {
+        OneSignal.init({
+          appId: "<%= Rails.application.credentials[:one_signal][:app_id] -%>",
+        });
+        OneSignal.setExternalUserId(externalUserId);
+      });
+    </script>
+
+    <!-- SiteChat iFrame -->
+    <% if ENV["#{I18n.t('tenant.id')}_sitechat_key"].present? %>
+      <script src="<%= send("api_#{ENV.fetch("#{I18n.t('tenant.id')}_sitechat_version", nil)}_clients_sitechat_url", ENV.fetch("#{I18n.t('tenant.id')}_sitechat_key", nil)) -%>"></script>
+    <% end %>
+  </head>
+  <body data-turbo-prefetch="false">
+    <div class="app">
+      <%= render partial: 'layouts/looper/common/header/show' %>
+      <%= render partial: 'layouts/looper/common/aside/show' if current_user %>
+
+      <main class="app-main">
+        <%= render partial: 'layouts/looper/common/body/notice_bar' %>
+        <div class="wrapper">
+          <%= yield %>
+        </div>
+      </main>
+    </div>
+
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'dash_modal', max_width: '900px', centered: true, scrollable: true, close: true } %>
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'alert_modal' } %>
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'video_modal', max_width: '90%', max_height: '90%', large: true, centered: true, scrollable: true, close: true } %>
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'full_size_modal', large: true, centered: true, scrollable: true, close: true, full_size: true } %>
+
+    <script>
+      $(function () {
+        <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+        <% if current_user&.suspended? %>
+          toastr.error('Your access was suspended.', 'We\'re Sorry!', {timeOut: 0, extendedTimeOut: 0})
+        <% elsif !current_user&.client&.active? %>
+          toastr.error('Your account is deactivated.', 'We\'re Sorry!', {timeOut: 0, extendedTimeOut: 0})
+        <% end %>
+      });
+    </script>
+
+  </body>
+</html>

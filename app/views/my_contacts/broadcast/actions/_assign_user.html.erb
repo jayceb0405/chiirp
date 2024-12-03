@@ -1,0 +1,21 @@
+<%
+   # app/views/my_contacts/broadcast/actions/_assign_user.html.erb
+   #
+   # Example:
+   #   render partial: 'my_contacts/broadcast/actions/assign_user', locals: { presenter: MyContacts::Presenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (MyContacts::Presenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+-%>
+<%= bootstrap_select_tag(
+      field:   'user_action[user_id]',
+      label:   { title: 'User' },
+      options: { array: presenter.client.users.where.not(id: nil).order(:lastname, :firstname).pluck(:id, :firstname, :lastname).map { |user| [Friendly.new.fullname(user[1], user[2]), user[0]] }, blank: 'Select a User' }
+    ) %>
+
+<%= render partial: 'my_contacts/broadcast/actions/show_calendar', locals: { presenter: } %>

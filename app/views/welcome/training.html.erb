@@ -1,0 +1,20 @@
+<%
+  # app/views/welcome/training.html.erb
+  # 
+  # Example:
+  #   render 'welcome/training', collection: @client.tags.order( :name ), locals: {  }
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<iframe src="<%= I18n.t('tenant.training_videos') -%>" style="height:722px;width:100%;border:none;"></iframe>
+
+<script>
+  $(function() {
+    $('#navbar_inner_container').html('<%= j render partial: 'layouts/dashboard/navbar_inner/navbar_inner', locals: { heading: '<i class="fa fa-caret-right"></i> Training Videos', description: "Learn how to use #{I18n.t('tenant.name')} from our experts!", show_toggler: false } -%>');
+  });
+</script>

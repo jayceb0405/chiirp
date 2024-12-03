@@ -1,0 +1,256 @@
+<%
+  # app/views/integrations/servicemonster/webhooks/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/webhooks/index'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter:               (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header d-flex justify-content-between">
+    <span class="my-auto">Events</span>
+    <span>
+      <%= link_to '<i class="fa fa-plus mr-2"></i>New Event'.html_safe, new_integrations_servicemonster_webhook_path, {
+            class:  'btn btn-light',
+            remote: true,
+            method: :get
+          } %>
+    </span>
+  </h6>
+  <div class="card-body">
+
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 200px">Event</th>
+            <%= tag.th(class: 'text-center') { 'Connection' } %>
+            <%= content_tag(:th, class: 'text-left') { 'Line Item' } %>
+            <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed? %>
+            <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed? %>
+            <th class="text-left">Tag</th>
+            <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed? %>
+            <%= content_tag(:th, class: 'text-left') { 'Stop Campaigns' } if presenter.campaigns_allowed? %>
+            <th style="min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="servicemonster_events_list">
+
+          <% if @webhook_event.present? && @webhook_event&.dig(:event_id).to_s.empty? %>
+            <%= render partial: 'integrations/servicemonster/webhooks/event_outer', locals: { webhook_event: @webhook_event, presenter: } %>
+          <% end %>
+
+          <%= render partial: 'integrations/servicemonster/webhooks/webhooks', collection: @client_api_integration.webhooks.sort, as: :webhooks, locals: { presenter: } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_webhooks').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.webhook_edit_row');
+    $(document).on('show.bs.collapse', '.webhook_edit_row', function (e) {
+      var id = $(this).data('id');
+
+      if (id) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '/integrations/servicemonster/webhooks/' + id + '/edit'
+        });
+      }
+    });
+
+    $(document).off('hide.bs.collapse', '.webhook_edit_row');
+    $(document).on('hide.bs.collapse', '.webhook_edit_row', function(e) {
+      var id = $(this).data('id');
+
+      $('#webhook_edit_td_' + id).html('<%= bootstrap_spinning_logo(message: 'Loading Event') -%>');
+    });
+
+    $(document).off('click', '.button_delete_webhook');
+    $(document).on('click', '.button_delete_webhook', function(e) {
+      e.preventDefault();
+
+      var id    = $(this).data('id');
+      var event = $(this).data('event');
+      var name  = $(this).data('name');
+
+      if (id) {
+        ChiirpAlert({
+          'body':'Deleting ' + name + ' can NOT be un-done. Is it your intention to delete this Webhook?',
+          'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_delete_webhook' }].to_json) -%>,
+          'type':'danger',
+          'persistent':true
+        });
+
+        $(document).off('click', '#button_dump_it_delete_webhook');
+        $(document).on('click', '#button_dump_it_delete_webhook', function(e) {
+          $.ajax({
+            type: 'DELETE',
+            dataType: 'script',
+            url: '/integrations/servicemonster/webhooks/' + id,
+            data: { event: event }
+          });
+        });
+      } else {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= integrations_servicemonster_webhooks_path -%>'
+        });
+      }
+    });
+  });
+
+  function appointmentStatusDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#appointment_status_' + webhook_event_id).show();
+      $('#job_types_' + webhook_event_id).show();
+    } else {
+      $('#appointment_status_' + webhook_event_id).hide();
+      $('#job_types_' + webhook_event_id).hide();
+    }
+  }
+  function assignUserDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#assign_user_to_technician_' + webhook_event_id).show();
+      $('#assign_user_to_salesrep_' + webhook_event_id).show();
+    } else {
+      $('#assign_user_to_technician_' + webhook_event_id).hide();
+      $('#assign_user_to_salesrep_' + webhook_event_id).hide();
+    }
+  }
+  function assignUserTechnicianToggle(webhook_event_id) {
+    if ($('#webhook_actions_assign_user_to_technician_' + webhook_event_id).is(':checked')) {
+      $('#webhook_actions_assign_user_to_salesrep_' + webhook_event_id).prop('checked', false);
+    }
+  }
+  function assignUserSalesRepToggle(webhook_event_id) {
+    if ($('#webhook_actions_assign_user_to_salesrep_' + webhook_event_id).is(':checked')) {
+      $('#webhook_actions_assign_user_to_technician_' + webhook_event_id).prop('checked', false);
+    }
+  }
+  function eventNewToggle(webhook_event_id) {
+    if (!$('#webhook_event_new_' + webhook_event_id).is(':checked')) {
+      $('#webhook_event_updated_' + webhook_event_id).prop('checked', true);
+    }
+    jobEventUpdatedDisplay(webhook_event_id);
+    startDateUpdatedDisplay(webhook_event_id);
+    techUpdatedDisplay(webhook_event_id);
+  }
+  function eventUpdatedToggle(webhook_event_id) {
+    if (!$('#webhook_event_updated_' + webhook_event_id).is(':checked')) {
+      $('#webhook_event_new_' + webhook_event_id).prop('checked', true);
+    }
+    jobEventUpdatedDisplay(webhook_event_id);
+    startDateUpdatedDisplay(webhook_event_id);
+    techUpdatedDisplay(webhook_event_id);
+  }
+  function jobEventNewDisplay(webhook_event_id) {
+    if (['OnUpdated', 'OnInvoiced'].includes($('#event_' + webhook_event_id).val().split('_')[1])) {
+      $('#job_event_new_' + webhook_event_id).show();
+    } else {
+      $('#job_event_new_' + webhook_event_id).hide();
+    }
+  }
+  function jobEventUpdatedDisplay(webhook_event_id) {
+    if (['OnUpdated', 'OnInvoiced'].includes($('#event_' + webhook_event_id).val().split('_')[1])) {
+      $('#job_event_updated_' + webhook_event_id).show();
+    } else {
+      $('#job_event_updated_' + webhook_event_id).hide();
+    }
+  }
+  function lineItemsDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] && $('#event_' + webhook_event_id).val().split('_')[0] != 'account') {
+      $('#line_items_' + webhook_event_id).show();
+    } else {
+      $('#line_items_' + webhook_event_id).hide();
+    }
+  }
+  function orderTypeDisplay(webhook_event_id) {
+    if (($('#event_' + webhook_event_id).val().split('_')[0] == 'order' && $('#event_' + webhook_event_id).val().split('_')[1] != 'OnInvoiced') || $('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#order_type_' + webhook_event_id).show();
+    } else {
+      $('#order_type_' + webhook_event_id).hide();
+    }
+  }
+  function orderTypeVoidedDisplay(webhook_event_id) {
+    if (($('#event_' + webhook_event_id).val().split('_')[0] == 'order' && ($('#event_' + webhook_event_id).val().split('_')[1] == 'OnUpdated' || $('#event_' + webhook_event_id).val().split('_')[1] == 'OnDeleted'))) {
+      $('#order_type_voided_' + webhook_event_id).show();
+    } else {
+      $('#order_type_voided_' + webhook_event_id).hide();
+    }
+  }
+  function orderGroupDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'order') {
+      $('#order_groups_' + webhook_event_id).show();
+      $('#order_subgroups_' + webhook_event_id).show();
+    } else {
+      $('#order_groups_' + webhook_event_id).hide();
+      $('#order_subgroups_' + webhook_event_id).hide();
+    }
+  }
+  function rangeSliderDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'order' || $('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#range_max_row_' + webhook_event_id).show();
+      $('#range_slider_row_' + webhook_event_id).show();
+    } else {
+      $('#range_max_row_' + webhook_event_id).hide();
+      $('#range_slider_row_' + webhook_event_id).hide();
+    }
+  }
+  function residentialToggle(webhook_event_id) {
+    if (!$('#webhook_residential_' + webhook_event_id).is(':checked')) {
+      $('#webhook_commercial_' + webhook_event_id).prop('checked', true);
+    }
+  }
+  function startDateUpdatedDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment' && $('#event_' + webhook_event_id).val().split('_')[1] != 'OnCreated') {
+      $('#start_date_updated_' + webhook_event_id).show();
+    } else {
+      $('#start_date_updated_' + webhook_event_id).hide();
+    }
+  }
+  function statusUpdatedDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment' && $('#event_' + webhook_event_id).val().split('_')[1] != 'OnCreated') {
+      $('#status_updated_' + webhook_event_id).show();
+    } else {
+      $('#status_updated_' + webhook_event_id).hide();
+    }
+  }
+  function techniciansDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment') {
+      $('#ext_tech_ids_' + webhook_event_id).show();
+    } else {
+      $('#ext_tech_ids_' + webhook_event_id).hide();
+    }
+  }
+  function techUpdatedDisplay(webhook_event_id) {
+    if ($('#event_' + webhook_event_id).val().split('_')[0] == 'appointment' && $('#event_' + webhook_event_id).val().split('_')[1] != 'OnCreated') {
+      $('#tech_updated_' + webhook_event_id).show();
+    } else {
+      $('#tech_updated_' + webhook_event_id).hide();
+    }
+  }
+  function commercialToggle(webhook_event_id) {
+    if (!$('#webhook_commercial_' + webhook_event_id).is(':checked')) {
+      $('#webhook_residential_' + webhook_event_id).prop('checked', true);
+    }
+  }
+</script>

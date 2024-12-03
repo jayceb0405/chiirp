@@ -1,0 +1,52 @@
+<%
+  # app/views/integrations/callrail/v3/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/overview', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'callrail' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_callrail_v3_connections_path, { class: 'metric metric-bordered align-items-center', id: 'link_connections', remote: true }) do %>
+            <h2 class="metric-label">CallRail Connection</h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if presenter.valid_credentials? %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

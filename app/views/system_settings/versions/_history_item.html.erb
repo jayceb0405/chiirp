@@ -1,0 +1,38 @@
+<%
+  # app/views/system_settings/versions/_history_item.html.erb
+  # 
+  # Example:
+  #   render partial: "system_settings/versions/history_item", collection: @versions, as: :version
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<h2 class="section-title"><%= version.start_date.in_time_zone(I18n.t("tenant.#{Rails.env}.time_zone")).strftime('%A, %B %e, %Y') -%></h2>
+<ul class="timeline">
+  <li class="timeline-item">
+    <div class="timeline-figure">
+      <span class="tile tile-circle tile-sm"><i class="fa fa-code-branch fa-lg"></i></span>
+    </div>
+
+    <div class="timeline-body">
+      <div class="media">
+        <div class="media-body">
+          <h6 class="timeline-heading">
+            <%= version.header -%>
+          </h6>
+          <p class="mb-0">
+            <%= version.description.html_safe -%>
+          </p>
+          <p class="timeline-date d-sm-none"><%= time_ago_in_words(version.start_date) -%> ago</p>
+        </div>
+        <div class="d-none d-sm-block">
+          <span class="timeline-date"><%= time_ago_in_words(version.start_date) -%> ago</span>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>

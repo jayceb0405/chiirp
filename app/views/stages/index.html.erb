@@ -1,0 +1,61 @@
+<%
+  # app/views/stages/index.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/index.html.erb', locals: { client: Client }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   client: (Client)
+  #
+  sp = StagesPresenter.new(client:)
+  sp.user = current_user
+-%>
+<div class="page">
+  <div class="page-inner pt-4 pb-0">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-project-diagram mr-2"></i>My <%= StageParent.title.pluralize -%></h1>
+
+        <div class="btn-toolbar">
+          <div class="dropdown">
+
+            <% if current_user.access_controller?('clients', 'pipelines', session) %>
+              <%= link_to client_stage_parents_path(sp.user.client_id), { class: 'btn btn-light' } do %>
+                <i class="fa fa-pencil-alt"></i>
+                <span class="ml-1">Add / Edit <%= StageParent.title.pluralize -%></span>
+              <% end %>
+            <% end %>
+
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-project-diagram"></i>
+              <span class="ml-1">Select a <%= StageParent.title -%></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_stage_parents_dropdown">
+              <%= render partial: 'stages/select_stage_parents_dropdown', locals: { stages_presenter: sp } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="stage_parent_body">
+
+      <% if sp.user.default_stage_parent_id.positive? && sp.default_stage_parent %>
+        <%= render partial: 'stages/show', locals: { stage_parent: sp.default_stage_parent } %>
+      <% else %>
+        <%= render partial: 'stages/index', locals: { stages_presenter: sp } %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_stage_parents').addClass('has-active');
+  });
+</script>

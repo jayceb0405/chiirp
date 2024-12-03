@@ -1,0 +1,36 @@
+<%
+  # app/views/triggers/forms/_120.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/120", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions immediately based on entered date
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Lead up to an Event...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Are static (the date is defined below).</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will fire thier first Trigger as defined in Actions leading up to the event date.</li>
+      </ul>
+    </small>
+  </div>
+</div>
+
+<%= bootstrap_calendar_field(
+      field:        'data[target_time]',
+      value:        presenter.trigger_target_time,
+      label:        { title: 'Event Date' },
+      html_options: { id: 'event_date', disabled: presenter.campaign_disabled? },
+      flatpickr:    { include_time: true, mode: 'single', min_date: Time.current.strftime('%m/%d/%Y %H:%M %p') }
+    ) %>

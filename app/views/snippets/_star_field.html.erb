@@ -1,0 +1,48 @@
+<%
+  # app/views/snippets/_star_field.html.erb
+  # <%= render partial: 'snippets/star_field', locals: {
+  #   field: 'string',
+  #   value: 'string',
+  #   row: { class: 'string', id: 'string', display: boolean, columns: [l, r] },
+  #   col: { class: 'string', id: 'string', display: boolean },
+  #   form_group: { class: 'string', id: 'string', display: boolean },
+  #   label: { class: 'string', id: 'string', title: 'string' },
+  #   html_options: { id: 'string', maxstars: integer },
+  #   messages: { note: 'string' }
+  # } % >
+  html_options = {}
+  html_options[:id]          = (local_assigns.dig(:html_options, :id) || "field_#{rand(1000)}").to_s
+  html_options[:maxstars]    = (local_assigns[:html_options][:maxstars] || 5).to_i
+  columns                    = [local_assigns.dig(:row, :columns) || [3, 9]].flatten
+  columns                    = columns.length == 2 ? columns : columns.length == 1 ? [columns[0], (12 - columns[0])] : [3, 9]
+  col_class                  = ["col-md-#{columns[1]}", local_assigns.dig(:col, :class).to_s, local_assigns.dig(:col, :class).to_s.split(' ').grep(/^m-/).any? || local_assigns.dig(:col, :class).to_s.split(' ').grep(/^mb-/).any? ? '' : 'mb-3'].reject(&:empty?)
+  label_class                = ["col-md-#{columns[0]}", local_assigns.dig(:label, :class).to_s, local_assigns.dig(:label, :class).to_s.split(' ').grep(/^m-/).any? || local_assigns.dig(:label, :class).to_s.split(' ').grep(/^mt-/).any? ? '' : 'mt-2'].reject(&:empty?)
+%>
+<div class="form-row <%= local_assigns.dig(:row, :class).to_s -%>" id="<%= local_assigns.dig(:row, :id).to_s -%>" style="<%= local_assigns.dig(:row, :display).nil? || local_assigns[:row][:display].to_bool ? '' : 'display:none;' -%>">
+  <%= label_tag html_options[:id].to_s, local_assigns.dig(:label, :title).to_s, { class: label_class.join(' '), id: local_assigns.dig(:label, :id).to_s } %>
+  <div class="<%= col_class.join(' ') -%>" id="<%= local_assigns.dig(:col, :id).to_s -%>" style="<%= local_assigns.dig(:col, :display).nil? || local_assigns.dig(:col, :display).to_bool ? '' : 'display:none;' -%>">
+    <%= hidden_field_tag local_assigns.dig(:field).to_sym, local_assigns.dig(:value).to_i, id: html_options[:id] %>
+    <div class="form-group <%= local_assigns.dig(:form_group, :class).to_s -%>" id="<%= (local_assigns.dig(:form_group, :id) || "div_#{html_options[:id]}").to_s -%>" style="<%= local_assigns.dig(:form_group, :display).nil? || local_assigns.dig(:form_group, :display).to_bool ? '' : 'display:none;' -%>">
+    </div>
+    <small class="text-muted"><%= local_assigns.dig(:messages, :note).to_s -%></small>
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $("#<%= (local_assigns.dig(:form_group, :id) || "div_#{html_options[:id]}").to_s -%>").starRating({
+      initialRating: <%= local_assigns.dig(:value).to_i -%>,
+      starSize: 25,
+      totalStars: <%= html_options[:maxstars] -%>,
+      useFullStars: true,
+      useGradient: false,
+      disableAfterRate: false,
+      emptyColor: 'lightgray',
+      hoverColor: 'gold',
+      activeColor: 'gold',
+      callback: function(currentRating, $el){
+        $('#<%= html_options[:id] -%>').val(currentRating);
+      }
+    });
+  });
+</script>

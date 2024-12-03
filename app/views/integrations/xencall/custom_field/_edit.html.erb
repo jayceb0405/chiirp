@@ -1,0 +1,97 @@
+<%
+  # app/views/integrations/xencall/custom_field/_edit.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/xencall/custom_field/edit"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  servicetitan_client_api_integration = current_user.client.client_api_integrations.find_by( target: "servicetitan" )
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Custom Fields</h6>
+  <div class="card-body">
+
+    <%= form_tag integrations_xencall_custom_field_update_path, { builder: LooperFormBuilder, remote: true, method: :put, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+      <%= bootstrap_text_field(
+        field: 'custom_field[gen_field_id]',
+        value: @client_api_integration.gen_field_id,
+            label: { title: 'Xencall Custom Field ID' },
+        html_options: { placeholder: 'Custom Field Name' },
+        messages: { note: 'This is a custom field created in Xencall.' }
+      ) %>
+      <%= bootstrap_text_field(
+        field: 'custom_field[gen_field_string]',
+        value: @client_api_integration.gen_field_string,
+            label: { title: 'Text Passed to Xencall' },
+        html_options: { placeholder: 'Custom Field Text' },
+        messages: { note: 'This is text passed in the custom field to Xencall.' }
+      ) %>
+
+      <% if servicetitan_client_api_integration && servicetitan_client_api_integration.api_key.present? %>
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>ServiceTitan Integration</h6></legend>
+          <%= bootstrap_text_field(
+            field: 'custom_field[bu_field_name]',
+            value: @client_api_integration.bu_field_name,
+                    label: { title: 'Xencall Custom Field Name for ServiceTitan Business Units' },
+            html_options: { placeholder: 'Custom Field Name' },
+            messages: { note: 'This is a custom field created in Xencall.' }
+          ) %>
+          <%= bootstrap_text_field(
+            field: 'custom_field[job_field_name]',
+            value: @client_api_integration.job_field_name,
+                    label: { title: 'Xencall Custom Field Name for ServiceTitan Job Types' },
+            html_options: { placeholder: 'Custom Field Name' },
+            messages: { note: 'This is a custom field created in Xencall.' }
+          ) %>
+          <%= bootstrap_text_field(
+            field: 'custom_field[tech_field_name]',
+            value: @client_api_integration.tech_field_name,
+                    label: { title: 'Xencall Custom Field Name for ServiceTitan Technician' },
+            html_options: { placeholder: 'Custom Field Name' },
+            messages: { note: 'This is a custom field created in Xencall.' }
+          ) %>
+          <%= bootstrap_text_field(
+            field: 'custom_field[campaign_field_name]',
+            value: @client_api_integration.campaign_field_name,
+                    label: { title: 'Xencall Custom Field Name for ServiceTitan Campaign' },
+            html_options: { placeholder: 'Custom Field Name' },
+            messages: { note: 'This is a custom field created in Xencall.' }
+          ) %>
+          <%= bootstrap_text_field(
+            field: 'custom_field[tag_field_name]',
+            value: @client_api_integration.tag_field_name,
+                    label: { title: 'Xencall Custom Field Name for ServiceTitan Tag' },
+            html_options: { placeholder: 'Custom Field Name' },
+            messages: { note: 'This is a custom field created in Xencall.' }
+          ) %>
+          <%= bootstrap_text_field(
+            field: 'custom_field[desc_field_name]',
+            value: @client_api_integration.desc_field_name,
+                    label: { title: 'Xencall Custom Field Name for ServiceTitan Job Description' },
+            html_options: { placeholder: 'Custom Field Name' },
+            messages: { note: 'This is a custom field created in Xencall.' }
+          ) %>
+        </fieldset>
+      <% end %>
+
+      <%= bootstrap_submit_buttons(
+        buttons: [{ title: 'Save Custom Fields', disable_with: 'Saving' }]
+      ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_custom_fields').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,80 @@
+<%
+  # /Users/Kevin/Rails Projects/funyl/app/views/video/start.html.erb
+  #
+  # Example:
+  # 	render partial: "xxx/start.html.erb", collection: @client.tags.order( :name ), locals: {  }
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  room_name = local_assigns.include?(:room_name) ? local_assigns[:room_name].to_s : ''
+  token     = local_assigns.include?(:token) ? local_assigns[:token].to_s : ''
+-%>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%= render partial: 'layouts/common/meta_tags' %>
+    <%= render partial: 'layouts/common/open_graph' %>
+
+    <title><%= I18n.t('tenant.name') -%> / Video</title>
+
+    <%= render partial: 'layouts/common/tag_manager_head' %>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- favicon -->
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon.ico" %>
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon-57.png", rel: 'apple-touch-icon', type: 'image/png' %>
+
+    <!-- stylesheet & javascript -->
+    <%= stylesheet_link_tag 'application_default', media: 'all' %>
+    <%= javascript_include_tag 'application' %>
+    <%= action_cable_meta_tag %>
+  </head>
+  <body>
+    <div class="page">
+      <div class="page-inner" id="video-body-contact">
+        <div class="row">
+          <div class="col-9" id="video-column-contact">
+            <div class="embed-responsive embed-responsive-16by9" id="primary-video-container"></div>
+          </div>
+          <div class="col-3" id="participant-column-contact">
+            <div class="text-center" id="participant-column-contact-header">
+              <% if @user.client.logo_image.attached? %>
+                <%= image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { class: 'img-fluid', style: 'height:200px;' }) %>
+              <% end %>
+            </div>
+
+            <div class="m-2" id="participant-column-contact-body">
+              <div class="mb-1 text-center">Connecting with <%= @user.fullname -%></div>
+              <div class="contact embed-responsive embed-responsive-16by9 mb-2 text-center" id="participant-container"></div>
+              <div class="contact embed-responsive embed-responsive-16by9 text-center" id="local-participant-container"></div>
+            </div>
+
+            <div class="m-2 text-center" id="participant-column-contact-buttons">
+              <%= button_tag 'Join Conversation', { type: 'button', class: 'btn btn-info pull-left mb-3', id: 'button_join' } %>
+              <%= button_tag 'Mute', { type: 'button', class: 'btn btn-info mb-3 pl-2 pr-2', id: 'button_mute' } %>
+              <%= button_tag 'Pause', { type: 'button', class: 'btn btn-info mb-3 pl-2 pr-2', id: 'button_pause' } %>
+              <%= button_tag 'Leave', { type: 'button', class: 'btn btn-info mb-3 pl-2 pr-2', id: 'button_leave' } %>
+            </div>
+
+            <div class="text-muted text-center" id="participant-column-contact-footer">
+              Video Conferencing Powered by <%= image_tag("tenant/#{I18n.t('tenant.id')}/logo-banner.svg", { class: 'img-fluid', style: 'height:20px;' }) -%>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <%= render partial: 'video/js/video_call', locals: { full_name: @user.fullname, room_name: room_name, token: token } %>
+
+    <script>
+      $(function () {
+      });
+    </script>
+  </body>
+</html>

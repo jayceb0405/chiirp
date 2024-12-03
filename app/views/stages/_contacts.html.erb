@@ -1,0 +1,76 @@
+<%
+  # app/views/stages/_contacts.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/contacts', locals: { client: Client, stage: Stage }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter       = StagesPresenter.new(client:)
+  presenter.stage = stage
+  presenter.user  = current_user
+  search_string   = local_assigns.dig(:search_string).to_s
+-%>
+<%= render partial: 'stages/contact', collection: presenter.contacts(search_string, session), locals: { presenter: } %>
+
+<script>
+  $(function() {
+    var sortable_<%= stage.id -%> = Sortable.create(stage_<%= stage.id -%>, {
+      group: 'stages',
+      handle: '.dd-handle', // handle's class
+      animation: 150,
+      dataIdAttr: 'id',
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      forceFallback: true,
+      supportPointer: Sortable.supportPointer !== false && 'PointerEvent' in window,
+      onAdd: function (event) {
+        var contactId      = $('#' + event.item.id).data('id');
+        var oldStageId     = $('#' + event.from.id).data('id');
+        var newStageId     = $('#' + event.to.id).data('id');
+        var newStageName   = $('#' + event.to.id).data('name');
+        var contactName    = $('#' + event.item.id).data('name');
+
+        $.ajax({
+          type: 'PATCH',
+          dataType: 'script',
+          url: '<%= stage_path(stage.id) -%>',
+          data: { contact_id: contactId, new_stage_id: newStageId, old_stage_id: oldStageId }
+        });
+
+        $.each(<%= presenter.client.client_custom_fields.map(&:id) -%>, function(index, value) {
+          if ($.inArray(value, <%= stage.show_custom_fields -%>) >= 0) {
+            $('#client_custom_field_' + value + '_' + contactId).show();
+          } else {
+            $('#client_custom_field_' + value + '_' + contactId).hide();
+          }
+        });
+
+        if ('<%= stage.campaign_id.positive? -%>' === 'true') {
+          ChiirpAlert({
+            'title':      'Start Campaign',
+            'body':       'Stage "' + newStageName + '" wants to start campaign "<%= stage.campaign&.name -%>" for ' + contactName + '.',
+            'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Start the Campaign!', id: "button_start_campaign_#{stage.id}" }].to_json) -%>,
+            'type':       'info',
+            'persistent': true
+          });
+
+          $('#button_start_campaign_<%= stage.id -%>').off('click');
+          $('#button_start_campaign_<%= stage.id -%>').on('click', function (e) {
+            $.ajax({
+              type: 'PATCH',
+              dataType: 'script',
+              url: '<%= stage_path(stage.id) -%>',
+              data: { contact_id: contactId, new_stage_id: newStageId, start_campaign: true }
+            });
+          });
+        }
+      }
+    });
+  });
+</script>

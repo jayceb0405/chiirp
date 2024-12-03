@@ -1,0 +1,56 @@
+<%
+  # app/views/integrations/google/locations/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/locations/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Account Locations</h6>
+  <div class="card-body">
+
+    <% if Integration::Google.valid_token?(presenter.user_api_integration) %>
+
+      <%= form_with model: presenter.client_api_integration, url: integrations_google_locations_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+        <div class="row">
+          <div class="col-2 font-weight-bold">
+            Accounts
+          </div>
+          <div class="col-5 font-weight-bold">
+
+            <% if current_user.access_controller?('integrations', 'google_messages', session) %>
+                Locations (Messages) BETA
+            <% end %>
+
+          </div>
+          <div class="col-5 font-weight-bold">
+
+            <% if Integration::Google.user_authorized_for_accounts_locations_config?(current_user, @client_api_integration) %>
+              Locations (Reviews)
+            <% end %>
+
+          </div>
+        </div>
+
+        <%= render partial: 'integrations/google/locations/account', collection: presenter.google_accounts, as: :account, locals: { presenter: } %>
+        <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving', disabled: presenter.google_accounts.blank? }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_locations').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

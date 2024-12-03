@@ -1,0 +1,126 @@
+<%
+  # app/views/integrations/fieldroutes/v1/import_contacts/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/fieldroutes/v1/import_contacts/show", locals: { presenter: Integrations::Fieldroutes::V1::ImportContacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Fieldroutes::V1::ImportContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Fieldroutes::V1::ImportContacts::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Import Contacts from FieldRoutes</span>
+      <span class="my-auto text-success small" id="contact_imports_remaining_count"><%= presenter.contact_imports_remaining_string(current_user.id) -%></span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with url: integrations_fieldroutes_v1_import_contacts_path, builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+        <%#= bootstrap_select_tag(
+              field:        'filter[office_ids]',
+              label:        { title: 'Offices' },
+              options:      { for_select: presenter.offices_for_select },
+              html_options: { multiple: true },
+              messages:     { note: 'Import customers from selected Offices.' }
+            ) %>
+        <%= bootstrap_switch_field(
+              field:  'filter[active_only]',
+              value:  false,
+              values: [true, false],
+              label:  { title: 'Active Only' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:        'filter[created_period]',
+              value:        '',
+              label:        { title: 'Customers Created Between' },
+              html_options: { id: 'import_type_created_period', placeholder: 'Click to select a period' },
+              flatpickr:    { include_time: false, mode: 'range', max_date: 'today' }
+            ) %>
+        <%= bootstrap_calendar_field(
+              field:        'filter[updated_period]',
+              value:        '',
+              label:        { title: 'Customers Updated Between' },
+              html_options: { id: 'import_type_updated_period', placeholder: 'Click to select a period' },
+              flatpickr:    { include_time: false, mode: 'range', max_date: 'today' }
+            ) %>
+        <%= f.check_box nil, {
+              label:      { title: 'Customer Balance' },
+              checkboxes: [
+                { field: 'actions[eq_0][import]', label: 'Balance = $0.00', checked: true, values: [true, false] },
+                { field: 'actions[below_0][import]', label: 'Balance < $0.00', checked: true, values: [true, false] },
+                { field: 'actions[above_0][import]', label: 'Balance > $0.00', checked: true, values: [true, false] }
+              ]
+            } %>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions on Contacts w/ Balance = $0.00</h6></legend>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: 0, campaign_id_field: 'actions[eq_0][campaign_id]',
+                group: 0, group_id_field: 'actions[eq_0][group_id]',
+                tag: 0, tag_id_field: 'actions[eq_0][tag_id]',
+                stage_id: 0, stage_id_field: 'actions[eq_0][stage_id]',
+                stop_campaign_ids: [], stop_campaign_ids_field: 'actions[eq_0][stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions on Contacts w/ Balance &lt; $0.00</h6></legend>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: 0, campaign_id_field: 'actions[below_0][campaign_id]',
+                group: 0, group_id_field: 'actions[below_0][group_id]',
+                tag: 0, tag_id_field: 'actions[below_0][tag_id]',
+                stage_id: 0, stage_id_field: 'actions[below_0][stage_id]',
+                stop_campaign_ids: [], stop_campaign_ids_field: 'actions[below_0][stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <fieldset class="border rounded p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Actions on Contacts w/ Balance > $0.00</h6></legend>
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: 0, campaign_id_field: 'actions[above_0][campaign_id]',
+                group: 0, group_id_field: 'actions[above_0][group_id]',
+                tag: 0, tag_id_field: 'actions[above_0][tag_id]',
+                stage_id: 0, stage_id_field: 'actions[above_0][stage_id]',
+                stop_campaign_ids: [], stop_campaign_ids_field: 'actions[above_0][stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <%= f.submit_buttons(
+              buttons: [
+                { title: 'Import & Process Actions', disable_with: 'Queuing Imports & Action Processes...' }
+              ]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_import_contacts').addClass('active');
+    $('#breadcrumb').show();
+
+    $('.action_fields').on('changed.campaigns.action_fields', function(e, fieldName, value, name) {
+      // import[campaign_id_0] => campaign_0_name
+      console.log(e);
+      console.log(fieldName);
+      console.log(value);
+      console.log(name);
+      var elId = fieldName.replace('actions[', '').replace('_ids', '').replace('_id', '').replace('[]', '').replace(/]/g, '').replace('[', '_') + '_name';
+      console.log(fieldName, elId)
+
+      $('#' + elId).html(name);
+    });
+  });
+</script>

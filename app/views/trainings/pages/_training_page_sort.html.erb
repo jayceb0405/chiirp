@@ -1,0 +1,28 @@
+<%
+	# app/views/trainings/pages/_training_page_sort.html.erb
+	# 
+	# Example:
+	# 	render partial: "trainings/pages/training_page_sort", collection: @training_pages, locals: { trainings_presenter: TrainingsPresenter }
+	# 
+	# Required Instance Variables:
+	# 	training_page: (TrainingPage)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+	return if training_page.new_record?
+-%>
+<% unless training_page.new_record? %>
+	<% if training_page.parent %>
+		<li class="dd-item bg-transparent" id="<%= training_page.id -%>">
+	<% else %>
+		<li class="dd-item bg-light px-4" id="<%= training_page.id -%>">
+	<% end %>
+	
+		<div class="dd-handle">
+			<span class="drag-indicator"></span>
+			<!-- <i class="fa fa-grip-vertical dash-button__handle list-group-handle mr-2"></i> -->
+			<div><%= truncate(training_page.menu_label, length: 35) %></div>
+		</div>
+	</li>
+<% end %>

@@ -1,0 +1,50 @@
+<%
+  # app/views/integrations/sunbasedata/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: "integrations/sunbasedata/js/show"
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+-%>
+<% if cards.include?( 1 ) %>
+  $('#general_container').html('<%= j render partial: "integrations/sunbasedata/edit" -%>');
+<% end %>
+<% if cards.include?( 2 ) %>
+  <% if @client_api_integration.api_key.length.positive? %>
+    $('#api_key_saved').removeClass('sidebar-inner__alert');
+    $('#api_key_saved').addClass('sidebar-inner__ok');
+  <% else %>
+    $('#api_key_saved').removeClass('sidebar-inner__ok');
+    $('#api_key_saved').addClass('sidebar-inner__alert');
+  <% end %>
+  <% if @client_api_integration.sales_rep_id.length.positive? %>
+    $('#sales_rep_id_saved').removeClass('sidebar-inner__alert');
+    $('#sales_rep_id_saved').addClass('sidebar-inner__ok');
+  <% else %>
+    $('#sales_rep_id_saved').removeClass('sidebar-inner__ok');
+    $('#sales_rep_id_saved').addClass('sidebar-inner__alert');
+  <% end %>
+  <% if @client_api_integration.appt_setter_id.length.positive? %>
+    $('#appt_setter_id_saved').removeClass('sidebar-inner__alert');
+    $('#appt_setter_id_saved').addClass('sidebar-inner__ok');
+  <% else %>
+    $('#appt_setter_id_saved').removeClass('sidebar-inner__ok');
+    $('#appt_setter_id_saved').addClass('sidebar-inner__alert');
+  <% end %>
+<% end %>
+
+<% if cards.include?( 10 ) %>
+  $("#dash_modal").modal("show");
+  $('#dash_modal_body').html('<%= j render partial: "integrations/sunbasedata/create_appt" -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?( 11 ) %>
+  $("#dash_modal").modal("hide");
+<% end %>
+
+Looper.init();

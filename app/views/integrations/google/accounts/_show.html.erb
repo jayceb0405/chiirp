@@ -1,0 +1,44 @@
+<%
+  # app/views/integrations/google/accounts/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/accounts/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Google Accounts</h6>
+  <div class="card-body">
+
+    <% if Integration::Google.valid_token?(presenter.user_api_integration) %>
+      <%= form_with model: presenter.client_api_integration, url: integrations_google_accounts_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+        <%= bootstrap_select_tag(
+              field:        'active_accounts',
+              row:          { columns: [0, 12] },
+              label:        { class: 'pb-1 font-weight-bold', title: 'Accounts' },
+              html_options: { multiple: true, autofocus: true },
+              options:      { array: presenter.options_for_accounts, selected: presenter.client_api_integration.active_accounts },
+              messages:     { note: 'Select your Google accounts to manage Messages and/or Reviews.' }
+            ) %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_accounts').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

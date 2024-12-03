@@ -1,0 +1,35 @@
+<%
+  # app/views/snippets/js/_confirm_alert.js.erb
+
+  # render partial: 'snippets/js/confirm_alert', locals: {
+  #   element: 'string',
+  #   alert: { body: 'string', type: 'primary/secondary/success/danger/warning/question/info', persistent: boolean },
+  #   ajax_action: { type: 'PATCH/GET/POST/DELETE', url: 'string', element: 'string' }
+  # }
+  element       = (local_assigns.dig(:element) || 'confirm_alert').to_s.downcase
+  do_it_element = "#{element.delete('#').delete('.')}_do_it"
+%>
+$(document).off('click', '<%= element -%>');
+$(document).on('click', '<%= element -%>', function(e) {
+  e.preventDefault();
+
+  ChiirpAlert({
+    'body':       '<%= local_assigns.dig(:alert, :body).to_s -%>',
+    'buttons':    <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: do_it_element }].to_json) -%>,
+    'type':       '<%= local_assigns.dig(:alert, :type).to_s -%>',
+    'persistent': <%= local_assigns.dig(:alert, :persistent).to_bool -%>
+  });
+
+  $(document).off('click', '#<%= do_it_element -%>');
+  $(document).on('click', '#<%= do_it_element -%>', function(e) {
+    if ('<%= local_assigns.dig(:ajax_action, :element).to_s -%>') {
+      $(this).trigger('clicked.confirm_alert', '<%= local_assigns.dig(:ajax_action, :element).to_s -%>');
+    }
+
+    $.ajax({
+      type: '<%= local_assigns.dig(:ajax_action, :type).to_s -%>',
+      dataType: 'script',
+      url: '<%= local_assigns.dig(:ajax_action, :url).to_s -%>'
+    });
+  });
+});

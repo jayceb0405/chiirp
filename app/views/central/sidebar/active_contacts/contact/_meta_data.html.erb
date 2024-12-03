@@ -1,0 +1,21 @@
+<%
+  # app/views/central/sidebar/active_contacts/contact/_meta_data.html.erb
+  #
+  # Example:
+  #   render partial: 'central/sidebar/active_contacts/contact/meta_data', locals: { contact: Contact, presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) contact:   (Contact)
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+-%>
+<p class="list-group-item-text small">
+  <%= presenter.message_display(contact.tw_id, contact.tw_message, contact.tw_msg_type) -%>
+</p>
+<p class="list-group-item-text small">
+  <%= contact.tw_created_at.to_s.present? ? Friendly.new.date(contact.tw_created_at, presenter.client.time_zone, true) : '' -%>
+</p>

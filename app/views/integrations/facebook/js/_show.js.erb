@@ -1,0 +1,68 @@
+<%
+# app/views/integrations/facebook/js/_show.js.erb
+#
+# Example:
+# 	render partial: "integrations/facebook/js/show", locals: { cards: Hash }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+# 	(req) cards: (Array)
+#
+-%>
+<% if cards.include?('show_instructions') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/facebook/instructions/show' -%>');
+<% end %>
+<% if cards.include?('edit_connections') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/facebook/connections/edit' -%>');
+<% end %>
+<% if cards.include?('index_pages') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/facebook/pages/index' -%>');
+<% end %>
+<% if cards.include?('index_pages_user') %>
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_spinner').hide();
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_pages').show();
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_pages').html('<%= j render partial: 'integrations/facebook/pages/index_user', locals: { user_id: local_assigns.dig(:user_id).to_s } -%>');
+<% end %>
+<% if cards.include?('index_pages_page') %>
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_spinner').hide();
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_forms').show();
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_forms').html('<%= j render partial: 'integrations/facebook/pages/index_page', locals: { page_id: local_assigns.dig(:page_id).to_s } -%>');
+<% end %>
+<% if cards.include?('index_forms') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/facebook/forms/index' -%>');
+<% end %>
+<% if cards.include?('index_forms_page') %>
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_spinner').hide();
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_forms').show();
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_forms').html('<%= j render partial: 'integrations/facebook/forms/index_page', locals: { page_id: local_assigns.dig(:page_id).to_s } -%>');
+<% end %>
+<% if cards.include?('index_forms_user') %>
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_spinner').hide();
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_pages').show();
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_pages').html('<%= j render partial: 'integrations/facebook/forms/index_user', locals: { user_id: local_assigns.dig(:user_id).to_s } -%>');
+<% end %>
+<% if cards.include?('edit_form') %>
+  $('#form_id_<%= local_assigns.dig(:form_id).to_s -%>_spinner').hide();
+  $('#form_id_<%= local_assigns.dig(:form_id).to_s -%>_form').show();
+  $('#form_id_<%= local_assigns.dig(:form_id).to_s -%>_form').html('<%= j render partial: 'integrations/facebook/forms/form', locals: { user_id: local_assigns.dig(:user_id), page_id: local_assigns.dig(:page_id), form_id: local_assigns.dig(:form_id) } -%>');
+<% end %>
+<% if cards.include?('index_messenger') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/facebook/messenger/index' -%>');
+<% end %>
+<% if cards.include?('index_messenger_page') %>
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_spinner').hide();
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_messenger').show();
+  $('#page_id_<%= local_assigns.dig(:page_id).to_s -%>_messenger').html('<%= j render partial: 'integrations/facebook/messenger/index_page', locals: { page_id: local_assigns.dig(:page_id).to_s } -%>');
+<% end %>
+<% if cards.include?('index_messenger_user') %>
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_spinner').hide();
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_messenger').show();
+  $('#user_id_<%= local_assigns.dig(:user_id).to_s -%>_messenger').html('<%= j render partial: 'integrations/facebook/messenger/index_user', locals: { user_id: local_assigns.dig(:user_id).to_s } -%>');
+<% end %>
+<% if cards.include?('show_overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/facebook/overview' -%>');
+<% end %>
+
+Looper.init();

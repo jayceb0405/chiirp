@@ -1,0 +1,105 @@
+<%
+  # app/views/integrations/webhooks/apis/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/index', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Webhooks::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Webhook APIs <span class="small">(inbound)</span> <span class="badge" id="webhook_count_badge"><%= presenter.apis.where(testing: '0').count -%> Live / <%= presenter.apis.count -%> Total</span></span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New Webhook API'.html_safe, new_integrations_webhook_api_path, {
+              class:  'btn btn-light',
+              remote: true,
+              method: :get
+            } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="3" style="min-width: 240px"> API </th>
+              <%= content_tag(:th, class: 'text-left') { 'Campaign' } if presenter.campaigns_allowed? %>
+              <%= content_tag(:th, class: 'text-left') { 'Group' } if presenter.groups_allowed? %>
+              <th class="text-left">Tag</th>
+              <%= content_tag(:th, class: 'text-left') { 'Stage' } if presenter.stages_allowed? %>
+              <%= content_tag(:th, class: 'text-left') { 'Stop Campaigns' } if presenter.campaigns_allowed? %>
+              <th> Created </th>
+              <th class="text-center"> Live </th>
+              <th style="width:100px;min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody id="webhook_apis_body">
+            <%= render partial: 'integrations/webhooks/apis/webhook', collection: presenter.apis, as: :webhook, locals: { presenter: } -%>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_apis').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.webhook_edit');
+    $(document).on('show.bs.collapse', '.webhook_edit', function (e) {
+      var webhook_id = $(this).data('webhookid');
+
+      $.ajax({
+        type: 'GET',
+        dataType: 'script',
+        url: '/integrations/webhook/apis/' + webhook_id + '/edit'
+      });
+    });
+
+    $(document).off('hide.bs.collapse', '.webhook_edit');
+    $(document).on('hide.bs.collapse', '.webhook_edit', function (e) {
+      var webhook_id = $(this).data('webhookid');
+
+      $('#webhook_edit_' + webhook_id).html('<td colspan="<%= presenter.table_colspan -%>" class="mt-3 text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Webhook API' } %></td>');
+    });
+
+    $(document).off('click', '.webhook_delete');
+    $(document).on('click', '.webhook_delete', function(e) {
+      e.preventDefault();
+
+      var webhook_id   = $(this).data('webhookid');
+      var webhook_name = $(this).data('webhookname');
+
+      ChiirpAlert({
+        'body':'Deleting Webhook "' + webhook_name + '" can NOT be un-done. Is it your intention to delete this Webhook?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/integrations/webhook/apis/' + webhook_id
+        });
+      });
+    });
+  });
+</script>

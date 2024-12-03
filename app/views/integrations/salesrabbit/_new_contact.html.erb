@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/salesrabbit/_new_contact.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/salesrabbit/new_contact"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  campaign_id       = @client_api_integration.new_contact_actions.include?("campaign_id") ? @client_api_integration.new_contact_actions["campaign_id"].to_i : 0
+  group             = @client_api_integration.new_contact_actions.include?("group_id") ? @client_api_integration.client.groups.find_by_id( @client_api_integration.new_contact_actions["group_id"].to_i ) : @client_api_integration.client.groups.new
+  stage_id          = @client_api_integration.new_contact_actions.include?("stage_id") ? @client_api_integration.new_contact_actions["stage_id"].to_i : 0
+  tag               = @client_api_integration.new_contact_actions.include?("tag_id") ? @client_api_integration.client.tags.find_by_id( @client_api_integration.new_contact_actions["tag_id"].to_i ) : @client_api_integration.client.tags.new
+  stop_campaign_ids = @client_api_integration.new_contact_actions["stop_campaign_ids"]
+
+  campaign_id ||= 0
+  group         = @client_api_integration.client.groups.new unless group
+  stage_id    ||= 0
+  tag           = @client_api_integration.client.tags.new unless tag
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SalesRabbit New Contact Processes</h6>
+  <div class="card-body">
+
+    <% if @client_api_integration.api_key.present? && @client_api_integration.statuses.present? %>
+      <%= form_with model: @client_api_integration, url: integrations_salesrabbit_contact_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+
+        <%= render partial: 'campaigns/action_fields', locals: {
+              client: @client_api_integration.client,
+              campaign_id:, campaign_id_field: 'new_contact_actions[campaign_id]',
+              group:, group_id_field: 'new_contact_actions[group_id]',
+              tag:, tag_id_field: 'new_contact_actions[tag_id]',
+              stage_id:, stage_id_field: 'new_contact_actions[stage_id]',
+              stop_campaign_ids:, stop_campaign_ids_field: 'new_contact_actions[stop_campaign_ids]'
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Actions', disable_with: 'Saving Actions' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_contacts').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

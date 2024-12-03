@@ -1,0 +1,40 @@
+<%
+  # /Users/Kevin/Rails Projects/funyl/app/views/integrations/dropfunnels/product_purchased_order_upsell/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'xxx/_show.html.erb', collection: @client.tags.order( :name ), locals: {  }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Product Purchased Upsell</h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: integrations_dropfunnels_product_purchased_order_upsell_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+      <%= render partial: 'campaigns/action_fields', locals: {
+            client: @client_api_integration.client,
+            campaign_id: @client_api_integration.product_purchased_order_upsell['campaign_id'].to_i, campaign_id_field: 'client_api_integration[product_purchased_order_upsell][campaign_id]',
+            group_id: @client_api_integration.product_purchased_order_upsell['group_id'].to_i, group_id_field: 'client_api_integration[product_purchased_order_upsell][group_id]',
+            tag_id: @client_api_integration.product_purchased_order_upsell['tag_id'].to_i, tag_id_field: 'client_api_integration[product_purchased_order_upsell][tag_id]',
+            stage_id: @client_api_integration.product_purchased_order_upsell['stage_id'].to_i, stage_id_field: 'client_api_integration[product_purchased_order_upsell][stage_id]',
+            stop_campaign_ids:@client_api_integration.product_purchased_order_upsell['stop_campaign_ids'], stop_campaign_ids_field: 'client_api_integration[product_purchased_order_upsell][stop_campaign_ids]'
+          } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save Product Purchased Upsell Actions', id: 'client_api_integration_form_submit', disable_with: 'Saving Product Purchased Upsell Actions' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_product_purchased_order_upsell').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

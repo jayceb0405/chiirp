@@ -1,0 +1,118 @@
+<%
+  # app/views/integrations/housecall/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/instructions/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user_api_integrations: (UserApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Housecall Pro Integration Help</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <h6>General:</h6>
+      <ul>
+        <li>Housecall Pro integration provides lead generation and 2-way text messaging capabilities at every point of customer communications.</li>
+        <li>A Housecall Pro connection is required.</li>
+        <li>The Housecall Pro "MobilePhone" number field is used when receiving a customer into <%= I18n.t('tenant.name') -%>.</li>
+      </ul>
+
+      <h6>Connection:</h6>
+      <ul>
+        <li>For data to begin flowing into <%= I18n.t('tenant.name') -%> a connection must be established.</li>
+        <li>Click the "Connect Housecall Pro" button to log into Housecall Pro and create the connection.</li>
+        <li>This connection can be turned off at any time by clicking the "Disconnect Housecall Pro" button.</li>
+      </ul>
+
+      <h6>Push Contacts:</h6>
+      <ul>
+        <li>When a Contact is ready to become a customer you will want to push that Contact into Housecall Pro.</li>
+        <li>Select a Tag that, when applied, will trigger <%= I18n.t('tenant.name') -%> to push that Contact's data into Housecall Pro.</li>
+        <li>Whenever you want to push a Contact into Housecall Pro simply apply that Tag.</li>
+      </ul>
+
+      <h6>Events:</h6>
+      <ul>
+        <li>When events happen in Housecall Pro (a customer is created, a job is completed, etc) an action can be triggered in <%= I18n.t('tenant.name') -%>.</li>
+        <li>Select a Campaign, Tag, etc to fire when a specific event takes place in Housecall Pro.</li>
+        <li>When the event takes place in Housecall Pro the action will take place in <%= I18n.t('tenant.name') -%>.</li>
+        <li>To further define Housecall Pro Job event actions you may also select line items that should appear in a Job to trigger actions.</li>
+        <li>Estimates & Jobs provide for additional criteria to determine trigger actions.</li>
+        <li>Estimates & Jobs may trigger Campaigns leading up to scheduled & actual dates.</li>
+        <li>Estimate & Job data are accessible through hashtag replacement fields in Campaigns created specifically for Estimate & Job Campaigns.</li>
+        <li>Hashtags available are as follows...</li>
+        <ul>
+          <li>Estimate Number</li>
+          <li>Estimate Status</li>
+          <li>Estimate Scheduled Start Date</li>
+          <li>Estimate Scheduled End Date</li>
+          <li>Estimate Scheduled Arrival Window Date</li>
+          <li>Estimate Scheduled Arrival Window Time</li>
+          <li>Estimate Started Date</li>
+          <li>Estimate Completed Date</li>
+          <li>Estimate On My Way Date</li>
+          <li>Job Invoice Number</li>
+          <li>Job Status</li>
+          <li>Job Description</li>
+          <li>Job Scheduled Start Date</li>
+          <li>Job Scheduled End Date</li>
+          <li>Job Scheduled Arrival Window Date</li>
+          <li>Job Scheduled Arrival Window Time</li>
+          <li>Job Started Date</li>
+          <li>Job Completed Date</li>
+          <li>Job On My Way Date</li>
+          <li>Job Total</li>
+          <li>Job Balance</li>
+        </ul>
+      </ul>
+
+      <h6>Employees</h6>
+      <ul>
+        <li>Match Housecall Pro employees to <%= I18n.t('tenant.name') -%> Users.</li>
+        <li>Events may be configured to assign a Contact to a User when triggered.</li>
+      </ul>
+
+      <h6>Price Book:</h6>
+      <ul>
+        <li>The Line Items that you access in Housecall Pro must be imported into <%= I18n.t('tenant.name') -%> using a CSV file.</li>
+        <li>To create a line item CSV file click on "Price Book" in the top menu bar in Housecall Pro.</li>
+        <li>Click the gear icon in the upper right of the Price Book page, then click "Export Price Book".</li>
+        <li>Your line item CSV file will be emailed to you.</li>
+        <li>When your CSV file is received drag it from your email and drop it on the <%= I18n.t('tenant.name') -%> Price Book import box (you may also move the file to your computer and then select it after clicking on the import box).</li>
+        <li>Your Housecall Pro line items will be imported and ready to be selected when defining actions for Housecall Pro events.</li>
+        <li>Remember to repeat  this process each time line items are changed.</li>
+      </ul>
+
+      <h6>Import Contacts</h6>
+      <ul>
+        <li>Import all of your Housecall pro customers into <%= I18n.t('tenant.name') -%>.</li>
+        <li>Choose whether to update existing <%= I18n.t('tenant.name') -%> Contacts or only import new Housecall Pro customers.</li>
+      </ul>
+
+      <h6>Import Jobs</h6>
+      <ul>
+        <li>Import your Housecall Pro Jobs based on current status, scheduled start date or scheduled end date.</li>
+        <li>Choose to process your existing "Events" in imported Jobs or not.</li>
+        <li>Select a Campaign, Group, Stage and/or Tag to process on every imported Job.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

@@ -1,0 +1,21 @@
+<%
+# app/views/package_campaigns/_edit.html.erb
+#
+# Example:
+#   render partial: 'package_campaigns/edit'
+#
+# Required Instance Variables:
+#   @package: (Package)
+#
+# Required Local Variables:
+#   package_campaigns: (PackageCampaigns)
+#
+-%>
+<%= form_with url: package_campaigns_path(@package.id), builder: LooperFormBuilder, remote: true, method: :post, html: { class: 'needs-validation', novalidate: true } do |f| %>
+  <%= f.text_field :share_code, {
+        label:        { title: 'Enter a Campaign Share Code to Auto Import with this Package' },
+        html_options: { placeholder: 'Campaign Share Code', required: true },
+        appends:      [{ button: true, label: 'Add' }],
+        messages:     { note: 'Required' }
+      } %>
+<% end %>

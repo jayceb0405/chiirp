@@ -1,0 +1,27 @@
+<%
+  # app/views/triggeractions/_triggeraction.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/triggeraction", collection: trigger.triggeractions.order( :sequence ), as: :triggeraction, locals { presenter: Campaigns::Presenter }
+  # 	render partial: "triggeractions/triggeraction", locals: { presenter: Campaigns::Presenter, triggeraction: trigger.triggeractions }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && local_assigns.dig(:triggeraction).is_a?(Triggeraction)
+
+  presenter.triggeraction = triggeraction
+-%>
+<div class="card card-expansion-item">
+  <div class="card-header d-flex align-items-center border-0" id="<%= presenter.triggeraction_header_id -%>">
+    <%= render partial: 'triggeractions/triggeraction_header', locals: { presenter: } %>
+  </div>
+  <div class="edit_triggeraction collapse" id="<%= presenter.triggeraction_form_id -%>" data-triggerid="<%= presenter.trigger.id -%>" data-triggeractionid="<%= presenter.triggeraction.id -%>" data-parent="#<%= presenter.triggeraction_accordion_id -%>">
+    <div class="text-center">
+      <%= render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Action' } %>
+    </div>
+  </div>
+</div>

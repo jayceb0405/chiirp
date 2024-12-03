@@ -1,0 +1,99 @@
+<%
+  # app/views/integrations/google/reviews/reviews/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/reviews/edit.html.erb', locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   (req) @review: (Review)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<%= form_with model: @review, url: integrations_google_reviews_review_path(@review.id), builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+  <%= bootstrap_info_field(
+        info:  @review.name,
+        label: { title: 'Reviewer Name' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'contact_id',
+        label:        { title: 'Select a Contact' },
+        html_options: { id: "contact_select_#{@review.id}_new" },
+        options:      { array: presenter.options_for_contact_select(@review), selected: @review.contact&.id || 0, blank: 'Search for a Contact', lookup: { url: contact_task_path, client: presenter.client } }
+      ) %>
+  <%= bootstrap_info_field(
+        info:         @review.star_rating,
+        info_wrapper: { tag: 'span', class: 'mr-3', id: '' },
+        html_options: { id: "review_stars_edit_#{@review.id}" },
+        label:        { title: 'Rating' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  @review.comment,
+        label: { title: 'Comments' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  Friendly.new.date(@review.target_created_at, presenter.time_zone, true),
+        label: { title: 'Created' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  Friendly.new.date(@review.target_updated_at, presenter.time_zone, true),
+        label: { title: 'Last Updated' }
+      ) %>
+  <%= f.text_area :reply, {
+        label:        { title: 'Reply' },
+        html_options: { placeholder: 'Your reply', autofocus: true, disabled: !current_user.access_controller?('integrations', 'google_review_replies', session) }
+      } %>
+  <%= bootstrap_info_field(
+        info:  @review.replied_at.present? ? @review.replied_at.in_time_zone(presenter.time_zone) : 'No Reply',
+        label: { title: 'Replied' }
+      ) %>
+
+  <%= f.submit_buttons buttons: [
+        { title: 'Delete Reply', disable_with: 'Deleting Reply...', id: "review_delete_#{@review.id}", disabled: !current_user.access_controller?('integrations', 'google_review_replies', session) },
+        { title: 'Submit Reply', disable_with: 'Submitting Reply...', disabled: !current_user.access_controller?('integrations', 'google_review_replies', session) }
+      ] %>
+<% end %>
+
+<script>
+  $(function() {
+    displayStars('review_stars_edit_<%= @review.id -%>', '<%= @review.star_rating -%>', 25)
+    selectContact(<%= presenter.client.id -%>, <%= @review.id -%>, <%= @review.contact_id || 0 -%>, '<%= @review.contact&.fullname -%>');
+
+    $(document).off('click', '#review_delete_<%= @review.id -%>');
+    $(document).on('click', '#review_delete_<%= @review.id -%>', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting a review reply can NOT be un-done. Is it your intention to delete this reply?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: "button_dump_it_#{@review.id}" }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_<%= @review.id -%>');
+      $(document).on('click', '#button_dump_it_<%= @review.id -%>', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= integrations_google_reviews_review_path(@review.id) -%>'
+        });
+      });
+    });
+
+    $(document).off('change', '#contact_select_<%= @review.id -%>_new');
+    $(document).on('change', '#contact_select_<%= @review.id -%>_new', function (e) {
+      var newContactId = $('#contact_select_<%= @review.id -%>_new').find(':selected').val();
+
+      if (newContactId) {
+        $.ajax({
+          type: 'PUT',
+          dataType: 'script',
+          url: '<%= integrations_google_reviews_review_path(@review.id) -%>',
+          data: { new_contact_id: newContactId }
+        });
+      }
+    });
+  });
+</script>

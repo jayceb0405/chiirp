@@ -1,0 +1,43 @@
+<%
+  # app/views/clients/holidays/_holiday.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/holidays/holiday', collection: Array, as: :holiday, , locals: { clients_holidays_presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @holiday: (Holiday)
+  #
+  # Local Variables:
+  #   (opt) clients_holidays_presenter: (Clients::Holidays::Presenter)
+  #   (opt) holiday:                    (Holiday)
+  #
+  presenter = local_assigns.dig(:clients_holidays_presenter) || Clients::Holidays::Presenter.new(client: @client)
+  presenter.holiday = holiday || @holiday
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_holiday_row_<%= presenter.holiday.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#edit_holiday_row_<%= presenter.holiday.id -%>">
+      <%= presenter.holiday.name -%>
+    </button>
+  </td>
+  <td class="text-left align-middle"><%= presenter.holiday.occurs_at -%></td>
+  <td class="text-left align-middle"><%= presenter.holiday.action_title -%></td>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_holiday_row_<%= presenter.holiday.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt holiday_delete',
+          data:  { id: presenter.holiday.id, name: presenter.holiday.name }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_holiday_row" id="edit_holiday_row_<%= presenter.holiday.id -%>">
+  <!-- Holiday Edit -->
+</tr>

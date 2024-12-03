@@ -1,0 +1,44 @@
+<%
+# app/views/integrations/five9/contact_lists/_edit.html.erb
+#
+# Example:
+#   render partial: 'integrations/five9/contact_lists/edit'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Contact Lists</h6>
+    </div>
+  </div>
+
+  <div class="card-body" id="contact_lists_form">
+    <div class="text-center mt-3">
+      <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %>
+    </div>
+    <div class="text-center mb-3">
+      Retrieving Lists from Five9...
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_contact_lists').addClass('active');
+    $('#breadcrumb').show();
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_five9_contact_lists_path(form: true) -%>'
+    });
+  });
+</script>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:og="http://ogp.me/ns#" xmlns:fb="http://www.facebook.com/2008/fbml">
+  <head>
+    <%= render partial: 'layouts/common/meta_tags' %>
+    <%= render partial: 'layouts/common/open_graph' %>
+    <%= render partial: 'layouts/common/structured_data' %>
+
+    <title><%= I18n.t('tenant.name') -%> / Message Central</title>
+
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- favicons -->
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon-57.png", rel: 'apple-touch-icon', type: 'image/png' %>
+    <%= favicon_link_tag "tenant/#{I18n.t('tenant.id')}/favicon.ico", rel: 'shortcut icon' %>
+    <meta name="theme-color" content="#3063A0">
+
+    <!-- stylesheets & javascript -->
+    <%= stylesheet_link_tag "application_#{cookies[:skin] || 'default'}", media: 'all' %>
+    <%= javascript_include_tag 'application' %>
+    <%= action_cable_meta_tag %>
+  </head>
+  <body data-turbo-prefetch="false">
+    <div class="app">
+      <main class="app-main">
+        <div class="wrapper">
+          <div class="page-inner page-inner-fill p-0" id="conversation">
+            <%= yield %>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'dash_modal', max_width: '900px', close: true } %>
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'alert_modal' } %>
+    <%= render partial: 'snippets/custom_modal', locals: { id: 'full_size_modal', large: true, centered: true, scrollable: true, close: true, full_size: true } %>
+
+    <script>
+      $(document).ready(function() {
+        <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+        // var tenantHeight = window.outerHeight;
+        // var tenantHeight = parseInt(window.getComputedStyle(document.body, null).height) + 50;
+        // var tenantWidth  = parseInt(window.getComputedStyle(document.body, null).width) + 80;
+        // window.parent.postMessage(JSON.stringify({ action: "setatt_central_frame", width: tenantWidth, height: tenantHeight }), '*');
+
+        window.addEventListener('message', function(event) {
+          console.log('api_v1_message_central event.origin: ' + event.origin);
+          console.log('api_v1_message_central tenant.domain: <%= I18n.t('tenant.domain') -%>');
+          if ( ~event.origin.indexOf('fieldcontrolpro.com') ) {
+            try { var obj = JSON.parse(event.data); }
+            catch(e) { var obj = event.data }
+
+            if (obj.action === 'load_iframe') {
+              $.ajax({
+                method: 'GET',
+                dataType: 'script',
+                url: '<%= api_v1_central_url -%>',
+                contentType: 'application/json',
+                data: obj.account_data,
+                beforeSend: function(xhr, settings){
+                  console.log(obj.account_data.authorization);
+                  xhr.setRequestHeader("Authorization", 'Basic ' + obj.account_data.authorization);
+                },
+              });
+            }
+          } else {
+            console.log('Blocked');
+            return;
+          }
+        });
+
+        window.parent.postMessage(JSON.stringify({ action: "loaded" }), '*');
+      });
+    </script>
+  </body>
+</html>

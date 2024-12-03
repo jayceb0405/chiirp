@@ -1,0 +1,86 @@
+<%
+  # app/views/clients/widgets/v3/show_bubble.html.erb
+  #
+  # Example:
+  #   render "clients/widgets/v3/show_bubble"
+  #
+  # Required Instance Variables:
+  #   @client:        (Client)
+  #   @client_widget: (Clients::Widget)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter        = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client_widget.client)
+  presenter.widget = @client_widget
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <title><%= '' -%></title>
+
+  <%= csp_meta_tag %>
+
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,500,500i,700&display=swap">
+
+  <%= javascript_include_tag 'widget_bubble' %>
+
+  <% if browser.platform.ios? %>
+    <%= stylesheet_link_tag 'widget_bubble_ios' %>
+  <% elsif browser.platform.android? %>
+    <%= stylesheet_link_tag 'widget_bubble_android' %>
+  <% else %>
+    <%= stylesheet_link_tag 'widget_bubble_desktop' %>
+  <% end %>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=<%= presenter.widget.bb_font -%>:400,500,700&display=swap" type="text/css">
+
+  <style type="text/css">
+    body {
+      font-family: "<%= presenter.widget.bb_font -%>";
+    }
+    .bubble:after {
+      border-right-color:<%= presenter.widget.bb_bg_color -%>;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="bubble" id="sitechat_bubble" style="background-color:<%= presenter.widget.bb_bg_color -%>;">
+      <%= button_tag '<i class="fa fa-times"></i>'.html_safe, { class: 'close_button', onclick: 'closeBubble()' } %>
+
+      <div class="inner_bubble" id="inner_sitechat_bubble">
+        <%= presenter.bubble_user_avatar.html_safe %>
+
+        <div class="body_text bubble_text" style="color:<%= presenter.widget.bb_text_color -%>;width:<%= presenter.bubble_text_width -%>px;">
+          <span><%= presenter.widget.bb_text.html_safe %></span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.onreadystatechange = function () {
+      var element = document.getElementById('sitechat_bubble');
+      setTimeout(function() {
+        element.style.display = "inline-block";
+      }, <%= presenter.widget.bb_timeout * 1000 -%>);
+    }
+
+    document.getElementById('inner_sitechat_bubble').onclick = function openSitechat() {
+      window.parent.postMessage('{"action":"open_sitechat"}', '*');
+    }
+
+    function closeBubble() {
+      window.parent.postMessage('{"action":"close_sitechat_bubble"}', '*');
+    }
+  </script>
+</body>
+</html>

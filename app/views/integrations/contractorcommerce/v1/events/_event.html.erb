@@ -1,0 +1,47 @@
+<%
+  # app/views/integrations/contactorcommerce/v1/events/_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/contactorcommerce/v1/events/event', collection: Contractorcommerce.events, as: :event, locals: { presenter: Integrations::Contractorcommerce::V1::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Contractorcommerce::V1::Presenter)
+  #   (req) event:     (Hash)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Contractorcommerce::V1::Presenter) && local_assigns.dig(:event).is_a?(Hash)
+
+  presenter.event = event
+%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_event_<%= presenter.event_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" colspan="2" id="td_event_<%= presenter.event_id -%>">
+    <button type="button" class="btn" data-toggle="collapse" data-target="#edit_event_<%= presenter.event_id -%>">
+      <%= presenter.event_type -%>
+    </button>
+  </td>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_campaign&.name.to_s } if presenter.campaigns_allowed %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_group&.name.to_s } if presenter.groups_allowed %>
+  <td class="text-left align-middle"><%= presenter.event_tag&.name.to_s -%></td>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_stage&.name.to_s } if presenter.stages_allowed %>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_event_<%= presenter.event_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_event',
+          style: 'text-decoration: none;',
+          data:  { id: presenter.event_id, event: presenter.event_type, name: presenter.event_type, turbo: true }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_event" id="edit_event_<%= presenter.event_id -%>">
+  <!-- Event -->
+</tr>

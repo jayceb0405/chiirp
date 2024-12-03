@@ -1,0 +1,17 @@
+<%
+  # app/views/integrations/successware/v202311/webhooks/_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/successware/v202311/webhooks/event', collection: @client_api_integration.webhooks, as: :event, locals: { presenter: Integrations::Successware::V202311::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Successware::V202311::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Successware::V202311::Presenter)
+
+  presenter.event = event
+-%>
+<%= render partial: 'integrations/successware/v202311/webhooks/webhook', collection: presenter.events, as: :webhook, locals: { presenter: } %>

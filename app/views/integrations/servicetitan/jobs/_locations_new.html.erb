@@ -1,0 +1,65 @@
+<%
+  # app/views/integrations/servicetitan/jobs/_locations_new.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/jobs/locations_new'
+  #
+  # Instance Variables:
+  #   (req) @contact: (Contact)
+  #
+  # Local Variables:
+  #   none
+  #
+  alt_phone = if (alt_phone = @contact.contact_phones.find_by(primary: false))
+                alt_phone.phone
+              else
+                ''
+              end
+-%>
+<fieldset class="border rounded p-2 mt-3 mb-3">
+  <legend class="w-auto mb-0"><h6>Create New Location</h6></legend>
+  <%= bootstrap_text_field(
+        field:        'address1',
+        value:        @contact.address1,
+        label:        { title: 'Address Line 1' },
+        html_options: { placeholder: 'Address Line #1', required: true }
+      ) %>
+  <%= bootstrap_text_field(
+        field:        'address2',
+        value:        @contact.address2,
+        label:        { title: 'Address Line 2' },
+        html_options: { placeholder: 'Address Line #2' }
+      ) %>
+  <%= bootstrap_text_field(
+        field:        'city',
+        value:        @contact.city,
+        label:        { title: 'City' },
+        html_options: { placeholder: 'City', required: true }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'state',
+        label:        { title: 'State' },
+        html_options: { required: true },
+        options:      { for_select: options_for_state(country: %w[US CA], selected: @contact.state), blank: 'Select a State' }
+      ) %>
+  <%= bootstrap_text_field(
+        field:        'zipcode',
+        value:        @contact.zipcode,
+        label:        { title: 'Zip Code' },
+        html_options: { placeholder: 'Zip Code', required: true }
+      ) %>
+  <%= bootstrap_text_field(
+        field:        'phone',
+        value:        number_to_phone(@contact.primary_phone&.phone.to_s),
+        label:        { title: 'Phone Number' },
+        html_options: { placeholder: 'Phone Number', required: true },
+        prepends:     [{ button: false, label: '<i class="fa fa-phone"></i>' }]
+      ) %>
+  <%= bootstrap_text_field(
+        field:        'alt_phone',
+        value:        number_to_phone(alt_phone),
+        label:        { title: 'Alternate Phone Number' },
+        html_options: { placeholder: 'Alternate Phone Number', required: true },
+        prepends:     [{ button: false, label: '<i class="fa fa-phone"></i>' }]
+      ) %>
+</fieldset>

@@ -1,0 +1,87 @@
+<%
+  # app/views/trainings/show.html.erb
+  # 
+  # Example:
+  #   render partial: 'trainings/show'
+  # 
+  # Required Instance Variables:
+  #   @training: (Training)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training)
+  training_edit = local_assigns.dig(:training_edit).to_bool
+-%>
+<div class="page has-sidebar has-sidebar-expand-xl">
+  <div class="sidebar-backdrop"></div>
+  <div class="page-inner page-inner-fill">
+
+    <header class="page-title-bar">
+      <div class="dropdown d-flex flex-row-reverse">
+        <div class="ml-2 mt-1">
+          <button class="btn btn-sm btn-icon btn-light d-xl-none" data-toggle="sidebar"><i class="fa fa-angle-double-left"></i></button>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section">
+      <div class="section-block">
+
+        <div class="card mb-2" id="training_edit">
+          <%= render partial: "trainings/#{training_edit ? 'edit' : 'pages/show'}", locals: { trainings_presenter: tp } %>
+        </div>
+        
+      </div>
+    </div>
+
+  </div>
+
+  <div class="page-sidebar">
+    <header class="sidebar-header d-sm-none">
+      <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+          <a class="prevent-default" href="#" onclick="Looper.toggleSidebar()"><i class="breadcrumb-icon fa fa-angle-double-right mr-2"></i>Back</a>
+        </li>
+      </ol>
+    </header>
+
+    <div class="sidebar-section-fill">
+
+      <div class="card card-reflow">
+        <div class="card-body">
+          <button type="button" class="close mt-n1 d-none d-xl-none d-sm-block" onclick="Looper.toggleSidebar()" aria-label="Close">
+            <span aria-hidden="true">×</span>
+          </button>
+
+          <div class="row">
+            <div class="col" id="training_pages_index">
+              <%= render partial: 'trainings/pages/index', locals: { trainings_presenter: tp } %>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col" id="trainings_index">
+              <%= render partial: 'trainings/index', locals: { trainings_presenter: tp } %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  $(function() {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_training').addClass('has-active');
+
+    <% if tp.training.new_record? %>
+      $('#aside_menu_item_training_create').addClass('has-active');
+    <% else %>
+      $('#aside_menu_item_training_<%= tp.training.id -%>').addClass('has-active');
+    <% end %>
+  });
+</script>

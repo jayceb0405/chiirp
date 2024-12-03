@@ -1,0 +1,85 @@
+<%
+# app/views/packages/show.html.erb
+#
+# Example:
+#   render partial: 'packages/show'
+#
+# Required Instance Variables:
+#   @packages = (Relation) Package
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-cube mr-2"></i>Package Manager</h1>
+
+        <div class="btn-toolbar">
+          <%= link_to '<i class="fa fa-plus mr-2"></i>New Package'.html_safe, new_package_path, {
+                class:  'btn btn-light',
+                remote: true,
+                method: :get
+              } %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit Package</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_package_dropdown">
+              <%= render partial: 'packages/select_package_dropdown' %>
+            </div>
+          </div>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <span>More</span>
+              <span class="fa fa-caret-down"></span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <div class="dropdown-arrow"></div>
+              <%= link_to '<i class="fa fa-cube mr-2"></i>Packages'.html_safe, packagemanager_path, {
+                    class: 'dropdown-item'
+                  } %>
+              <%= link_to '<i class="fa fa-cubes mr-2"></i>Package Pages'.html_safe, packagepages_path, {
+                    class: 'dropdown-item'
+                  } %>
+              <%= link_to '<i class="fa fa-plus mr-2"></i>New Onetime Package'.html_safe, package_onetime_path, {
+                    class: 'dropdown-item',
+                    data:  { turbo: true, turbo_stream: true }
+                  } %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="packages_body">
+
+      <% if @package.nil? || (@package.new_record? && @package.name.to_s.empty?) %>
+        <%= render partial: 'packages/index' %>
+      <% else %>
+        <%= render partial: 'packages/edit' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_packages').addClass('has-active');
+
+    $(document).on('click', '.option_package', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/packages/' + $(this).attr('id') + '/edit'
+      });
+    });
+  });
+</script>

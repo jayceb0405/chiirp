@@ -1,0 +1,151 @@
+<%
+  # app/views/integrations/jobnimbus/webhooks/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/webhooks/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #   (req) @webhook:                 (Hash)
+  #            {"actions"=>{"tag_id"=>157, "group_id"=>0, "stage_id"=>0, "campaign_id"=>0}, "criteria"=>{}, "event_id"=>"4612b56a-de62-480d-9665-ca50a5dbcb6c"}
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter               = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.webhook_event = @webhook_event
+-%>
+<%= form_with url: presenter.form_url, builder: LooperFormBuilder, remote: true, method: presenter.form_method, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+  <%= bootstrap_select_tag(
+        field:        'webhook[event]',
+        label:        { title: 'JobNimbus Automation Type' },
+        html_options: { id: "event_#{presenter.webhook_event_id}", required: true },
+        options:      { array: presenter.webhook_events_array, selected: presenter.webhook_object, blank: 'Select a JobNimbus Event' },
+        messages:     { note: 'JobNimbus event selection is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[contact_status]',
+        row:          { id: "webhook_contact_status_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'JobNimbus Contact Status' },
+        html_options: { id: "contact_status_#{presenter.webhook_event_id}" },
+        options:      { array: presenter.contact_status_options_array, selected: presenter.webhook_event.dig(:criteria, :status).to_s, blank: 'Select a JobNimbus Contact Status' },
+        messages:     { note: 'JobNimbus status selection is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[job_status]',
+        row:          { id: "webhook_job_status_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'JobNimbus Job Status' },
+        html_options: { id: "job_status_#{presenter.webhook_event_id}" },
+        options:      { array: presenter.job_status_options_array, selected: presenter.webhook_event.dig(:criteria, :status).to_s, blank: 'Select a JobNimbus Job Status' },
+        messages:     { note: 'JobNimbus status selection is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[estimate_status]',
+        row:          { id: "webhook_estimate_status_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'JobNimbus Estimate Status' },
+        html_options: { id: "estimate_status_#{presenter.webhook_event_id}" },
+        options:      { array: presenter.estimate_status_options_array, selected: presenter.webhook_event.dig(:criteria, :status).to_s, blank: 'Select a JobNimbus Estimate Status' },
+        messages:     { note: 'JobNimbus status selection is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[invoice_status]',
+        row:          { id: "webhook_invoice_status_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'JobNimbus Invoice Status' },
+        html_options: { id: "invoice_status_#{presenter.webhook_event_id}" },
+        options:      { array: presenter.invoice_status_options_array, selected: presenter.webhook_event.dig(:criteria, :status).to_s, blank: 'Select a JobNimbus Invoice Status' },
+        messages:     { note: 'JobNimbus status selection is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[workorder_status]',
+        row:          { id: "webhook_workorder_status_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'JobNimbus Workorder Status' },
+        html_options: { id: "workorder_status_#{presenter.webhook_event_id}" },
+        options:      { array: presenter.workorder_status_options_array, selected: presenter.webhook_event.dig(:criteria, :status).to_s, blank: 'Select a JobNimbus Workorder Status' },
+        messages:     { note: 'JobNimbus status selection is required.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[task_status]',
+        value:        presenter.webhook_task_status,
+        values:       [true, false],
+        row:          { id: "webhook_task_status_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'Task Completed' },
+        html_options: { id: "task_status_#{presenter.webhook_event_id}" },
+        messages:     { note: 'JobNimbus status is required.' }
+      ) %>
+  <%= bootstrap_select_tag(
+        field:        'webhook[task_types]',
+        row:          { id: "webhook_task_types_row_#{presenter.webhook_event_id}" },
+        label:        { title: 'Task Types' },
+        html_options: { multiple: true },
+        options:      { array: presenter.task_types_for_select, selected: presenter.webhook_event_task_types },
+        messages:     { note: 'Event actions will trigger when the task type matches selected types.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[event_new]',
+        value:        presenter.webhook_event_new,
+        values:       [true, false],
+        row:          { id: "job_event_new_#{presenter.webhook_event_id}" },
+        label:        { title: 'First Event' },
+        html_options: { id: "webhook_event_new_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger only on receipt of first event.' }
+      ) %>
+  <%= bootstrap_switch_field(
+        field:        'webhook[event_updated]',
+        value:        presenter.webhook_event_updated,
+        values:       [true, false],
+        row:          { id: "job_event_updated_#{presenter.webhook_event_id}" },
+        label:        { title: 'Subsequent Events' },
+        html_options: { id: "webhook_event_updated_#{presenter.webhook_event_id}" },
+        messages:     { note: 'Event actions will trigger on receipt of all subsequent events.' }
+      ) %>
+
+  <fieldset class="border rounded p-2 mt-3 mb-2">
+    <legend class="w-auto mb-0"><h6>Event Actions</h6></legend>
+
+    <%= render partial: 'campaigns/action_fields', locals: {
+          client: presenter.client,
+          campaign: presenter.webhook_event_campaign, campaign_id_field: 'webhook[actions][campaign_id]',
+          group: presenter.webhook_event_group, group_id_field: 'webhook[actions][group_id]',
+          tag: presenter.webhook_event_tag, tag_id_field: 'webhook[actions][tag_id]',
+          stage: presenter.webhook_event_stage, stage_id_field: 'webhook[actions][stage_id]',
+          stop_campaign_ids: presenter.webhook_event_stop_campaign_ids, stop_campaign_ids_field: 'webhook[actions][stop_campaign_ids]',
+          first_trigger_types: [115, 120, 125, 130, 135, 136, 140, 145, 149]
+        } %>
+  </fieldset>
+
+  <%= bootstrap_submit_buttons(
+        buttons: [{ title: "Save Actions for #{presenter.webhook_name.titleize} Event", disable_with: "Saving Actions for #{presenter.webhook_name.titleize} Event" }]
+      ) %>
+<% end %>
+
+<script>
+  $(function () {
+    statusDisplay('<%= presenter.webhook_event_id -%>');
+
+    $(document).off('change', '#event_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#event_<%= presenter.webhook_event_id -%>', function(e) {
+      e.preventDefault();
+
+      $('#contact_status_<%= presenter.webhook_event_id -%>').val(null);
+      $('#contact_status_<%= presenter.webhook_event_id -%>').trigger('change');
+      $('#estimate_status_<%= presenter.webhook_event_id -%>').val(null);
+      $('#estimate_status_<%= presenter.webhook_event_id -%>').trigger('change');
+      $('#invoice_status_<%= presenter.webhook_event_id -%>').val(null);
+      $('#invoice_status_<%= presenter.webhook_event_id -%>').trigger('change');
+      $('#workorder_status_<%= presenter.webhook_event_id -%>').val(null);
+      $('#workorder_status_<%= presenter.webhook_event_id -%>').trigger('change');
+      statusDisplay('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_event_new_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_event_new_<%= presenter.webhook_event_id -%>', function(e) {
+      eventNewToggle('<%= presenter.webhook_event_id -%>');
+    });
+
+    $(document).off('change', '#webhook_event_updated_<%= presenter.webhook_event_id -%>');
+    $(document).on('change', '#webhook_event_updated_<%= presenter.webhook_event_id -%>', function(e) {
+      eventUpdatedToggle('<%= presenter.webhook_event_id -%>');
+    });
+  });
+</script>

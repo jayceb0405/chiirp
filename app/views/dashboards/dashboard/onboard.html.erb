@@ -1,0 +1,36 @@
+<%
+# app/views/dashboards/dashboard/onboard.html.erb
+#
+# Example:
+#   render partial: 'dashboards/dashboard/onboard'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner">
+    <div class="page-section">
+      <header class="page-title-bar">
+        <h1 class="page-title">Welcome to <%= I18n.t('tenant.name') -%>!</h1>
+      </header>
+    </div>
+
+    <div class="card card-fluid card-margins-mobile">
+      <div class="card-body">
+        <header class="page-title-bar">
+          <h1 class="page-title">Let's Get Started!</h1>
+        </header>
+
+        <div class="row">
+          <div class="offset-lg-1 col-lg-10" id="client_onboard">
+            <%= render partial: 'clients/onboard/edit' %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,210 @@
+<%
+  # app/views/users/permissions/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'users/permissions/edit'
+  #
+  # Required Instance Variables:
+  #   @user: (User)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Users::Presenter.new(user: @user)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Permissions</span>
+      <span>
+        <%= button_tag 'Select All Permissions', class: 'btn btn-light', id: 'select_all' %>
+        <%= button_tag 'Select No Permissions', class: 'btn btn-light', id: 'select_none' %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with(model: presenter.user, url: users_permission_path(presenter.user.id), builder: LooperFormBuilder, remote: true, class: 'needs-validation', id: 'admin_form', novalidate: true) do |f| %>
+        <%= f.select :dashboard_controller, {
+              label:        { title: 'Dashboard' },
+              html_options: { id: 'dashboard_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+              choices:      { array: presenter.dashboard_controller_array, selected: presenter.user.dashboard_controller }
+            } %>
+
+        <% if presenter.client.message_central_allowed %>
+          <%= f.select :central_controller, {
+                label:        { title: 'Message Central' },
+                html_options: { id: 'central_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                choices:      { array: presenter.central_controller_array, selected: presenter.user.central_controller }
+              } %>
+        <% end %>
+
+        <% if presenter.client.my_contacts_allowed %>
+          <%= f.select :my_contacts_controller, {
+                label:        { title: 'My Contacts' },
+                html_options: { id: 'my_contacts_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                choices:      { array: presenter.my_contacts_controller_array, selected: presenter.user.my_contacts_controller }
+              } %>
+        <% end %>
+
+        <% if presenter.client.stages_count.positive? %>
+          <%= f.select :stages_controller, {
+                label:        { title: "My #{StageParent.title.pluralize}" },
+                html_options: { id: 'stages_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                choices:      { array: presenter.stages_controller_array, selected: presenter.user.stages_controller }
+              } %>
+        <% end %>
+
+        <% if presenter.client.integrations_allowed.include?('servicetitan') %>
+          <%= f.select :integrations_servicetitan_controller, {
+                label:        { title: 'ServiceTitan' },
+                html_options: { id: 'integrations_servicetitan_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                choices:      { array: presenter.integrations_servicetitan_controller_array, selected: presenter.user.integrations_servicetitan_controller }
+              } %>
+        <% end %>
+
+        <fieldset class="border p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Automation</h6></legend>
+
+          <% if presenter.client.quick_leads_count.positive? %>
+            <%= f.select :user_contact_forms_controller, {
+                  label:        { title: 'QuickPages' },
+                  html_options: { id: 'user_contact_forms_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.user_contact_forms_controller_array, selected: presenter.user.user_contact_forms_controller }
+                } %>
+          <% end %>
+
+          <% if presenter.client.campaigns_count.positive? %>
+            <%= f.select :campaigns_controller, {
+                  label:        { title: 'Campaign Builder' },
+                  html_options: { id: 'campaigns_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.campaigns_controller_array, selected: presenter.user.campaigns_controller }
+                } %>
+          <% end %>
+
+          <% unless presenter.client.aiagent_included_count.zero? %>
+            <%= f.select :aiagents_controller, {
+                  label:        { title: 'AI Agents' },
+                  html_options: { id: 'aiagents_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.aiagents_controller_array, selected: presenter.user.aiagents_controller }
+                } %>
+          <% end %>
+
+          <% if presenter.client.surveys_count.positive? %>
+            <%= f.select :surveys_controller, {
+                  label:        { title: 'Survey Builder' },
+                  html_options: { id: 'surveys_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.surveys_controller_array, selected: presenter.user.surveys_controller }
+                } %>
+          <% end %>
+
+          <% if presenter.client.widgets_count.positive? %>
+            <%= f.select :widgets_controller, {
+                  label:        { title: 'SiteChat' },
+                  html_options: { id: 'widgets_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.widgets_controller_array, selected: presenter.user.widgets_controller }
+                } %>
+          <% end %>
+
+          <% if presenter.client.trackable_links_count.positive? %>
+            <%= f.select :trackable_links_controller, {
+                  label:        { title: 'Trackable Links' },
+                  html_options: { id: 'trackable_links_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.trackable_links_controller_array, selected: presenter.user.trackable_links_controller }
+                } %>
+          <% end %>
+
+          <% unless presenter.client.max_email_templates.zero? %>
+            <%= f.select :email_templates_controller, {
+                  label:        { title: 'Email Templates' },
+                  html_options: { id: 'email_templates_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.email_templates_controller_array, selected: presenter.user.email_templates_controller }
+                } %>
+          <% end %>
+
+          <% if presenter.client.import_contacts_count.positive? %>
+            <%= f.select :import_contacts_controller, {
+                  label:        { title: 'Import Contacts' },
+                  html_options: { id: 'import_contacts_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.import_contacts_controller_array, selected: presenter.user.import_contacts_controller }
+                } %>
+          <% end %>
+
+          <% if presenter.client.integrations_allowed.present? %>
+            <%= f.select :integrations_controller, {
+                  label:        { title: 'Integrations' },
+                  html_options: { id: 'integrations_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.integrations_controller_array, selected: presenter.user.integrations_controller }
+                } %>
+          <% end %>
+        </fieldset>
+
+        <% if presenter.client.training.present? %>
+          <fieldset class="border p-2 mb-2">
+            <legend class="w-auto mb-0"><h6>Support</h6></legend>
+
+            <%= f.select :trainings_controller, {
+                  label:        { title: 'Training' },
+                  html_options: { id: 'trainings_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.trainings_controller_array, selected: presenter.user.trainings_controller }
+                } %>
+          </fieldset>
+        <% end %>
+
+        <fieldset class="border p-2 mb-2">
+          <legend class="w-auto mb-0"><h6>Admin</h6></legend>
+
+          <%= f.select :users_controller, {
+                label:        { title: 'My Profile' },
+                html_options: { id: 'users_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                choices:      { array: presenter.users_controller_array, selected: presenter.user.users_controller }
+              } %>
+
+          <%= f.select :clients_controller, {
+                label:        { title: 'My Company Profile' },
+                html_options: { id: 'clients_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                choices:      { array: presenter.clients_controller_array, selected: presenter.user.clients_controller }
+              } %>
+
+          <% if (current_user.team_member? || (current_user.agent? && current_user.client.agency_access && current_user.access_controller?('companies', 'allowed', session))) && (presenter.user.team_member? || presenter.user.agent?) %>
+            <%= f.select :companies_controller, {
+                  label:        { title: 'Companies' },
+                  html_options: { id: 'companies_controller', multiple: true, mobile: browser.device.mobile?, data: { 'actions-box' => 'true' } },
+                  choices:      { array: presenter.companies_controller_array, selected: presenter.user.companies_controller }
+                } %>
+          <% end %>
+        </fieldset>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Permissions', disable_with: 'Saving Permissions' }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_permissions').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_permissions').addClass('has-active');
+    $('#breadcrumb').show();
+
+    $('#select_all').off('click');
+    $('#select_all').on('click', function(e) {
+      e.preventDefault();
+
+      $('#admin_form').find('select[multiple="multiple"]').selectpicker('selectAll').selectpicker('render');
+    });
+
+    $('#select_none').off('click');
+    $('#select_none').on('click', function(e) {
+      e.preventDefault();
+
+      $('#admin_form').find('select[multiple="multiple"]').selectpicker('deselectAll').selectpicker('render');
+    });
+  });
+</script>

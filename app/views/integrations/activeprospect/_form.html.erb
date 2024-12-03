@@ -1,0 +1,42 @@
+<%
+	# app/views/integrations/activeprospect/_form.html.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/activeprospect/form"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">ActiveProspect TrustedForm Script</h6>
+  <div class="card-body">
+
+		<%= form_with model: @user_api_integration, url: integrations_activeprospect_integration_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+      <%= f.text_area :trusted_form_script, {
+            label: { title: 'ActiveProspect TrustedForm Script' },
+        html_options: { id: 'trusted_form_script', placeholder: 'TrustedForm Script' }
+      } %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', id: 'save_trusted_form_script', disable_with: 'Saving' }] %>
+		<% end %>
+	</div>
+</div>
+
+<script>
+	$(function () {
+    $('.nav-link').removeClass('active');
+    $('#trusted_form_connection').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('click', '#save_trusted_form_script');
+    $(document).on('click', '#save_trusted_form_script', function(e) {
+      $('#trusted_form_script').val($('#trusted_form_script').val().replace(/<script/g, '{script'));
+      $('#trusted_form_script').val($('#trusted_form_script').val().replace(/<\/script>/g, '{/script}'));
+    });
+	});
+</script>

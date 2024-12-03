@@ -1,0 +1,52 @@
+<%
+  # app/views/clients/dlc10/v2/intro/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/intro/show', locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client.dlc10_brand] } %>
+
+<script src="https://fast.wistia.com/embed/medias/dz8jkduybm.jsonp" async></script>
+<script src="https://fast.wistia.com/assets/external/E-v1.js" async></script>
+
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0 shadow-none">
+    <div class="card-body d-flex flex-column" id="dlc10_intro_body">
+      <p>I want to introduce you to 10DLC.  This is a new program put forth by the major carriers (ATT, Verizon, Sprint, T-mobile) to help maintain the integrity of text messaging.</p>
+      <p>As legitimate business owners it sucks when scammers come in and ruin a good thing...  Think “email spam”. Email was once the king of digital communication... but spammers and scammers ruined it!</p>
+      <p>We don’t want the same to happen to text messaging.  So the carriers are taking strides to keep the spammers out so that legitimate businesses can continue to enjoy the awesome value that comes from text message automation.</p>
+      <p class="font-italic font-weight-bold text-info">10DLC is a simple registration process that shows the carriers that you are legit.</p>
+      <p>Here are some of the benefits that will come from registering your SMS traffic:</p>
+      <ol>
+        <li>Increased Deliverability: your messages will be sent from a verified source and have a much smaller chance of being filtered as spam</li>
+        <li>Increased Throughput: Registered businesses will be able to send more text messages throughout the day</li>
+        <li>Automatic Registration Renewal: no need to continually submit your messages for approval</li>
+      </ol>
+      <p>We’ve spent the last few months developing a registration process within CHIIRP so that it will literally only take you about 10-15 minutes to get your traffic registered and increase your deliverability.  <span class="font-italic font-weight-bold text-info">The video below shows you how to do it.</span></p>
+      <p class="font-italic font-weight-bold text-info">Be sure to register before March 31st to avoid any interruptions in the delivery of your messages. Let us know if you need any help.</p>
+      <div class="text-right mb-2 font-italic">
+        - Taylor
+      </div>
+
+      <div class="embed-responsive embed-responsive-16by9">
+        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/HmPBaVulpXA?rel=0" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-dlc10_link').removeClass('active');
+    $('#link_dlc10_intro').addClass('active');
+    $("#dlc10_intro_body")[0].scrollIntoView(false);
+  });
+</script>

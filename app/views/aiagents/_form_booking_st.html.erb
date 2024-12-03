@@ -1,0 +1,104 @@
+<%
+  # app/views/aiagents/_form_booking_st.html.erb
+  #
+  # Example:
+  #   render partial: "aiagents/form_booking_st"
+  #
+  # Instance Variables:
+  #   (req) @contact:                 (Contact)
+  #   (req) @contact_api_integration: (ContactApiIntegration)
+  #   (req) @client_api_integration:  (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  if @client_api_integration.booking_fields.present?
+    use_options          = %w[req inc]
+    used_booking_fields  = @client_api_integration.booking_fields.select { |_key, value| use_options.include?(value['use'].to_s) && value['client_custom_field_id'].to_i.positive? }
+    client_custom_fields = ClientCustomField.where(client_id: @client_api_integration.client_id, id: used_booking_fields.map { |_key, value| value['client_custom_field_id'] })
+  else
+    used_booking_fields  = {}
+  end
+-%>
+
+<%#
+
+  use_options          = %w[req inc]
+  ClientApiIntegration.where(target: 'servicetitan', name: '').each do |cai|
+    fields = cai.booking_fields.select { |_key, value| use_options.include?(value['use'].to_s) && value['client_custom_field_id'].to_i.positive? }
+    puts "#{cai.client.name} => #{fields}" if fields.any?
+  end
+
+  The following Client uses custom booking fields:
+  2438 - Service Emperor HVAC, Plumbing, Electrical & more
+
+%>
+
+<div id="business_unit_form"></div>
+<div id="job_type_form"></div>
+<div id="technician_form"></div>
+<div id="campaign_form"></div>
+<div id="tag_type_form"></div>
+
+<% used_booking_fields.sort_by { |_st_custom_field_id, values| values['order'] }.each do |st_custom_field_id, values| %>
+
+  <% if (client_custom_field = client_custom_fields.find_by(id: values['client_custom_field_id'])) %>
+    <%= contact_custom_field_input(
+          custom_field: client_custom_field,
+          object_name:  'client_custom_fields',
+          var_value:    @aiagent.client_custom_fields&.dig(client_custom_field.id.to_s),
+          html_options: { required: values['use'].to_s == 'req' },
+          messages:     { note: (values['use'].to_s == 'req' ? 'Required' : '').to_s }
+        ) %>
+  <% end %>
+<% end %>
+
+<div id="locations_form"></div>
+
+<%= bootstrap_text_area(
+      field:        'description',
+      value:        @aiagent.description,
+      label:        { title: 'Job Description' },
+      html_options: { placeholder: 'Job Description', required: true },
+      messages:     { note: 'Required' }
+    ) %>
+
+<%= bootstrap_text_area(
+      field:        'agent[ending_prompt]',
+      value:        presenter.agent.ending_prompt,
+      label:        { title: 'Final Text Message' },
+      html_options: { typeahead_client: presenter.agent.client, char_count_client: presenter.agent.client },
+      messages:     { note: 'How would you like to end this conversation if the AI Agent does not send out a final message? This field is hashtag aware.' }
+    ) %>
+
+<script>
+  $(function () {
+    $.ajax({
+      type: 'GET',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      dataType: 'script',
+      data: { commit: 'get_business_unit', business_unit_id: <%= @aiagent.business_unit_id.to_i %>, form_type: 'aiagents', technician_ids: <%= @aiagent.technician_ids.to_json.html_safe %> }
+    });
+
+    $.ajax({
+      type: 'GET',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      dataType: 'script',
+      data: { commit: 'get_job_type', job_type_id: <%= @aiagent.job_type_id.to_i %>, form_type: 'aiagents' }
+    });
+
+    $.ajax({
+      type: 'GET',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      dataType: 'script',
+      data: { commit: 'get_campaigns', field_name: 'st_campaign_id', campaign_id: <%= @aiagent.st_campaign_id.to_i %> }
+    });
+
+    $.ajax({
+      type: 'GET',
+      url: '<%= edit_integrations_servicetitan_contact_booking_path(@contact.id) -%>',
+      dataType: 'script',
+      data: { commit: 'get_tag_type', tag_type_names: <%= @aiagent.tag_type_names.to_json.html_safe %> }
+    });
+  });
+</script>

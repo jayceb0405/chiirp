@@ -1,0 +1,75 @@
+<%
+  # app/views/users/show.html.erb
+  #
+  # Example:
+  #   render partial: 'users/show'
+  #
+  # Instance Variables:
+  #   (req) @user: (User)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Users::Presenter.new(user: @user)
+  user_page_section = (local_assigns.dig(:user_page_section) || 'overview').to_s.downcase
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div class="user-avatar user-avatar-xl" id="show_user_avatar"><%= presenter.user_avatar -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname"><%= presenter.user.new_record? ? 'New User' : presenter.user_name -%></h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+      <!-- <p class="text-muted"> Project Manager @CreativeDivision </p> -->
+      <!-- <p> Huge fan of HTML, CSS and Javascript. Web design and open source lover. </p> -->
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <!-- <a href="#" class="btn btn-light" data-toggle="modal" data-target="#followersModal">2,159 Followers</a> <a href="#" class="btn btn-light" data-toggle="modal" data-target="#followingModal">136 Following</a> -->
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <% if presenter.user.new_record? %>
+          <%= link_to 'Creating a New User', '#', { class: 'nav-link' } %>
+        <% else %>
+          <%= if current_user.access_controller?('users', 'profile', session)
+                link_to('Profile',
+                        edit_client_user_path(presenter.user.client_id, presenter.user.id.to_i),
+                        class: 'nav-link',
+                        id:    'link_profile',
+                        data:  { turbo: true, turbo_stream: true })
+              end %>
+          <%= link_to "Tasks #{presenter.user_tasks.any? ? "<span class=\"badge\">#{presenter.user_tasks.count}</span>" : ''}".html_safe, users_tasks_path(user_id: presenter.user.id), { class: 'nav-link', id: 'link_tasks', remote: true } if current_user.access_controller?('users', 'tasks', session) %>
+          <%= link_to 'Phone Processing', edit_users_phone_path(presenter.user.id), { class: 'nav-link', id: 'link_phone', remote: true } if presenter.client.phone_calls_allowed && current_user.access_controller?('users', 'phone_processing', session) %>
+          <%= link_to 'Notifications', edit_users_notification_path(presenter.user.id), { class: 'nav-link', id: 'link_notifications', remote: true } if current_user.access_controller?('users', 'notifications', session) %>
+          <%= link_to 'Admin Settings', edit_users_admin_path(presenter.user.id), { class: 'nav-link', id: 'link_admin', remote: true } if current_user.access_controller?('users', 'admin_settings', session) %>
+          <%= link_to 'Permissions', edit_users_permission_path(presenter.user.id), { class: 'nav-link', id: 'link_permissions', remote: true } if current_user.access_controller?('users', 'permissions', session) %>
+          <!-- <a class="nav-link active" href="user-activities.html">Activities <span class="badge">16</span></a> -->
+        <% end %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <% unless presenter.user.new_record? %>
+              <%= link_to(edit_users_overview_path(presenter.user.id), { class: 'nav-link', remote: true }) do %>
+                <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+              <% end %>
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="user_page_section">
+      <%= render partial: "users/#{user_page_section}/edit", locals: { presenter: } %>
+    </div>
+  </div>
+</div>

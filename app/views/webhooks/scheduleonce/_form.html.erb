@@ -1,0 +1,37 @@
+<%
+  # app/views/webhooks/scheduleonce/_form.html.erb
+  #
+  # Example:
+  # 	render partial: "webhooks/scheduleonce/form"
+  #
+  # Required Instance Variables:
+  # 	@webhook = (Object) Webhook
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   collapsed: (Boolean)
+  #
+  collapsed = local_assigns.include?(:collapsed) && local_assigns[:collapsed].is_a?(Boolean) ? local_assigns[:collapsed] : true
+-%>
+<!-- webhooks form -->
+<div class="app_collapse">
+  <a class="app_collapse__header<%= collapsed ? ' collapsed' : '' -%>" data-toggle="collapse" href="#scheduleonce-webhook-form-collapse">
+    <h4><%= image_tag('integrations/scheduleonce_logo.png', { class: 'img-fluid', style: 'max-height:18px;' }) -%> Webhook Editor</h4>
+    <span class="collapse-icon fa fa-arrow-circle-down"></span>
+  </a>
+
+  <div class="collapse app_collapse-inner p-2<%= collapsed ? '' : ' show' -%>" id="scheduleonce-webhook-form-collapse">
+
+    <%= form_tag client_webhooks_path(@client.id), { builder: LooperFormBuilder, remote: true, method: :post } do %>
+      <%= hidden_field_tag :integration, 'scheduleonce' %>
+
+      <span id="scheduleonce_form"></span>
+
+      <%= submit_tag 'Save', data: { 'disable-with': 'Saving...' }, class: 'btn btn-app mt-2' %>
+    <% end %>
+
+  </div>
+</div>
+<!-- /.webhooks form -->

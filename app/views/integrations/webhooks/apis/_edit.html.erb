@@ -1,0 +1,109 @@
+<%
+  # app/views/integrations/webhooks/apis/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/webhooks/apis/edit', locals: { presenter: Integrations::Webhooks::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Webhooks::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Webhooks::Presenter)
+-%>
+<td colspan="<%= presenter.table_colspan -%>">
+  <%= render partial: 'layouts/alerts', locals: { models: [presenter.webhook] } %>
+  <%= form_with model: presenter.webhook, url: presenter.api_form_submit_path, builder: LooperFormBuilder, remote: true, class: 'needs-validation', id: 'contact_form', novalidate: true do |f| %>
+    <%= hidden_field_tag :integration, 'api' %>
+    <%= f.text_field :name, {
+          label:        { title: 'API Name' },
+          html_options: { placeholder: 'API Name', minlength: 2, required: true, autofocus: true },
+          messages:     { note: 'Required. Must be minimum of 2 characters.' }
+        } %>
+    <%= f.select :data_type, {
+          label:        { title: 'Select a Data Type' },
+          html_options: { id: "webhook_data_type_select_#{presenter.webhook.id}", mobile: browser.device.mobile? },
+          choices:      { array: Integrations::Webhooks::Presenter::DATA_TYPES, selected: presenter.webhook.data_type, prompt: 'Data Type' }
+        } %>
+
+    <%= bootstrap_copy_field(
+          field: "webhook_url_#{presenter.webhook.id}",
+          value: presenter.subscription_webhook_url,
+          label: { title: 'API Endpoint' }
+        ) %>
+
+    <% if %w[user contact].include?(presenter.webhook.data_type) %>
+
+      <%= f.switch :testing, {
+            label:      { title: 'Testing mode' },
+            checkboxes: [{ id: "testing_check_box_#{presenter.webhook.id}", checked: presenter.webhook.testing.to_i == 1, values: %w[1 0] }],
+            messages:   { note: "<span class='ml-2 text-success' id='testing_mode_note_off_#{presenter.webhook.id}'>Webhook is Live</span><span class='ml-2 text-danger' id='testing_mode_note_on_#{presenter.webhook.id}'>Webhook is in Test Mode</span>".html_safe }
+          } %>
+
+      <% if presenter.webhook.sample_data.present? %>
+        <%= bootstrap_info_field(
+              info:  '<i class="fa fa-check text-success mr-2"></i>Sample data was submitted.',
+              label: { title: 'Sample Data' }
+            ) %>
+      <% else %>
+        <%= bootstrap_info_field(
+              info:  '<i class="fa fa-times text-danger mr-2"></i>Please use the Webhook URL above to submit sample data.',
+              label: { title: 'Sample Data' }
+            ) %>
+      <% end %>
+    <% end %>
+
+    <%= render partial: 'integrations/webhooks/apis/edit/match_webhook_data', locals: { presenter: } %>
+
+    <% if %w[user contact].include?(presenter.webhook.data_type) %>
+      <%= render partial: 'integrations/webhooks/apis/edit/actions', locals: { presenter: } %>
+    <% end %>
+
+    <%= f.submit_buttons(
+          buttons: [{ title: 'Save Webhook API', disable_with: 'Saving Webhook API' }]
+        ) %>
+  <% end %>
+</td>
+
+<script>
+  $(function () {
+    updateTestingText('<%= presenter.webhook.id -%>');
+
+    $(document).off('change', 'select.variable_response_options');
+    $(document).on('change', 'select.variable_response_options', function(e) {
+      var key        = $(this).data('key');
+      var parent_key = $(this).data('parentkey');
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/integrations/webhook/apis/option/' + <%= presenter.webhook.id -%> + '/' + parent_key + '/' + key + '/' + $(this).val()
+      });
+    });
+
+    $(document).off('change', '#testing_check_box_<%= presenter.webhook.id -%>');
+    $(document).on('change', '#testing_check_box_<%= presenter.webhook.id -%>', function(e) {
+      updateTestingText('<%= presenter.webhook.id -%>');
+    });
+
+    $("#webhook_data_type_select_<%= presenter.webhook.id -%>").on("change", function (e) {
+      $.ajax({
+        method: 'PUT',
+        dataType: 'script',
+        url: '<%= integrations_webhook_api_path(presenter.webhook.id) -%>',
+        data: { 'webhook[data_type]': $("#webhook_data_type_select_<%= presenter.webhook.id -%>").val() }
+      });
+    });
+  });
+
+  function updateTestingText(webhook_id) {
+    if ($('#testing_check_box_' + webhook_id).is(':checked')) {
+      $('#testing_mode_note_on_' + webhook_id).removeClass('d-none');
+      $('#testing_mode_note_off_' + webhook_id).addClass('d-none');
+    } else {
+      $('#testing_mode_note_on_' + webhook_id).addClass('d-none');
+      $('#testing_mode_note_off_' + webhook_id).removeClass('d-none');
+    }
+  }
+</script>

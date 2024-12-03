@@ -1,0 +1,40 @@
+<%
+  # app/views/integrations/sunbasedata/_edit.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/sunbasedata/_edit"
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<!-- integrations.sunbasedata.edit -->
+<div class="container-body">
+  <%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+
+  <%= form_tag integrations_sunbasedata_integration_path, { builder: LooperFormBuilder, method: :put, remote: true } do %>
+    <div class="form-group">
+      <%= label_tag( "", "SunbaseData Schema Name", { class: "form-group-label mb-0 text-muted" } ) %>
+      <%= text_field_tag( "api_key", @client_api_integration.api_key, { class: "form-control", placeholder: "Schema Name" } ) %>
+      <small class="text-muted">* Required. Received from SunbaseData.</small>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag( "", "SunbaseData Sales Rep ID", { class: "form-group-label mb-0 text-muted" } ) %>
+      <%= text_field_tag( "sales_rep_id", @client_api_integration.sales_rep_id, { class: "form-control", placeholder: "Sales Rep ID" } ) %>
+      <small class="text-muted">* Required. Received from SunbaseData.</small>
+    </div>
+
+    <div class="form-group">
+      <%= label_tag( "", "SunbaseData Appointment Setter ID", { class: "form-group-label mb-0 text-muted" } ) %>
+      <%= text_field_tag( "appt_setter_id", @client_api_integration.appt_setter_id, { class: "form-control", placeholder: "Appointment Setter ID" } ) %>
+      <small class="text-muted">* Required. Received from SunbaseData.</small>
+    </div>
+
+    <%= submit_tag "Save", data: { "disable-with": "Saving..." }, class: 'btn btn-app mt-2' %>
+  <% end %>
+</div>
+<!-- /.integrations.sunbasedata.edit -->

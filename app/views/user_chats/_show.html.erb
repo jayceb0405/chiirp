@@ -1,0 +1,33 @@
+<%
+	# app/views/user_chats/_show.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_chats/show"
+	# 
+	# Required Instance Variables:
+	# 	@user:       (User)
+	# 	@user_chats: (UserChats)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="container-body pt-0">
+	<div class="m-central__messages-body" id="team_chats_<%= @user.id -%>">
+		<!-- add messages here -->
+	</div>
+
+	<div class="m-central__messages-footer mt-1" id="team_chat_form_<%= current_user.id %>">
+		<%= render partial: "user_chats/chats/form", locals: { user: @user } %>
+	</div>
+</div>
+
+<script>
+	$(function() {
+		$.ajax({
+			method: 'GET',
+			dataType: 'script',
+			url: '<%= index_user_chats_chats_path(@user) -%>'
+		});
+	});
+</script>

@@ -1,0 +1,36 @@
+<%
+  # app/views/integrations/salesrabbit/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/salesrabbit/overview'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'salesrabbit' } %>
+
+  <div class="card-body">
+    <div class="form-group">
+      <% if @client_api_integration.api_key.present? %>
+        <i class="fa fa-link text-success mr-2"></i>API Key is saved.
+      <% else %>
+        <i class="fa fa-link text-danger mr-2"></i>API Key is not saved.
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

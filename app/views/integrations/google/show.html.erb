@@ -1,0 +1,58 @@
+<%
+  # app/views/integrations/google/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/google/google-logo.png', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">Google Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_google_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'Connection', edit_integrations_google_connections_path, { class: 'nav-link', id: 'link_connections', remote: true } %>
+        <%= link_to 'Calendar', edit_integrations_google_calendars_path, { class: 'nav-link', id: 'link_calendars', remote: true } %>
+        <%= link_to 'Accounts', integrations_google_accounts_path, { class: 'nav-link', id: 'link_accounts', remote: true } if Integration::Google.user_authorized_for_accounts_locations_config?(current_user, @client_api_integration) %>
+        <%= link_to 'Locations', integrations_google_locations_path, { class: 'nav-link', id: 'link_locations', remote: true } if Integration::Google.user_authorized_for_accounts_locations_config?(current_user, @client_api_integration) %>
+        <%= link_to 'Reviews', integrations_google_reviews_path, { class: 'nav-link', id: 'link_reviews', remote: true } if current_user.access_controller?('integrations', 'google_reviews', session) %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_google_integrations_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <%= render partial: 'integrations/google/overview', locals: { calendar_presenter: presenter } %>
+    </div>
+  </div>
+</div>

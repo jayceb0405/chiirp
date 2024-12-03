@@ -1,0 +1,29 @@
+<%
+  # app/views/clients/billing/_upgrade.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/billing/upgrade'
+  #
+  # Required Instance Variables:
+  #   @package_page: (PackagePage)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:welcome_presenter) || WelcomePresenter.new(package_page: @package_page, upgrade: local_assigns.dig(:upgrade).to_bool)
+-%>
+<section class="position-relative py-5 bg-light">
+  <div class="container position-relative">
+    <h2 class="text-center"> Simple Pricing </h2>
+    <p class="lead text-muted text-center mb-5"> Easy lead generation & nurturing at an affordable price. </p>
+    <div class="row">
+      <%= render partial: 'welcome/package', collection: [1, 2, 3, 4], as: :package_position, locals: { welcome_presenter: presenter } %>
+    </div>
+  </div>
+</section>
+
+<script>
+  $(function () {
+    $('#dash_modal_dialog').css('max-width', '1200px');
+  });
+</script>

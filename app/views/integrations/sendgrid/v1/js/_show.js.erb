@@ -1,0 +1,39 @@
+<%
+  # app/views/integrations/sendgrid/v1/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendgrid/v1/js/show', locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration) && local_assigns.dig(:cards).is_a?(Array)
+
+  presenter = Integrations::Sendgrid::V1::Presenter.new(client_api_integration: @client_api_integration) if %w[api_key_edit email_addresses_edit overview].intersect?(cards)
+-%>
+// API Keys
+<% if cards.include?('api_key_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendgrid/v1/api_key/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Email Addresses
+<% if cards.include?('email_addresses_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendgrid/v1/email_addresses/edit', locals: { presenter: } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendgrid/v1/instructions/show' -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/sendgrid/v1/overview', locals: { presenter: } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

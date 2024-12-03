@@ -1,0 +1,157 @@
+<%
+  # app/views/clients/overview/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/overview/edit'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Overview</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <div class="section-block">
+        <div class="metric-row metric-flush">
+
+          <% if @phone_number_assigned && @contact_created && @user_phone_defined %>
+
+            <div class="col-4 py-2">
+              <%= link_to(edit_clients_profile_path(presenter.client), { class: 'metric metric-bordered align-items-center', id: 'link_profile', remote: true }) do %>
+                <h2 class="metric-label"> New Contact Assignment </h2>
+                <p class="metric-value h3">
+                  <span class="value text-success">
+                    <%= presenter.client.def_user_name %>
+                  </span>
+                </p>
+              <% end %>
+            </div>
+
+          <% end %>
+
+          <div class="col-4 py-2">
+            <%= link_to(client_phone_numbers_path(presenter.client), { class: 'metric metric-bordered align-items-center', remote: true }) do %>
+              <%= render 'pie_chart_element', title: 'Phone Numbers', count: presenter.client.twnumbers.count, max: presenter.client.current_max_phone_numbers %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(my_contacts_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'Contacts', count: presenter.client.contacts.count, max: presenter.client.max_contacts_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(client_users_path(presenter.client), class: 'metric metric-bordered align-items-center', data: { turbo: true, turbo_stream: true }) do %>
+              <%= render 'pie_chart_element', title: 'Users', count: presenter.client.users.count, max: presenter.client.max_users_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(campaigns_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'Campaigns', count: presenter.client.campaigns.count, max: presenter.client.campaigns_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(client_custom_fields_path(presenter.client), { class: 'metric metric-bordered align-items-center', remote: true }) do %>
+              <%= render 'pie_chart_element', title: 'Custom Fields', count: presenter.client.client_custom_fields.count, max: presenter.client.custom_fields_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(client_folders_path(presenter.client), { class: 'metric metric-bordered align-items-center', remote: true }) do %>
+              <%= render 'pie_chart_element', title: Folder.title.pluralize, count: presenter.client.folders.count, max: presenter.client.folders_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(client_groups_path(presenter.client), { class: 'metric metric-bordered align-items-center', remote: true }) do %>
+              <%= render 'pie_chart_element', title: 'Groups', count: presenter.client.groups.count, max: presenter.client.groups_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(stages_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'Pipelines', count: presenter.client.stage_parents.count, max: presenter.client.stages_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(clients_kpis_path, { class: 'metric metric-bordered align-items-center', remote: true }) do %>
+              <%= render 'pie_chart_element', title: 'KPIs', count: presenter.client.client_kpis.count, max: presenter.client.max_kpis_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(surveys_surveys_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: Surveys::Survey.title.pluralize, count: presenter.client.surveys.count, max: presenter.client.surveys_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(clients_widgets_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'Site Chat Buttons', count: presenter.client.client_widgets.count, max: presenter.client.widgets_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(email_templates_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'Email Templates', count: presenter.client.email_templates.count, max: presenter.client.max_email_templates %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(user_contact_forms_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'QuickPages', count: presenter.client.user_contact_forms.count, max: presenter.client.quick_leads_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(aiagents_path, { class: 'metric metric-bordered align-items-center', remote: false }) do %>
+              <%= render 'pie_chart_element', title: 'AI Agents', count: presenter.client.aiagents.count, max: presenter.client.aiagent_included_count %>
+            <% end %>
+          </div>
+
+          <div class="col-4 py-2">
+            <%= link_to(client_lead_sources_path(presenter.client), { class: 'metric metric-bordered align-items-center', remote: true }) do %>
+              <h2 class="metric-label"> Lead Sources </h2>
+              <p class="metric-value h3">
+                <span class="value text-success">
+                  <%= presenter.client.lead_sources.count %>
+                </span>
+              </p>
+            <% end %>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_overview').addClass('has-active');
+    $('#breadcrumb').hide();
+  });
+</script>

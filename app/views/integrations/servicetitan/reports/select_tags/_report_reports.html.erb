@@ -1,0 +1,29 @@
+<%
+  # app/views/integrations/servicetitan/reports/select_tags/_report_reports.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/select_tags/report_reports.html.erb', { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:  (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'report[report_id]',
+      label:        { title: "ServiceTitan report<span class=\"ml-2\">#{link_to '', integrations_servicetitan_reports_refresh_reports_path(id: presenter.report_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Reports', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { id: "report_report_select_#{presenter.report_id}" },
+      options:      { array: presenter.reports_by_category(presenter.report_category_id.presence || presenter.reports_category_options&.first&.second), selected: presenter.report_report_id, blank: 'Select a Report' }
+    ) %>
+
+<script>
+  $(function () {
+    $(document).off('change', '#report_report_select_<%= presenter.report_id -%>');
+    $(document).on('change', '#report_report_select_<%= presenter.report_id -%>', function(e) {
+      update_report_criteria('<%= presenter.report_id -%>');
+    });
+  });
+</script>

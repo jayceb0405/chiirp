@@ -1,0 +1,32 @@
+<%
+  # app/views/clients/dlc10/v2/campaign_types/_type.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/dlc10/v2/campaign_types/type', collection: campaign_types, as: :type, locals: { presenter: Clients::Dlc10::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::Dlc10::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::Dlc10::V2::Presenter)
+-%>
+<tr>
+  <td class="text-left"> <%= type[:usecase] == '2FA' ? '2FA' : type[:usecase].titleize -%> </td>
+  <td class="text-right"> <%= number_to_currency(type[:monthlyFee] + 2) -%>/mo </td>
+  <td colspan="6"></td>
+</tr>
+
+<% type[:mnoMetadata].each do |usecase, data| %>
+  <tr>
+    <td class="text-right"> <%= data[:mno] -%></td>
+    <td></td>
+    <td class="text-center"> <%= data[:mnoReview] ? 'Req' : '' -%> </td>
+    <td class="text-left"> <%= presenter.dlc10_campaign_use_case_throughput(data.dig(:tpmScope), data.dig(:tpm), data.dig(:brandDailyCap)) -%> </td>
+    <td class="text-center"> <%= data[:reqSubscriberOptin] ? 'Req' : '' -%> </td>
+    <td class="text-center"> <%= data[:reqSubscriberOptout] ? 'Req' : '' -%> </td>
+    <td class="text-center"> <%= data[:reqSubscriberHelp] ? 'Req' : '' -%> </td>
+    <td class="text-center"> <%= data[:noEmbeddedLink] ? '<i class="fa fa-times text-danger"></i>'.html_safe : '<i class="fa fa-check text-success"></i>'.html_safe -%> </td>
+  </tr>
+<% end %>

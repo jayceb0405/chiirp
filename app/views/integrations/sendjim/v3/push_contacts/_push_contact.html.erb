@@ -1,0 +1,39 @@
+<%
+  # app/views/integrations/sendjim/v3/push_contacts/_push_contact.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendjim/v3/push_contacts/push_contact', collection: Array, as: :push_contact, , locals: { presenter: PushContactsPresenter }
+  #
+  # Instance Variables:
+  #   (opt) @push_contact: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter:    (Integrations::Sendjim::V3::PushContactsPresenter)
+  #   (opt) push_contact: (Hash)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.push_contact = push_contact || @push_contact
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-light" data-toggle="collapse" data-target="#edit_push_contact_<%= presenter.push_contact_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left"><%= presenter.push_contact_tag&.name.to_s -%></td>
+  <td class="text-left"><%= presenter.push_contact_quick_send_type.titleize -%></td>
+  <td class="text-left"><%= presenter.push_contact_quick_send_name -%></td>
+  <td class="align-middle text-right">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_push_contact_<%= presenter.push_contact_id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt push_contact_delete',
+          data:  { id: presenter.push_contact_id, name: presenter.push_contact_tag&.name.to_s }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_push_contact" id="edit_push_contact_<%= presenter.push_contact_id -%>">
+  <!-- Push Contact Edit -->
+</tr>

@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/sendjim/v3/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendjim/v3/instructions/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Sendjim::V3::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SendJim Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your SendJim account.</li>
+      <li>Create Automations in your SendJim account and start automations on your Contacts from <%= I18n.t('tenant.name') -%>.</li>
+      <li>Don't have a SendJim account? <%= link_to('Click Here Sign up today!', 'https://www.sendjim.io/signup-home', target: :_blank, rel: :noopener) -%></li>
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>Create your SendJim account at <%= link_to('SendJim.io', 'https://www.sendjim.io/signup-home', target: :_blank, rel: :noopener) -%>.</li>
+      <li>Click the "Connect to SendJim" button in <%= I18n.t('tenant.name') -%>.</li>
+      <li>Click the "Allow" button when the SendJim authentication window appears.</li>
+      <li>All Set!</li>
+    </ul>
+
+    <h6>Import:</h6>
+    <ul>
+      <li>Import your SendJim contacts into <%= I18n.t('tenant.name') -%>.</li>
+      <li>Select to only add new contacts or add new & update existing contacts.</li>
+      <li>Click the "Import Contacts" button and watch your SendJim contacts load into <%= I18n.t('tenant.name') -%>.</li>
+    </ul>
+
+    <h6>Push Contacts:</h6>
+    <ul>
+      <li>This is where the magic happens!</li>
+      <li>Click the elipsis (<i class="fa fa-fw fa-ellipsis-v"></i>) in the top right side of the title bar to create a new Push Tag.</li>
+      <li>Select or create a new Tag (when this Tag is applied to a Contact SendJim will process the selected mailing).</li>
+      <li>Select from the "SendJim Mailing Type" & "SendJim Mailing" that you created in SendJim.</li>
+      <li>Turn on "Send Tags to SendJim" if you want to send your <%= I18n.t('tenant.name') -%> Tags to SendJim.</li>
+      <li>When selecting to send a "Neighbor Mailing Type".</li>
+      <ul>
+        <li>Enter either the "Number of Neighbors" or "All Neighbors in Radius (Miles)" (these are mutually exclusive & miles will most likely be a decimal ie: 0.1).</li>
+        <li>Turn on "Same Street Only" if you only want to send to neighbors on the same street.</li>
+      </ul>
+      <li>Don't forget to click the "Save Push Tag" button.</li>
+      <li>You may create as many different Push Tags as desired.</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

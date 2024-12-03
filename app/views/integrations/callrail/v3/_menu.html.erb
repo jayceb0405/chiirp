@@ -1,0 +1,21 @@
+<%
+  # app/views/integrations/callrail/v3/_page_navs.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/page_navs', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+
+<div class="nav-scroller">
+  <div class="nav nav-center nav-tabs">
+    <%= link_to 'Connection', edit_integrations_callrail_v3_connections_path, { class: 'nav-link', id: 'link_connections', remote: true } %>
+    <%= link_to 'Events', integrations_callrail_v3_events_path, { class: 'nav-link', id: 'link_events', remote: true } if presenter.valid_credentials? %>
+  </div>
+</div>

@@ -1,0 +1,78 @@
+<%
+# app/views/integrations/zapier/_instructions.html.erb
+#
+# Example:
+# 	render partial: "integrations/zapier/instructions"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect Chiirp to hundreds of other apps with Zapier</h6>
+  <div class="card-body">
+    <h6>Here's What You Can Do With Chiirp & Zapier</h6>
+    <ul>
+      <li>Send your Contact information out to other apps in Zapier every time you...
+      <ul>
+        <li>Add a new Contact.</li>
+        <li>Edit an existing Contact.</li>
+        <li>Apply a Tag to a Contact.</li>
+      </ul>
+      <li>Zapier Zaps from other apps may...</li>
+      <ul>
+        <li>Create a new Contact in Chiirp.</li>
+        <li>Update an existing Contact in Chiirp.</li>
+      </ul>
+    </ul>
+
+    <h6>Getting Started with Zapier</h6>
+
+    <ul>
+      <li><a href="https://zapier.com/apps/Chiirp" class="text-primary" target="_blank">Zapier</a> lets you connect Chiirp to 2,000+ other web services.</li>
+      <li>Automated connections called Zaps, set up in minutes with no coding, can automate your day-to-day tasks and build workflows between apps that otherwise wouldn't be possible.</li>
+      <li>Each Zap has one app as the **Trigger**, where your information comes from and which causes one or more **Actions** in other apps, where your data gets sent automatically.</li>
+      <li>Sign up for a free <a href="https://zapier.com/apps/Chiirp" class="text-primary" target="_blank">Zapier</a> account, from there you can jump right in.</li>
+    </ul>
+
+    <!-- <script src="https://zapier.com/zapbook/embed/widget.js?services=APP&container=true&limit=5,"></script> -->
+
+    <div class="mt-auto <%= local_assigns.dig(:row, :class).to_s -%>" id="<%= local_assigns.dig(:row, :id).to_s -%>" style="<%= local_assigns.dig(:row, :display).nil? || local_assigns[:row][:display].to_bool ? '' : 'display:none;' -%>">
+      <div class="form-actions">
+        <%= link_to 'Visit our Chiirp app in Zapier',
+                    'https://zapier.com/apps/chiirp',
+                    class:  'btn btn-info ml-auto',
+                    style:  'text-decoration: none;',
+                    target: '_blank', rel: 'noopener' %>
+      </div>
+    </div>
+
+    <h6 class="mt-4">Here are some of our favorite Zapier Zaps...</h6>
+    <script src="https://zapier.com/apps/embed/widget.js?services=chiirp&limit=5"></script>
+
+    <h6>How do I connect Chiirp to Zapier?</h6>
+
+    <ol>
+      <li>Log in to your <a href="https://zapier.com/sign-up" class="text-primary" target="_blank">Zapier account</a> or create a <a href="https://zapier.com" class="text-primary" target="_blank">new account</a>.</li>
+      <li>Navigate to "My Apps" from the top menu bar.</li>
+      <li>Now click on "Connect a new account..." and search for "Chiirp"</li>
+      <li>Use your credentials to connect your Chiirp account to Zapier.</li>
+      <li>Once that's done you can start creating an automation! Use a pre-made Zap or create your own with the Zap Editor. Creating a Zap requires no coding knowledge and you'll be walked step-by-step through the setup.</li>
+      <li>Need inspiration? See everything that's possible with <a href="https://zapier.com/apps/Chiirp" class="text-primary" target="_blank">Chiirp and Zapier</a>.</li>
+    </ol>
+
+    <p>
+      If you have any additional questions, you can reach out to <a href="mailto:contact@zapier.com" class="text-primary">Zapier</a>.
+    </p>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

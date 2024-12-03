@@ -1,0 +1,41 @@
+<%
+  # app/views/users/overview/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'users/overview/edit'
+  #
+  # Required Instance Variables:
+  #   @user: (User)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Users::Presenter.new(user: @user)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Overview</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_overview').addClass('has-active');
+    $('#breadcrumb').hide();
+  });
+</script>

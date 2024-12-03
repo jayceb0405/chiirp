@@ -1,0 +1,50 @@
+<%
+  # app/views/contacts/scheduled_actions/_action.html.erb
+  #
+  # Example:
+  # 	render partial: "contacts/scheduled_actions/action", collection: scheduled_actions, as: :delayed_job, locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  #
+  # Local Variables:
+  #   (req) delayed_job: (DelayedJob)
+  #   (req) presenter:   (Contacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+  return unless local_assigns.dig(:delayed_job).is_a?(DelayedJob) || local_assigns.dig(:delayed_job).is_a?(Delayed::Backend::ActiveRecord::Job)
+
+  presenter.delayed_job = delayed_job
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#delayed_job_<%= delayed_job.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle pl-0" colspan="2">
+    <%= presenter.delayed_job_icon.html_safe -%><%= presenter.delayed_job_action_name.html_safe %>
+  </td>
+  <td class="text-left align-middle">
+    <%= presenter.delayed_job_campaign_name %>
+  </td>
+  <td class="text-left align-middle"> <%= Friendly.new.date(delayed_job.run_at, presenter.client.time_zone, true) -%> </td>
+  <td class="text-right align-middle">
+    <% if %w[send_text send_email].include?(delayed_job.process) %>
+      <%= button_tag('',
+                     class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                     type:  'button',
+                     data:  {
+                       toggle: 'collapse',
+                       target: "#delayed_job_#{delayed_job.id}"
+                     }) %>
+    <% end %>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_action',
+          data:  { contactid: presenter.contact.id, delayedjobid: delayed_job.id, actionname: presenter.delayed_job_action_name }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse delayed_job_edit" id="delayed_job_<%= delayed_job.id -%>" data-contactid="<%= presenter.contact.id -%>" data-delayedjobid="<%= delayed_job.id -%>">
+  <!-- delayed_job -->
+</tr>

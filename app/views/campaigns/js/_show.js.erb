@@ -1,0 +1,84 @@
+<%
+  # app/views/campaigns/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "campaigns/js/show", locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   (opt) @campaign: (Campaign)
+  #
+  # Local Variables:
+  #   cards: (Array)
+  #
+  return unless local_assigns.dig(:cards).is_a?(Array)
+
+  presenter = Campaigns::Presenter.new(current_user) if cards.intersect?(%w[campaign campaign_general_settings index select_campaign_dropdown triggers_list])
+  presenter.campaign = @campaign if cards.intersect?(%w[triggers_list])
+-%>
+// Index
+<% if cards.include?('index') %>
+  $('#campaigns_body').html('<%= j render partial: 'campaigns/index/list', locals: { presenter: } -%>');
+<% end %>
+
+// Show
+<% if cards.include?('campaign') %>
+  $('#campaigns_body').html('<%= j render partial: 'campaigns/show', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('campaign_general_settings') %>
+  $('#campaign_general_settings').html('<%= j render partial: 'campaigns/show/edit', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('campaign_general_name') %>
+  $('#campaign_general_name').html('<%= @campaign.name -%>');
+<% end %>
+<% if cards.include?('campaign_general_settings_active') %>
+  $('#campaign_general_settings_active').html('<%= j render partial: 'campaigns/show/active' -%>');
+<% end %>
+<% if cards.include?('triggers_list') %>
+  $('#triggers_list').html('<%= j render partial: 'triggers/list', locals: { presenter: } -%>');
+<% end %>
+
+// Import Campaign
+<% if cards.include?('import') %>
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-cloud-download-alt"></i> Import Campaign');
+  $('#dash_modal_body').html('<%= j render partial: 'campaigns/import' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('index_contact_campaign') %>
+  $('#campaign_history_<%= @contact_campaign.id -%>_td').html('<%= j render partial: 'campaigns/contact/triggeractions' -%>');
+<% end %>
+<% if cards.include?('index_contact_campaigns') %>
+  $('#campaigns_index_content').html('<%= j render partial: 'campaigns/contact/index_content' -%>');
+<% end %>
+
+// Campaign Dropdown
+<% if cards.include?('select_campaign_dropdown') %>
+  $('#select_campaign_dropdown').html('<%= j render partial: 'campaigns/select_campaign_dropdown', locals: { presenter: } -%>');
+<% end %>
+
+// Show/Hide
+<% if cards.include?('show_campaign_general_help') %>
+  $('#campaign_general_help').collapse('show');
+<% end %>
+<% if cards.include?('show_campaign_general_settings') %>
+  $('#campaign_general_settings').collapse('show');
+<% end %>
+<% if cards.include?('hide_campaign_general_settings') %>
+  $('#campaign_general_settings').collapse('hide');
+<% end %>
+<% if cards.include?('show_trigger_form') %>
+  $('#trigger-form-<%= @trigger.new_record? ? @trigger.campaign_id : @trigger.id -%>_c').collapse('show');
+<% end %>
+<% if cards.include?('show_new_campaign_trigger_button') %>
+  $('#new_campaign_trigger_button').show();
+<% end %>
+
+<% if defined?(@campaign) %>
+  <%= render partial: 'campaigns/js/analysis_results', locals: { campaign: @campaign } %>
+<% end %>
+
+$('.tooltip').remove();
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

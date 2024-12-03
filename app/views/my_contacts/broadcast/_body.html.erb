@@ -1,0 +1,140 @@
+<%
+  # app/views/my_contacts/broadcast/_body.html.erb
+  #
+  # Example:
+  #   render partial: 'my_contacts/broadcast/body', locals: { presenter: MyContacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (MyContacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(MyContacts::Presenter)
+%>
+<%= form_with url: my_contacts_path(format: 'csv', broadcast: presenter.broadcast), builder: LooperFormBuilder, class: 'needs-validation card-body d-flex flex-column p-2', id: 'my_contacts_form', novalidate: true, local: true, multipart: true do |f| %>
+  <%= hidden_field_tag 'file_attachments_message_id', '' %>
+
+  <% if presenter.broadcast %>
+    <div class="d-flex justify-content-between">
+      <%= bootstrap_select_tag(
+            field:        'user_action[action]',
+            row:          { class: 'w-100 pr-3' },
+            col:          { class: 'mb-3' },
+            form_group:   { class: 'mb-0' },
+            label:        { title: 'Schedule Action' },
+            html_options: { id: 'contacts-action-select' },
+            options:      { for_select: options_for_select(presenter.action_options), blank: 'Select an Action' }
+          ) %>
+
+      <% if current_user.access_controller?('import_contacts', 'allowed', session) %>
+        <%= link_to 'Import Contacts', contacts_import_path, class: 'w-25 btn btn-sm btn-secondary' %>
+      <% end %>
+    </div>
+    <div id="broadcast_action" class="mt-2">
+      <!-- Broadcast Action -->
+    </div>
+
+    <%= f.submit_buttons(
+          buttons: [{ title: 'Process Action', class: 'user_action_option', id: 'contacts_submit', display: false, disabled: true }]
+        ) %>
+  <% end %>
+
+  <%= turbo_frame_tag 'my_contacts', src: my_contacts_contacts_path, class: 'mt-2' do %>
+    <%= bootstrap_spinning_logo(message: 'Loading Contacts') %>
+  <% end %>
+<% end %>
+
+<script>
+  $(function() {
+    $('[data-toggle="tooltip"], .tooltip').tooltip( {
+      placement: 'auto',
+      container: 'body'
+    });
+
+    $(document).off('click', 'a');
+    $(document).on('click', 'a', function () {
+      $('[data-toggle="tooltip"], .tooltip').tooltip('hide');
+    });
+
+    $(document).off('click', '#new_contact');
+    $(document).on('click', '#new_contact', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= new_contact_path -%>'
+      });
+    });
+
+    $(document).off('change', '#contacts-action-select');
+    $(document).on('change', '#contacts-action-select', function (e) {
+      toggleActions($(this).val());
+    });
+
+    $(document).off('change', '[id*="user_action"]');
+    $(document).on('change', '[id*="user_action"]', function() {
+      countSelectedContacts();
+    });
+
+    $(document).off('click', '#contacts_submit');
+    $(document).on('click', '#contacts_submit', function(e) {
+
+      // all selections except export
+      e.preventDefault();
+      e.stopPropagation();
+
+      $('#contacts_submit').val('Processing...');
+      $('#contacts_submit').prop('disabled', true);
+
+      var params = $('#my_contacts_form').serializeArray();
+      params.push({ name: 'message[file_attachments]', value: $('#file_attachments_' + $('#file_attachments_message_id').val()).val() });
+
+      $.ajax({
+        method: 'POST',
+        dataType: 'turbo_stream',
+        accepts: {
+          'turbo_stream': 'text/vnd.turbo-stream.html'
+        },
+        converters: {
+          'text turbo_stream': function (data) {
+            Turbo.renderStreamMessage(data);
+          }
+        },
+        url: '<%= my_contacts_path(broadcast: presenter.broadcast) -%>',
+        data: params
+      });
+    });
+
+    toggleActions($(this).val());
+  });
+
+  function toggleActions(action) {
+    $('#broadcast_action').html('');
+    $('#file_attachments_message_id').val('');
+
+    if (action) {
+      $.ajax({
+        method: 'GET',
+        accepts: {
+          'turbo_stream': 'text/vnd.turbo-stream.html'
+        },
+        dataType: 'turbo_stream',
+        converters: {
+          'text turbo_stream': function(data) {
+            Turbo.renderStreamMessage(data);
+          }
+        },
+        url: '<%= my_contacts_broadcast_action_path -%>',
+        data: { broadcast_action: action }
+      });
+
+      $('#contacts_submit').show();
+      countSelectedContacts();
+    } else {
+      $('#contacts_submit').hide();
+    }
+  }
+</script>

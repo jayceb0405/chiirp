@@ -1,0 +1,46 @@
+<%
+  # app/views/integrations/cardx/events/_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/cardx/events/event', collection: @client_api_integration.events, as: :event, locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   (req) event: (Hash)
+  #
+  presenter       = local_assigns.dig(:presenter) || Integrations::Cardx::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = event
+  presenter.account_and_company_id = presenter.event[:account_company_id] if presenter.event[:account_company_id]
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_event_<%= presenter.event[:event_id] -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle" id="td_event_<%= presenter.event[:event_id] -%>"><%= presenter.event[:name] -%></td>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_campaign&.name } %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_group&.name } %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_tag&.name } %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_stage&.name } %>
+  <%= content_tag(:td, class: 'text-left align-middle') { presenter.event_stop_campaigns.join(', ') } %>
+  <td class="text-right align-middle">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#edit_event_<%= presenter.event[:event_id] -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+    <%= link_to '', '#', {
+          class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_event',
+          style: 'text-decoration: none;',
+          data:  { id: presenter.event[:event_id] }
+        } %>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse edit_event" id="edit_event_<%= presenter.event[:event_id] -%>">
+  <!-- Event -->
+  <td colspan="8" class="mt-3" style="text-align: center;">
+    <%= render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Event' } %>
+  </td>
+</tr>

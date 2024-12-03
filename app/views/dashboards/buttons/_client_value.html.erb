@@ -1,0 +1,36 @@
+<%
+  # app/views/dashboards/buttons/_client_value.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/client_value', { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.super_admin? %>
+  <%
+    historical_clients = Client.select(:id, 'SUM(CAST(client_transactions.setting_value AS DOUBLE PRECISION)) AS total, COUNT(client_transactions.setting_value) AS count').where(clients: { tenant: I18n.t('tenant.id') }).joins(:client_transactions).where(client_transactions: { setting_key: ['mo_charge'] }).group('id').order('id')
+    historical_mo_charge_total = 0
+    historical_mo_charge_count = 0
+    historical_clients.each do |c|
+      historical_mo_charge_total += c.total.to_d
+      historical_mo_charge_count += c.count.to_d
+    end
+  %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               'client_value',
+        stats:            "#{historical_clients.length.positive? ? (historical_mo_charge_count / historical_clients.length).round(2) : 'N/A'} x #{historical_mo_charge_count.positive? ? number_to_currency(historical_mo_charge_total / historical_mo_charge_count) : 'N/A'}",
+        description:      "Client Value <small>(#{historical_clients.length.positive? && historical_mo_charge_count.positive? ? number_to_currency((historical_mo_charge_count / historical_clients.length) * (historical_mo_charge_total / historical_mo_charge_count)) : 'N/A'})</small>",
+        description_icon: 'c',
+        icon:             'fa fa-city',
+        link:             clients_companies_path,
+        chart_id:         '',
+        chart_value:      0,
+        button_movable:   true
+      } %>
+<% end %>

@@ -1,0 +1,38 @@
+<%
+  # app/views/quick_responses/_quick_response.html.erb
+  #
+  # Example:
+  #   render partial: 'quick_responses/quick_response', locals: { presenter: QuickResponsesPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter:  (QuickResponsesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(QuickResponsesPresenter)
+-%>
+
+<%
+type = quick_response.is_a?(Aiagent) ? 'aiagent' : 'simple'
+%>
+
+<tr>
+  <td class="text-left align-middle">
+    <a class="text-decoration-none text-reset" href="#"><span class="quick_response_target" data-type="<%= type %>" data-message="<%= quick_response.message if quick_response.respond_to?(:message) %>" data-aiagent-id="<%= quick_response.id %>"><%= type == 'aiagent' ? "<i class=\"fa fa-robot mr-2\"></i> #{quick_response.name}".html_safe : quick_response.name %></span></a>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"><%= type == 'simple' ? quick_response.message.truncate(50) : 'n/a' %></td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(quick_response.created_at, quick_response.client.time_zone, true) -%> </td>
+  <td class="text-middle align-middle text-right">
+    <% if type == 'simple' && current_user.central_controller.include?('manage_quick_responses') %>
+      <%= link_to '',
+                  edit_quick_response_path(quick_response, contact_id: params[:contact_id], message_id: presenter.message_id),
+                  class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                  remote: true %>
+      <%= link_to '',
+                  '#',
+                  class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt quick_response_delete',
+                  data:  { id: quick_response.id, name: quick_response.name } %>
+    <% end %>
+  </td>
+</tr>

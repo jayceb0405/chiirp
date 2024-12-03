@@ -1,0 +1,91 @@
+<%
+  # app/views/integrations/google/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/google/connections/edit"
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   (opt) presenter: (Integrations::Google::Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Google::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connect <%= I18n.t('tenant.name') -%> to Google</h6>
+  <div class="card-body">
+
+    <% if presenter.google_account_admin == current_user %>
+      <h6 class="mt-5">Google Account Connection</h6>
+    <% else %>
+      <h6 class="mt-5">Your Google Account Connection</h6>
+    <% end %>
+    <% if presenter.connection_valid? %>
+      <%= bootstrap_info_field(
+            info: '<i class="fa fa-link text-success mr-2"></i>Google connection is valid.',
+            row:  { columns: [0, 12] }
+          ) %>
+    <% else %>
+      <%= bootstrap_info_field(
+            info: "<i class=\"fa fa-link text-danger mr-2\"></i>Google connection must be refreshed. Click #{presenter.user_api_integration.token.present? ? '"Revoke Connection"' : '"Sign in with Google"'} to refresh token.",
+            row:  { columns: [0, 12] }
+          ) %>
+
+      <h6>Important!</h6>
+      <ul>
+        <li>Be sure to check...</li>
+          <ul>
+            <li><strong>View and edit events on all your calendars.</strong></li>
+            <li><strong>See, edit, share, and permanently delete all the calendars you can access using Google Calendar.</strong></li>
+          </ul>
+        <li>These must be selected to authorize <%= I18n.t('tenant.name') -%> to add events to your calendars.</li>
+      </ul>
+    <% end %>
+
+    <% if presenter.connection_valid? || presenter.user_api_integration.token.present? %>
+      <div class="mt-auto">
+        <div class="form-actions">
+          <%= link_to 'Revoke Connection', integrations_google_connections_path, method: :delete, class: 'btn btn-info ml-auto' %>
+        </div>
+      </div>
+    <% else %>
+      <div class="mt-auto">
+        <div class="form-actions">
+          <%= link_to image_tag('integrations/google/btn_google_signin_dark_pressed_web@2x.png', { class: 'img-fluid rounded-0', style: 'max-height:40px;' }), send(Tenant.omniauth_authorize_path(request, 'google_oauth2')), method: :post, class: 'ml-auto' %>
+        </div>
+      </div>
+    <% end %>
+
+    <h6>Google Account Administrator</h6>
+    <p>
+      <% if presenter.google_account_admin == current_user %>
+      You are the Google account administrator.
+      <% else %>
+      <%= presenter.google_account_admin.fullname %> is the Google account administrator.
+      <% end %>
+    </p>
+    <% if presenter.google_account_admin == current_user || presenter.client.def_user == current_user %>
+      <%= form_with model: @user_api_integration, url: integrations_google_connections_path, builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', novalidate: true } do |f| %>
+        Change the Google account administrator by selecting a different user from the list below.
+        <%= bootstrap_select_tag(
+              field:    'google[account_administrator_id]',
+              row:      { columns: [0, 12] },
+              options:  { for_select: options_from_collection_for_select(presenter.google_account_admin_potentials, 'id', 'fullname', presenter.google_account_admin.id) },
+              messages: { note: 'Choose the Google account administrator User.' }
+            ) %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

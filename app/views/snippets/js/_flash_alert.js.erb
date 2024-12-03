@@ -1,0 +1,28 @@
+<%
+# app/views/snippets/js/_flash_alert.js.erb
+# render partial: 'snippets/js/flash_alert', formats: [:js]
+# flash[:sweetify] = cookies[:sweetify] if cookies[:sweetify].present?
+%>
+<% if flash[:sweetify].present? || cookies[:sweetify].present? %>
+  try { var obj = JSON.parse('<%= j raw(flash[:sweetify] || cookies[:sweetify]) -%>'); }
+  catch(e) { var obj = {title: '', text: '', html: '', icon: 'danger'} }
+
+  if (obj.icon) {
+    if (obj.icon == 'error') {
+      obj.icon = 'danger'
+    }
+  } else {
+    obj.icon = 'danger'
+  }
+
+  if (obj.title || obj.text || obj.html) {
+    ChiirpAlert({
+      'title':      (obj.title || ''),
+      'body':       (obj.text || obj.html || ''),
+      'type':       obj.icon,
+      'persistent': true
+    });
+  }
+  <% flash[:sweetify] = nil %>
+  <% cookies.delete(:sweetify) %>
+<% end %>

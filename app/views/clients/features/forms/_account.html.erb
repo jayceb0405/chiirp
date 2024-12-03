@@ -1,0 +1,89 @@
+<%
+  # app/views/clients/features/forms/_account.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/features/forms/account', locals: { presenter: ClientPresenter }
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   client_presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || ClientPresenter.new(client: @client)
+-%>
+<h6 class="card-header">Account</h6>
+<%= form_with model: presenter.client, url: clients_feature_path(presenter.client), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: 'features_form', novalidate: true } do |f| %>
+  <%= f.number_field :max_users_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Users Permitted' },
+        html_options: { min: 1, step: 1 },
+        messages:     { note: 'Must be minimum of 1 user.' }
+      } %>
+  <%= f.number_field :max_contacts_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Contacts Permitted <small class="text-muted">(-1=&#8734;)</small>'.html_safe },
+        html_options: { min: -1, step: 1 },
+        messages:     { note: 'Must be minimum of -1 contact.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Message Central Allowed' },
+        checkboxes: [{ field: 'message_central_allowed', checked: presenter.client.message_central_allowed, values: %w[true false] }]
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'My Contacts Allowed' },
+        checkboxes: [{ field: 'my_contacts_allowed', checked: presenter.client.my_contacts_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :custom_fields_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Custom Fields Permitted' },
+        html_options: { min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 custom fields.' }
+      } %>
+  <%= f.number_field :folders_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: "Maximum #{Folder.title.pluralize} Permitted" },
+        html_options: { min: 0, step: 1 },
+        messages:     { note: "Must be minimum of 0 #{Folder.title.downcase.pluralize}." }
+      } %>
+  <%= f.number_field :groups_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum Groups Permitted' },
+        html_options: { min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 Groups.' }
+      } %>
+  <%= f.number_field :stages_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: "Maximum #{StageParent.title.pluralize} Permitted" },
+        html_options: { min: 0, step: 1 },
+        messages:     { note: "Must be minimum of 0 #{StageParent.title.downcase.pluralize}." }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: "#{StageParent.title} Sharing Allowed" },
+        checkboxes: [{ field: 'share_stages_allowed', checked: presenter.client.share_stages_allowed, values: %w[true false] }]
+      } %>
+  <%= f.number_field :max_kpis_count, {
+        row:          { columns: [6, 6] },
+        label:        { title: 'Maximum KPIs Permitted' },
+        html_options: { min: 0, step: 1 },
+        messages:     { note: 'Must be minimum of 0 KPIs.' }
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'Team Chat Allowed' },
+        checkboxes: [{ field: 'user_chat_allowed', checked: presenter.client.user_chat_allowed, values: %w[true false] }]
+      } %>
+  <%= f.switch :null, {
+        row:        { columns: [6, 6] },
+        label:      { title: 'User Tasks Allowed' },
+        checkboxes: [{ field: 'tasks_allowed', checked: presenter.client.tasks_allowed, values: %w[true false] }]
+      } %>
+
+  <%= f.submit_buttons buttons: [{ title: 'Save Account Features', disable_with: 'Saving Account Features' }] %>
+<% end %>

@@ -1,0 +1,37 @@
+<%
+# app/views/trackable_links/_trackable_link.html.erb
+#
+# Example:
+#   render partial: "trackable_links/trackable_link", collection: @trackable_links
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+# short_code_count     = TrackableLink.contacts_delivered(trackable_link.id, 30.days.ago.beginning_of_day, Time.current).uniq.count
+# hit_count            = TrackableLink.contacts_clicked(trackable_link.id, 30.days.ago.beginning_of_day, Time.current).uniq.count
+-%>
+<tr>
+  <td class="text-left align-middle">
+    <%= link_to trackable_link.name,
+                edit_trackable_link_path(trackable_link),
+                class:  'text-decoration-none text-reset',
+                remote: true,
+                method: :get %>
+  </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= trackable_link.original_url -%> </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(trackable_link.created_at, trackable_link.client.time_zone, true) -%> </td>
+  <td class="text-middle align-middle text-right">
+    <%= link_to '',
+                edit_trackable_link_path(trackable_link),
+                class:  'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+                remote: true,
+                method: :get %>
+    <%= link_to '',
+                '#',
+                class: 'btn btn-sm btn-icon btn-secondary fa fa-trash-alt button_delete_trackable_link',
+                data:  { id: trackable_link.id, name: trackable_link.name } %>
+  </td>
+</tr>

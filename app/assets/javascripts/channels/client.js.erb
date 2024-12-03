@@ -1,0 +1,174 @@
+// app/assets/javascripts/channels/chat.js.erb
+// client side of the Cable
+App.user = App.cable.subscriptions.create('ClientChannel', {
+
+  // Called once when the subscription is created.
+  initialized() {
+    // console.log('ClientChannel initialized.');
+    // this.appear = this.appear.bind(this);
+    // this.away = this.away.bind(this);
+  },
+
+  // Called when the subscription is ready for use on the server.
+  connected() {
+    // console.log('ClientChannel connected.');
+    // this.install();
+    // this.appear();
+  },
+
+  // Called when the WebSocket connection is closed.
+  disconnected() {
+    // console.log('ClientChannel disconnected.');
+    // this.uninstall();
+  },
+
+  // Called when the subscription is rejected by the server.
+  rejected() {
+    // console.log('ClientChannel rejected.');
+    // this.uninstall();
+  },
+
+  appear() {
+    // Calls `AppearanceChannel#appear(data)` on the server.
+    // console.log('Appear.');
+    // var element = document.querySelector('#ca');
+    // this.perform("appear", { ca: element ? element.getAttribute('class') : null });
+  },
+
+  away() {
+    // Calls `AppearanceChannel#away` on the server.
+    // console.log('Away.');
+    // this.perform("away");
+  },
+
+  install() {
+    // console.log('Install.');
+    // window.addEventListener("focus", this.update);
+    // window.addEventListener("blur", this.update);
+    // document.addEventListener("visibilitychange", this.update);
+  },
+
+  uninstall() {
+    // console.log('Uninstall.');
+    // window.removeEventListener("focus", this.update);
+    // window.removeEventListener("blur", this.update);
+    // document.removeEventListener("visibilitychange", this.update);
+  },
+
+  // get documentIsActive() {
+    // console.log('Visibility: ' + document.visibilityState);
+    // return document.visibilityState == "visible" && document.hasFocus();
+    // return document.visibilityState == "visible";
+  // },
+
+  // get appearingOn() {
+    // const element = document.querySelector('#ca');
+    // console.log(element ? element.getAttribute('class') : "ca is NOT defined.");
+    // return element ? element.getAttribute('class') : null;
+  // },
+
+  received(data) {
+    if (!!data.msg_status) {
+      $('#msg-status-' + data.id).html(' (' + data.msg_status + ')');
+    }
+
+    if (!!data.chiirp_alert) {
+      ChiirpAlert({
+        'title':      ((!!data.chiirp_alert.title) ? data.chiirp_alert.title : ''),
+        'body':       ((!!data.chiirp_alert.body) ? data.chiirp_alert.body : ''),
+        'buttons':    [{ label: '<i class="fa fa-thumbs-down mr-2"></i>' + ((!!data.chiirp_alert.cancel_button_text) ? data.chiirp_alert.cancel_button_text : 'No, Wait!'), id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up mr-2"></i>' + ((!!data.chiirp_alert.confirm_button_text) ? data.chiirp_alert.confirm_button_text : 'Yup, Go for it!'), id: 'button_do_it'}],
+        'type':       ((!!data.chiirp_alert.type) ? data.chiirp_alert.type : ''),
+        'persistent': ((!!data.chiirp_alert.persistent) ? data.chiirp_alert.persistent : false)
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        if (!!data.chiirp_alert.url) {
+          if (!!data.chiirp_alert.data_type && data.chiirp_alert.data_type == 'script') {
+            $.ajax({
+              type: 'GET',
+              dataType: 'script',
+              url: data.chiirp_alert.url
+            })
+          } else {
+            window.location.href = data.chiirp_alert.url;
+          }
+        }
+      });
+    }
+
+    if (!!data.campaign_activity) {
+      $('#campaign-activity-' + data.id).append('<div class="row ml-3">' + data.created_at + ' - T: ' + data.trigger_name + '</div><div class="row ml-5">A: ' + data.triggeraction_name + '</div>');
+    }
+
+    if (!!data.append) {
+      if (data.append == 'true') {
+        $('[id=temp_message]').remove();
+        $('[id=' + data.id + ']').append(data.html);
+      } else {
+        $('[id=' + data.id + ']').html(data.html);
+      }
+    }
+
+    if (!!data.replace_or_append) {
+      $('[id=temp_message]').remove();
+
+      if (data.replace_id && document.getElementById(data.replace_id)) {
+        $('[id=' + data.replace_id + ']').replaceWith(data.html);
+      } else {
+        $('[id=' + data.append_id + ']').append(data.html);
+      }
+    }
+
+    if (!!data.scrollup) {
+      if (data.scrollup) {
+        if ($('#central_conversation_body')) {
+          var msgBody = document.getElementById('central_conversation_body');
+          msgBody.scrollTop = msgBody.scrollHeight;
+        }
+      }
+    }
+
+    if (!!data.redirect) {
+      window.location = data.url
+    }
+
+    if (!!data.enable) {
+      $('[id=' + data.id + ']').prop('disabled', false);
+    }
+
+    if (!!data.disable) {
+      $('[id=' + data.id + ']').prop('disabled', true);
+    }
+
+    if (!!data.turnon) {
+      $('[id=' + data.id + ']').show();
+    }
+
+    if (!!data.turnoff) {
+      $('[id=' + data.id + ']').hide();
+    }
+
+    if (!!data.addclass) {
+      $('[id=' + data.id + ']').addClass(data.class);
+    }
+
+    if (!!data.removeclass) {
+      $('[id=' + data.id + ']').removeClass(data.class);
+    }
+
+    if (!!data.toastr) {
+      if (data.toastr[0] == 'success') {
+        toastr.success(data.toastr[1]);
+      } else if (data.toastr[0] == 'info') {
+        toastr.info(data.toastr[1]);
+      } else if (data.toastr[0] == 'warning') {
+        toastr.warning(data.toastr[1]);
+      } else if (data.toastr[0] == 'error') {
+        toastr.error(data.toastr[1]);
+      }
+    }
+  }
+});

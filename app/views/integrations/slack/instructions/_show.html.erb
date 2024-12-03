@@ -1,0 +1,53 @@
+<%
+  # app/views/integrations/slack/instructions/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/slack/instructions/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #  (req) @user_api_integrations: (UserApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Slack::Presenter.new(user_api_integration: @user_api_integration) unless local_assigns.dig(:presenter).is_a?(Integrations::Slack::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Slack Integration Help</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>A Slack integration allows <%= I18n.t("tenant.name") -%> to send notifications to a Slack channel.</li>
+      <li>A Slack integration is configured by each User.</li>
+      <li>Users with configured Slack integrations may add Campaign Actions to create, invite users and post messages to channels.</li>
+      <li>A Slack connection is required.</li>
+    </ul>
+
+    <h6>Connection:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t("tenant.name") -%> account to your Slack Account.</li>
+      <li><%= I18n.t("tenant.name") -%> must have permissions to access your Slack Account.</li>
+      <li>After your connection is complete you may select the Slack channels that you wish to send general notifications to.</li>
+    </ul>
+
+    <h6>Notifications:</h6>
+    <ul>
+      <li>Select your Slack Channel to send general notifications to.</li>
+    </ul>
+
+    <h6>Campaigns:</h6>
+    <ul>
+      <li>From Campaign Builder add Actions to "Create a Slack Channel", "Add Users to a Slack Channel" & "Send a Slack Message".</li>
+      <li>Slack Channels may be created using hashtag replacement.</li>
+      <li>Slack actions will only be completed when the User a Contact is assigned to has completed a Slack Integration.</li>
+    </ul>
+
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

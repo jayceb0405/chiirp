@@ -1,0 +1,47 @@
+<%
+  # app/views/dashboards/tasks/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/tasks/index', locals: { presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'tasks', session) %>
+
+  <% if presenter.user.access_controller?('dashboard', 'all_contacts', session) %>
+    <div class="d-flex flex-column flex-md-row mb-3">
+      <div class="ml-auto d-flex">
+
+        <div class="form-group">
+          <%= select_tag('user_for_tasks',
+                         options_for_select(presenter.users_with_tasks_for_select, presenter.user_for_tasks),
+                         {
+                           class: 'form-control',
+                           id:    'select_slack_channel',
+                           data:  {
+                             toggle: 'selectpicker',
+                             width:  '100%',
+                             remote: true,
+                             url:    index_tasks_dashboard_path,
+                             method: :get
+                           }
+                         }) %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="card-deck-xl">
+    <% %w[past current future].each do |column_type| %>
+      <%= render partial: 'dashboards/tasks/task_column', locals: { presenter:, column_type: } %>
+    <% end %>
+  </div>
+
+  <%= render partial: 'snippets/custom_modal', locals: { id: 'task_modal', max_width: '900px', close: true } %>
+<% end %>

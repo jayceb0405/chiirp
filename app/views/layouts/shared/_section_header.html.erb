@@ -1,0 +1,31 @@
+<%
+  # app/views/layouts/shared/_section_header.html.erb
+  #
+  # Example:
+  # 	render partial: 'layouts/shared/section_header', locals: {  }
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   heading     = (String)
+  # 	description = (String)
+  # 	options     = (String)
+  #
+  heading     = local_assigns.dig(:heading).to_s
+  description = local_assigns.dig(:description).to_s
+  options     = local_assigns.dig(:options).to_s
+-%>
+<div class="page_content_inner__header"></h4>
+  <div class="mt-auto">
+    <h4><%= heading.html_safe -%>
+    <% unless description.empty? %>
+      <h5><%= description.html_safe -%></h5>
+    <% end %>
+  </div>
+  <p>
+    <% unless options.empty? %>
+      <%= options.html_safe %>
+    <% end %>
+  </p>
+</div>

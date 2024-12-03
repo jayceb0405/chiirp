@@ -1,0 +1,94 @@
+<%
+  # app/views/users/admin/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'users/admin/edit', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @user: (User)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Users::Presenter.new(user: @user)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Admin Settings</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if current_user.admin? %>
+        <%= form_with(model: presenter.user, url: users_admin_path(presenter.user.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'admin_form', novalidate: true }) do |f| %>
+
+          <% if current_user.super_admin? %>
+            <%= f.switch :super_admin, {
+                  label:      { title: 'Super Admin' },
+                  checkboxes: [{ checked: presenter.user.super_admin, values: [true, false] }]
+                } %>
+            <%= f.switch :team_member, {
+                  label:      { title: 'Team Member' },
+                  checkboxes: [{ checked: presenter.user.team_member, values: [true, false] }]
+                } %>
+          <% end %>
+          <%= if current_user.team_member?
+                f.switch :agent, {
+                  label:      { title: 'Agent' },
+                  checkboxes: [{ checked: presenter.user.agent, values: [true, false] }]
+                }
+              end %>
+
+        <%= bootstrap_check_box(
+              checkboxes: [{ field: 'send-invite', label: 'Send Invitation', id: 'send_invite', value: false, values: [true, false] }]
+            ) %>
+
+          <%= unless current_user.id == presenter.user.id
+                bootstrap_calendar_field(
+                  field:        'user[suspended_at]',
+                  value:        presenter.user_suspended_at_formatted,
+                  label:        { title: "Suspend #{presenter.user.firstname} on..." },
+                  html_options: { id: 'user_suspended_at_01' },
+                  flatpickr:    { include_time: true, mode: 'single' }
+                )
+              end %>
+          <%= if current_user.super_admin?
+                f.select :trainings_editable, {
+                  label:        { title: 'Training Editable' },
+                  html_options: { id: 'trainings_select', multiple: true, mobile: browser.device.mobile? },
+                  choices:      { array: Training.pluck(:menu_label, :id), selected: presenter.user.trainings_editable }
+                }
+              end %>
+
+          <%= bootstrap_info_field(
+                info:  presenter.user_last_logged_in,
+                label: { title: 'Last Logged In' }
+              ) %>
+          <%= bootstrap_info_field(
+                info:  presenter.user_last_invited,
+                label: { title: 'Last Invited' }
+              ) %>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Admin Settings', disable_with: 'Saving Admin Settings' }] %>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_admin').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_admin').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

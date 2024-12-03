@@ -1,0 +1,28 @@
+<%
+  # /app/views/contacts/update.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   (opt) contact:      (Contact)
+  #   (opt) user_setting: (Users::Setting)
+  #
+  # Local Variables:
+  #
+  presenter = MyContacts::Presenter.new(user_setting: @user_setting)
+  presenter.broadcast = current_user.access_controller?('my_contacts', 'schedule_actions', session)
+-%>
+
+<%= turbo_stream.update 'dash_modal_title' do %>
+  <i class="fa fa-pencil-alt"></i> Contact Profile for <%= @contact.new_record? ? 'New Contact' : @contact.fullname_or_phone -%>
+<% end %>
+
+<%= turbo_stream.update 'dash_modal_body' do %>
+  <%= render 'contacts/edit', turbo: true, return_to: local_assigns.dig(:return_to).to_s %>
+<% end %>
+
+<%= turbo_stream.update 'dash_modal_footer' %>
+
+<%= turbo_stream.replace dom_id(@contact) do %>
+  <%= render 'my_contacts/broadcast/contact', presenter:, contact: @contact %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

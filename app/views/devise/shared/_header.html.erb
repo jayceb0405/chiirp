@@ -1,0 +1,20 @@
+<%
+# app/views/devise/shared/_header.html.erb
+#
+# Devise auth pages header
+#
+# Example:
+#   render partial: 'devise/shared/header'
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<header id="auth-header" class="auth-header">
+  <h1>
+    <%= link_to image_tag("tenant/#{I18n.t('tenant.id')}/logo-banner-white.svg", { class: 'img-fluid', width: '100%', style: 'max-width:14rem;' }), "https://#{I18n.t("tenant.#{Rails.env}.sales_host")}/" %>
+  </h1>
+</header>

@@ -1,0 +1,499 @@
+<%
+  # app/views/user_contact_forms/v2/edit/_edit.html.erb
+  #
+  # Example:
+  #   render partial: "user_contact_forms/v2/edit/edit"
+  #
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  return if @user_contact_form.new_record? && @user_contact_form.form_name.empty?
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@user_contact_form] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <span class="mr-auto"><%= @user_contact_form.form_name -%></span>
+
+      <% unless @user_contact_form.new_record? %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe, '#', {
+              class: 'btn btn-icon btn-light',
+              id:    'button_user_contact_form_delete'
+            } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <%= form_with model: [:api, :v2, @user_contact_form], builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true do |f| %>
+      <%= f.text_field :form_name, {
+            label:        { title: 'Form Name *' },
+            html_options: { id: 'user_contact_form_form_name', placeholder: 'Form Name', required: true }
+          } %>
+
+      <% unless @user_contact_form.new_record? %>
+        <div class="form-group text-center">
+          <%= link_to "View #{@user_contact_form.form_name} in a new tab!", api_v2_user_contact_form_page_path(@user_contact_form.page_key), { class: 'btn btn-app', target: '_blank', rel: 'noopener' } %>
+        </div>
+      <% end %>
+
+      <% if current_user.client.share_quick_leads_allowed && !@user_contact_form.new_record? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'QuickPage Share Code' },
+              html_options: { value: @user_contact_form.share_code.to_s }
+            } %>
+      <% end %>
+
+      <% unless @user_contact_form.new_record? %>
+        <%= f.copy_field nil, {
+              label:        { title: 'QuickPage URL' },
+              html_options: { value: api_v2_user_contact_form_page_url(@user_contact_form.page_key.to_s) },
+              messages:     { note: 'Use this link to display this Contact Form on it\'s own.' }
+            } %>
+        <%= f.copy_field nil, {
+              label:        { title: 'QuickPage Embed Code' },
+              html_options: { value: "<div id='tenant-quicklead-div'></div><script src='#{api_v2_user_contact_form_frame_init_url(@user_contact_form.page_key.to_s)}'></script>" },
+              messages:     { note: 'Place this code in the HTML of your website where you want the form to appear.' }
+            } %>
+        <%= f.copy_field nil, {
+              label:        { title: 'QuickPage Popup/Modal Embed Code' },
+              html_options: { value: "<script src='#{api_v2_user_contact_form_modal_init_url(@user_contact_form.page_key.to_s)}'></script>" },
+              messages:     { note: 'Place this code in the HTML of your website between the &lt;head&gt; & &lt;/head&gt; tags.<br />* Requires Popup/Modal Link or Button Code.'.html_safe }
+            } %>
+        <%= f.copy_field nil, {
+              label:        { title: 'QuickPage Popup/Modal Link Code' },
+              html_options: { value: "<a href='' onclick='return openQuickPage()'>Click Here</a>" },
+              messages:     { note: 'Place this code in the HTML of your website where you want the link to appear.<br />* Requires Popup/Modal Embed Code.'.html_safe }
+            } %>
+        <%= f.copy_field nil, {
+              label:        { title: 'QuickPage Popup/Modal Button Code' },
+              html_options: { value: "<button type='button' class='btn btn-info' onclick='return openQuickPage()'>Click Here</button>" },
+              messages:     { note: 'Place this code in the HTML of your website where you want the button to appear.<br />* Requires Popup/Modal Embed Code. Uses standard bootstrap classes. May be edited when placed.'.html_safe }
+            } %>
+      <% end %>
+
+      <%= f.text_field :title, {
+            label:        { title: 'Page Title' },
+            html_options: { id: 'user_contact_form_page_title', placeholder: 'Page Title' }
+          } %>
+      <%= f.text_area :header_notes, {
+            label:        { title: 'Header Text' },
+            html_options: { id: 'user_contact_form_header_text', placeholder: 'Header Text' }
+          } %>
+      <%= f.text_field :youtube_video, {
+            label:        { title: 'YouTube Video URL' },
+            html_options: { id: 'user_contact_form_youtube_video', placeholder: 'https://youtu.be/XXxxXXxxXXX' }
+          } %>
+
+      <table class="table table-no-border table-striped mb-4">
+        <thead>
+          <th class="text-muted" colspan=3>Select Fields to Collect</th>
+        </thead>
+        <thead>
+          <th class="p-2 text-muted">Field</th>
+          <th class="p-2 text-muted">Include</th>
+          <th class="p-2 text-muted">Required</th>
+        </thead>
+        <tbody>
+          <% Webhook.internal_key_hash(@user_contact_form.user.client, 'contact', %w[personal phones custom_fields]).each do |key, name| %>
+            <% key_value = if key == 'phone'
+                             1
+                           else
+                             @user_contact_form.form_fields.include?(key.to_sym) ? @user_contact_form.form_fields[key.to_sym].to_i : 0
+                           end %>
+            <% key_required_value = if key == 'phone'
+                                      1
+                                    else
+                                      @user_contact_form.form_fields.include?(:"#{key}_required") ? @user_contact_form.form_fields[:"#{key}_required"].to_i : 0
+                                    end %>
+# key_value          = key == "phone" ? 1 : 0 %>
+# key_required_value = key == "phone" ? 1 : 0 %>
+            <tr>
+              <td>
+                <%= name %>
+                <% if key == "phone" %>
+                  <small class="text-danger">* Required.</small>
+                <% end %>
+              </td>
+              <td>
+                <label class="switch-inline">
+                  <span class="switch switch--info">
+                    <%= hidden_field_tag "user_contact_form[form_fields][#{key}]", (key == 'phone' ? '1' : '0') %>
+                    <%= check_box_tag "user_contact_form[form_fields][#{key}]", '1', (key_value == 1), { class: 'field_key', id: "fields_#{key}_check_box", disabled: (key == 'phone') } %>
+                    <span class="switch-slider"></span>
+                  </span>
+                </label>
+              </td>
+              <td>
+                <label class="switch-inline">
+                  <span class="switch switch--info">
+                    <%= hidden_field_tag "user_contact_form[form_fields][#{key}_required]", (key == 'phone' ? '1' : '0') %>
+                    <%= check_box_tag "user_contact_form[form_fields][#{key}_required]", '1', (key_required_value == 1), { class: 'field_key_required', id: "fields_#{key}_check_box_required", disabled: (key == 'phone') } %>
+                    <span class="switch-slider"></span>
+                  </span>
+                </label>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <%= f.text_area :footer_notes, {
+            label:        { title: 'Footer Text' },
+            html_options: { placeholder: 'Footer Text' }
+          } %>
+
+      <table class="table table-no-border table-striped mb-4">
+        <thead>
+          <th class="text-muted" colspan=2>Additional Formatting</th>
+        </thead>
+        <thead>
+          <th class="p-2 text-muted">Feature</th>
+          <th class="p-2 text-muted">Setting</th>
+        </thead>
+        <tbody>
+          <tr>
+          <tr>
+            <td>Tag Line</td>
+            <td>
+              <div class="form-group m-0">
+                <%= text_field_tag 'user_contact_form[tag_line]', @user_contact_form.tag_line.to_s, { class: 'form-control', id: 'tag_line', placeholder: 'Tag Line' } %>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Submit Button Text</td>
+            <td>
+              <div class="form-group m-0">
+                <%= text_field_tag 'user_contact_form[submit_button_text]', @user_contact_form.submit_button_text.to_s, { class: 'form-control', id: 'submit_button_text', placeholder: 'Submit' } %>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Ask if OK to Text</td>
+            <td>
+              <label class="switch-inline">
+                <span class="switch switch--info">
+                  <%= hidden_field_tag 'user_contact_form[ok2text]', '0' %>
+                  <%= check_box_tag 'user_contact_form[ok2text]', '1', (@user_contact_form.ok2text.to_s == '1'), {} %>
+                  <span class="switch-slider"></span>
+                </span>
+              </label>
+            </td>
+          </tr>
+
+          <tr>
+            <td>OK to Text Text</td>
+            <td>
+              <div class="form-group m-0">
+                <%= text_field_tag 'user_contact_form[ok2text_text]', @user_contact_form.ok2text_text.to_s, { class: 'form-control', id: 'ok2text_text', placeholder: 'May We Send Text Messages?' } %>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Ask if OK to Email</td>
+            <td>
+              <label class="switch-inline">
+                <span class="switch switch--info">
+                  <%= hidden_field_tag 'user_contact_form[ok2email]', '0' %>
+                  <%= check_box_tag 'user_contact_form[ok2email]', '1', (@user_contact_form.ok2email.to_s == '1'), {} %>
+                  <span class="switch-slider"></span>
+                </span>
+              </label>
+            </td>
+          </tr>
+
+          <tr>
+            <td>OK to Email Text</td>
+            <td>
+              <div class="form-group m-0">
+                <%= text_field_tag 'user_contact_form[ok2email_text]', @user_contact_form.ok2email_text.to_s, { class: 'form-control', id: 'ok2email_text', placeholder: 'May We Send Email Messages?' } %>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Submit Button Color</td>
+            <td>
+              <%= hidden_field_tag 'user_contact_form[submit_button_color]', @user_contact_form.submit_button_color, { id: 'submit_button_color_hidden_field' } %>
+              <%= link_to @user_contact_form.submit_button_text, '#', { class: 'btn btn-info btn-app pl-5 pr-5 rounded-pill', id: 'submit_button_color', style: "background-color:#{@user_contact_form.submit_button_color};border-color:#{@user_contact_form.submit_button_color};" } %>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Header Background Color</td>
+            <td>
+              <%= hidden_field_tag 'user_contact_form[header_bg_color]', @user_contact_form.header_bg_color.to_s, { id: 'header_bg_color_hidden_field' } %>
+              <div class="pl-2 m-1" id="header_bg_color" style="background-color:<%= @user_contact_form.header_bg_color.to_s -%>;">Click to Edit</div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Body Background Color</td>
+            <td>
+              <%= hidden_field_tag 'user_contact_form[body_bg_color]', @user_contact_form.body_bg_color.to_s, { id: 'body_bg_color_hidden_field' } %>
+              <div class="pl-2 m-1" id="body_bg_color" style="background-color:<%= @user_contact_form.body_bg_color.to_s -%>;">Click to Edit</div>
+            </td>
+          </tr>
+
+          <tr>
+            <td>Form Background Color</td>
+            <td>
+              <%= hidden_field_tag 'user_contact_form[form_bg_color]', @user_contact_form.form_bg_color.to_s, { id: 'form_bg_color_hidden_field' } %>
+              <div class="pl-2 m-1" id="form_bg_color" style="background-color:<%= @user_contact_form.form_bg_color.to_s -%>;">Click to Edit</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <%= bootstrap_select_tag_campaign(
+            client:       @user_contact_form.user.client,
+            field:        'user_contact_form[campaign_id]',
+            label:        { title: 'Select a Campaign to Start on each new Contact' },
+            html_options: { id: 'campaign_id' },
+            options:      { selected: @user_contact_form.campaign_id, active_only: true }
+          ) %>
+
+      <% if @user_contact_form.user.client.groups_count.positive? %>
+        <fieldset class="border p-2 mb-2">
+          <legend class="w-auto mb-0"><h6><i class="fa fa-user-cog"></i> Select a Group to Add each new Contact to</h6></legend>
+          <div id="user_contact_form_group">
+            <%= render partial: 'groups/select_or_add', locals: { user: @user_contact_form.user, group: @user_contact_form.group || @user_contact_form.user.client.groups.new, select_or_add_field_name: 'user_contact_form[group_id]', select_or_add_div_id: 'user_contact_form_group' } %>
+          </div>
+        </fieldset>
+      <% end %>
+
+      <fieldset class="border p-2 mb-2">
+        <legend class="w-auto mb-0"><h6><i class="fa fa-user-tag"></i> Select a Tag to Apply to each new Contact</h6></legend>
+        <div id="user_contact_form_tag">
+          <%= render partial: 'tags/select_or_add', locals: { user: @user_contact_form.user, tag: @user_contact_form.tag || @user_contact_form.user.client.tags.new, select_or_add_field_name: 'user_contact_form[tag_id]', select_or_add_div_id: 'user_contact_form_tag' } %>
+        </div>
+      </fieldset>
+
+      <%= bootstrap_select_tag(
+            field:   'user_contact_form[stage_id]',
+            label:   { title: 'Move to Stage' },
+            options: { for_select: option_groups_from_collection_for_select(StageParent.where(client: @user_contact_form.user.client_id), :stages, :name, :id, :name, @user_contact_form.stage_id), blank: 'Select a Stage' }
+          ) %>
+      <%= f.text_field :redirect_url, {
+            label:        { title: 'Redirect URL' },
+            html_options: { id: 'user_contact_form_youtube_video', placeholder: 'Redirect URL' },
+            messages:     { note: 'Leave blank to clear form ready for another Contact.' }
+          } %>
+
+      <% unless @user_contact_form.new_record? %>
+
+        <%= label_tag '', 'Logo Image', { class: 'form-group-label mb-0 text-muted' } %>
+        <%= f.file_field :logo_image, { name: 'user_contact_form[logo_image]', class: 'image-url form-control', id: 'logo_image_input', direct_upload: true, accept: 'image/*', style: 'display:none;' } %>
+        <div class="app_dropzone mb-2 text-center" id="logo_image_dropzone">
+          <button type="button" id="logo_image_delete" class="close text-muted" style="z-index:1000px;">
+            <i class="fa fa-times"></i>
+          </button>
+          <div class="text-center" id="logo_image_container">
+            <% if @user_contact_form.logo_image.attached? %>
+              <%= cl_image_tag(@user_contact_form.logo_image.key, { class: 'img-responsive', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 250, height: 250, crop: 'fit'], format: 'png' }) -%>
+            <% else %>
+              <i class="ua-icon-upload text-primary display-3"></i>
+            <% end %>
+          </div>
+          <span class="text-muted" id="logo_image_drag_text">Drag and drop or Click to Upload</span>
+        </div>
+
+        <%= label_tag '', 'Background Image', { class: 'form-group-label mb-0 text-muted' } %>
+        <%= f.file_field :background_image, { name: 'user_contact_form[background_image]', class: 'image-url form-control', id: 'background_image_input', direct_upload: true, accept: 'image/*', style: 'display:none;' } %>
+        <div class="app_dropzone mb-2 text-center" id="background_image_dropzone">
+          <button type="button" id="background_image_delete" class="close text-muted" style="z-index:1000px;">
+            <i class="fa fa-times"></i>
+          </button>
+          <div class="text-center" id="background_image_container">
+            <% if @user_contact_form.background_image.attached? %>
+              <%= cl_image_tag(@user_contact_form.background_image.key, { class: 'img-responsive', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 250, height: 250, crop: 'fit'], format: 'png' }) -%>
+            <% else %>
+              <i class="ua-icon-upload text-primary display-3"></i>
+            <% end %>
+          </div>
+          <span class="text-muted" id="background_image_drag_text">Drag and drop or Click to Upload</span>
+        </div>
+
+      <% end %>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', id: 'user_contact_form_form_submit', disable_with: 'Saving' }] %>
+    <% end %>
+
+  </div>
+</div>
+
+<script>
+  $(document).ready( function() {
+    $("#new_user_contact_form").on("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= new_api_v3_user_contact_form_path -%>'
+      });
+    });
+
+    <% unless @user_contact_form.new_record? %>
+      //
+      // logo_image dropzone
+      //
+      Dropzone.autoDiscover = false;
+
+      $("#logo_image_dropzone").dropzone( {
+        url: ' ',
+        autoQueue: false,
+        maxFilesize: 150,
+        addRemoveLinks: false,
+        acceptedFiles: 'image/jpg,image/jpeg,image/gif,image/png',
+        clickable: '#logo_image_dropzone, #logo_image_container, #logo_image_drag_text',
+        addedfile: function(file, response) {
+          // a file input with direct upload must be somewhere on the page...
+          $('#logo_image_container').html('<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+
+          const input  = document.querySelector('#logo_image_input');
+          const url    = input.dataset.directUploadUrl;
+          const upload = new ActiveStorage.DirectUpload(file, url);
+
+          // Upload the file
+          upload.create((error, blob) => {
+            $.ajax({
+              method: 'PATCH',
+              dataType: 'script',
+              url: '<%= user_contact_form_path(@user_contact_form) -%>',
+              data: { 'user_contact_form[logo_image]': blob.signed_id }
+            });
+          });
+        }
+      });
+
+      $('#logo_image_delete').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'PATCH',
+          url: '<%= user_contact_form_path(@user_contact_form) -%>',
+          dataType: "script",
+          data: { logo_image_delete: 'true' }
+        });
+      });
+
+      //
+      // background_image dropzone
+      //
+      Dropzone.autoDiscover = false;
+
+      $("#background_image_dropzone").dropzone( {
+        url: ' ',
+        autoQueue: false,
+        maxFilesize: 150,
+        addRemoveLinks: false,
+        acceptedFiles: 'image/jpg,image/jpeg,image/gif,image/png',
+        clickable: '#background_image_dropzone, #background_image_container, #background_image_drag_text',
+        addedfile: function(file, response) {
+          // a file input with direct upload must be somewhere on the page...
+          $('#background_image_container').html('<div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+
+          const input  = document.querySelector('#background_image_input');
+          const url    = input.dataset.directUploadUrl;
+          const upload = new ActiveStorage.DirectUpload(file, url);
+
+          // Upload the file
+          upload.create((error, blob) => {
+            $.ajax({
+              method: 'PATCH',
+              dataType: 'script',
+              url: '<%= user_contact_form_path(@user_contact_form) -%>',
+              data: { 'user_contact_form[background_image]': blob.signed_id }
+            });
+          });
+        }
+      });
+
+      $('#background_image_delete').on('click', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'PATCH',
+          url: '<%= user_contact_form_path(@user_contact_form) -%>',
+          dataType: "script",
+          data: { background_image_delete: 'true' }
+        });
+      });
+    <% end %>
+
+    $('.field_key_required').on('change', function(e) {
+      if ( $(this).is(':checked') ) {
+        $('#' + $(this).attr('id').replace('_required', '')).prop( "checked", true );
+      } else {
+
+      }
+    });
+
+    $('.field_key').on('change', function(e) {
+      if ( $(this).is(':checked') ) {
+
+      } else {
+        $('#' + $(this).attr('id') + '_required').prop( "checked", false );
+      }
+    });
+
+    $('#submit_button_text').on('keyup', function() {
+      $('#submit_button_color').html($(this).val());
+    });
+
+    var picker = new Picker( {
+      parent: document.querySelector('#submit_button_color'),
+      color: '<%= @user_contact_form.submit_button_color -%>',
+      popup: 'left',
+      onChange: function(color) {
+        document.querySelector('#submit_button_color').style.backgroundColor = color.hex;
+        document.querySelector('#submit_button_color').style.borderColor = color.hex;
+        document.querySelector('#submit_button_color_hidden_field').value = color.hex;
+        document.querySelector('#submit_button_color').style.color = contrastColor(color.hex, true);
+      },
+    });
+
+    var picker = new Picker( {
+      parent: document.querySelector('#header_bg_color'),
+      color: '<%= @user_contact_form.header_bg_color -%>',
+      popup: 'left',
+      onChange: function(color) {
+        document.querySelector('#header_bg_color').style.backgroundColor = color.hex;
+        document.querySelector('#header_bg_color_hidden_field').value = color.hex;
+        document.querySelector('#header_bg_color').style.color = contrastColor(color.hex);
+      },
+    });
+
+    var picker = new Picker( {
+      parent: document.querySelector('#body_bg_color'),
+      color: '<%= @user_contact_form.body_bg_color -%>',
+      popup: 'left',
+      onChange: function(color) {
+        document.querySelector('#body_bg_color').style.backgroundColor = color.hex;
+        document.querySelector('#body_bg_color_hidden_field').value = color.hex;
+        document.querySelector('#body_bg_color').style.color = contrastColor(color.hex);
+      },
+    });
+
+    var picker = new Picker( {
+      parent: document.querySelector('#form_bg_color'),
+      color: '<%= @user_contact_form.form_bg_color -%>',
+      popup: 'left',
+      onChange: function(color) {
+        document.querySelector('#form_bg_color').style.backgroundColor = color.hex;
+        document.querySelector('#form_bg_color_hidden_field').value = color.hex;
+        document.querySelector('#form_bg_color').style.color = contrastColor(color.hex);
+      },
+    });
+  });
+</script>
+<!-- /.user_contact_forms.edit -->

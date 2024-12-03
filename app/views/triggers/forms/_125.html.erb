@@ -1,0 +1,30 @@
+<%
+  # app/views/triggers/forms/_125.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/125", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start actions immediately based on dynamic date
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+-%>
+<div class="row">
+  <div class="col-3"></div>
+  <div class="col-9">
+    <small class="text-muted">
+      Campaigns that Lead up to an Appointment...
+      <ul class="fa-ul">
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Are dynamic (they get their date from external data).</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Will fire thier first Trigger as defined in Actions leading up to the scheduled date.</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Require that a Webhook Key with a date be mapped to a Date <%= I18n.t('tenant.name') -%> Key.</li>
+        <li><span class="fa-li"><i class="fa fa-check text-success"></i></span>Do NOT require additional Trigger settings.</li>
+      </ul>
+    </small>
+  </div>
+</div>

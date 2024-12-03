@@ -1,0 +1,54 @@
+<%
+  # app/views/triggers/forms/_repeat.html.erb
+  #
+  # Example:
+  #   render partial: "triggers/forms/repeat", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.trigger.is_a?(Trigger)
+
+  trigger_repeat = presenter.trigger.data&.dig(:repeat).to_i == 1
+-%>
+<%= bootstrap_switch_field(
+      field:        'data[repeat]',
+      value:        trigger_repeat,
+      values:       %w[1 0],
+      label:        { title: 'Repeat Trigger' },
+      html_options: { id: "switch_repeat_#{presenter.trigger.id}", disabled: presenter.campaign_disabled? }
+    ) %>
+
+<div class="form-row" id="select_repeat_<%= presenter.trigger.id -%>" style="<%= trigger_repeat ? '' : 'display:none;' -%>">
+  <%= label_tag 'data[repeat_interval]', 'Repeat every...', { class: 'col-md-3' } %>
+  <div class="col-md-9 mb-3">
+    <div class="form-group d-flex flex-row">
+      <%= select_tag('data[repeat_interval]',
+                     options_for_select((1..90), presenter.trigger.data&.dig(:repeat_interval).to_i),
+                     { class:    'form-control pr-2',
+                       data:     { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? },
+                       disabled: presenter.campaign_disabled? }) %>
+      <%= select_tag('data[repeat_period]',
+                     options_for_select(%w[minutes days weeks months years], (presenter.trigger.data&.dig(:repeat_period) || 'days').to_s),
+                     { class:    'form-control',
+                       data:     { toggle: 'selectpicker', width: 'fit', container: 'body', mobile: browser.device.mobile? },
+                       disabled: presenter.campaign_disabled? }) %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('#switch_repeat_<%= presenter.trigger.id -%>').on('click', function(e) {
+
+      if ($(this).prop('checked')) {
+        $('#select_repeat_<%= presenter.trigger.id -%>').show();
+      } else {
+        $('#select_repeat_<%= presenter.trigger.id -%>').hide();
+      }
+    });
+  });
+</script>

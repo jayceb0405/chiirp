@@ -1,0 +1,18 @@
+<%
+  # app/views/affiliates/reports/searchlight/_client.html.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/reports/searchlight/client', collection: @clients.order(:name), as: :client, locals: { presenter: }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<tr>
+  <td colspan="2" class="text-left align-middle"> <%= client.name -%> </td>
+  <td class="text-right align-middle"> <%= number_to_currency(client.searchlight_fee.to_d) -%> </td>
+</tr>

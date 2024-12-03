@@ -1,0 +1,51 @@
+<%
+  # app/views/triggers/js/_show.js.erb
+  #
+  # Example:
+  # 	render partial: "triggers/js/show", locals: { cards: Array }
+  #
+  # Instance Variables:
+  # 	(req) @trigger: (Trigger)
+  #
+  # Local Variables:
+  # 	(req) cards:     (Array)
+  #
+  return unless local_assigns.dig(:cards).is_a?(Array)
+
+  presenter = Campaigns::Presenter.new(current_user) if cards.intersect?(%w[triggeractions_new triggers_list triggers_new update])
+  presenter.campaign = @trigger.campaign if cards.intersect?(%w[triggers_list triggers_new update])
+  presenter.campaign = @triggeraction.campaign if cards.intersect?(%w[triggeractions_new])
+  presenter.trigger  = @trigger if cards.intersect?(%w[update])
+  presenter.trigger  = @triggeraction.trigger if cards.intersect?(%w[triggeractions_new])
+%>
+// Index
+<% if cards.include?('triggers_list') %>
+  $('#triggers_list').html('<%= j render partial: 'triggers/list', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('triggers_new') %>
+  $('#triggers_list').append('<%= j render partial: 'triggers/trigger', locals: { presenter:, trigger: @trigger } -%>');
+<% end %>
+
+// Show
+<% if cards.include?('update') %>
+  $('#<%= presenter.trigger_header_id -%>').html('<%= j render partial: 'triggers/trigger_header', locals: { presenter: } -%>');
+  $('#<%= presenter.trigger_form_id -%>').html('<%= j render partial: 'triggers/form', locals: { presenter: } -%>');
+<% end %>
+<% if cards.include?('triggeractions_new') %>
+  $('#triggeraction-accordion-<%= @trigger.id -%>').append('<%= j render partial: 'triggeractions/triggeraction', locals: { presenter:, triggeraction: @triggeraction } -%>');
+<% end %>
+
+// Show/Hide
+<% if cards.include?('show_trigger_form') %>
+  $('#trigger-form-<%= @trigger.new_record? ? @trigger.campaign_id : @trigger.id -%>_c').collapse('show');
+<% end %>
+<% if cards.include?('show_triggeraction_form') %>
+  $('#triggeraction-form-<%= @triggeraction.new_record? ? @trigger.id : @triggeraction.id -%>').collapse('show');
+<% end %>
+
+<%= render partial: 'campaigns/js/analysis_results', locals: { campaign: @trigger.campaign } %>
+<%= render partial: 'triggers/js/analysis_results', locals: { trigger: @trigger } %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

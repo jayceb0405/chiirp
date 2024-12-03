@@ -1,0 +1,68 @@
+<%
+# app/views/integrations/five9/dispositions/_index.html.erb
+#
+# Example:
+#   render partial: 'integrations/five9/dispositions/index'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Dispositions</h6>
+      <div class="card-header-control">
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+
+        <thead>
+          <tr>
+            <th colspan="3" style="min-width: 240px">Disposition Name</th>
+            <th class="text-left"> Campaign </th>
+            <th class="text-left"> Group </th>
+            <th class="text-left"> Tag </th>
+            <th class="text-left"> Stage </th>
+            <th style="min-width:100px;"></th>
+          </tr>
+        </thead>
+
+        <tbody id="dispositions_tbody">
+          <tr>
+            <td colspan="8">
+              <div class="text-center mt-3">
+                <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %>
+              </div>
+              <div class="text-center mb-3">
+                Retrieving Dispositions from Five9...
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_dispositions').addClass('active');
+    $('#breadcrumb').show();
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '<%= integrations_five9_dispositions_path(tbody: true) -%>'
+    });
+  });
+</script>

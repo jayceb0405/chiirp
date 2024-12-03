@@ -1,0 +1,92 @@
+<%
+# app/views/integrations/_header.html.erb
+#
+# Example:
+# 	render "integrations/header"
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<header class="page-title-bar px-3 my-4">
+  <div class="d-md-flex align-items-md-start">
+    <h1 class="mr-sm-auto page-title"><i class="fa fa-puzzle-piece mr-2"></i>Integrations</h1>
+
+    <div id="aiagents_toolbar" class="btn-toolbar">
+      <div class="dropdown">
+        <button type="button" class="btn btn-light" data-toggle="dropdown">
+          <span>Sort Integrations</span>
+          <span class="fa fa-caret-down"></span>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right">
+          <div class="dropdown-arrow"></div>
+          <button type="button" class="dropdown-item btn" id="button_sort_asc">
+            <i class="fas fa-sort-alpha-down mr-2"></i>Alphabetical (A to Z)
+          </button>
+          <button type="button" class="dropdown-item btn" id="button_sort_desc">
+            <i class="fas fa-sort-alpha-up mr-2"></i>Alphabetical (Z to A)
+          </button>
+          <button type="button" class="dropdown-item btn" id="button_sort_configured">
+            <i class="fas fa-link mr-2"></i>Configured
+          </button>
+          <button type="button" class="dropdown-item btn" id="button_sort_random">
+            <i class="fas fa-random mr-2"></i>Random
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+<script>
+  $(function() {
+    function getRandomInt(min, max) {
+      const minCeiled = Math.ceil(min);
+      const maxFloored = Math.floor(max);
+      return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+    }
+
+    function saveSortOrder() {
+      $.ajax({
+        type: 'PATCH',
+        dataType: 'plain',
+        url: '<%= update_user_settings_integrations_path -%>',
+        data: { integration_buttons: $('#integrations_outer_div').sortable('toArray') }
+      });
+    }
+
+    $('#button_sort_asc').off('click');
+    $('#button_sort_asc').on('click', function() {
+      $('#integrations_outer_div > .list-group-item').sort(function(a, b) {
+        return Intl.Collator().compare($(a).data('name'), $(b).data('name'));
+      }).appendTo('#integrations_outer_div')
+      saveSortOrder();
+    });
+
+    $('#button_sort_desc').off('click');
+    $('#button_sort_desc').on('click', function() {
+      $('#integrations_outer_div > .list-group-item').sort(function(a, b) {
+        return Intl.Collator().compare($(b).data('name'), $(a).data('name'));
+      }).appendTo('#integrations_outer_div')
+      saveSortOrder();
+    });
+
+    $('#button_sort_configured').off('click');
+    $('#button_sort_configured').on('click', function() {
+      $('#integrations_outer_div > .list-group-item').sort(function(a, b) {
+        return $(a).data('configured') > $(b).data('configured') ? -1 : 1;
+      }).appendTo('#integrations_outer_div')
+      saveSortOrder();
+    });
+
+    $('#button_sort_random').off('click');
+    $('#button_sort_random').on('click', function() {
+      $('#integrations_outer_div > .list-group-item').sort(function(a, b) {
+        return getRandomInt(0, 2) == 0 ? -1 : 1;
+      }).appendTo('#integrations_outer_div')
+      saveSortOrder();
+    });
+  });
+</script>

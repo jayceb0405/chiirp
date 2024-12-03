@@ -1,0 +1,47 @@
+<%
+	# app/views/user_chats/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "user_chats/js/show", locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	cards[1]:
+	# 		@users:      (Hash)
+	# 	cards[2]:
+	# 		@user:       (User)
+	# 	cards[3]:
+	# 		@user:       (User)
+	# 		@user_chats: (UserChats)
+	# 	cards[4]:
+	# 		@user:       (User)
+	# 		@user_chats: (UserChats)
+	# 	cards[5]:
+	# 		none
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+-%>
+<% if cards.include?( 1 ) %>
+	// Users list
+	$('#users_index_<%= current_user.id -%>').html('<%= j render partial: "user_chats/users/index" -%>');
+<% end %>
+<% if cards.include?( 2 ) %>
+	// Users name
+	$('#header_user_name').html('<%= @user.fullname -%>')
+<% end %>
+<% if cards.include?( 3 ) %>
+	// UserChat list
+	$('#team_chats_<%= @user.id -%>').html('<%= j render partial: "user_chats/chats/chat", collection: @user_chats, locals: { recipient_user_id: @user.id} -%>');
+	$('#team_chats_<%= @user.id -%>').scrollTop( $('#team_chats_<%= @user.id -%>').prop('scrollHeight') );			
+<% end %>
+<% if cards.include?( 4 ) %>
+	// UserChat form
+	$('#team_chat').html('<%= j render partial: "user_chats/show" -%>');
+<% end %>
+<% if cards.include?( 5 ) %>
+	// clear UserChat form
+	$('#emoji_textarea').val('');
+<% end %>
+
+Looper.init();

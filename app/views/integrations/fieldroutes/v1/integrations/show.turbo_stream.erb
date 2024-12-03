@@ -1,0 +1,16 @@
+<%
+  # /app/views/integrations/fieldroutes/v1/integrations/show.turbo_stream.erb
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Fieldroutes::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update 'integration_page_section' do %>
+  <%= render partial: 'integrations/fieldroutes/v1/integrations/overview', locals: { presenter: } %>
+<% end %>

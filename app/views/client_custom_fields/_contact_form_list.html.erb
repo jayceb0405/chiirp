@@ -1,0 +1,35 @@
+<%
+  # app/views/client_custom_fields/_contact_form_list.html.erb
+  #
+  # Example:
+  # 	render partial: 'client_custom_fields/contact_form_list', collection: @client.client_custom_fields, as: :custom_field, locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) custom_field:          (ClientCustomField)
+  #   (req) presenter:             (Contacts::Presenter)
+  #   (opt) hide_important_fields: (Boolean)
+  #   (opt) field_tag_name:        (String)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+-%>
+<% if !custom_field.var_important && local_assigns.dig(:hide_important_fields).to_bool %>
+  <div class="text-right not_important_button mb-2" id="hide_important_<%= custom_field_counter -%>" data-index="<%= custom_field_counter -%>">
+    <span class="rating rating-sm mr-3">
+      <input type="checkbox" id="<%= "hide_important_button_#{custom_field_counter}" -%>" value="1">
+      <label for="<%= "hide_important_button_#{custom_field_counter}" -%>">
+        <span class="text-dark mr-2">Show all custom fields</span>
+        <span class="fa fa-star"></span>
+      </label>
+    </span>
+  </div>
+<% end %>
+
+<%= contact_custom_field_input(
+      custom_field:,
+      object_name:     local_assigns.dig(:field_tag_name).presence || 'client_custom_fields',
+      contact:         presenter.contact,
+      google_calendar: { calendar_ids: presenter.google_calendar_array }
+    ) %>

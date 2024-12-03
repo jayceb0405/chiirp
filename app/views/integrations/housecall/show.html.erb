@@ -1,0 +1,69 @@
+<%
+  # app/views/integrations/housecall/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/housecall/show', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   presenter: Presenter
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Housecall::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/housecallpro/full_logo_black.svg', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">Housecall Pro Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_housecall_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+      <!-- <a href="#" class="btn btn-light" data-toggle="modal" data-target="#followersModal">2,159 Followers</a> <a href="#" class="btn btn-light" data-toggle="modal" data-target="#followingModal">136 Following</a> -->
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'Connection', edit_integrations_housecall_api_key_path, { class: 'nav-link', id: 'link_api_key', remote: true } %>
+        <%= link_to 'Events', integrations_housecall_webhooks_path, { class: 'nav-link', id: 'link_webhooks', remote: true } %>
+        <%= link_to 'Employees', integrations_housecall_employees_path, { class: 'nav-link', id: 'link_employees', remote: true } %>
+        <%= link_to 'Price Book', integrations_housecall_price_book_path, { class: 'nav-link', id: 'link_price_book', remote: true } %>
+        <%= link_to 'Push Contacts', edit_integrations_housecall_push_leads_path, { class: 'nav-link', id: 'link_push_leads', remote: true } %>
+        <%= link_to 'Import Contacts', integrations_housecall_update_contacts_path, { class: 'nav-link', id: 'link_update_contacts', remote: true } %>
+        <%= link_to 'Import Jobs', integrations_housecall_import_jobs_path, { class: 'nav-link', id: 'link_import_jobs', remote: true } %>
+        <%= link_to 'Import Estimates', integrations_housecall_import_estimates_path, { class: 'nav-link', id: 'link_import_estimates', remote: true } %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_housecall_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <% if local_assigns.dig(:partial_to_show).to_s.present? && @client_api_integration.is_a?(ClientApiIntegration) %>
+        <%= render partial: partial_to_show, locals: { presenter: } %>
+      <% else %>
+        <%= render partial: 'integrations/housecall/overview', locals: { presenter: } %>
+      <% end %>
+    </div>
+  </div>
+</div>

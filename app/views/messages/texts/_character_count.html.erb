@@ -1,0 +1,82 @@
+<%
+  # app/views/messages/texts/_character_count.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/character_count', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+-%>
+<% if presenter.show_character_count? %>
+  <small class="text-muted" style="<%= browser.device.mobile? ? 'font-size:60%;' : '' -%>">
+    (Chars: <span id="text_length_<%= presenter.message_id -%>">0</span> / Remaining: <span id="text_remaining_<%= presenter.message_id -%>">160</span> / Type: <span id="text_sms_type_<%= presenter.message_id -%>">Normal</span> / Segments: <span id="text_message_segments_<%= presenter.message_id -%>">0</span> / Cost: <span id="text_message_cost_<%= presenter.message_id -%>">0</span> credits)
+  </small>
+
+  <script>
+    $(function() {
+      $('#textarea_<%= presenter.message_id -%>').on("change keyup paste", function(e) {
+        updateTextInfo(this);
+      });
+    });
+
+    function updateTextInfo(e) {
+      var message_id = '<%= presenter.message_id -%>';
+      var text = $(e).val() || '';
+      var data = SMSCounter.count(text, true);
+      var length = data['length'];
+      var remaining = data['remaining'];
+      var part_count = data['part_count'];
+      var text = data['text'];
+      var per_message = data['per_message'];
+      var encoding = data['encoding'];
+      var sms_type = '';
+      var approx = text.indexOf('#') >= 0 ? '~' : ''
+      var charge = '0.00';
+
+      if (encoding == 'GSM_7BIT') {
+        sms_type = 'Normal';
+      }else if (encoding == 'GSM_7BIT_EX') {
+        sms_type = 'Extended'; // for 7 bit GSM: ^ { } \ [ ] ~ | €
+      } else if (encoding == 'GSM_7BIT_EX_TR') {
+        sms_type = 'Turkish'; // Only for Turkish Characters "Ş ş Ğ ğ ç ı İ" encoding see https://en.wikipedia.org/wiki/GSM_03.38#Turkish_language_.28Latin_script.29
+      } else if (encoding == 'UTF16') {
+        sms_type = 'Unicode'; // for other languages "Arabic, Chinese, Russian" see http://en.wikipedia.org/wiki/GSM_03.38#UCS-2_Encoding
+      }
+
+      $('#text_length_' + message_id).html(approx + length);
+      $('#text_remaining_' + message_id).html(approx + remaining);
+      $('#text_message_segments_' + message_id).html(part_count);
+      // $('#text_per_message').html('Per Message: ' + per_message);
+      // $('#text_encoding').html('Message Encoding: ' + encoding);
+      $('#text_sms_type_' + message_id).html(sms_type);
+
+      if (<%= presenter.client.unlimited ? 1 : 0 -%> === 1) {
+        // charge 0 if Client set to unlimited
+        charge = '0.00';
+      } else if (<%= presenter.client.text_segment_charge_type.to_i -%> === 0) {
+        // charge fixed rate for all segments
+        charge = (<%= presenter.client.text_message_credits.to_d.to_s -%> * part_count);
+      } else if (<%= presenter.client.text_segment_charge_type.to_i -%> === 1) {
+        // charge graduated rate for segments
+        charge = (<%= presenter.client.text_message_credits.to_d.to_s -%> + ((part_count - 1.0) * (<%= presenter.client.text_message_credits.to_d.to_s -%> * 0.75)));
+      } else {
+        // charge flat fee for action
+        charge = '<%= presenter.client.text_message_credits.to_d.to_s -%>';
+      }
+
+      charge = parseFloat(charge) + (<%= presenter.client.text_message_credits.to_d -%> * window.file_attachments[message_id].length);
+
+      $('#text_message_cost_' + message_id).html(approx + charge);
+      // $('#text_message_cost_currency').html('Message Cost (currency): $' + part_count * 0.00675)
+    }
+  </script>
+<% else %>
+  <script>
+    function updateTextInfo(e) {}
+  </script>
+<% end %>

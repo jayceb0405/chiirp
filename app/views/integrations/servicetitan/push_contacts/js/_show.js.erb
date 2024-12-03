@@ -1,0 +1,30 @@
+// app/views/integrations/servicetitan/push_contacts/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/servicetitan/push_contacts/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   none
+//
+// Local Variables:
+//   (req) cards: (Array)
+//
+<% push_contacts_presenter = Integrations::Servicetitan::PushContactsPresenter.new(client_api_integration: @client_api_integration) %>
+
+<% if cards.include?('push_contacts_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/push_contacts/index', locals: { presenter: push_contacts_presenter } -%>');
+<% end %>
+
+<% if cards.include?('push_contacts_edit') %>
+  $('#edit_push_contact_<%= @push_contact.dig(:id) -%>').html('<%= j render partial: 'integrations/servicetitan/push_contacts/edit', locals: { presenter: push_contacts_presenter } -%>');
+<% end %>
+
+<% if cards.include?('push_contacts_new') %>
+  $('#no_tags').hide();
+  $('#push_contacts_body').append('<%= j render partial: 'integrations/servicetitan/push_contacts/push_contact', locals: { push_contact: @push_contact, presenter: push_contacts_presenter } -%>');
+  $('#edit_push_contact_<%= @push_contact.dig(:id) -%>').html('<%= j render partial: 'integrations/servicetitan/push_contacts/edit', locals: { presenter: push_contacts_presenter } -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

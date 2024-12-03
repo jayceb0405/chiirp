@@ -1,0 +1,283 @@
+<%
+  # app/views/clients/statements/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/statements/show', locals: { presenter: ClientPresenter, printable: Boolean }
+  #
+  # Instance Variables:
+  #   (opt) @client: (Client)
+  #   (req) @statement_month: (String) "Month (Integer):Year (Integer)" ex: "9:2023"
+  #
+  # Local Variables:
+  #   (opt) presenter: (ClientPresenter)
+  #   (opt) printable: (Boolean)
+  #
+  return unless (local_assigns.dig(:presenter).is_a?(ClientPresenter) || @client.is_a?(Client)) && @statement_month.is_a?(String)
+
+  presenter = ClientPresenter.new(client: @client) unless local_assigns.dig(:presenter).is_a?(ClientPresenter)
+  presenter.statement_month = @statement_month
+  printable                 = local_assigns.dig(:printable).to_bool
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Statements</span>
+      <span>
+        <% unless printable %>
+          <button class="btn btn-light" onclick="statementPrint()">Print</button>
+        <% end %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <% unless printable %>
+        <%= bootstrap_select_tag(
+              field:        'statement_month',
+              row:          { columns: [3, 9] },
+              label:        { title: 'Statement Month' },
+              html_options: { data: { remote: true, url: clients_statement_path(@client), method: :get } },
+              options:      { array: presenter.options_for_statement_month, selected: presenter.statement_month, prompt: 'Select Statement Month' }
+            ) %>
+      <% end %>
+
+      <div class="border p-2 pt-4">
+        <h6><span class="font-weight-light">Account:</span> <%= @client.name %></h6>
+        <h6 class="pt-4"><span class="font-weight-light">Date:</span> <%= presenter.current_client_time.strftime('%A, %B %e, %Y (%-l:%M:%S %P)') %></h6>
+        <h6 class="pt-4"><span class="font-weight-light">Billed To:</span></h6>
+        <h6 class="pl-3">
+          <%= presenter.client.name -%><br>
+          <%= presenter.client.address1 -%><br>
+
+          <% if presenter.client.address2.present? %>
+            <%= presenter.client.address2 -%><br>
+          <% end %>
+
+          <%= presenter.client.city -%>, <%= presenter.client.state -%> <%= presenter.client.zip -%><br>
+          <%= number_to_phone(presenter.client.phone) -%>
+        </h6>
+
+        <h6 class="pt-4"><span class="font-weight-light">Billing Period:</span> <%= Date::MONTHNAMES[presenter.statement_month.split(':')[0].to_i] -%>, <%= presenter.statement_month.split(':')[1] -%></h6>
+
+        <h6 class="pt-4"><span class="font-weight-light">Transactions:</span></h6>
+
+        <div class="table-responsive">
+          <table class="table" id="statements">
+            <thead>
+              <tr>
+                <th colspan="3" style="min-width: 240px">Activity</th>
+                <th class="text-right">Amount</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td class="px-1 align-middle" style="width: 1.5rem">
+                  <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#credits_added" data-selection="credits_added" onclick="clientTransactions('credits_added');">
+                    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                  </button>
+                </td>
+                <td colspan="2"><%= ClientTransaction.description('credits_added') -%></td>
+                <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('credits_added').to_d, unit: '') -%></td>
+              </tr>
+              <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'credits_added' } %>
+
+              <tr>
+                <td class="px-1 align-middle" style="width: 1.5rem">
+                  <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#text_message_credits" data-selection="text_message_credits" onclick="clientTransactions('text_message_credits');">
+                    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                  </button>
+                </td>
+                <td colspan="2"><%= ClientTransaction.description('text_message_credits') -%></td>
+                <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('text_message_credits').to_d * -1, unit: '') -%></td>
+              </tr>
+              <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'text_message_credits' } %>
+
+              <% if presenter.client_transaction_totals.dig('aiagent_message_credits').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#aiagent_message_credits" data-selection="aiagent_message_credits" onclick="clientTransactions('aiagent_message_credits');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('aiagent_message_credits') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('aiagent_message_credits').to_d * -1, unit: '') -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'aiagent_message_credits' } %>
+              <% end %>
+
+              <% if presenter.client_transaction_totals.dig('text_image_credits').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#text_image_credits" data-selection="text_image_credits" onclick="clientTransactions('text_image_credits');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('text_image_credits') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('text_image_credits').to_d * -1, unit: '') -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'text_image_credits' } %>
+              <% end %>
+
+              <% if presenter.client_transaction_totals.dig('phone_call_credits').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#phone_call_credits" data-selection="phone_call_credits" onclick="clientTransactions('phone_call_credits');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('phone_call_credits') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('phone_call_credits').to_d * -1, unit: '') -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'phone_call_credits' } %>
+              <% end %>
+
+              <% if presenter.client_transaction_totals.dig('rvm_credits').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#rvm_credits" data-selection="rvm_credits" onclick="clientTransactions('rvm_credits');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('rvm_credits') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('rvm_credits').to_d * -1, unit: '') -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'rvm_credits' } %>
+              <% end %>
+
+              <% if presenter.client_transaction_totals.dig('video_call_credits').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#video_call_credits" data-selection="video_call_credits" onclick="clientTransactions('video_call_credits');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('video_call_credits') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('video_call_credits').to_d * -1, unit: '') -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'video_call_credits' } %>
+              <% end %>
+
+              <tr>
+                <td class="font-weight-bold" colspan="3">Credit Balance</td>
+                <td class="text-right font-weight-bold"><%= number_to_currency(presenter.credit_balance, unit: '') -%></td>
+              </tr>
+
+              <tr><td class="border-0"></td><td class="border-0"></td></tr>
+
+              <% if presenter.client_transaction_totals.dig('startup_costs').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#startup_costs" data-selection="startup_costs" onclick="clientTransactions('startup_costs');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('startup_costs') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('startup_costs').to_d) -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'startup_costs' } %>
+              <% end %>
+
+              <tr>
+                <td class="px-1 align-middle" style="width: 1.5rem">
+                  <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#mo_charge" data-selection="mo_charge" onclick="clientTransactions('mo_charge');">
+                    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                  </button>
+                </td>
+                <td colspan="2"><%= ClientTransaction.description('mo_charge') -%></td>
+                <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('mo_charge').to_d) -%></td>
+              </tr>
+              <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'mo_charge' } %>
+
+              <tr>
+                <td class="px-1 align-middle" style="width: 1.5rem">
+                  <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#dlc10_charges" data-selection="dlc10_charges" onclick="clientTransactions('dlc10_charges');">
+                    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                  </button>
+                </td>
+                <td colspan="2">10DLC Charges</td>
+                <td class="text-right"><%= number_to_currency(presenter.dlc10_charges.to_d) -%></td>
+              </tr>
+              <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'dlc10_charges' } %>
+
+              <% if presenter.client_transaction_totals.dig('added_charge').to_d.positive? %>
+                <tr>
+                  <td class="px-1 align-middle" style="width: 1.5rem">
+                    <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#added_charge" data-selection="added_charge" onclick="clientTransactions('added_charge');">
+                      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                    </button>
+                  </td>
+                  <td colspan="2"><%= ClientTransaction.description('added_charge') -%></td>
+                  <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('added_charge').to_d) -%></td>
+                </tr>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'added_charge' } %>
+              <% end %>
+
+              <tr>
+                <td class="px-1 align-middle" style="width: 1.5rem">
+                  <button type="button" class="btn btn-sm btn-icon btn-light d-print-none" data-toggle="collapse" data-target="#credit_charge" data-selection="credit_charge" onclick="clientTransactions('credit_charge');">
+                    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+                  </button>
+                </td>
+                <td colspan="2"><%= ClientTransaction.description('credit_charge') -%></td>
+                <td class="text-right"><%= number_to_currency(presenter.client_transaction_totals.dig('credit_charge').to_d) -%></td>
+                <%= render partial: 'clients/statements/transaction_row_collapsable', locals: { presenter:, printable:, selection: 'credit_charge' } %>
+              </tr>
+
+              <tr>
+                <td class="font-weight-bold" colspan="3">Total Charges</td>
+                <td class="text-right font-weight-bold"><%= number_to_currency(presenter.total_charges) -%></td>
+              </tr>
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_statements').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_statements').addClass('has-active');
+    $('#breadcrumb').show();
+
+    <% if printable %>
+    print();
+    <% end %>
+  });
+
+  function clientTransactions(transaction_type) {
+    $.ajax({
+      method: 'GET',
+      dataType: 'script',
+      url: '/clients/statements/<%= presenter.client.id -%>',
+      data: {
+        statement_month: '<%= presenter.statement_month -%>',
+        transaction_type: transaction_type
+      }
+    });
+  }
+
+  function statementPrint() {
+    var selections = [];
+    var all = $('#statements').find('[data-toggle="collapse"]');
+    all.each(function(i) {
+      var target = $($(this).data('target'));
+      var shown = target.hasClass('show');
+      var selection = $(this).data('selection')
+
+      if (shown) {
+        selections.push('selections[]=' + selection)
+      }
+    });
+
+    var url = '/clients/statements/<%= presenter.client.id -%>/print?statement_month=<%= presenter.statement_month %>&' + selections.join('&');
+
+    window.open(url, '_blank').focus();
+  }
+</script>

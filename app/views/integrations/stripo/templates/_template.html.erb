@@ -1,0 +1,34 @@
+<%
+  # app/views/integrations/stripo/templates/_template.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/stripo/templates/template', collection: presenter.email_templates, as: :email_template, locals: { presenter: Integrations::Stripo::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Stripo::Presenter) && local_assigns.dig(:email_template).is_a?(EmailTemplate)
+-%>
+<% if email_template.category != presenter.current_template_category %>
+</div>
+<div class="row" id="<%= (email_template.category.to_s.presence || 'Miscellaneous') -%>">
+  <div class="col-12 mt-4">
+    <h5><%= (email_template.category.to_s.presence || 'Miscellaneous').titleize %> Styles</h5>
+    <% presenter.current_template_category = email_template.category %>
+  </div>
+</div>
+<div class="row">
+<% end %>
+<div class="col-12 col-md-6 col-lg-4 m-0 p-1" style="height:235px;">
+  <div class="h-100 p-3 bg-light text-center border border-primary rounded overflow-hidden email_template_select" style="cursor:pointer;" data-id="<%= email_template.id -%>">
+    <div style="height:<%= presenter.image_div_height -%>px;">
+      <h6><%= email_template.name -%></h6>
+      <% if email_template.thumbnail.attached? %>
+        <%= cl_image_tag(email_template.thumbnail.key, { class: 'img-fluid', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 200, height: 200, crop: 'fit'], format: 'png' }) -%>
+      <% end %>
+    </div>
+  </div>
+</div>

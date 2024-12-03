@@ -1,0 +1,23 @@
+<%
+  # app/views/triggeractions/forms/_200.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/200", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # start a Campaign
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag_campaign(
+      client:       presenter.client,
+      field:        'triggeraction[campaign_id]',
+      label:        { title: 'Select a Campaign to Start' },
+      html_options: { disabled: presenter.campaign_disabled? },
+      options:      { first_trigger_types: Trigger::START_CAMPAIGN_TYPES, exclude_campaigns: [presenter.campaign.id], active_only: true, blank: 'Select a Campaign', selected: presenter.triggeraction.campaign_id }
+    ) %>

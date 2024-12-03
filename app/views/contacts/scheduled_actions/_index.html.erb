@@ -1,0 +1,108 @@
+<%
+  # app/views/contacts/scheduled_actions/_index.html.erb
+  #
+  # Example:
+  # 	render partial: 'contacts/scheduled_actions/index', locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   (req) presenter: (Contacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+  return if presenter.contact.new_record?
+-%>
+<div class="table-responsive">
+  <table class="table">
+
+    <thead>
+      <tr>
+        <th colspan="3" class="text-left" style="min-width: 240px"> Action </th>
+        <th class="text-left"> Campaign </th>
+        <th class="text-left"> Date </th>
+        <th style="width:100px; min-width:100px;"></th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      <% if presenter.scheduled_actions? %>
+        <%= render partial: 'contacts/scheduled_actions/action', collection: presenter.scheduled_actions, as: :delayed_job, locals: { presenter: } -%>
+      <% else %>
+        <tr><td colspan="6">
+          Scheduled Actions were not found.
+        </td></tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+  $(function() {
+    $(document).off('hide.bs.collapse', '.delayed_job_edit');
+    $(document).on('hide.bs.collapse', '.delayed_job_edit', function (e) {
+      var delayed_job_id = $(this).data('delayedjobid');
+
+      $('#delayed_job_' + delayed_job_id).html('');
+    });
+
+    $(document).off('show.bs.collapse', '.delayed_job_edit');
+    $(document).on('show.bs.collapse', '.delayed_job_edit', function (e) {
+      var contact_id     = $(this).data('contactid');
+      var delayed_job_id = $(this).data('delayedjobid');
+
+      $.ajax({
+        type:     'GET',
+        dataType: 'script',
+        url:      '/contacts/' + contact_id + '/scheduled_action/' + delayed_job_id + '/edit'
+      })
+    });
+
+    $(document).off('click', '.button_delete_action>');
+    $(document).on('click', '.button_delete_action', function(e) {
+      e.preventDefault();
+
+      var contact_id     = $(this).data('contactid');
+      var delayed_job_id = $(this).data('delayedjobid');
+      var action_name    = $(this).data('actionname');
+
+      ChiirpAlert({
+        'body':'Deleting action "' + action_name + '" can NOT be un-done. Is it your intention to delete this scheduled action?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_action' }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_action');
+      $(document).on('click', '#button_dump_it_action', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '/contacts/' + contact_id + '/scheduled_action/' + delayed_job_id
+        });
+      });
+    });
+
+    $(document).off('click', '#delete_all_actions');
+    $(document).on('click', '#delete_all_actions', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Deleting all actions can NOT be un-done. Is it your intention to delete all scheduled actions?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait' }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Dump it!', id: 'button_dump_it_all_actions' }].to_json) -%>,
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_dump_it_all_actions');
+      $(document).on('click', '#button_dump_it_all_actions', function(e) {
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: '<%= contact_scheduled_action_path(presenter.contact.id, 0) -%>'
+        });
+      });
+    });
+  });
+</script>

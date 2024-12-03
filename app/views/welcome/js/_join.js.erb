@@ -1,0 +1,20 @@
+<%
+  # app/views/welcome/js/_join.js.erb
+  # 
+  # Example:
+  #   render partial: "welcome/js/join", locals: { package: Integer }
+  # 
+  # Required Instance Variables:
+  #   @client: (Client)
+  #   @user:   (User)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  package = local_assigns.dig(:package)
+-%>
+$('#client_form').html('<%= j render partial: 'clients/new', locals: { self_create: true, package: package } -%>');
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

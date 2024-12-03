@@ -1,0 +1,40 @@
+<%
+# app/views/central/conversation/_show_attachment.html.erb
+#
+# Example:
+#   render partial: 'central/conversation/show_attachment', locals: { attachment: ContactAttachment }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (req) attachment: ContactAttachment
+#
+-%>
+<% if attachment.image.resource_type == 'video' %>
+  <figure class="figure">
+    <div class="figure-img figure-attachment embed-responsive embed-responsive-16by9">
+      <%= link_to cl_image_tag(attachment.image.thumb.my_public_id, { style: 'border-radius:10px;', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 220, height: 128, crop: 'fit'], resource_type: attachment.image.resource_type, format: 'png' }), '',
+                  { class: 'show_image_modal',
+                    id:    "image_#{attachment.id}",
+                    data:  {
+                      imagetype:        'video',
+                      imagetag:         cl_video_tag(attachment.image.my_public_id, { class: 'embed-responsive-item', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), controls: true, transformation: [width: 300, height: 300, crop: 'pad', quality: 70], fallback_content: 'Your browser does not support HTML5 video tags.' }),
+                      imagefullsizetag: cl_video_tag(attachment.image.my_public_id, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), controls: true, fallback_content: 'Your browser does not support HTML5 video tags.' })
+                    } } %>
+    </div>
+  </figure>
+<% else %>
+  <figure class="figure">
+    <div class="figure-img figure-attachment">
+      <%= link_to cl_image_tag(attachment.image.thumb.my_public_id, { style: 'border-radius:10px;', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 220, height: 128, crop: 'fit'], resource_type: attachment.image.resource_type, format: 'png' }), '',
+                  { class: 'show_image_modal',
+                    id:    "image_#{attachment.id}",
+                    data:  {
+                      imagetype:        'image',
+                      imagetag:         cl_image_tag(attachment.image.standard.my_public_id, { class: 'img-responsive', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [width: 300, height: 300, crop: 'fit'], format: 'png' }),
+                      imagefullsizetag: cl_image_tag(attachment.image.standard.my_public_id, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' })
+                    } } %>
+    </div>
+  </figure>
+<% end %>

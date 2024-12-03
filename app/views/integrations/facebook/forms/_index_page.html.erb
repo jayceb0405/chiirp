@@ -1,0 +1,28 @@
+<%
+  # app/views/integrations/facebook/forms/_index_page.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/forms/index_page.html.erb', locals: { page_id: String }
+  #
+  # Instance Variables:
+  #   (req) @user_api_integration: (UserApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter     = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+  facebook_page = presenter.user_api_integration.pages.map(&:deep_symbolize_keys).find { |p| p[:id] == local_assigns.dig(:page_id).to_s }
+  fb_model      = Integration::Facebook::Base.new(@user_api_integration)
+-%>
+<div id="forms_accordion" class="card-expansion">
+
+  <% if fb_model.page_subscribed?(page_id: facebook_page[:id], permissions: Integration::Facebook::Base::PAGE_PERMISSIONS_LEADS) %>
+    <%= render partial: 'integrations/facebook/forms/facebook_form', collection: presenter.page_forms(facebook_page.dig(:user_id), facebook_page[:id]), as: :facebook_form, locals: { user_id: facebook_page.dig(:user_id).to_s, presenter: } %>
+  <% else %>
+      <%= bootstrap_info_field(
+            col:  { class: 'mb-0' },
+            info: '<i class="fa fa-times text-danger mr-2"></i>Page must be subscribed to Leads. Return to Pages and subscribe to Leads.',
+            row:  { columns: [0, 12] }
+          ) %>
+  <% end %>
+</div>

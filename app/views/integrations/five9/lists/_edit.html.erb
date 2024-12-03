@@ -1,0 +1,103 @@
+<%
+  # app/views/integrations/five9/lists/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/lists/edit', locals: { list: [:id, { name: String, action: String, tag_id: Integer }] }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  list_id     = list[0].to_s
+  list_name   = list[1].symbolize_keys[:name].to_s
+  list_action = list[1].symbolize_keys[:action].to_s
+  list_tag_id = list[1].symbolize_keys[:tag_id].to_i
+
+  if list_id == 'new_list'
+    form_method = :post
+    form_url    = integrations_five9_lists_path
+    list_tag    = nil
+  else
+    form_method = :patch
+    form_url    = integrations_five9_list_path(list_id)
+    list_tag    = Tag.find_by(client_id: @client_api_integration.client_id, id: list_tag_id)
+  end
+
+  list_tag      = @client_api_integration.client.tags.new if list_tag.nil?
+  f9_client     = Integrations::FiveNine::Base.new(@client_api_integration.credentials)
+  f9_client.call(:lists_names)
+  list_result = f9_client.result
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">List: <%= list_name -%></h6>
+  <div class="card-body">
+
+    <%= form_with model: @client_api_integration, url: form_url, builder: LooperFormBuilder, remote: true, method: form_method, html: { class: 'needs-validation', novalidate: true } do |f| %>
+
+      <% if f9_client.success? %>
+        <%= bootstrap_select_tag(
+              field:    'list[name]',
+              label:    { title: 'List Name' },
+              options:  { array: list_result, selected: list_name, prompt: 'Select a List Name' },
+              messages: { note: 'Select a Five9 List to add Contacts to.' }
+            ) %>
+      <% else %>
+        <%= bootstrap_info_field(
+              info:  "Unable to retrieve Lists (#{f9_client.message})",
+              label: { title: 'List Name' }
+            ) %>
+      <% end %>
+
+      <%= bootstrap_text_field(
+            field:        'list[new][name]',
+            value:        '',
+            label:        { class: 'pl-4', title: 'Create a New List' },
+            html_options: { id: "list_new_field_#{list_id}", placeholder: 'List Name' },
+            appends:      [{ button: true, label: 'Create', id: "list_new_button_#{list_id}" }]
+          ) %>
+      <%= render partial: 'snippets/radio_field', locals: {
+            field:   'list[action]',
+            label:   { title: 'Action' },
+            buttons: [
+              { label: 'Add Contact to List', value: 'add', id: 'add_contact_to_list', checked: list_action == 'add' },
+              { label: 'Remove Contact from List', value: 'remove', id: 'remove_contact_from_list', checked: list_action == 'remove' }
+            ]
+          } %>
+      <div id="list_tag_new">
+        <%= render partial: 'tags/select_or_add', locals: { user: current_user, tag: list_tag, select_or_add_field_name: 'list[tag_id]', select_or_add_div_id: 'list_tag_new', message_note: 'Select Tag that will trigger adding a Contact to Five9 List.' } %>
+      </div>
+
+      <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(document).ready(function() {
+    $(document).off('keydown', '#list_new_field_<%= list_id -%>');
+    $(document).on('keydown', '#list_new_field_<%= list_id -%>', function(e) {
+      if (e.keyCode === 13) {
+        e.preventDefault();
+        $('#list_new_button_<%= list_id -%>').click();
+        return false;
+      }
+    });
+
+    $(document).off('click', '#list_new_button_<%= list_id -%>');
+    $(document).on('click', '#list_new_button_<%= list_id -%>', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      // Submit the form via ajax
+      $.ajax({
+        url: '<%= integrations_five9_create_list_path(list_id) -%>',
+        method: 'POST',
+        dataType: 'script',
+        data: { list_name: $('#list_new_field_<%= list_id -%>').val() }
+      });
+    });
+  });
+</script>

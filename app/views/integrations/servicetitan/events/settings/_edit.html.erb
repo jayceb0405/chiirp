@@ -1,0 +1,51 @@
+<%
+  # app/views/integrations/servicetitan/events/settings/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/settings/edit', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<h6 class="card-header d-flex justify-content-between">
+  <span class="my-auto">Settings</span>
+</h6>
+<div class="card-body">
+  <h6>Sold Estimates Disqualification Options</h6>
+
+  <div class="col-8 offset-2 px-5 small text-center">
+    <%= I18n.t('tenant.name') -%> processes one (1) sold estimate per job.
+    All other estimates created on a job are ignored when a sold estimate is encountered.
+    Select line items that, when included in an estimate, will disqualify an estimate from counting as sold.
+  </div>
+
+  <%= form_with url: integrations_servicetitan_events_settings_line_items_path, builder: LooperFormBuilder, data: { turbo: true, turbo_stream: true }, method: :get, class: 'needs-validation', novalidate: true do |f| %>
+    <%= f.switch :null, {
+          row:        { class: 'mt-3' },
+          label:      { title: 'ServiceTitan Line Item Types' },
+          checkboxes: [
+            { field: 'equipment', label: 'Equipment', checked: presenter.line_item_type_equipment, values: [true, false], note: 'Include Equipment Line Items' },
+            { field: 'materials', label: 'Materials', checked: presenter.line_item_type_materials, values: [true, false], note: 'Include Material Line Items' },
+            { field: 'services', label: 'Services', checked: presenter.line_item_type_services, values: [true, false], note: 'Include Service Line Items' }
+          ],
+          messages:   { note: "Select line item types to filter line items. Click 'Refresh Line Items' when types & categories are selected." }
+        } %>
+    <%= f.select :categories, {
+          label:        { title: 'ServiceTitan Categories' },
+          html_options: { multiple: true, count_selected_text: 'categories', mobile: browser.device.mobile? },
+          choices:      { grouped_array: presenter.options_for_line_item_categories, selected: presenter.line_item_categories },
+          messages:     { note: "Select categories to filter line items. Click 'Refresh Line Items' when types & categories are selected." }
+        } %>
+
+    <%= f.submit_buttons buttons: [{ title: 'Refresh Line Items', disable_with: 'Refreshing Line Items' }] %>
+  <% end %>
+
+  <div class="mt-3" id="servicetitan_line_items_dropdown">
+    <%= render partial: 'integrations/servicetitan/events/settings/line_items_dropdown', locals: { presenter: } %>
+  </div>
+</div>

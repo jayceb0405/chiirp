@@ -1,0 +1,177 @@
+<%
+  # app/views/campaigns/_show.html.erb
+  #
+  # Example:
+  #   render partial: "campaigns/show"
+  #
+  # Instance Variables:
+  #   (req) @campaign: (Campaign)
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # Partials Tree:
+  #   campaigns/show
+  #     layouts/alerts
+  #     campaigns/show/active
+  #     campaigns/show/help
+  #     campaigns/show/edit
+  #     triggers/list
+  #       triggers/trigger
+  #         triggers/trigger_header
+  #         triggers/form
+  #           triggers/forms/#{trigger.trigger_type}
+  #         triggeractions/list
+  #           triggeractions/triggeraction
+  #             triggeractions/triggeraction_header
+  #             triggeractions/form
+  #               triggeractions/forms/#{triggeraction.action_type}
+  #               triggeractions/action_scheduler
+  #       triggeractions/js/images
+  #       triggeractions/js/text_info
+  #     snippets/custom_modal
+  #     campaigns/js/analysis_results
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && @campaign.is_a?(Campaign)
+
+  presenter.campaign = @campaign
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.campaign] } %>
+<div class="card card-margins-mobile">
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+
+      <% if presenter.campaign.new_record? %>
+        <h6 class="mr-auto">
+          <span id="campaign_general_name"><%= presenter.campaign.name -%></span>
+          <span class="ml-2" id="campaign_analysis_results"></span>
+        </h6>
+      <% else %>
+
+        <%= link_to "<span id=\"campaign_general_name\" data-toggle=\"tooltip\" title=\"Edit\">#{presenter.campaign.name}</span><span class=\"ml-2\" id=\"campaign_analysis_results\"></span>".html_safe,
+                    '#',
+                    class: 'h6 mr-auto text-decoration-none prevent-default text-dark',
+                    data:  {
+                      toggle: 'collapse',
+                      target: '#campaign_general_settings'
+                    } %>
+
+        <%= link_to '<span data-toggle="tooltip" title="Edit"><i class="fa fa-pencil-alt"></i></span>'.html_safe,
+                    '#',
+                    class: 'btn btn-icon btn-light prevent-default',
+                    data:  {
+                      toggle: 'collapse',
+                      target: '#campaign_general_settings'
+                    } %>
+
+        <span id="campaign_general_settings_active">
+          <%= render partial: 'campaigns/show/active' %>
+        </span>
+
+        <%= link_to '<i class="fa fa-funnel-dollar"></i>'.html_safe,
+                    edit_campaign_marketplace_path(presenter.campaign.campaign_share_code.id),
+                    class:  "btn btn-icon btn-light prevent-default #{presenter.campaign.marketplace ? 'text-success' : ''}",
+                    remote: true,
+                    method: :get,
+                    title:  'Marketplace',
+                    data:   {
+                      toggle: 'tooltip'
+                    } %>
+      <% end %>
+
+      <%= link_to '<span data-toggle="tooltip" title="Help"><i class="fa fa-question"></i></span>'.html_safe,
+                  '#',
+                  class: 'btn btn-icon btn-light prevent-default',
+                  data:  {
+                    toggle: 'collapse',
+                    target: '#campaign_general_help'
+                  } %>
+
+      <% unless presenter.campaign.new_record? %>
+        <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe,
+                    '#',
+                    class: 'btn btn-icon btn-light prevent-default',
+                    id:    'button_campaign_delete',
+                    title: 'Delete',
+                    data:  {
+                      toggle: 'tooltip'
+                    } %>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="card-body">
+  <% if presenter.campaign.marketplace %>
+    <%= bootstrap_info_field(
+          info: '<i class="fa fa-times text-danger mr-2"></i>Your Campaign may NOT be edited. It has been submitted to the Marketplace.'
+        ) %>
+  <% end %>
+    <%= render partial: 'campaigns/show/help' %>
+
+    <div class="collapse app_collapse-inner p-2" id="campaign_general_settings">
+      <!-- edit Campaign -->
+
+      <% if presenter.campaign.new_record? %>
+        <%= render partial: 'campaigns/show/edit' %>
+      <% end %>
+    </div>
+
+    <% unless presenter.campaign.new_record? %>
+      <div class="card">
+        <div class="card-header">
+          <div class="d-flex align-items-center">
+            <h6 class="mr-auto">Triggers</h6>
+
+            <% unless presenter.campaign.marketplace %>
+              <%= link_to '<i class="fa fa-plus mr-2"></i>New Trigger'.html_safe,
+                          new_campaign_trigger_path(presenter.campaign.id),
+                          method: :get,
+                          remote: true,
+                          class:  'btn btn-light',
+                          id:     'new_campaign_trigger_button' %>
+            <% end %>
+          </div>
+        </div>
+
+        <div class="card-body bg-light">
+          <div id="triggers_list">
+            <%= render partial: 'triggers/list', locals: { presenter: } %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+  </div>
+</div>
+
+<%= render partial: 'snippets/custom_modal', locals: { id: 'campaign_marketplace_modal', max_width: '900px', close: true } %>
+
+<script>
+  $(function () {
+    <%= render partial: 'campaigns/js/analysis_results', locals: { campaign: presenter.campaign } %>
+
+    <% if presenter.campaign.new_record? %>
+      $(document).off('show.bs.collapse', '#campaign_general_settings');
+      $('#campaign_general_settings').collapse('show');
+    <% else %>
+
+      <% if presenter.campaign.triggers.empty? %>
+        $('#new_campaign_trigger_button').hide();
+      <% end %>
+
+      $(document).off('show.bs.collapse', '#campaign_general_settings');
+      $(document).on('show.bs.collapse', '#campaign_general_settings', function (e) {
+        $.ajax({
+          type:     'GET',
+          dataType: 'script',
+          url:      '<%= edit_campaign_path(presenter.campaign.id) -%>'
+        })
+      });
+
+      <%= render partial: 'snippets/js/confirm_alert', locals: {
+            element:     '#button_campaign_delete',
+            alert:       { body: "Deleting \"#{presenter.campaign.name}\" can NOT be un-done. Is it your intention to delete this campaign?", type: 'danger', persistent: true },
+            ajax_action: { type: 'DELETE', url: campaign_path(presenter.campaign.id) }
+          } %>
+    <% end %>
+  });
+</script>

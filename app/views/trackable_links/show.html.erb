@@ -1,0 +1,68 @@
+<%
+	# app/views/trackable_links/show.html.erb
+	# 
+	# Example:
+	# 	render partial: "trackable_links/show"
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-link mr-2"></i>Trackable Links</h1>
+
+        <div class="btn-toolbar">
+          <%= link_to '<i class="fa fa-plus mr-2"></i>New Trackable Link'.html_safe, new_trackable_link_path, {
+              class:  'btn btn-light',
+              id:     "button_new_trackable_link",
+              remote: true,
+              method: :get
+            } if current_user.client.trackable_links.count < current_user.client.trackable_links_count
+          %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit Trackable Link</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_trackable_links_dropdown">
+              <%= render partial: 'trackable_links/select_trackable_links_dropdown' %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="trackable_links_body">
+
+      <% if @trackable_link.new_record? && @trackable_link.name.to_s.empty? %>
+        <%= render partial: 'trackable_links/index' %>
+      <% else %>
+        <%= render partial: 'trackable_links/edit' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_trackable_links').addClass('has-active');
+
+    $(document).on('click', '.option_trackable_link', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/trackable_links/' + $(this).attr('id') + '/edit'
+      });
+    });
+  });
+</script>

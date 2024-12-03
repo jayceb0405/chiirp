@@ -1,0 +1,22 @@
+<%
+   # app/views/integrations/servicetitan/events/events/select_tags/_job_cancel_reasons.html.erb
+   #
+   # Example:
+   #   render partial: 'integrations/servicetitan/events/events/select_tags/job_cancel_reasons', locals: { presenter: Integrations::Servicetitan::EventsPresenter }
+   #
+   # Instance Variables:
+   #   none
+   #
+   # Local Variables:
+   #   (req) presenter: (Integrations::Servicetitan::EventsPresenter)
+   #
+   return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::EventsPresenter)
+-%>
+<%= bootstrap_select_tag(
+      field:        'events[job_cancel_reason_ids]',
+      row:          { class: 'event_criteria_row', id: "job_cancel_reason_ids_row_#{presenter.event_id}" },
+      label:        { title: "Canceled Reasons<span class=\"ml-2\">#{link_to '', integrations_servicetitan_events_refresh_job_cancel_reasons_path(event_id: presenter.event_id), { class: 'btn btn-sm btn-icon btn-secondary rotate-right-button fa fa-rotate-right', title: 'Refresh Cancel Reasons', data: { toggle: 'tooltip', turbo: true, turbo_stream: true } }}</span>" },
+      html_options: { multiple: true },
+      options:      { array: presenter.job_cancel_reasons, selected: presenter.job_cancel_reason_ids },
+      messages:     { note: 'Event actions will trigger when ServiceTitan Canceled Job Reasons include any of the selected reasons.' }
+    ) %>

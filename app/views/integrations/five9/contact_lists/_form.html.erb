@@ -1,0 +1,48 @@
+<%
+  # app/views/integrations/five9/contact_lists/_form.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/five9/contact_lists/form'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  f9_client = Integrations::FiveNine::Base.new(@client_api_integration.credentials)
+  f9_client.call(:lists_names)
+  list_result = f9_client.result
+-%>
+<%= form_with url: integrations_five9_contact_lists_path, builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', novalidate: true do |f| %>
+
+  <% if f9_client.success? %>
+    <%= bootstrap_select_tag(
+          field:    'contact_lists[create]',
+          label:    { title: 'Add new Contacts to this List' },
+          options:  { array: list_result, selected: @client_api_integration.contact_lists['create'], prompt: 'Select a List Name' },
+          messages: { note: 'Select a Five9 List to add New Contacts to.' }
+        ) %>
+
+    <%= bootstrap_select_tag(
+          field:    'contact_lists[update]',
+          label:    { title: 'Add edited Contacts to this List' },
+          options:  { array: list_result, selected: @client_api_integration.contact_lists['update'], prompt: 'Select a List Name' },
+          messages: { note: 'Select a Five9 List to add Edited Contacts to.' }
+        ) %>
+
+    <%= bootstrap_select_tag(
+          field:    'contact_lists[book]',
+          label:    { title: 'Add booked Contacts to this List' },
+          options:  { array: list_result, selected: @client_api_integration.contact_lists['book'], prompt: 'Select a List Name' },
+          messages: { note: 'Select a Five9 List to add Booked Contacts to.' }
+        ) %>
+  <% else %>
+    <%= bootstrap_info_field(
+          info:  "Unable to retrieve Lists (#{f9_client.message})",
+          label: { title: 'Add new Contacts to this List' }
+        ) %>
+  <% end %>
+
+  <%= f.submit_buttons buttons: [{ title: 'Save', disable_with: 'Saving' }] %>
+<% end %>

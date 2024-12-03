@@ -1,0 +1,72 @@
+<%
+  # app/views/dashboards/dashboard/full.html.erb
+  #
+  # Example:
+  #   render "dashboards/dashboard", locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: Presenter
+  #
+  presenter = DashboardPresenter.new(user: current_user)
+-%>
+<div class="page">
+  <div class="page-inner">
+    <div class="page-section" id="dashboard_header_div">
+      <%= render partial: 'dashboards/header', locals: { presenter: } %>
+    </div>
+
+    <div class="page-section" id="dashboard_buttons_div">
+      <%= render partial: 'dashboards/dash_buttons', locals: { presenter: } %>
+    </div>
+
+    <% if presenter.user.access_controller?('dashboard', 'tasks', session) %>
+      <div class="page-section" id="tasks_index_container">
+        <%= render partial: 'dashboards/tasks/index', locals: { presenter: } %>
+      </div>
+    <% end %>
+
+    <% if presenter.user.access_controller?('dashboard', 'calendar', session) %>
+      <div class="page-section" id="dashboard_calendar">
+        <%= render partial: 'dashboards/calendar', locals: { presenter: } %>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_dashboard').addClass('has-active');
+
+    <% if current_user.access_controller?('clients', 'dlc10', session) %>
+      <% dlc10_brand = current_user.client.dlc10_brand %>
+      <% dlc10_campaign = dlc10_brand&.campaigns&.find_by('dca_completed_at != null') || dlc10_brand&.campaigns&.find_by('shared_at != null') || dlc10_brand&.campaigns&.first %>
+
+      <% if dlc10_brand.blank? %>
+        toastr.error('Your 10DLC Brand has NOT been created yet!<br><%= link_to('Click Here to Begin', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Brand Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% elsif dlc10_brand.tcr_brand_id.blank? && dlc10_brand.submitted_at.blank? %>
+        toastr.error('Your 10DLC Brand has NOT been submitted yet!<br><%= link_to('Click Here to Review', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Brand Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% elsif (dlc10_brand.tcr_brand_id.blank? || dlc10_brand.verified_at.blank?) && dlc10_brand.submitted_at.present? && (Time.current - dlc10_brand.submitted_at) > 10.days %>
+        toastr.error('Your 10DLC Brand has NOT been verified yet!<br><%= link_to('Click Here to Review', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Brand Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% elsif dlc10_brand.tcr_brand_id.present? && dlc10_brand.verified_at.present? && dlc10_campaign.nil? %>
+        toastr.error('Your 10DLC Brand was verified but no 10DLC Campaigns have been created yet!<br><%= link_to('Click Here to Begin', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Campaign Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% elsif dlc10_brand.tcr_brand_id.present? && dlc10_brand.verified_at.present? && dlc10_campaign.shared_at.blank? && dlc10_campaign.dca_completed_at.blank? %>
+        toastr.error('Your 10DLC Campaign has NOT been submitted yet!<br><%= link_to('Click Here to Begin', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Campaign Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% elsif dlc10_brand.tcr_brand_id.present? && dlc10_brand.verified_at.present? && dlc10_campaign.shared_at.present? && dlc10_campaign.dca_completed_at.blank? && (Time.current - dlc10_campaign.shared_at) > 10.days %>
+        toastr.error('Your 10DLC Campaign has NOT been approved yet!<br><%= link_to('Click Here to Begin', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Campaign Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% elsif dlc10_brand.tcr_brand_id.present? && dlc10_brand.verified_at.present? && dlc10_campaign.dca_completed_at.present? && current_user.client.twnumbers.where(dlc10_campaign_id: nil).where.not(phone_vendor: 'twilio').any? %>
+        toastr.error('Some or all of your phone numbers have NOT been registered with your approved 10DLC Campaign yet!<br><%= link_to('Click Here to Begin', clients_dlc10_intro_path(current_user.client)) -%>', 'Required 10DLC Phone Number Registration', {timeOut: 0, extendedTimeOut: 0})
+      <% end %>
+    <% end %>
+  });
+
+  function contrastButtonFontColor(button_id) {
+    fontColor = contrastColor(rgb2hex($('#widget_button_' + button_id).css('background-color')), true)
+    $('#widget_amount_' + button_id).css({'color':fontColor});
+    $('#widget_description_' + button_id).css({'color':fontColor});
+    $('#widget_icon_' + button_id).css({'color':fontColor});
+  }
+</script>

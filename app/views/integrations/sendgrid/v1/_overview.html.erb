@@ -1,0 +1,63 @@
+<%
+  # app/views/integrations/sendgrid/v1/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/sendgrid/v1/overview', locals: { presenter: Integrations::Sendgrid::V1::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Sendgrid::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Sendgrid::V1::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'sendgrid' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_sendgrid_v1_api_key_path, { class: 'metric metric-bordered align-items-center', id: 'link_api_key', remote: true }) do %>
+            <h2 class="metric-label"> API Key </h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <% if presenter.client_api_integration.api_key.present? %>
+                  <i class="fa fa-link text-success"></i>
+                <% else %>
+                  <i class="fa fa-link text-danger"></i>
+                <% end %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+        <div class="col-4 py-2">
+          <%= link_to(edit_integrations_sendgrid_v1_email_addresses_path, { class: 'metric metric-bordered align-items-center', id: 'link_email_addresses', remote: true }) do %>
+            <h2 class="metric-label"> Email Addresses </h2>
+            <p class="metric-value h3">
+              <span class="value">
+                <%= presenter.email_addresses_count %>
+              </span>
+            </p>
+          <% end %>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

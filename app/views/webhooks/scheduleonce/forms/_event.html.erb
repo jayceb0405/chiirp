@@ -1,0 +1,24 @@
+<%
+  # app/views/webhooks/scheduleonce/forms/_event.html.erb
+  #
+  # Example:
+  # 	render partial: "webhooks/scheduleonce/forms/event", locals: { event: String }
+  #
+  # Required Instance Variables:
+  # 	none
+  #
+  # Required Local Variables:
+  #   event: (String)
+  #
+  campaign_id = @client.send(:"scheduleonce_#{event}")
+-%>
+<%= hidden_field_tag :webhook_event, event %>
+
+<div class="form-group">
+  <%= label_tag 'campaign_id', "Select a Campaign to Start on each #{event.tr('_', ' ')}:", { class: 'form-group-label' } %>
+  <%= select_tag(:campaign_id,
+                 options_for_campaign(client: @client, selected_campaign_id: campaign_id, grouped: true),
+                 { include_blank: 'Select a Campaign',
+                   class:         'form-control select2',
+                   style:         'width: 100%;' }) %>
+</div>

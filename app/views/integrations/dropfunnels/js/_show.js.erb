@@ -1,0 +1,66 @@
+<%
+	# app/views/integrations/dropfunnels/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: 'integrations/dropfunnels/js/show'
+	# 
+	# Required Instance Variables:
+	#   none
+	# 
+	# Required Local Variables:
+	# 	cards: (Array)
+	# 
+-%>
+<% if cards.include?('instructions') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/instructions' -%>');
+<% end %>
+<% if cards.include?('overview') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/overview' -%>');
+<% end %>
+
+// API Key
+<% if cards.include?('api_key_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/api_key/show' -%>');
+<% end %>
+
+// lead_create
+<% if cards.include?('lead_create_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/lead_create/show' -%>');
+<% end %>
+
+// member_create
+<% if cards.include?('member_create_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/member_create/show' -%>');
+<% end %>
+
+// two_step_lead_create
+<% if cards.include?('two_step_lead_create_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/two_step_lead_create/show' -%>');
+<% end %>
+
+// two_step_lead_create
+<% if cards.include?('product_purchased_main_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/product_purchased_main/show' -%>');
+<% end %>
+
+// product_purchased_main
+<% if cards.include?('two_step_lead_create_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/two_step_lead_create/show' -%>');
+<% end %>
+
+// product_purchased_order_bump
+<% if cards.include?('product_purchased_order_bump_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/product_purchased_order_bump/show' -%>');
+<% end %>
+
+// product_purchased_order_upsell
+<% if cards.include?('product_purchased_order_upsell_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/product_purchased_order_upsell/show' -%>');
+<% end %>
+
+// submit_quiz
+<% if cards.include?('submit_quiz_show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/dropfunnels/submit_quiz/show' -%>');
+<% end %>
+
+Looper.init();

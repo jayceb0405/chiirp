@@ -1,0 +1,41 @@
+<%
+  # app/views/integrations/dope/v1/connections/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/dope/v1/connections/show', locals: { dope_presenter: Presenter }
+  #
+  # Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:dope_presenter) || Integrations::Dope::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Connection</h6>
+  <div class="card-body">
+
+    <%= form_with model: presenter.client_api_integration, url: integrations_dope_v1_connection_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', novalidate: true do |f| %>
+
+      <%= f.password_field :api_key, {
+            label:        { title: 'Dope API Token' },
+            html_options: { value: presenter.client_api_integration.api_key, placeholder: 'API Token', required: true },
+            prepends:     [{ button: false, label: '<i class="fa fa-key"></i>' }],
+            messages:     { note: "Required. Created in Dope (Dope > <i class='fa fa-user'></i> > More > API Access)" }
+          } %>
+
+      <%= bootstrap_submit_buttons(
+            buttons: [{ title: 'Save API Token', disable_with: 'Saving API Token...' }]
+          ) %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

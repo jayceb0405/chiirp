@@ -1,0 +1,40 @@
+// app/views/snippets/js/_login_as.js.erb
+//
+// render partial: 'snippets/js/login_as', locals: { element: 'string' }
+<%
+  element = (local_assigns.dig(:element) || '.log_in_as').to_s.downcase
+%>
+$('<%= element -%>').off('click');
+$('<%= element -%>').on('click', function(e) {
+  e.preventDefault();
+  e.stopPropagation();
+
+  ChiirpAlert({
+    'title': 'Log In As Another User',
+    'body': '<%= bootstrap_select_tag(field: 'string', row: { columns: [0, 12] }, label: { title: 'Log In As' }, html_options: { id: 'log_in_as_user_id' }, options: { array: [], selected: '' }) -%>',
+    'buttons': <%= raw([{ label: '<i class="fa fa-thumbs-down"></i> Cancel', id: 'button_cancel'}, {label: '<i class="fa fa-thumbs-up"></i> Log In', id: 'button_login' }].to_json) -%>,
+    'type': 'question',
+    'persistent': true
+  });
+
+  $.getJSON('/clients/' + this.id.replace('log_in_as_', '') + '/user_list').done(function(json) {
+    var clientUsers = ['<option>Select a User</option>'];
+
+    $.each(json, function(index, element) {
+      clientUsers.push('<option value="' + element.user_id + '">' + element.fullname + '</option>');
+    });
+
+    $('#log_in_as_user_id').html(clientUsers);
+    $('#log_in_as_user_id').selectpicker('refresh');
+  });
+
+  $('#button_login').off('click');
+  $('#button_login').on('click', function(e) {
+
+    $.ajax({
+      type: 'GET',
+      dataType: 'script',
+      url: '/users/' + $('#log_in_as_user_id').selectpicker('val') + '/become'
+    });
+  });
+});

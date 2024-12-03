@@ -1,0 +1,65 @@
+<%
+  # app/views/integrations/servicemonster/show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicemonster/show', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   (opt) presenter:                (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Servicemonster::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<div class="page">
+  <header class="page-cover">
+    <div class="text-center">
+      <div><%= image_tag('integrations/servicemonster/logo_name.png', { class: 'img-fluid rounded-0', style: 'max-width:500px;max-height:110px;' }) -%></div>
+      <h2 class="h4 mt-2 mb-0" id="show_user_fullname">ServiceMonster Integration</h2>
+      <div class="my-1">
+        <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i> <i class="fa fa-star text-yellow"></i>
+      </div>
+    </div>
+    <div class="cover-controls cover-controls-bottom">
+      <%= link_to '<i class="fa fa-question"></i>'.html_safe, integrations_servicemonster_instructions_path, { class: 'btn btn-sm btn-icon btn-secondary', id: 'button_help', remote: true } %>
+    </div>
+  </header>
+
+  <nav class="page-navs">
+    <div class="nav-scroller">
+      <div class="nav nav-center nav-tabs">
+        <%= link_to 'Events', integrations_servicemonster_webhooks_path, { class: 'nav-link', id: 'link_webhooks', remote: true } if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+        <%= link_to 'Employees', integrations_servicemonster_employees_path, { class: 'nav-link', id: 'link_employees', remote: true } if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+        <%= link_to 'Push Contacts', edit_integrations_servicemonster_push_leads_path, { class: 'nav-link', id: 'link_push_leads', remote: true } if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+        <%= link_to 'Import Contacts', integrations_servicemonster_update_contacts_path, { class: 'nav-link', id: 'link_update_contacts', remote: true } if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+        <%= link_to 'Import Orders', integrations_servicemonster_import_jobs_path, { class: 'nav-link', id: 'link_import_jobs', remote: true } if Integration::Servicemonster.valid_credentials?(presenter.client_api_integration) %>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page-inner">
+    <header class="page-title-bar" id="breadcrumb">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item active">
+            <%= link_to(integrations_servicemonster_path, { class: 'nav-link', remote: true }) do %>
+              <i class="breadcrumb-icon fa fa-angle-left mr-2"></i>Overview
+            <% end %>
+          </li>
+        </ol>
+      </nav>
+    </header>
+
+    <div class="page-section" id="integration_page_section">
+      <% if local_assigns.dig(:partial_to_show).to_s.present? && @client_api_integration.is_a?(ClientApiIntegration) %>
+        <%= render partial: partial_to_show, locals: { presenter: } %>
+      <% else %>
+        <%= render partial: 'integrations/servicemonster/overview', locals: { presenter: } %>
+      <% end %>
+    </div>
+  </div>
+</div>

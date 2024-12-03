@@ -1,0 +1,66 @@
+<%
+  # app/views/clients/terms/_edit.html.erb
+  #
+  # Example:
+  #   render 'clients/terms/edit'
+  #
+  # Required Instance Variables:
+  #   @client: (Client)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  # Optional Local Variables:
+  #   destination: (String)
+  #
+  cp          = local_assigns.dig(:client_presenter) || ClientPresenter.new(client: @client)
+  destination = (local_assigns.dig(:destination) || 'dashboard').to_s
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Terms & Conditions <small>(September 13, 2019)</small></span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <h6 class="text-muted">(please review, scroll to bottom and accept to continue)</h6>
+
+      <div class="overflow-auto border p-3" id="terms_div" style="max-height:500px;">
+        <%= render partial: 'clients/terms/terms' %>
+      </div>
+
+      <%= form_with url: clients_term_path(@client, dest: destination), builder: LooperFormBuilder, method: :patch, remote: (destination == 'client') do |f| %>
+        <%= f.submit_buttons(
+              buttons: [
+                { title: 'Print', id: 'terms_form_print', disable_with: 'Preparing Terms & Conditions' },
+                { title: "I Accept the #{I18n.t('tenant.name')} Terms & Conditions", id: 'terms_form_submit', disable_with: 'Accepting Terms & Conditions', disabled: true }
+              ]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('#terms_div').scroll(function() {chk_scroll($('#terms_div'));});
+
+    $('.nav-link').removeClass('active');
+    $('#link_terms').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_company_settings').addClass('has-active');
+    $('#aside_menu_item_client_terms').addClass('has-active');
+
+    <% if @phone_number_assigned && @contact_created && @user_phone_defined %>
+      $('#breadcrumb').show();
+     <% end %>
+  });
+
+  function chk_scroll(e) {
+    if ( e[0].scrollHeight - e.scrollTop() <= e.outerHeight() ) {
+      $('#terms_form_submit').prop('disabled', false);
+    }
+  }
+</script>

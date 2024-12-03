@@ -1,0 +1,49 @@
+<%
+  # app/views/integrations/sunbasedata/show.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/sunbasedata/show"
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+  links = [
+    {
+      type: "h",
+      name: "SunbaseData Config"
+    },
+    {
+      type: ( @client_api_integration.api_key.present? ? "o" : "a" ),
+      name: "API Key Saved",
+      id: "api_key_saved"
+    },
+    {
+      type: ( @client_api_integration.sales_rep_id.present? ? "o" : "a" ),
+      name: "Sales Rep ID Saved",
+      id: "sales_rep_id_saved"
+    },
+    {
+      type: ( @client_api_integration.appt_setter_id.present? ? "o" : "a" ),
+      name: "Appt Setter ID Saved",
+      id: "appt_setter_id_saved"
+    }
+  ]
+-%>
+<!-- integrations.sunbasedata.show -->
+<div class="section-container" id="general_container">
+  <!-- GENERAL CONTAINER -->
+</div>
+
+<script>
+  $(function() {
+    $.ajax({
+      method: 'GET',
+      dataType: 'script',
+      url: '<%= edit_integrations_sunbasedata_integration_path -%>'
+    });
+  });
+</script>
+<!-- /.integrations.sunbasedata.show -->

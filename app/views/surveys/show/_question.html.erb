@@ -1,0 +1,29 @@
+<%
+  # app/views/surveys/_question.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/question'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  images_found = false
+
+  @survey_screen.responses.each do |option_id, features|
+    images_found = true if @survey_screen.send("question_#{option_id.gsub('option_', '')}_image").attached?
+  end
+-%>
+<% if @survey_screen.question.present? %>
+  <h5 class="mb-3">
+    <%= @survey_screen.question.html_safe %>
+  </h5>
+<% end %>
+
+<% if images_found %>
+  <%= render partial: 'surveys/show/questions/with_images' %>
+<% else %>
+  <%= render partial: 'surveys/show/questions/without_images' %>
+<% end %>

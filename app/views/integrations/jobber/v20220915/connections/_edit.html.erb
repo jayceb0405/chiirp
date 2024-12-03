@@ -1,0 +1,57 @@
+<%
+  # app/views/integrations/jobber/v20220915/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobber/v20220915/connections/edit', locals: { presenter: Integrations::Jobber::V20220915::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jobber::V20220915::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jobber::V20220915::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to Jobber</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <% if presenter.valid_credentials? %>
+        <%= bootstrap_info_field(
+              info: '<i class="fa fa-check text-success mr-2"></i>Jobber connection is valid.',
+              row:  { columns: [0, 12] }
+            ) %>
+      <% else %>
+        <%= bootstrap_info_field(
+              info: '<i class="fa fa-times text-danger mr-2"></i>Jobber connection must be refreshed. Click "Connect to Jobber" to refresh token.',
+              row:  { columns: [0, 12] }
+            ) %>
+      <% end %>
+
+      <div class="mt-auto">
+        <div class="form-actions">
+          <% if presenter.valid_credentials? %>
+            <%= link_to 'Delete Jobber Connection', integrations_jobber_v20220915_connections_path, method: :delete, remote: true, class: 'btn btn-info ml-auto' %>
+          <% else %>
+            <%= link_to 'Connect to Jobber', presenter.connect_to_jobber_url, method: :get, class: 'btn btn-info ml-auto' %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

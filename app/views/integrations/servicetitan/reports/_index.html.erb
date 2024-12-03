@@ -1,0 +1,172 @@
+<%
+  # app/views/integrations/servicetitan/reports/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/reports/index', locals: { presenter: Integrations::Servicetitan::ReportsPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Servicetitan::ReportsPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Servicetitan::ReportsPresenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration, presenter.client_api_integration_reports] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">ServiceTitan reports</span>
+      <span>
+        <%= link_to '<i class="fa fa-plus mr-2"></i>New report'.html_safe,
+                    new_integrations_servicetitan_report_path,
+                    {
+                      class:   'btn btn-light',
+                      onclick: '$("#new_report_spinner").show();$("#no_reports").hide();',
+                      data:    {
+                        turbo:        true,
+                        turbo_stream: true
+                      }
+                    } %>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th colspan="2" style="min-width: 240px">Report</th>
+              <th class="text-left">Category</th>
+              <th style="width:150px; min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody id="reports_body">
+            <tr id="new_report_spinner" style="display:none;">
+              <td colspan="11" class="mt-3 text-center">
+                <%= render partial: 'snippets/spinning_logo', locals: { comment: 'Loading New Report' } %>
+              </td>
+            </tr>
+            <%= render partial: 'integrations/servicetitan/reports/reports', locals: { presenter: } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_reports').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.edit_report');
+    $(document).on('show.bs.collapse', '.edit_report', function (e) {
+
+      if (e.target.id.replace('edit_report_', '')) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '/integrations/servicetitan/reports/' + e.target.id.replace('edit_report_', '') + '/edit'
+        });
+      }
+    });
+
+    $(document).off('hide.bs.collapse', '.edit_report');
+    $(document).on('hide.bs.collapse', '.edit_report', function (e) {
+      $('#rotate_right_button_' + e.target.id.replace('edit_report_', '')).hide();
+      $('#edit_report_' + e.target.id.replace('edit_report_', '')).html('<td colspan="11" class="mt-3 text-center"><%= j render partial: 'snippets/spinning_logo', locals: { comment: 'Loading Tag' } %></td>');
+    });
+
+    $(document).off('change', '.report_type_select');
+    $(document).on('change', '.report_type_select', function(e) {
+      e.stopPropagation();
+
+      displayInputs(e.target.id.replace('report_type_select_', ''));
+    });
+
+    $(document).off('click', '.report_delete');
+    $(document).on('click', '.report_delete', function(e) {
+      e.preventDefault();
+
+      var report_id   = $(this).data('id');
+      var report_name = $(this).data('name');
+
+      ChiirpAlert({
+        'body':       'Deleting "' + report_name + '" can NOT be un-done. Is it your intention to delete this Report?',
+        'buttons':    [{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it'}],
+        'type':       'danger',
+        'persistent': true
+      });
+
+      $(document).off('click', '#button_do_it');
+      $(document).on('click', '#button_do_it', function(e) {
+        e.preventDefault();
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'turbo_stream',
+          accepts: {
+            'turbo_stream': 'text/vnd.turbo-stream.html'
+          },
+          converters: {
+            'text turbo_stream': function (data) {
+              Turbo.renderStreamMessage(data);
+            }
+          },
+          url: '/integrations/servicetitan/reports/' + report_id
+        });
+      });
+    });
+  });
+
+  function update_report_reports(report_id) {
+    $.ajax({
+      type: 'GET',
+      dataType: 'turbo_stream',
+      accepts: {
+        'turbo_stream': 'text/vnd.turbo-stream.html'
+      },
+      converters: {
+        'text turbo_stream': function (data) {
+          Turbo.renderStreamMessage(data);
+        }
+      },
+      url: '/integrations/servicetitan/reports/update_report_reports/' + report_id,
+      data:      {
+        st_category_id: $('#report_category_select_' + report_id).val()
+      }
+    });
+  }
+
+  function update_report_criteria(report_id) {
+    $.ajax({
+      type: 'GET',
+      dataType: 'turbo_stream',
+      accepts: {
+        'turbo_stream': 'text/vnd.turbo-stream.html'
+      },
+      converters: {
+        'text turbo_stream': function (data) {
+          Turbo.renderStreamMessage(data);
+        }
+      },
+      url: '/integrations/servicetitan/reports/update_report_criteria/' + report_id,
+      data:     {
+        st_category_id: $('#report_category_select_' + report_id).val(),
+        st_report_id:   $('#report_report_select_' + report_id).val()
+      }
+    });
+  }
+</script>

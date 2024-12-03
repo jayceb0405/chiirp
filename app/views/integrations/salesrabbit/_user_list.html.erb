@@ -1,0 +1,46 @@
+<%
+  # app/views/integrations/salesrabbit/_user_list.html.erb
+  # 
+  # Example:
+  #   render partial: "integrations/salesrabbit/user_list"
+  # 
+  # Required Instance Variables:
+  #   @client_api_integration: (ClientApiIntegration)
+  # 
+  # Required Local Variables:
+  #   none
+  # 
+-%>
+<%= render partial: "layouts/alerts", locals: { models: [@client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">SalesRabbit User Links</h6>
+  <div class="card-body">
+
+    <% if @client_api_integration.api_key.present? && @client_api_integration.users.present? %>
+      <%= form_with model: @client_api_integration, url: integrations_salesrabbit_user_path, builder: LooperFormBuilder, remote: true, method: :put, class: 'needs-validation', id: 'admin_form', novalidate: true do |f| %>
+
+        <table class="table table-no-bordered table-striped">
+          <thead>
+            <tr>
+              <th>SalesRabbit User</th>
+              <th><%= I18n.t('tenant.name') -%> User</th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= render partial: 'integrations/salesrabbit/user', collection: @client_api_integration.users %>
+          </tbody>
+        </table>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Users', disable_with: 'Saving Users' }] %>
+      <% end %>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_users').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

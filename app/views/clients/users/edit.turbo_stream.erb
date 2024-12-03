@@ -1,0 +1,21 @@
+<%
+   # app/views/clients/users/edit.turbo_stream.erb
+   #
+   # Example:
+   #   render partial: 'clients/users/edit'
+   #
+   # Instance Variables:
+   #   (req) @user: (User)
+   #
+   # Local Variables:
+   #   none
+   #
+   return unless @user.is_a?(User)
+
+   presenter = Users::Presenter.new(user: @user)
+-%>
+<%= turbo_stream.update 'user_page_section' do %>
+  <%= render partial: 'clients/users/edit', locals: { presenter: } %>
+<% end %>
+
+<%= turbo_stream.bootstrap_init %>

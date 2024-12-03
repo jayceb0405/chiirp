@@ -1,0 +1,49 @@
+<%
+  # app/views/integrations/outreach/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/outreach/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards: Array
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Outreach::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Connection
+<% if cards.include?('connections_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/outreach/connections/edit', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/outreach/instructions/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/outreach/overview', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Webhooks
+<% if cards.include?('webhooks_index') %>
+  $('#integration_page_section').html('<%= j render partial: "integrations/outreach/webhooks/index" -%>');
+<% end %>
+<% if cards.include?('webhooks_open_new') %>
+  $('#webhook_new').collapse('show');
+  $('#webhook_edit_new').html('<%= j render partial: 'integrations/outreach/webhooks/edit', locals: { presenter: presenter, webhook_id: 0  } -%>');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  $('#webhook_edit_<%= local_assigns.dig(:webhook_id).to_i -%>').html('<%= j render partial: 'integrations/outreach/webhooks/edit', locals: { presenter: presenter, webhook_id: local_assigns.dig(:webhook_id).to_i  } -%>');
+<% end %>
+
+// Users
+<% if cards.include?('users') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/outreach/users/index' -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

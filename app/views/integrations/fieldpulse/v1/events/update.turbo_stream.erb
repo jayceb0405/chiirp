@@ -1,0 +1,17 @@
+<%
+  # app/views/integrations/fieldpulse/v1/events/update.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/fieldpulse/v1/events/update'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Fieldpulse::V1::Events::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+<%= turbo_stream.update('events_body', partial: 'integrations/fieldpulse/v1/events/event', collection: presenter.sorted_event_ids, as: :event_id, locals: { presenter: }) %>

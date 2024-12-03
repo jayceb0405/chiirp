@@ -1,0 +1,44 @@
+<%
+  # app/views/clients/widgets/v3/forms/_actions.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/widgets/v3/forms/actions', locals: { widget_presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client: Client
+  #   @client_widget: Clients::Widget
+  #
+  # Required Local Variables:
+  #   widget_presenter: Presenter
+  #
+  presenter = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client)
+-%>
+<div class="card-header border-0" id="clients_widget_actions">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#clients_widget_actions_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>SiteChat Action Settings</span>
+  </button>
+</div>
+
+<div id="clients_widget_actions_body" class="collapse" data-parent="#clients_widget_accordion">
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="card-expansion" id="clients_widget_options_accordion">
+
+        <%= form_with model: presenter.widget, url: presenter.form_path, builder: LooperFormBuilder, id: 'media-dropzone', multipart: true, remote: true, method: presenter.form_method.to_sym, class: 'needs-validation', id: 'user_contact_form_form', novalidate: true do |f| %>
+
+          <% (['All Contacts'] + presenter.widget.w_dd_options).each do |option| %>
+            <div class="card card-expansion-item" id="clients_widget_option_outer_<%= option -%>">
+              <%= render partial: 'clients/widgets/v3/forms/option', locals: { option:, widget_presenter: presenter } %>
+            </div>
+          <% end %>
+
+          <%= f.submit_buttons buttons: [{ title: 'Save Action Settings', id: 'clients_widget_form_submit', disable_with: 'Saving Action Settings' }] %>
+        <% end %>
+
+      </div>
+    </div>
+
+  </div>
+</div>

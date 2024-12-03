@@ -1,0 +1,208 @@
+<%
+  # app/views/surveys/show.html.erb
+  #
+  # Example:
+  #   render 'surveys/show'
+  #
+  # Instance Variables:
+  #   (req) @survey_screen: (SurveyScreen)
+  #
+  # Local Variables:
+  #   none
+  #
+  font_size = 10
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+
+  <%= render partial: 'layouts/common/open_graph', locals: {
+        title: @survey_screen.name
+        # image: @survey_screen.logo_image.attached? ? cl_image_path( @survey_screen.logo_image.key, secure: true ) : '',
+        # description: @survey_screen.tag_line.to_s.present? ? @survey_screen.tag_line.to_s : ''
+      } %>
+
+  <title><%= @survey_screen.name -%></title>
+
+  <%= csrf_meta_tags %>
+  <%= csp_meta_tag %>
+
+  <%= javascript_include_tag 'contact_form' %>
+
+  <!-- Latest compiled and minified CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+
+  <!-- jQuery library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+  <!-- Popper JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+
+  <!-- Latest compiled JavaScript -->
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+  <!-- FlatPickr -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/plugins/confirmDate/confirmDate.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/flatpickr.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.6/dist/plugins/confirmDate/confirmDate.js"></script>
+
+  <!-- Star Rating -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/css/star-rating-svg.css">
+  <script src="https://cdn.jsdelivr.net/npm/star-rating-svg2@1.2.1/src/jquery.star-rating-svg.js"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,500,700&display=swap' type='text/css'>
+
+  <style>
+    body {
+      background-image: url('<%= @survey.background_image.attached? ? cl_image_path(@survey.background_image.key, secure: true) : '' -%>');
+      background-color: <%= @survey.background_color.presence || '#ffffff' -%>;
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: "Montserrat", sans-serif;
+    }
+    .input-group {
+      align-items: center;
+    }
+    .rounded {
+      border-radius: 25px !important;
+    }
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: <%= 50 - (24 - font_size - 8) -%>px;
+      height: <%= font_size + 8 -%>px;
+      top: 3px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: <%= font_size + 4 -%>px;
+      width: <%= font_size + 4 -%>px;
+      left: 2px;
+      bottom: 2px;
+      background-color: white;
+      -webkit-transition: .4s;
+      transition: .4s;
+    }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196F3;
+    }
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+    .slider.round {
+      border-radius: 34px;
+    }
+    .slider.round:before {
+      border-radius: 50%;
+    }
+    .form_div {
+      font-size:<%= font_size -%>pt;
+    }
+    .form-control {
+      font-size:<%= font_size -%>pt;
+    }
+  </style>
+
+  <% if @survey.facebook_pixel_base_code.present? %>
+    <%= @survey.facebook_pixel_base_code.html_safe %>
+  <% end %>
+  <% if @survey_screen.facebook_event_code.present? %>
+    <%= @survey_screen.facebook_event_code.html_safe %>
+  <% end %>
+  <% if @survey_screen.screen_type == 'data' && @user_api_integration&.trusted_form_script.present? %>
+    <%= @user_api_integration.trusted_form_script.html_safe %>
+  <% end %>
+</head>
+<body>
+  <div class="container">
+    <div class="row my-5">
+      <div class="mx-auto p-0 text-center" style="max-width:700px;min-width:400px;">
+        <div class="mx-0 p-4 text-center" style="background-color: #ffffff;">
+
+          <% if @survey.logo_image.attached? %>
+            <%= cl_image_tag(@survey.logo_image.key, { class: 'img-responsive', secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), transformation: [height: 50, crop: 'fit'], format: 'png' }) -%>
+          <% end %>
+
+          <% if @survey_screen.header.present? %>
+            <h2 class="py-3">
+              <span style="color: <%= @survey.header_color -%>;">
+                <strong>
+                  <%= @survey_screen.header.html_safe %>
+                </strong>
+              </span>
+            </h2>
+          <% end %>
+
+          <% if @survey_screen.sub_header.present? %>
+            <h3 class="py-3">
+              <span style="color: <%= @survey.header_color -%>;">
+                <strong>
+                  <%= @survey_screen.sub_header.html_safe %>
+                </strong>
+              </span>
+            </h3>
+          <% end %>
+
+          <% case @survey_screen.screen_type %>
+          <% when 'question' %>
+            <%= render partial: 'surveys/show/question' %>
+          <% when 'info' %>
+            <%= render partial: 'surveys/show/info' %>
+          <% when 'data' %>
+            <%= render partial: 'surveys/show/data' %>
+          <% end %>
+        </div>
+
+        <div class="d-flex justify-content-around mt-3">
+          <% (1..3).each do |pos| %>
+
+            <% if @survey.footer_links["label_0#{pos}"].present? || @survey.footer_links["link_0#{pos}"].present? %>
+              <%= link_to @survey.footer_links["label_0#{pos}"], @survey.footer_links["link_0#{pos}"], class: 'small' %>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script>
+  $(function() {
+    <%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+  });
+</script>
+</html>

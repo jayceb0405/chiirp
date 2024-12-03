@@ -1,0 +1,59 @@
+<%
+	# app/views/user_contact_form_marketplaces/_edit.html.erb
+	# 
+	# Example:
+	# 	render partial: "user_contact_form_marketplaces/edit"
+	# 
+	# Required Instance Variables:
+	# 	@user_contact_form: (user_contact_form)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+-%>
+<%= form_with model: @user_contact_form, url: user_contact_form_marketplace_path(@user_contact_form.id), builder: LooperFormBuilder, role: 'form', remote: true, html: { class: 'needs-validation', novalidate: true } do |f| %>
+	<h6>
+		<%= @user_contact_form.form_name %>
+	</h6>
+
+  <%= f.text_area :description, {
+    label: { title: 'Description/Instructions' },
+    html_options: { placeholder: 'Description', disabled: @user_contact_form.marketplace }
+  } %>
+  <%= f.number_field :price, {
+    label: { title: 'Price' },
+    html_options: { value: number_with_precision(@user_contact_form.price.to_d, precision: 2), min: '0.00', step: '0.01', disabled: @user_contact_form.marketplace },
+    prepends: [{ button: false, label: '<i class="fa fa-dollar-sign"></i>' }]
+  } %>
+  <%= render partial: 'snippets/f_file_field', locals: {
+    form: f,
+    file_field: { field: 'marketplace_image', id: 'marketplace_image_input', name: 'user_contact_form[marketplace_image]', url: image_user_contact_form_marketplaces_path(@user_contact_form), disabled: @user_contact_form.marketplace },
+    col: { id: 'marketplace_image_dropzone' },
+    label: { title: 'Marketplace Image' },
+    image_container: { id: 'marketplace_image_container' },
+    image: @user_contact_form.marketplace_image.attached? ? { key: @user_contact_form.marketplace_image.key, width: 200, height: 200, class: 'rounded', crop: 'fit', format: 'png' } : {}
+  } %>
+
+	<p class="border rounded ml-3 mr-3 p-2">
+		Note: By submitting your QuickPage you are authorizing <%= I18n.t("tenant.name") -%> to list your QuickPage in the <%= I18n.t("tenant.name") -%> QuickPage Marketplace.
+		Once submitted your QuickPage will no longer be editable until you withdraw your QuickPage from the QuickPage Marketplace.
+		Your QuickPage will be accessible to all <%= I18n.t("tenant.name") -%> account holders after it is approved.
+	</p>
+
+  <%= f.submit_buttons(
+    buttons: [
+    	{ title: "#{ @user_contact_form.marketplace ? "Withdraw from" : "Submit to" } Marketplace" },
+    	{ title: 'Save Marketplace Information', disable_with: 'Saving', disabled: @user_contact_form.marketplace },
+    	{ title: 'Cancel', class: 'string', id: 'user_contact_form_marketplace_edit_cancel_button' }
+    ]
+  ) %>
+<% end %>
+
+<script>
+	$(function () {
+		$('#user_contact_form_marketplace_edit_cancel_button').on("click", function (e) {
+			e.preventDefault();
+			$('#user_contact_form_marketplace_modal').modal('hide');
+		});
+	});
+</script>

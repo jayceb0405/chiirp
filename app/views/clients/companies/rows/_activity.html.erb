@@ -1,0 +1,105 @@
+<%
+  # app/views/clients/companies/rows/_activity.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/rows/activity', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+
+  agency_users_rvms_sum          = 0
+  agency_users_text_messages_sum = 0
+  client_users_rvms_sum          = 0
+  client_users_text_messages_sum = 0
+-%>
+<tr>
+  <%= presenter.company_cell(client, 'top') %>
+  <td>
+
+    <div class="table-responsive w-100 mr-1">
+      <table class="table">
+
+        <thead>
+          <th class="align-bottom text-left">Client Users</th>
+          <th class="align-bottom text-right">Text Messages</th>
+          <th class="align-bottom text-right">RVMs</th>
+        </thead>
+
+        <tbody>
+
+          <% presenter.company_users(client).each do |user| %>
+            <tr>
+              <td class="align-middle text-left">
+                <%= user.fullname -%>
+              </td>
+              <td class="align-middle text-right">
+                <%= presenter.agency_client_user_text_messages_sum(client.id, user.id) %>
+              </td>
+              <td class="align-middle text-right">
+                <%= presenter.agency_client_user_rvms_sum(client.id, user.id) %>
+              </td>
+            </tr>
+
+            <% client_users_rvms_sum += presenter.agency_client_user_rvms_sum(client.id, user.id) %>
+            <% client_users_text_messages_sum += presenter.agency_client_user_text_messages_sum(client.id, user.id) %>
+          <% end %>
+
+          <tr class="bg-light<%= client.id == presenter.client.id ? ' border border-dark' : '' -%>">
+            <td class="align-middle text-left"><%= client.id == presenter.client.id ? 'Totals' : 'Sub-Totals' -%></td>
+            <td class="align-bottom text-right"><%= client_users_text_messages_sum -%></td>
+            <td class="align-bottom text-right"><%= client_users_rvms_sum -%></td>
+          </tr>
+        </tbody>
+
+        <% if client.id != presenter.client.id %>
+
+          <thead>
+            <th class="align-bottom text-left">Agency Users</th>
+            <th class="align-bottom text-right">Text Messages</th>
+            <th class="align-bottom text-right">RVMs</th>
+          </thead>
+
+          <tbody>
+
+            <% presenter.agency_users.each do |user| %>
+              <tr>
+                <td class="align-middle text-left">
+                  <%= user.fullname -%>
+                </td>
+                <td class="align-middle text-right">
+                  <%= presenter.agency_client_user_text_messages_sum(client.id, user.id) %>
+                </td>
+                <td class="align-middle text-right">
+                  <%= presenter.agency_client_user_rvms_sum(client.id, user.id) %>
+                </td>
+              </tr>
+
+              <% agency_users_rvms_sum += presenter.agency_client_user_rvms_sum(client.id, user.id) %>
+              <% agency_users_text_messages_sum += presenter.agency_client_user_text_messages_sum(client.id, user.id) %>
+            <% end %>
+
+            <tr class="bg-light">
+              <td class="align-middle text-left">Sub-Totals</td>
+              <td class="align-bottom text-right"><%= agency_users_text_messages_sum -%></td>
+              <td class="align-bottom text-right"><%= agency_users_rvms_sum -%></td>
+            </tr>
+
+            <tr class="bg-light border border-dark">
+              <td class="align-middle text-left">Totals</td>
+              <td class="align-bottom text-right"><%= agency_users_text_messages_sum + client_users_text_messages_sum -%></td>
+              <td class="align-bottom text-right"><%= agency_users_rvms_sum + client_users_rvms_sum -%></td>
+            </tr>
+
+          </tbody>
+
+        <% end %>
+
+      </table>
+    </div>
+  </td>
+</tr>

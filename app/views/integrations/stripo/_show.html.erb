@@ -1,0 +1,167 @@
+<%
+  # app/views/integrations/stripo/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/stripo/show', locals: { css_element_id: String, form_element_id: String, header: String, html_element_id: String, save_element_id: String, user: User }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) user:            (User)
+  #   (req) css_element_id:  (String)
+  #   (req) form_element_id: (String)
+  #   (req) html_element_id: (String)
+  #   (req) save_element_id: (String)
+  #
+  return unless local_assigns.dig(:css_element_id).to_s.present? && local_assigns.dig(:form_element_id).to_s.present? && local_assigns.dig(:html_element_id).to_s.present? && local_assigns.dig(:save_element_id).to_s.present? && local_assigns.dig(:user).is_a?(User)
+
+  presenter = Integrations::Stripo::Presenter.new unless local_assigns.dig(:presenter)
+-%>
+<style>
+  #stripoSettingsContainer .nav {
+    display: block;
+  }
+</style>
+<div id="externalSystemContainer" class="row bg-light d-flex justify-content-between">
+  <span class="h3 mr-2"><%= local_assigns.dig(:header).to_s.presence || 'Email Editor' -%></span>
+  <span>
+    <button type="button" id="undoButton" class="btn btn-large btn-secondary mr-2 fa fa-rotate-left"></button>
+    <button type="button" id="redoButton" class="btn btn-large btn-secondary mr-2 fa fa-rotate-right"></button>
+    <button type="button" id="codeEditor" class="btn btn-large btn-secondary mr-2 fa fa-code"></button>
+    <span id="changeHistoryContainer" style="display: none;">Last change: <a id="changeHistoryLink"></a></span>
+  </span>
+</div>
+<div class="notification-zone"></div>
+<div>
+  <div id="stripoSettingsContainer" style="height: 1000px;">Loading...</div>
+  <div id="stripoPreviewContainer" style="height: 1000px;"></div>
+</div>
+
+<script>
+  $(function () {
+
+    if ($('#<%= html_element_id -%>').val() == '') {
+      $('#dash_modal_title').html('<%= j render partial: 'integrations/stripo/templates/header' -%>');
+      $('#dash_modal_body').html('<%= j render partial: 'integrations/stripo/templates/index', locals: { presenter: } -%>');
+      $('#dash_modal_footer').html('');
+      $('#dash_modal').modal('show');
+    }
+
+    $(document).off('click', '#<%= save_element_id -%>')
+    $(document).on('click', '#<%= save_element_id -%>', function(e) {
+      e.preventDefault();
+
+      window.StripoApi.getTemplate(function(html, css) {
+        $('#<%= html_element_id -%>').val(html);
+        $('#<%= css_element_id -%>').val(css);
+
+        // use Rails UJS to submit the form, this ensures the form follows any remote settings
+        // $('#<%= form_element_id -%>').trigger();
+        Rails.fire($('#<%= form_element_id -%>').get(0), 'submit')
+      });
+    });
+  });
+
+  function request(method, url, data, callback) {
+    var req = new XMLHttpRequest();
+    req.onreadystatechange = function () {
+      if (req.readyState === 4 && req.status === 200) {
+        callback(req.responseText);
+      } else if (req.readyState === 4 && req.status !== 200) {
+        console.error('Can not complete request. Please check you entered a valid PLUGIN_ID and SECRET_KEY values');
+      }
+    };
+    req.open(method, url, true);
+    if (method !== 'GET') {
+      req.setRequestHeader('content-type', 'application/json');
+    }
+    req.send(data);
+  }
+
+  function loadDemoTemplate(callback) {
+    // request('GET', 'https://raw.githubusercontent.com/ardas/stripo-plugin/master/Public-Templates/Basic-Templates/Trigger%20newsletter%20mockup/Trigger%20newsletter%20mockup.html', null, function(html) {
+    //   request('GET', 'https://raw.githubusercontent.com/ardas/stripo-plugin/master/Public-Templates/Basic-Templates/Trigger%20newsletter%20mockup/Trigger%20newsletter%20mockup.css', null, function(css) {
+    //     callback({html: html, css: css});
+    //   });
+    // });
+    var html_string = ''
+    var css_string  = ''
+
+    if ($('#<%= html_element_id -%>').val()) {
+      html_string = $('#<%= html_element_id -%>').val();
+    }
+
+    if ($('#<%= css_element_id -%>').val()) {
+      css_string = $('#<%= css_element_id -%>').val();
+    }
+
+    if (html_string && css_string) {
+      callback({html: html_string, css: css_string});
+    }
+  }
+
+  // Call this function to start plugin.
+  // Please use backend middleware to authenticate plugin.
+  // See documentation: https://stripo.email/plugin-api/
+  function initPlugin(template) {
+    const apiRequestData = {
+      emailId: <%= user.client_id -%>
+    };
+
+    const script = document.createElement('script');
+    script.id = 'stripoScript';
+    script.type = 'text/javascript';
+    script.src = 'https://plugins.stripo.email/static/latest/stripo.js';
+    script.onload = function () {
+      window.Stripo.init({
+        settingsId: 'stripoSettingsContainer',
+        previewId: 'stripoPreviewContainer',
+        codeEditorButtonId: 'codeEditor',
+        undoButtonId: 'undoButton',
+        redoButtonId: 'redoButton',
+        locale: 'en',
+        html: template.html,
+        css: template.css,
+        mergeTags: $.parseJSON("<%= j presenter.merge_tags(client: user.client) -%>"),
+        customAppearanceMergetags:true,
+        customAppearanceMergetagsInLinks:true,
+        customAppearanceMergetagsBorderColor:"yellow",
+        customAppearanceMergetagsBackgroundColor:"yellow",
+        notifications: {
+          info: notifications.info.bind(notifications),
+          error: notifications.error.bind(notifications),
+          warn: notifications.warn.bind(notifications),
+          loader: notifications.loader.bind(notifications),
+          hide: notifications.hide.bind(notifications),
+          success: notifications.success.bind(notifications)
+        },
+        apiRequestData: apiRequestData,
+        userFullName: '<%= user.fullname -%>',
+        versionHistory: {
+          changeHistoryLinkId: 'changeHistoryLink',
+          onInitialized: function(lastChangeIndoText) {
+            $('#changeHistoryContainer').show();
+          }
+        },
+        getAuthToken: function (callback) {
+          request(
+            'POST',
+            'https://plugins.stripo.email/api/v1/auth',
+            JSON.stringify({
+              pluginId: '<%= presenter.plugin_id -%>',
+              secretKey: '<%= presenter.secret_key -%>',
+              role: '<%= current_user&.team_member? ? 'ADMIN' : 'USER' -%>'
+            }),
+            function(data) {
+              callback(JSON.parse(data).token);
+            }
+          );
+        }
+      });
+    };
+    document.body.appendChild(script);
+  }
+
+  loadDemoTemplate(initPlugin);
+</script>

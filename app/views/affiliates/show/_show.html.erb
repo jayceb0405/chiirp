@@ -1,0 +1,38 @@
+<%
+  # app/views/affiliates/show/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/show/show'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   presenter: (Affiliates::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<%= bootstrap_info_field(
+      info:  presenter.affiliate.company_name,
+      label: { title: 'Company Name' }
+    ) %>
+<%= bootstrap_info_field(
+      info:  presenter.affiliate.contact_name,
+      label: { title: 'Contact Name' }
+    ) %>
+<%= bootstrap_info_field(
+      info:  number_to_phone(presenter.affiliate.contact_phone),
+      label: { title: 'Phone Number' }
+    ) %>
+<%= bootstrap_info_field(
+      info:  presenter.affiliate.contact_email,
+      label: { title: 'Email Address' }
+    ) %>
+<%= bootstrap_info_field(
+      info:  "#{presenter.affiliate.commission} %",
+      label: { title: 'Commission' }
+    ) %>
+<%= bootstrap_info_field(
+      info:  presenter.affiliate.notes,
+      label: { title: 'Notes' }
+    ) %>

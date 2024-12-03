@@ -1,0 +1,43 @@
+<%
+  # app/views/affiliates/index/_affiliate.html.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/index/affiliate', collection: presenter.affiliates.order(:company_name, :contact_name), as: :affiliate, locals: { presenter: }
+  #   render partial: 'affiliates/index/affiliate', locals: { affiliate: @affiliate, presenter: }
+  #
+  # Instance Variables:
+  #   (req) affiliate: (Affiliate)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<tr>
+  <td class="px-1 align-middle" style="width: 1.5rem">
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#affiliate_<%= affiliate.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+    </button>
+  </td>
+  <td class="text-left align-middle"> <%= affiliate.company_name -%> </td>
+  <td class="text-left align-middle"> <%= affiliate.contact_name -%> </td>
+  <td class="text-left align-middle d-none d-md-table-cell"> <%= Friendly.new.date(affiliate.created_at, I18n.t("tenant.#{Rails.env}.time_zone"), true) -%> </td>
+  <td class="text-right align-middle">
+    <% unless affiliate.new_record? %>
+      <%= link_to '<i class="fa fa-trash-alt"></i>'.html_safe,
+                  '#',
+                  class: 'btn btn-sm btn-icon btn-secondary affiliate_delete',
+                  data:  {
+                    affiliateId:   affiliate.id,
+                    affiliateName: affiliate.company_name
+                  } %>
+    <% end %>
+    <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#affiliate_<%= affiliate.id -%>">
+      <span class="collapse-indicator"><i class="fa fa-pencil-alt"></i></span>
+    </button>
+  </td>
+</tr>
+
+<tr class="row-details bg-light collapse affiliate_edit" id="affiliate_<%= affiliate.id -%>">
+  <!-- Affiliate -->
+</tr>

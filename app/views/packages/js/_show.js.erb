@@ -1,0 +1,30 @@
+<%
+# app/views/packages/js/_show.js.erb
+#
+# Example:
+#   render partial: 'packages/js/show', locals: { cards: Array }
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   cards: (Array)
+#     cards[1]
+#       @packages
+#     cards[2]
+#       @package
+#     cards[3]
+#       @packages
+#
+-%>
+<% if cards.include?('dropdown') %>
+  $('#select_package_dropdown').html('<%= j render partial: 'packages/select_package_dropdown' -%>');
+<% end %>
+<% if cards.include?('edit') %>
+  $('#packages_body').html('<%= j render partial: 'packages/edit' -%>');
+<% end %>
+<% if cards.include?('index') %>
+  $('#packages_body').html('<%= j render partial: 'packages/index' -%>');
+<% end %>
+
+Looper.init();

@@ -1,0 +1,51 @@
+<%
+  # app/views/contacts/scheduled_actions/edit/_send_email.html.erb
+  #
+  # Example:
+  #   render partial: 'app/views/contacts/scheduled_actions/edit/send_email', locals: { presenter: Contacts::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Contacts::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Contacts::Presenter)
+  return unless presenter.delayed_job.is_a?(Delayed::Backend::ActiveRecord::Job)
+
+  email_presenter = Messages::Email::Presenter.new(
+    contact:                presenter.contact,
+    email_template_id:      presenter.delayed_job_object_args[:email_template_id],
+    email_template_subject: presenter.delayed_job_object_args[:email_template_subject] || presenter.delayed_job_object_args[:subject],
+    email_template_yield:   presenter.delayed_job_object_args[:email_template_yield],
+    file_attachments:       presenter.delayed_job_object_args[:file_attachments],
+    cc_email:               presenter.delayed_job_object_args[:cc_email],
+    bcc_email:              presenter.delayed_job_object_args[:bcc_email],
+    payment_request:        presenter.delayed_job_object_args[:payment_request],
+    show_ok2email:          false,
+    show_calendar:          true,
+    show_submit:            false
+  )
+-%>
+<td colspan="6">
+  <%= form_with(url: update_contact_scheduled_action_path(presenter.contact.id, presenter.delayed_job.id), builder: LooperFormBuilder, remote: true, method: :patch, class: 'needs-validation', id: 'contact_form', novalidate: true) do |f| %>
+
+    <%= render partial: 'messages/email_message_fields', locals: { presenter: email_presenter } %>
+
+    <%= bootstrap_calendar_field(
+          field:        'run_at',
+          value:        presenter.delayed_job.run_at.in_time_zone(current_user.client.time_zone).strftime('%m/%d/%Y %H:%M %p'),
+          label:        { title: 'When?' },
+          html_options: { id: 'contacts-calendar-string', required: true },
+          flatpickr:    { include_time: true, mode: 'single' },
+          messages:     { note: 'A scheduled time must be chosen.' }
+        ) %>
+
+    <%= f.submit_buttons(
+          buttons: [{ title: 'Save', disable_with: 'Saving' }]
+        ) %>
+  <% end %>
+</td>
+<script>
+
+</script>

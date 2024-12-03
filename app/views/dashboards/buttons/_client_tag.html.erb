@@ -1,0 +1,30 @@
+<%
+  # app/views/dashboards/buttons/_tag_client.html.erb
+  #
+  # Example:
+  #   render partial: 'dashboards/buttons/tag_client', locals: { id: Integer, presenter: DashboardPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) id:        (Integer) Tag id
+  #   (req) presenter: (DashboardPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(DashboardPresenter)
+-%>
+<% if presenter.user.access_controller?('dashboard', 'company_tiles', session) && (tag = presenter.client.tags.find_by(id: local_assigns.dig(:id).to_i)) %>
+  <%= render partial: 'dashboards/dash_button', locals: {
+        id:               "client_tag_#{tag.id}",
+        button_id:        tag.id.to_s,
+        stats:            Contacttag.by_tag_and_period(tag.id, presenter.date_range[0], presenter.date_range[1]).count.to_s,
+        description:      tag.name,
+        description_icon: 'c',
+        icon:             'fa fa-user-tag',
+        link:             presenter.client.my_contacts_allowed ? my_contacts_path(leads: 'client', tag_id: tag.id, user_setting_id: presenter.user_settings_buttons.id) : '#',
+        chart_id:         '',
+        chart_value:      0,
+        background_color: tag.color,
+        button_movable:   true
+      } %>
+<% end %>

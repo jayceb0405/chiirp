@@ -1,0 +1,28 @@
+<%
+  # app/views/clients/companies/rows/_automation.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/companies/rows/automation', locals: { presenter: Clients::CompaniesPresenter }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Clients::CompaniesPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::CompaniesPresenter)
+-%>
+<tr>
+  <%= presenter.company_cell(client) %>
+  <td class="align-middle"><%= Friendly.new.date(client.created_at, client.time_zone, false) -%></td>
+  <td class="align-middle text-center <%= client.share_aiagents_allowed ? 'text-success' : 'text-danger' %>"><%= client.aiagents.count %> / <%= client.aiagent_included_count %></td>
+  <td class="align-middle text-center <%= client.share_email_templates_allowed ? 'text-success' : 'text-danger' %>"><%= client.email_templates.count %> / <%= client.max_email_templates %></td>
+  <td class="align-middle text-center <%= client.share_funnels_allowed ? 'text-success' : 'text-danger' %>"><%= client.campaigns.count %> / <%= client.campaigns_count %></td>
+  <td class="align-middle text-center <%= client.share_quick_leads_allowed ? 'text-success' : 'text-danger' %>"><%= UserContactForm.joins(:user).where(users: { client_id: client.id }).count %> / <%= client.quick_leads_count %></td>
+  <td class="align-middle text-center <%= client.share_surveys_allowed ? 'text-success' : 'text-danger' %>"><%= client.surveys.count %> / <%= client.surveys_count %></td>
+  <td class="align-middle text-center <%= client.share_widgets_allowed ? 'text-success' : 'text-danger' %>"><%= client.client_widgets.count %> / <%= client.widgets_count %></td>
+  <td class="align-middle text-center"><%= client.trackable_links.count %> / <%= client.groups_count %></td>
+  <td class="align-middle text-center"><%= client.groups.count -%> / <%= client.groups_count -%></td>
+  <td class="align-middle text-center <%= client.share_stages_allowed ? 'text-success' : 'text-danger' %>"><%= client.stage_parents.count %> / <%= client.stages_count %></td>
+  <%= render partial: 'clients/companies/rows/action_buttons', locals: { client: } %>
+</tr>

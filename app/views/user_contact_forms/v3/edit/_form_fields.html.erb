@@ -1,0 +1,127 @@
+<%
+  # app/views/user_contact_forms/v3/edit/_form_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/v3/edit/form_fields'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  disabled    = @user_contact_form.marketplace
+  form_fields = ::Webhook.internal_key_hash(@user_contact_form.user.client, 'contact', %w[personal phones custom_fields])
+
+  form_fields.each do |key, value|
+    form_fields[key] = { 'name' => value }
+
+    if ff = @user_contact_form.form_fields.dig(key)
+
+      ff.each do |k, v|
+        form_fields[key][k] = v
+      end
+    else
+      form_fields[key]['order']    = form_fields.length.to_s
+      form_fields[key]['show']     = '0'
+      form_fields[key]['required'] = '0'
+    end
+  end
+
+  form_fields = form_fields.sort_by { |_key, value| [value['order'].to_i, value['name']] }.to_h
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@user_contact_form] } %>
+<div class="card-header border-0" id="user_contact_form_form_fields">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#user_contact_form_form_fields_body" aria-expanded="false" aria-controls="user_contact_form_form_fields_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>Data to Collect</span>
+  </button>
+</div>
+
+<div id="user_contact_form_form_fields_body" class="collapse" aria-labelledby="user_contact_form_form_fields" data-parent="#user_contact_form_accordion">
+  <div class="row ml-2 mr-2" data-toggle="sortable" data-draggable=".sortable-tile" data-handle=".drag-handle">
+    <div class="sortable-tile w-100">
+      <div class="card-header">
+        <div class="row">
+          <div class="col-6 pt-3 pl-4">
+            <h6>Field</h6>
+          </div>
+          <div class="col-3 pt-3">
+            <h6>Include</h6>
+          </div>
+          <div class="col-3 pt-3">
+            <h6>Required</h6>
+          </div>
+        </div>
+      </div>
+
+      <ul class="sortable-lists list-group list-group-flush" id="data_table" data-toggle="sortable" data-group="pages">
+        <% form_fields.each do |key, value| %>
+          <% key_name = (value.dig('name') || 'Unknown').to_s %>
+          <% key_show = value.dig('show').to_i %>
+          <% key_required = value.dig('required').to_i %>
+          <% key_order = value.dig('order').to_i %>
+
+          <li class="list-group-item align-items-center drag-handle" data-id="<%= key -%>">
+            <div class="row w-100">
+              <%= hidden_field_tag "user_contact_form[form_fields][#{key}][order]", key_order, { id: "list_group_sort_order_#{key}" } %>
+
+              <div class="col-6">
+                <% unless disabled %>
+                  <span class="drag-indicator"></span>
+                <% end %>
+                <%= key_name %>
+              </div>
+
+              <div class="col-3">
+                <%= bootstrap_switch_field(
+                      field:        "user_contact_form[form_fields][#{key}][show]",
+                      value:        key_show == 1,
+                      values:       %w[1 0],
+                      row:          { columns: [0, 12] },
+                      col:          { class: 'mb-0' },
+                      form_group:   { class: 'mb-0' },
+                      html_options: { class: 'field_key', id: "fields_#{key}_check_box", disabled: key == 'phone' || disabled }
+                    ) %>
+              </div>
+
+              <div class="col-3">
+                <%= bootstrap_switch_field(
+                      field:        "user_contact_form[form_fields][#{key}][required]",
+                      value:        key_required == 1,
+                      values:       %w[1 0],
+                      row:          { columns: [0, 12] },
+                      col:          { class: 'mb-0' },
+                      form_group:   { class: 'mb-0' },
+                      html_options: { class: 'field_key_required', id: "fields_#{key}_check_box_required", disabled: key == 'phone' || disabled }
+                    ) %>
+              </div>
+            </div>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    <% unless @user_contact_form.new_record? %>
+      $('.field_key_required').on('change', function(e) {
+        if ( $(this).is(':checked') ) {
+          $('#' + $(this).attr('id').replace('_required', '')).prop('checked', true);
+        } else {
+
+        }
+      });
+
+      $('.field_key').on('change', function(e) {
+        if ( $(this).is(':checked') ) {
+
+        } else {
+          $('#' + $(this).attr('id') + '_required').prop('checked', false);
+        }
+      });
+    <% end %>
+  });
+</script>

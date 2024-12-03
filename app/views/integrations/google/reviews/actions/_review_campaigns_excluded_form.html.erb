@@ -1,0 +1,38 @@
+<%
+  # app/views/integrations/google/reviews/actions/_review_campaigns_excluded_form.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/google/reviews/actions/review_campaigns_excluded_form', locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Google::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<div class="card-header">
+  <button type="button" class="btn btn-sm btn-icon btn-secondary" data-toggle="collapse" data-target="#review_campaigns_excluded">
+    <span class="collapse-indicator"><i class="fa fa-angle-right"></i></span>
+  </button>
+  <button type="button" class="btn font-weight-bold" data-toggle="collapse" data-target="#review_campaigns_excluded">
+    Campaigns Excluded After Reviews <span class="font-weight-light">(<%= presenter.review_campaign_ids_excluded&.length.to_i -%> Campaigns selected)</span>
+  </button>
+
+  <div class="row font-weight-normal collapse" id="review_campaigns_excluded">
+    <div class="col-10 offset-2">
+
+      <%= form_with url: integrations_google_reviews_actions_review_campaigns_path, builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+        <%= f.select :review_campaign_ids_excluded, {
+              label:        { title: 'Campaigns Excluded' },
+              html_options: { multiple: true, count_selected_text: 'campaigns', mobile: browser.device.mobile? },
+              choices:      { for_select: options_for_campaign(client: presenter.client, grouped: true, selected_campaign_id: presenter.review_campaign_ids_excluded) },
+              messages:     { note: 'Select Campaigns that will NOT process on a Contact after a Google review is received.' }
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Excluded Reviews', disable_with: 'Saving Excluded Reviews' }] %>
+      <% end %>
+    </div>
+  </div>
+</div>

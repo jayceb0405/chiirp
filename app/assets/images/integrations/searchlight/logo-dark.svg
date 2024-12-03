@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="0 -40.236 1620.883 271.094" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="linear-gradient" x1="352.54" y1="179.79" x2="352.54" y2="3.97" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#f2d3a9" stop-opacity="0"/>
+      <stop offset="0.22" stop-color="#e5c497" stop-opacity=".25"/>
+      <stop offset="0.6" stop-color="#d0ac7b" stop-opacity=".65"/>
+      <stop offset="0.87" stop-color="#c39c69" stop-opacity=".9"/>
+      <stop offset="1" stop-color="#be9763"/>
+    </linearGradient>
+    <style>.cls-1{fill:url(#linear-gradient);opacity:.8;}.cls-2,.cls-3{font-size:235.69px;}.cls-4,.cls-3{fill:#231f20;font-family:Posterama1927-Regular, 'Posterama 1927';}.cls-5,.cls-6{fill:#be9763;}.cls-6{font-family:Posterama1927-Light, 'Posterama 1927';}</style>
+  </defs>
+  <text class="cls-3" transform="matrix(1, 0, 0, 1, 0, 171.949997)" style="white-space: pre;"><tspan x="0" y="0">SE   </tspan></text>
+  <text class="cls-2" transform="matrix(1, 0, 0, 1, 426.890015, 171.949997)" style="white-space: pre;"><tspan class="cls-4" x="0" y="0">RCH</tspan><tspan class="cls-6" x="487.16" y="0">LIGHT</tspan></text>
+  <g>
+    <path class="cls-1" d="M358.11,7.23l53.58,167.42c.75,2.44-1.07,4.91-3.62,4.91l-111.06,.24c-2.55,0-4.37-2.47-3.62-4.91L344.04,7.23c2.32-4.21,10.91-4.46,14.07,0Z"/>
+    <ellipse class="cls-5" cx="352.46" cy="174.64" rx="59.24" ry="7.06"/>
+    <circle class="cls-5" cx="351.07" cy="11.49" r="8.2"/>
+  </g>
+</svg>

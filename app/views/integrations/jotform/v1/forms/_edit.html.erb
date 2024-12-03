@@ -1,0 +1,88 @@
+<%
+  # app/views/integrations/jotform/_edit_forms.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/jotform/edit"
+  #
+  # Instance Variables:
+  #   (req) @page_forms: (Hash)
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jotform::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jotform::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.user_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Define How Your JotForm Fields Match Up With <%= I18n.t('tenant.name') -%></h6>
+  <div class="card-body">
+
+    <div id="forms_accordion" class="card-expansion">
+
+      <%= form_tag integrations_jotform_v1_forms_path, { builder: LooperFormBuilder, method: :patch, data: { turbo: true, turbo_stream: true }, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <% presenter.jotform_forms.each do |form_id, form| %>
+
+          <div class="card card-expansion-item">
+            <div class="card-header border-0" id="form_header_id_<%= form_id %>">
+              <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#form_id_<%= form_id %>" aria-expanded="false" aria-controls="form_id_<%= form_id %>">
+                <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+                <span><%= form[:title].to_s %></span>
+              </button>
+            </div>
+            <div class="collapse" id="form_id_<%= form_id %>" aria-labelledby="form_header_id_<%= form_id %>" data-parent="#forms_accordion">
+              <div class="card-body pt-0">
+                <%= bootstrap_select_tag(
+                      field:   "forms[#{form_id}][campaign_id]",
+                      label:   { title: 'Start Campaign when Contact is Received' },
+                      options: { array: presenter.options_for_campaign_hash, selected: form[:campaign_id], prompt: 'Select a Campaign' }
+                    ) %>
+
+                <hr class="my-3">
+
+                <% form[:questions].each do |question_id, question| %>
+                  <% if question[:sublabels].present? %>
+
+                    <% question[:sublabels].each do |var_name, sublabel| %>
+                      <%= bootstrap_select_tag(
+                            field:   "forms[#{form_id}][#{question_id}][#{var_name}][custom_field_id]",
+                            label:   { title: "#{question[:label]}: #{sublabel[:label]}" },
+                            options: { array: presenter.options_for_key_hash, selected: sublabel[:custom_field_id], prompt: 'Matching Field or Skip' }
+                          ) %>
+                    <% end %>
+                  <% else %>
+                    <%= bootstrap_select_tag(
+                          field:   "forms[#{form_id}][#{question_id}][custom_field_id]",
+                          label:   { title: question[:label] },
+                          options: { array: presenter.options_for_key_hash, selected: question[:custom_field_id], prompt: 'Matching Field or Skip' }
+                        ) %>
+                  <% end %>
+
+                  <% question[:options].each do |option_text, campaign_id| %>
+                    <%= bootstrap_select_tag(
+                          field:   "forms[#{form_id}][#{question_id}][#{option_text}]",
+                          row:     { class: 'ml-4' },
+                          label:   { title: "Response: #{option_text}" },
+                          options: { array: presenter.options_for_campaign_hash, selected: campaign_id, prompt: 'Select a Campaign' }
+                        ) %>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Forms', disable_with: 'Saving Forms' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_forms').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

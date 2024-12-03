@@ -1,0 +1,19 @@
+// app/views/integrations/stripo/js/_show.js.erb
+//
+// Example:
+//   render partial: 'integrations/stripo/js/show', locals: { cards: Array }
+//
+// Instance Variables:
+//   none
+//
+// Local Variables:
+//   (req) cards: (Array)
+
+// API Key
+<% if cards.include?('show_stripo_full') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/servicetitan/connections/show' -%>');
+<% end %>
+
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+Looper.init();

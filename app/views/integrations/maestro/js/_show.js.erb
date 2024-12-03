@@ -1,0 +1,30 @@
+<%
+  # app/views/integrations/maestro/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: "integrations/maestro/js/show", locals: { cards: Array }
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   cards: (Array)
+  # 
+-%>
+<% if cards.include?( 1 ) %>
+  $('#maestro_hotel_id').html('<%= j render partial: "integrations/maestro/hotel_id" -%>');
+<% end %>
+<% if cards.include?( 2 ) %>
+  $('#maestro_new_contact_actions').html('<%= j render partial: "integrations/maestro/new_contact" -%>');
+<% end %>
+<% if cards.include?( 3 ) %>
+  $('#maestro_checkin_contact_actions').html('<%= j render partial: "integrations/maestro/checkin_contact" -%>');
+<% end %>
+<% if cards.include?( 4 ) %>
+  $('#maestro_checkout_contact_actions').html('<%= j render partial: "integrations/maestro/checkout_contact" -%>');
+<% end %>
+<% if cards.include?( 5 ) %>
+  $('#maestro_roommove_contact_actions').html('<%= j render partial: "integrations/maestro/roommove_contact" -%>');
+<% end %>
+
+Looper.init();

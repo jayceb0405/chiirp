@@ -1,0 +1,46 @@
+<%
+  # app/views/trainings/pages/_training_page_links.html.erb
+  #
+  # Example:
+  #   render partial: 'trainings/pages/training_page_links', locals { training_page: training_page, trainings_presenter: TrainingsPresenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training)
+  truncated_menu_label = TrainingPage.user_authorized?(current_user, training_page.training, 'edit') || TrainingPage.user_authorized?(current_user, training_page.training, 'destroy') ? truncate(training_page.menu_label, length: 25) : training_page.menu_label
+-%>
+<div class="d-flex justify-content-between">
+  <span>
+    <% if !training_page.parent || training_page.header.present? || training_page.footer.present? || training_page.video_link.present? %>
+      <%= link_to truncated_menu_label,
+        training_training_page_path(training_page.training_id, training_page.id),
+        remote: true,
+        method: :get,
+        id: "collapse_toggle_#{training_page.id}"
+      %>
+    <% end %>
+  </span>
+
+  <span>
+    <% if TrainingPage.user_authorized?(current_user, training_page.training, 'edit') %>
+      <%= link_to '',
+        edit_training_training_page_path(training_page.training_id, training_page.id),
+        remote: true,
+        method: :get,
+        class: 'fa fa-pencil-alt btn btn-sm btn-icon btn-secondary'
+      %>
+    <% end %>
+
+    <% if TrainingPage.user_authorized?(current_user, training_page.training, 'destroy') %>
+      <%= link_to '',
+        '#',
+        class: 'fa fa-trash-alt btn btn-sm btn-icon btn-secondary prevent-default training_page_delete',
+        data: { name: training_page.menu_label, trainingid: training_page.training_id, trainingpageid: training_page.id }
+      %>
+    <% end %>
+  </span>
+</div>

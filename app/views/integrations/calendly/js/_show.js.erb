@@ -1,0 +1,31 @@
+<%
+	# app/views/integrations/calendly/js/_show.js.erb
+	# 
+	# Example:
+	# 	render partial: "integrations/calendly/js/show", locals: { cards: Array }
+	# 
+	# Required Instance Variables:
+	# 	none
+	# 
+	# Required Local Variables:
+	#   cards: (Array)
+	# 
+-%>
+<% if cards.include?('form') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/calendly/form' -%>');
+<% end %>
+<% if cards.include?('instructions') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/calendly/instructions' -%>');
+<% end %>
+<% if cards.include?('show') %>
+	$('#integration_page_section').html('<%= j render partial: 'integrations/calendly/overview' -%>');
+<% end %>
+<% if cards.include?('appointment') %>
+  $('#dash_modal').modal({ backdrop: 'static' });
+  $('#dash_modal').modal('show');
+  $('#dash_modal_title').html('<i class="fa fa-calendar-alt mr-2"></i>Calendly Appointments');
+  $('#dash_modal_body').html('<%= j render partial: 'integrations/calendly/appointment' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+Looper.init();

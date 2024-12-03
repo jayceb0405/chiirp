@@ -1,0 +1,27 @@
+<%
+  # app/views/stages/_stage_parent.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/stage_parent', collection: StageParents, locals: { stage_presenter: StagePresenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  sp = local_assigns.dig(:stages_presenter)
+-%>
+<tr>
+  <td class="text-left"> <%= stage_parent.name -%> </td>
+  <td class="text-center d-none d-md-table-cell"> <%= stage_parent.stages.count -%> </td>
+  <td class="text-left d-none d-md-table-cell"> <%= Friendly.new.date(stage_parent.created_at, sp.client.time_zone, true) -%> </td>
+  <td class="text-middle text-right">
+    <%= link_to '',
+      stage_path(stage_parent.id),
+      class: 'btn btn-sm btn-icon btn-secondary fa fa-pencil-alt',
+      remote: true,
+      method: :get
+    %>
+  </td>
+</tr>

@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/google/reviews/_show.html.erb
+  #
+  # Example:
+  #   render partial: "integrations/google/reviews/show", locals: { presenter: Integrations::Google::Presenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: Presenter
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Google::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header"><i class="fa fa-thumbs-up mr-2"></i>Google Reviews</h6>
+  <div class="card-body" id="google_reviews_card_body">
+    <div class="nav nav-left nav-tabs">
+      <%= link_to 'Reviews', integrations_google_reviews_reviews_path, { class: 'nav-link nav-reviews-link', id: 'link_reviews_reviews', remote: true } %>
+      <%= link_to 'Links', integrations_google_reviews_reviews_links_path, { class: 'nav-link nav-reviews-link', id: 'link_reviews_links', remote: true } if Integration::Google.user_authorized_for_accounts_locations_config?(current_user, @client_api_integration) %>
+      <%= link_to 'Actions', edit_integrations_google_reviews_actions_path, { class: 'nav-link nav-reviews-link', id: 'link_reviews_actions', remote: true } if Integration::Google.user_authorized_for_accounts_locations_config?(current_user, @client_api_integration) %>
+    </div>
+
+    <div class="page-section pt-3" id="reviews_page_section">
+      <!-- reviews section -->
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_reviews').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

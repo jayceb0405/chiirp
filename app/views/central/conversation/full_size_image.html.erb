@@ -1,0 +1,19 @@
+<%
+# app/views/central/conversation/full_size_image.html.erb
+#
+# Example:
+#   render partial: 'central/conversation/ull_size_image'
+#
+# Instance Variables:
+#   (req) @contact_attachment: ContactAttachment
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= cl_image_tag(@contact_attachment.image.standard.my_public_id, {
+                   class:               'img-responsive',
+                   style:               '-webkit-user-select: none; display: block; margin: auto; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); cursor: zoom-in;',
+                   secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"),
+                   format:              'png'
+                 }) %>

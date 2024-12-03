@@ -1,0 +1,44 @@
+<%
+# app/views/devise/passwords/edit.html.erb
+#
+# Example:
+#   /users/password/edit
+#   edit_user_password_path
+#   edit_user_password_url
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   none
+#
+-%>
+<%= render partial: 'devise/shared/header' %>
+
+<%= form_for resource, as: resource_name, url: password_path(resource_name), builder: LooperFormBuilder, html: { class: 'auth-form-noborder needs-validation mb-5', novalidate: true, method: :patch } do |f| %>
+  <h4 class="text-left pb-3">Log in</h4>
+  <%= f.hidden_field :reset_password_token -%>
+
+  <%= f.password_field :password, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'Password' },
+        html_options: { id: 'input_password', placeholder: "New Password #{@minimum_password_length ? " (min #{@minimum_password_length} characters)" : ''}", minlength: @minimum_password_length, autocomplete: 'off', required: true },
+        prepends:     []
+      } %>
+  <%= f.password_field :password_confirmation, {
+        row:          { class: 'mb-2', columns: [3, 9] },
+        form_group:   { class: 'mb-0' },
+        label:        { title: 'Password' },
+        html_options: { id: 'input_password_confirmation', placeholder: "Confirm New Password #{@minimum_password_length ? " (min #{@minimum_password_length} characters)" : ''}", minlength: @minimum_password_length, autocomplete: 'off', required: true },
+        prepends:     []
+      } %>
+
+  <%= f.submit_buttons(
+        buttons: [{ title: 'Save log in' }]
+      ) %>
+<% end -%>
+
+<% if devise_mapping.omniauthable? %>
+  <%= render partial: 'devise/shared/links' %>
+<% end %>

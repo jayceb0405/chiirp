@@ -1,0 +1,17 @@
+<%
+  # app/views/integrations/jobber/v20220915/webhooks/_event.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobber/v20220915/webhooks/event', collection: @client_api_integration.webhooks, as: :event, locals: { presenter: Integrations::Jobber::V20220915::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Jobber::V20220915::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Jobber::V20220915::Presenter)
+
+  presenter.event = event
+-%>
+<%= render partial: 'integrations/jobber/v20220915/webhooks/webhook', collection: presenter.events, as: :webhook, locals: { presenter: } %>

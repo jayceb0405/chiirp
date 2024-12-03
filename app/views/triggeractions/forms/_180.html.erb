@@ -1,0 +1,58 @@
+<%
+  # app/views/triggeractions/forms/_180.html.erb
+  #
+  # Example:
+  #   render partial: 'triggeractions/forms/180', locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # send a Slack message
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+
+  messages_text_presenter = Messages::Text::Presenter.new(contact: current_user.contacts.new(ok2text: 1, ok2email: 1), user: current_user)
+  messages_text_presenter.contacts_array            = []
+  messages_text_presenter.disabled                  = presenter.campaign_disabled?
+  messages_text_presenter.file_attachments          = presenter.triggeraction.attachments.map { |a| { id: a, type: 'client', url: presenter.client.client_attachments.find_by(id: a).image.thumb.url(resource_type: presenter.client.client_attachments.find_by(id: a).image.resource_type, secure: true) } }
+  messages_text_presenter.file_type                 = 'client'
+  messages_text_presenter.include_estimate_hashtags = true
+  messages_text_presenter.include_invoice_hashtags  = true
+  messages_text_presenter.include_job_hashtags      = true
+  messages_text_presenter.message                   = presenter.triggeraction.text_message
+  messages_text_presenter.show_character_count      = false
+  messages_text_presenter.show_hashtag_notes        = true
+  messages_text_presenter.show_images               = false
+  messages_text_presenter.show_msg_delay            = false
+  messages_text_presenter.show_ok2text              = false
+  messages_text_presenter.show_payment_request      = false
+  messages_text_presenter.show_phone_call           = false
+  messages_text_presenter.show_submit               = false
+  messages_text_presenter.show_voicemail            = false
+  messages_text_presenter.show_video_calls          = false
+-%>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[slack_channel]',
+      label:        { title: 'Select Slack Channel' },
+      html_options: { id: "slack_channel_select_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      options:      { array: presenter.slack_channels, selected: presenter.triggeraction.slack_channel, blank: 'Select a Slack Channel' }
+    ) %>
+<%= bootstrap_text_field(
+      field:        'triggeraction[slack_channel_new]',
+      value:        presenter.slack_channels.include?(presenter.triggeraction.slack_channel) ? '' : presenter.triggeraction.slack_channel,
+      row:          { class: 'mb-5' },
+      label:        { title: 'Create Slack Channel' },
+      html_options: { id: "slack_channel_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      messages:     { note: presenter.triggeraction_note_for_slack_message.html_safe }
+    ) %>
+<%= render partial: 'messages/texts/message', locals: { presenter: messages_text_presenter } %>
+
+<script>
+  $(function() {
+    // provide #hashtag variable selector
+    MultiTypeahead('#slack_channel_<%= presenter.triggeraction.id -%>', <%= options_for_hashtag(client: presenter.client, include_estimate_hashtags: true, include_invoice_hashtags: true, include_job_hashtags: true, include_subscription_hashtags: true).to_json.html_safe %>, '#', false);
+  });
+</script>

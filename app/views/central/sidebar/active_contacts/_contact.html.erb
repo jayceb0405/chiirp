@@ -1,0 +1,80 @@
+<%
+  # app/views/central/sidebar/active_contacts/_contact.html.erb
+  #
+  # Example:
+  #   render partial: 'central/sidebar/active_contacts/contact', collection: ActiveContacts, locals: { presenter: CentralPresenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (CentralPresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(CentralPresenter)
+
+  presenter.contact = contact unless presenter.contact&.id == contact.id
+-%>
+<div class="list-group-item align-items-start">
+  <div class="list-group-item-figure">
+    <div class="user-avatar tile tile-circle" style="font-size:1.2rem;<%= (contact.tag_color || '').present? ? "background-color:#{contact.tag_color};" : '' -%><%= (contact.tag_color || '').present? ? "color: #{contrasting_text_color(contact.tag_color)};" : '' -%>">
+      <%= contact.initials -%>
+      <% if presenter.client.message_central_allowed && contact.tw_read_at.nil? %>
+        <span class="avatar-badge idle">
+      <% end %>
+    </div>
+  </div>
+
+  <% if presenter.client.message_central_allowed %>
+
+    <%= link_to(central_conversation_path(contact.id),
+                method: :get,
+                class:  'w-100 text-decoration-none text-reset',
+                remote: true) do %>
+      <div class="list-group-item-body px-0">
+        <h4 class="list-group-item-title text-truncate"><%= contact.fullname_or_phone %><%= presenter.user_client_tag -%></h4>
+        <span id="active_contacts_message_meta_<%= contact.id -%>" style="display:<%= presenter.meta_data_display -%>">
+          <%= render partial: 'central/sidebar/active_contacts/contact/meta_data', locals: { contact:, presenter: } -%>
+        </span>
+        <span id="active_contacts_message_typing_<%= contact.id -%>" style="display:<%= presenter.user_typing_display -%>">
+          <%= render partial: 'central/sidebar/active_contacts/contact/user_typing', locals: { user_typing: presenter.user_typing } -%>
+        </span>
+      </div>
+    <% end %>
+  <% else %>
+    <div class="list-group-item-body px-0">
+      <h4 class="list-group-item-title text-truncate"> <%= contact.fullname_or_phone %> </h4>
+      <span id="active_contacts_message_meta_<%= contact.id -%>" style="display:<%= presenter.meta_data_display -%>">
+        <%= render partial: 'central/sidebar/active_contacts/contact/meta_data', locals: { contact:, presenter: } -%>
+      </span>
+      <span id="active_contacts_message_typing_<%= contact.id -%>" style="display:<%= presenter.user_typing_display -%>">
+        <%= render partial: 'central/sidebar/active_contacts/contact/user_typing', locals: { user_typing: presenter.user_typing } -%>
+      </span>
+    </div>
+  <% end %>
+  <div class="list-group-item-figure">
+    <div class="dropdown" id="contact_options_dropdown_<%= contact.id -%>">
+      <button class="btn btn-sm btn-icon btn-light" data-toggle="dropdown"><i class="fa fa-fw fa-ellipsis-v"></i></button>
+      <div class="dropdown-menu dropdown-menu-right" id="contact_options_menu_div_<%= contact.id -%>">
+        <div class="dropdown-arrow mr-n1"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $(document).off('show.bs.dropdown', '#contact_options_dropdown_<%= contact.id -%>');
+    $(document).on('show.bs.dropdown', '#contact_options_dropdown_<%= contact.id -%>', function (e) {
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '<%= central_contact_options_path(contact) -%>'
+      });
+    });
+
+    $(document).off('hide.bs.dropdown', '#contact_options_dropdown_<%= contact.id -%>');
+    $(document).on('hide.bs.dropdown', '#contact_options_dropdown_<%= contact.id -%>', function (e) {
+      $('#contact_options_menu_div_<%= contact.id -%>').html('');
+    });
+  });
+</script>

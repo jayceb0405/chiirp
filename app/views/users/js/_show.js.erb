@@ -1,0 +1,68 @@
+<%
+  # users/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "users/js/show", locals: { cards: [] }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   cards: (Array)
+  #
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+// Admin
+<% if cards.include?('admin') %>
+  $('#user_page_section').html('<%= j render partial: 'users/admin/edit' -%>');
+<% end %>
+
+// Notifications
+<% if cards.include?('notifications') %>
+  $('#user_page_section').html('<%= j render partial: 'users/notifications/edit' -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#user_page_section').html('<%= j render partial: 'users/overview/edit' -%>');
+<% end %>
+
+// Permissions
+<% if cards.include?('permissions') %>
+  $('#user_page_section').html('<%= j render partial: 'users/permissions/edit' -%>');
+<% end %>
+
+// Phone
+<% if cards.include?('phone') %>
+  $('#user_page_section').html('<%= j render partial: 'users/phone/edit' -%>');
+<% end %>
+
+// Tasks
+<% if cards.include?('index_tasks') %>
+  $('#user_page_section').html('<%= j render partial: 'users/tasks/edit' -%>' );
+<% end %>
+
+<% if cards.include?('edit_user_mobile') %>
+  $('#dash_modal_title').html('<i class="fa fa-phone mr-2"></i> My Cell Phone Number')
+  $('#dash_modal_body').html('<%= j render partial: 'users/edit_mobile', locals: { user: @user } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('edit_user_mobile_show') %>
+  $("#dash_modal").modal('show');
+<% end %>
+<% if cards.include?('profile_avatar') %>
+  $('#profile_avatar').html('<%= image_tag(Cloudinary::Utils.cloudinary_url(@user.avatar.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' })) -%>');
+  $('#show_user_avatar').html('<%= image_tag(Cloudinary::Utils.cloudinary_url(@user.avatar.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' })) -%>');
+  $('#header_user_avatar').html('<%= image_tag(Cloudinary::Utils.cloudinary_url(@user.avatar.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' })) -%>');
+<% end %>
+
+<% if @user&.errors.any? %>
+  ChiirpAlert({
+    'title': 'Errors While Attempting to Save User',
+    'body': '<%= @user.errors.full_messages.join('<br />') -%>',
+    'type': 'warning',
+    'persistent': true
+  });
+<% end %>
+
+Looper.init();

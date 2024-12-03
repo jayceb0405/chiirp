@@ -1,0 +1,60 @@
+<%
+  # app/views/stages/_index.html.erb
+  #
+  # Example:
+  #   render partial: 'stages/index', local: { stages_presenter: StagesPresenter }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   stages_presenter: (StagesPresenter)
+  #
+  sp = local_assigns.dig(:stages_presenter)
+  return unless sp&.client.is_a?(Client)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto"><i class="fa fa-link mr-2"></i><%= StageParent.title.pluralize -%> <span class="badge"><%= sp.client.stage_parents.count -%> / <%= sp.user.client.stages_count -%></span></span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table">
+
+          <thead>
+            <tr>
+              <th class="text-left"> <%= StageParent.title -%> </th>
+              <th class="text-center d-none d-md-table-cell"> Stages </th>
+              <th class="text-left d-none d-md-table-cell"> Created </th>
+              <th style="min-width:100px;"></th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <% if sp.stage_parents.present? %>
+              <%= render partial: 'stages/stage_parent', collection: sp.stage_parents, locals: { stages_presenter: sp } -%>
+            <% elsif sp.client.stage_parents.count.positive? %>
+              <tr>
+                <td colspan=4>
+                  <p class="mt-3">You do not have permission to access the existing <%= StageParent.title.pluralize -%>.</p>
+                </td>
+              </tr>
+            <% else %>
+              <tr>
+                <td colspan=4>
+                  <p class="mt-3"><%= StageParent.title.pluralize -%> have not been created.</p>
+                </td>
+              </tr>
+            <% end %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

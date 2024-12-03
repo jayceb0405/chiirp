@@ -1,0 +1,27 @@
+<%
+  # app/views/integrations/slack/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "integrations/slack/js/show", locals: { cards: Hash }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards: (Array)
+  #
+-%>
+<% if cards.include?('show_instructions') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/slack/instructions/show' -%>');
+<% end %>
+<% if cards.include?('edit_connections') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/slack/connections/edit' -%>');
+<% end %>
+<% if cards.include?('edit_notifications') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/slack/notifications/edit' -%>');
+<% end %>
+<% if cards.include?('show_overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/slack/overview' -%>');
+<% end %>
+
+Looper.init();

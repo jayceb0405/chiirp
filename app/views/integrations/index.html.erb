@@ -1,0 +1,80 @@
+<%
+  # app/views/integrations/index.html.erb
+  #
+  # Example:
+  # 	render "integrations/index"
+  #
+  # Instance Variables:
+  # 	none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = SystemSettings::IntegrationsPresenter.new(user: current_user)
+  console.log(presenter.inspect)
+  image_div_height = 100
+-%>
+<%= render 'header' %>
+<div class="row m-5 invisible-box list-group flex-row" id="integrations_outer_div">
+
+  <% presenter.integrations_for_index.each do |integration| %>
+    <% presenter.integration = integration %>
+
+    <div class="col-12 col-md-6 col-lg-4 m-0 p-1 list-group-item d-block" id="<%= presenter.integration.id -%>" style="height:185px;" data-name="<%= presenter.integration.company_name %>" data-configured="<%= presenter.configured_for_client_and_user? %>" data-available="<%= integration.accessible_to_user?(presenter.user) %>">
+      <div class="h-100 px-3 bg-light text-center border border-primary rounded overflow-hidden" style="<%= presenter.cursor_style %>" onclick="<%= presenter.onclick_function %>">
+        <div class="float-right" style="position: relative; left: 12px;">
+          <% if integration.accessible_to_user?(presenter.user) %>
+            <% if presenter.configured_for_client_and_user? %>
+              <i class="fa fa-link text-success"></i>
+            <% else %>
+              <i class="fa fa-link text-danger"></i>
+            <% end %>
+          <% else %>
+            <i class="fa fa-lock text-muted"></i>
+          <% end %>
+        </div>
+
+        <div class="text-left text-primary small <%= presenter.integration.preferred ? 'pb-2' : 'py-2' -%>">
+          <%= presenter.integration.preferred ? 'Featured' : '' -%>
+        </div>
+        <div style="height:100px;">
+          <%= presenter.integration_logo(width: 300, height: 60) -%>
+          <h2><%= presenter.integration_name -%></h2>
+        </div>
+        <span><%= presenter.integration.short_description -%></span>
+      </div>
+
+      <div class="d-flex justify-content-between">
+        <i class="fa fa-grip-vertical dash-button-alpha__handle text-muted"></i>
+        <% if presenter.user.super_admin? %>
+          <%= link_to '<i class="fa fa-pencil-alt text-muted"></i>'.html_safe,
+                      edit_system_settings_integration_path(presenter.integration.id),
+                      style: 'position:relative;bottom:25px;right:6px;' %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+</div>
+
+<script>
+  $(function() {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_integrations').addClass('has-active');
+
+    $('#integrations_outer_div').sortable({
+      handle: '.dash-button-alpha__handle', // handle's class
+      animation: 150,
+      dataIdAttr: 'id',
+      ghostClass: 'dash-button-alpha__ghost',
+      onEnd: function(e) {
+        $.ajax({
+          type: 'PATCH',
+          dataType: 'plain',
+          url: '<%= update_user_settings_integrations_path -%>',
+          data: { integration_buttons: $('#integrations_outer_div').sortable('toArray') }
+        });
+      }
+    });
+  });
+</script>

@@ -1,0 +1,52 @@
+<%
+	# app/views/trainings/pages/_training_page.html.erb
+	# 
+	# Example:
+	# 	render partial: "trainings/pages/training_page", collection: @training_pages, locals: { trainings_presenter: TrainingsPresenter }
+	# 
+	# Required Instance Variables:
+	# 	training_page: (TrainingPage)
+	# 
+	# Required Local Variables:
+	#   none
+	# 
+  return if training_page.new_record?
+  tp = local_assigns.dig(:trainings_presenter) || TrainingsPresenter.new(training: @training)
+  truncated_menu_label = TrainingPage.user_authorized?(current_user, training_page.training, 'edit') || TrainingPage.user_authorized?(current_user, training_page.training, 'destroy') ? truncate(training_page.menu_label, length: 25) : training_page.menu_label
+-%>
+<% if training_page.parent %>
+	<% if @parent_page_is_shown %>
+		</div></div>
+    <% @parent_page_is_shown = false %>
+	<% end %>
+	
+  <div class="card card-expansion-item">
+    <div class="card-header border-0" id="training_page_parent_<%= training_page.id %>">
+      <button class="btn btn-reset collapsed prevent-default w-100 d-flex justify-content-between" data-toggle="collapse" data-target="#training_page_<%= training_page.id %>" aria-expanded="false" aria-controls="training_page_<%= training_page.id %>">
+
+        <% if training_page.header.empty? && training_page.footer.empty? && training_page.video_link.empty? %>
+          <span class="collapse-indicator mr-2">
+            <i class="fa fa-fw fa-caret-right"></i>
+            <%= truncated_menu_label %>
+          </span>
+          <%= render partial: 'trainings/pages/training_page_links', locals: { training_page: training_page, trainings_presenter: tp } %>
+        <% else %>
+          <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+          <span class="w-100">
+            <%= render partial: 'trainings/pages/training_page_links', locals: { training_page: training_page, trainings_presenter: tp } %>
+          </span>
+        <% end %>
+      </button>
+    </div>
+
+    <div class="collapse" id="training_page_<%= training_page.id %>" aria-labelledby="training_page_parent_<%= training_page.id %>" data-parent="#forms_accordion">
+    <% @parent_page_is_shown = true %>
+<% else %>
+	<div class="card-body">
+    <%= render partial: 'trainings/pages/training_page_links', locals: { training_page: training_page, trainings_presenter: tp } %>
+  </div>
+<% end %>
+
+<% if count == training_page_counter + 1 && @parent_page_is_shown %>
+	</div></div>
+<% end %>

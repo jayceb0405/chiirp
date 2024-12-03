@@ -1,0 +1,51 @@
+<%
+  # app/views/dashboards/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: "dashboards/js/show", locals: { cards: Array }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) cards:         (Array)
+  #   (opt) new_dashboard: (Boolean)
+  #
+  new_dashboard = local_assigns.dig(:new_dashboard).to_bool if %w[config].intersect?(cards)
+  presenter     = DashboardPresenter.new(user: current_user) if %w[buttons config header show_tasks].intersect?(cards)
+-%>
+<% if cards.include?('header') %>
+  $('#dashboard_header_div').html('<%= j render partial: 'dashboards/header', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('buttons') %>
+  $('#dashboard_buttons_div').html('<%= j render partial: 'dashboards/dash_buttons', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('config') %>
+  $('#dash_modal').css('overflow', 'visible');
+  $('#dash_modal_body').css('overflow-y', 'visible');
+  $('#dash_modal_title').html('Dashboard Preferences');
+  $('#dash_modal_body').html('<%= j render partial: 'dashboards/config', locals: { new_dashboard:, presenter: } -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+<% if cards.include?('show_tasks') %>
+  $('#tasks_index_container').html('<%= j render partial: 'dashboards/tasks/index', locals: { presenter: } -%>');
+<% end %>
+
+<% if cards.include?('clear_config') %>
+  $('#dash_modal_title').html('');
+  $('#dash_modal_body').html('');
+  $('#dash_modal_footer').html('');
+<% end %>
+
+<% if cards.include?('hide_config') %>
+  $('#dash_modal').modal('hide');
+<% end %>
+
+<% if cards.include?('show_config') %>
+  $('#dash_modal').modal('show');
+<% end %>
+
+Looper.init();

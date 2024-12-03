@@ -1,0 +1,33 @@
+<%
+# app/views/integrations/activeprospect/_overview.html.erb
+#
+# Example:
+#   render partial: 'integrations/activeprospect/overview'
+#
+# Required Instance Variables:
+#   none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'activeprospect' } %>
+
+  <div class="card-body">
+    <%= bootstrap_info_field(
+          info:  (@user_api_integration.trusted_form_script.present? ? '<i class="fa fa-link text-success mr-2"></i>Exists' : '<i class="fa fa-link text-danger mr-2"></i>Empty').html_safe,
+          label: { class: 'mt-0', title: 'TrustedForm Script' }
+        ) %>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

@@ -1,0 +1,222 @@
+<%
+  # app/views/clients/widgets/v3/show_widget.html.erb
+  #
+  # Example:
+  #   render "clients/widgets/v3/show_widget"
+  #
+  # Required Instance Variables:
+  #   @client:        (Client)
+  #   @client_widget: (Clients::Widget)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter            = local_assigns.dig(:widget_presenter) || Clients::Widgets::Presenter.new(client: @client_widget.client)
+  presenter.widget     = @client_widget
+-%>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta name="keywords" content="">
+  <title><%= '' -%></title>
+
+  <%= csp_meta_tag %>
+
+  <!-- stylesheet & javascript -->
+  <%= stylesheet_link_tag 'widget_button' %>
+  <%= javascript_include_tag 'widget_button' %>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=<%= presenter.widget.w_font -%>:400,500,700&display=swap" type="text/css">
+
+  <style type="text/css">
+    body {
+      font-family: "<%= presenter.widget.w_font -%>";
+    }
+    .m-central__messages-message-text::after {
+      background: <%= presenter.widget.w_bg_color.to_s -%> !important;
+    }
+    .alert {
+      top: <% presenter.show_window_user_avatar? ? '85px' : '50px' -%>;
+    }
+  </style>
+</head>
+<body>
+  <div id="app-widget-box" class="app-widget-box" style="background-color: <%= presenter.widget.b_bg_color -%>;color: <%= presenter.widget.b_icon_color -%>;">
+    <%= presenter.button_image.html_safe %>
+    <div class="launch-button">
+      <div class="header" style="background-color: <%= presenter.widget.w_header_color -%>;">
+        <%= presenter.window_user_avatar.html_safe %>
+
+        <div id="app-widget-box-title" class="title">
+          <%= presenter.widget.w_title %>
+        </div>
+
+        <button id="close-button">
+          <i class="fa fa-times"></i>
+        </button>
+      </div>
+      <p id="app-widget-box-tag" class="small">
+        <%= presenter.widget.w_tag_line %>
+      </p>
+      <div class="m-central__messages-body">
+        <div class="m-central__messages-message is-interlocutor">
+          <div class="m-central__messages-wrap">
+            <div class="m-central__messages-message-text">
+              <%= presenter.widget.w_text_message %>
+            </div>
+          </div>
+        </div>
+
+        <div class="m-central__messages-message is-self">
+          <div class="m-central__messages-wrap">
+            <div class="m-central__messages-message-text" style="padding-top:15px;padding-bottom:15px;">
+              <%= form_tag api_v3_clients_save_widget_contact_url(presenter.client, presenter.widget.widget_key) do %>
+                <%= presenter.window_dropdown_comment.html_safe %>
+                <%= presenter.window_dropdown_options.html_safe %>
+
+                <% presenter.form_fields_for_widget.each do |key, value| %>
+                  <% custom_field = presenter.client.client_custom_fields.find_by(var_var: key) || presenter.client.client_custom_fields.new(var_name: value['name'], var_var: key, var_type: 'string', var_placeholder: value['name'], var_options: {}) %>
+                  <% field_tag = 'client_custom_fields' %>
+
+                  <div class="form-group">
+                    <%= contact_custom_field_input(
+                          custom_field:,
+                          object_name:  field_tag,
+                          row:          { class: 'mb-0', columns: [0, 12] },
+                          col:          { class: 'mb-0' },
+                          form_group:   { class: 'mb-0' },
+                          label:        { class: 'mt-0 mb-0', display: custom_field.var_type.casecmp('stars').zero? },
+                          html_options: { required: value['required'].to_i == 1 }
+                        ) %>
+                  </div>
+                <% end %>
+
+                <%= presenter.window_question.html_safe %>
+
+                <p class="text-muted data-rates-comment">By submitting you agree to receive text messages at the number provided. Message/data rates may apply.</p>
+
+                <div style="text-align:center;">
+                  <%= submit_tag presenter.widget.w_submit_button_text.to_s, { id: 'contact_form_submit', data: { 'disable-with': 'Submitting...' }, class: 'btn btn-app', style: "font-family:#{presenter.widget.w_font};background-color:#{presenter.widget.w_submit_button_color};border-color:#{presenter.widget.w_submit_button_color};" } %>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="footer" style="background-color:<%= presenter.widget.w_footer_color -%>;">
+        <%= link_to image_tag("tenant/#{I18n.t('tenant.id')}/logo.svg", { height: 15 }) + "&nbsp;Powered by #{I18n.t('tenant.name')}".html_safe, root_url, { id: 'powered_link', style: 'text-decoration:none;display:none;', target: '_blank', rel: 'noopener' } %>
+      </div>
+
+      <% if flash[:notice] %>
+        <div id="flash_notice" class="alert alert-info"><%= flash[:notice].html_safe %></div>
+        <% flash.discard %>
+      <% end %>
+
+    </div>
+  </div>
+
+  <script>
+    $(document).ready( function() {
+
+      window.addEventListener('message', function(event) {
+        try { var obj = JSON.parse(event.data); }
+        catch(e) { var obj = event.data }
+
+        if ( obj.action === 'open_sitechat' ) {
+          openElement();
+        } else if ((obj.vw + obj.vh) > 0 ) {
+          vw = obj.vw;
+          vh = obj.vh;
+          set_sitechat_attributes();
+        }
+      });
+
+      var element  = $('.app-widget-box');
+      var vw       = 0;
+      var vh       = 0;
+      var sitechat = 'closed'
+
+      window.parent.postMessage('{"action":"viewport"}', '*');
+
+      document.getElementById('contact_form_submit').setAttribute('color', contrastColor('<%= presenter.widget.w_submit_button_color.to_s -%>', true));
+      element.find('.header button').css({'color':contrastColor('<%= presenter.widget.w_bg_color.to_s -%>')});
+      element.find('#contact_form_submit').css({'color':contrastColor('<%= presenter.widget.w_bg_color.to_s -%>', true)});
+      element.find('#app-widget-box-title').css({'color':contrastColor('<%= presenter.widget.w_bg_color.to_s -%>')});
+      element.find('#app-widget-box-tag').css({'color':contrastColor('<%= presenter.widget.w_bg_color.to_s -%>')});
+
+      setTimeout(function() {
+        element.addClass('enter');
+      }, <%= flash.notice.present? ? 0 : 1000 -%>);
+
+      element.click(openElement);
+
+      <% if presenter.widget.w_auto_popup || flash.notice.present? %>
+        setTimeout(function() {
+          openElement();
+        }, <%= flash.notice.present? ? 0 : presenter.widget.w_auto_popup_timeout * 1000 -%>);
+      <% end %>
+
+      <% if flash.notice.present? %>
+        setTimeout(function() {
+          $('#flash_notice').slideUp();
+        }, 3000);
+
+        setTimeout(function() {
+          closeElement();
+        }, 4000);
+      <% end %>
+
+      function openElement() {
+        sitechat = 'open'
+        set_sitechat_attributes();
+        element.css({'background-color':'<%= presenter.widget.w_bg_color.to_s -%>'});
+        element.find('.launch-button').addClass('enter');
+        element.find('>i').hide();
+        element.find('.launch-button-image').hide();
+        element.addClass('expand');
+        element.find('.header button').click(closeElement);
+        element.off('click', openElement);
+        element.find('#powered_link').show();
+      }
+
+      function closeElement() {
+        sitechat = 'closed'
+        document.getElementById('app-widget-box').style.backgroundColor = '#ffffff';
+        element.css({'background-color':'<%= presenter.widget.b_bg_color.presence || presenter.widget.w_bg_color.to_s -%>'});
+        element.find('.launch-button').removeClass('enter').hide();
+        element.find('>i').show();
+        element.find('.launch-button-image').show();
+        element.removeClass('expand');
+        element.find('.header button').off('click', closeElement);
+
+        setTimeout(function() {
+          element.find('.launch-button').removeClass('enter').show()
+          element.find('#powered_link').hide();
+          element.click(openElement);
+          set_sitechat_attributes();
+        }, 500);
+      }
+
+      function set_sitechat_attributes() {
+        if (sitechat === 'open') {
+          if (vw > 414) {
+            window.parent.postMessage('{"action":"setatt_sitechat","width":"300","height":"450","right":"10px","bottom":"10px"}', '*');
+          } else {
+            window.parent.postMessage('{"action":"setatt_sitechat","width":"' + vw + '","height":"' + vh + '","right":"0px","bottom":"0px"}', '*');
+          }
+          window.parent.postMessage('{"action":"close_sitechat_bubble"}', '*');
+        } else {
+          window.parent.postMessage('{"action":"setatt_sitechat","width":"70","height":"70","right":"10px","bottom":"10px"}', '*');
+        }
+      }
+    });
+  </script>
+</body>
+</html>

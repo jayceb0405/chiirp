@@ -1,0 +1,60 @@
+<%
+  # app/views/messages/emails/_show.html.erb
+  #
+  # Example:
+  #   render partial: 'message_emails/show'
+  #
+  # Required Instance Variables:
+  #   @message: Messages::Message
+  #
+  # Required Local Variables:
+  #   none
+  #
+  message_email = @message.email
+-%>
+<% if message_email %>
+  <%= bootstrap_info_field(
+        info:  Friendly.new.date(@message.created_at, @message.contact.client.time_zone, true),
+        label: { title: @message.msg_type == 'emailin' ? 'Received' : 'Sent' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  @message.from_phone,
+        label: { title: 'From' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  message_email.to_emails.flatten.map { |to_email| "#{to_email['name']} &lt;#{to_email['email']}&gt;" }.join(', '),
+        label: { title: 'To' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  message_email.cc_emails.flatten.map { |to_email| "#{to_email['name']} &lt;#{to_email['email']}&gt;" }.join(', '),
+        label: { title: 'Cc' }
+      ) %>
+  <%= bootstrap_info_field(
+        info:  message_email.bcc_emails.flatten.map { |to_email| "#{to_email['name']} &lt;#{to_email['email']}&gt;" }.join(', '),
+        label: { title: 'Bcc' }
+      ) %>
+
+  <label class="mt-2">Body</label>
+  <% if message_email.html_body.present? %>
+    <iframe style="width: 100%; height: 100%; border: none;" src="<%= messages_message_email_html_body_path(@message) %>"></iframe>
+  <% else %>
+    <%= bootstrap_info_field(
+          info:  message_email.text_body,
+          label: { title: '' }
+        ) %>
+  <% end %>
+
+  <div class="row">
+    <div class="col-3">Attachments</div>
+
+    <% message_email.images.each do |image| %>
+      <div class="col-3">
+        <%= render partial: 'messages/emails/show_attachment', locals: { attachment: image } %>
+      </div>
+    <% end %>
+
+  </div>
+
+<% else %>
+  <h6>Email information was NOT found.</h6>
+<% end %>

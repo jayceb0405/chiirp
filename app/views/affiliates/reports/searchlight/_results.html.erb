@@ -1,0 +1,36 @@
+<%
+  # app/views/affiliates/reports/searchlight/_results.html.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/reports/searchlight/results', locals: { presenter: }
+  #
+  # Instance Variables:
+  #   (opt) @clients:       (Clients)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<div class="table-responsive">
+  <table class="table">
+
+    <thead>
+      <tr>
+        <th colspan="2" style="min-width: 240px"> Client </th>
+        <th class="text-right d-none d-md-table-cell"> SearchLight Fee </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <%= render partial: 'affiliates/reports/searchlight/client', collection: @clients.order(:name), as: :client, locals: { presenter: } -%>
+    </tbody>
+
+    <tfoot>
+      <tr>
+        <td colspan="2" class="text-left align-middle"> Total </td>
+        <td class="text-right align-middle"> <%= number_to_currency(@clients.sum { |c| c.searchlight_fee.to_d }) -%> </td>
+      </tr>
+    </tfoot>
+  </table>
+</div>

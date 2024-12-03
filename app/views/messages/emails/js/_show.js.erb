@@ -1,0 +1,24 @@
+<%
+  # app/views/messages/emails/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'messages/emails/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   cards: (Array)
+  #
+  cards = [local_assigns.dig(:cards) || []].flatten
+-%>
+<% if cards.include?('message_email') %>
+  // show MessageEdit in modal
+  $('#dash_modal_title').html('<i class="fa fa-envelope"></i> Email')
+  $('#dash_modal_body').html('<%= j render partial: 'messages/emails/show' -%>');
+  $('#dash_modal_footer').html('');
+<% end %>
+<% if cards.include?('message_email_show') %>
+  // show MessageEdit in modal
+  $("#dash_modal").modal('show');
+<% end %>

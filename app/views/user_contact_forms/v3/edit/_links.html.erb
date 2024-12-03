@@ -1,0 +1,112 @@
+<%
+  # app/views/user_contact_forms/v3/edit/_links.html.erb
+  #
+  # Example:
+  #   render partial: 'user_contact_forms/v3/edit/links', locals: { f: f }
+  #
+  # Required Instance Variables:
+  #   @user_contact_form: (UserContactForm)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  page_name_disabled = @user_contact_form.page_domain.empty?
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [@user_contact_form] } %>
+<div class="card-header border-0" id="user_contact_form_links">
+  <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#user_contact_form_links_body" aria-expanded="false" aria-controls="user_contact_form_links_body">
+    <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+    <span>Links <small>(Use these links to access your QuickPage anywhere!)</small></span>
+  </button>
+</div>
+
+<div id="user_contact_form_links_body" class="collapse" aria-labelledby="user_contact_form_links" data-parent="#user_contact_form_accordion">
+  <div class="card-body pt-0">
+
+    <%= bootstrap_select_tag(
+          field:        'user_contact_form[page_domain]',
+          label:        { title: 'QuickPage Domain' },
+          html_options: { id: 'user_contact_form_page_domain', disable: @user_contact_form.new_record? },
+          options:      { array: UserContactForm.available_domains(client: @user_contact_form.user.client), selected: @user_contact_form.page_domain, blank: 'Select a Domain' },
+          messages:     { note: 'Only valid when a page name is reserved.' }
+        ) %>
+    <%= bootstrap_text_field(
+          field:        'user_contact_form[page_name]',
+          value:        @user_contact_form.page_name,
+          label:        { title: 'Unique Page Name' },
+          html_options: { id: 'user_contact_form_page_name', placeholder: 'Page Name', disabled: page_name_disabled || @user_contact_form.new_record? },
+          prepends:     [{ button: true, label: 'Reserve', id: 'user_contact_form_page_name_button', disabled: page_name_disabled }],
+          messages:     { note: "This is the 'xxxx' in 'https://www.selected_domain.com/xxxx' (must be letters, numbers or underscore / must select a domain)." }
+        ) %>
+    <%= bootstrap_copy_field(
+          field:    'landing_page_url',
+          value:    @user_contact_form.landing_page_url,
+          label:    { title: 'QuickPage URL' },
+          messages: { note: "Use this link to display this Contact Form on it's own." }
+        ) %>
+    <%= bootstrap_copy_field(
+          field:    'page_embed_code',
+          value:    "<div id='tenant-quicklead-div'></div><script src='#{api_v3_user_contact_form_frame_init_url(@user_contact_form.page_key.to_s)}'></script>",
+          label:    { title: 'Page Embed Code' },
+          messages: { note: 'Place this code in the HTML of your website where you want the form to appear.' }
+        ) %>
+    <%= bootstrap_copy_field(
+          field:    'modal_embed_code',
+          value:    "<script src='#{api_v3_user_contact_form_modal_init_url(@user_contact_form.page_key.to_s)}'></script>",
+          label:    { title: 'Popup/Modal Embed Code' },
+          messages: { note: "Place this code in the HTML of your website between the head tags.<br /><span class='text-danger'>Requires Popup/Modal Link, Button or Auto-Popup Code.</span>".html_safe }
+        ) %>
+
+    <fieldset class="border p-2 mb-2">
+      <legend class="w-auto mb-0"><small> Use One of These Options with Popup/Modal Embed Code</small></legend>
+
+      <%= bootstrap_copy_field(
+            field:    'modal_link_code',
+            value:    "<a href='#' onclick='return openQuickPage()'>Click Here</a>",
+            label:    { title: 'Popup/Modal Link Code' },
+            messages: { note: "Place this code in the HTML of your website where you want the link to appear.<br /><span class='text-danger'>Requires Popup/Modal Embed Code.</span>".html_safe }
+          ) %>
+      <%= bootstrap_copy_field(
+            field:    'modal_button_code',
+            value:    '<button type="button" class="btn btn-info" onclick="return openQuickPage()">Click Here</button>',
+            label:    { title: 'Popup/Modal Button Code' },
+            messages: { note: "Place this code in the HTML of your website where you want the button to appear.<br /><span class='text-danger'>Requires Popup/Modal Embed Code. Uses standard bootstrap classes. May be edited when placed.</span>".html_safe }
+          ) %>
+      <% message_note = "Place this code in the HTML of your website where you want the button to appear.<br />The popup will appear after 5000 milliseconds (5 seconds). Edit '5000' for desired timing.<br />This code provides an example of 4 parameters that may be included with any openQuickPage().<br /><ul class='mb-0'><li>When any of the 4 parameters are provided all parameters must be provided.</li><li>ex: openQuickPage('width','height','position x','position y')</li><li>Each parameter must be in pixels (px) and must be wrapped with quotes.</li><li>If any parameter is not desired simply provide open/close quotes ('').</li></ul><span class='text-danger'>Requires Popup/Modal Embed Code. Uses standard bootstrap classes. May be edited when placed.</span>" %>
+      <%= bootstrap_copy_field(
+            field:    'modal_auto_code',
+            value:    "<script>setTimeout(function(){openQuickPage('300px','500px','50px','50px');},5000);</script>",
+            label:    { title: 'Popup/Modal Auto-Popup Code' },
+            messages: { note: message_note.html_safe }
+          ) %>
+    </fieldset>
+  </div>
+</div>
+
+<script>
+  $(function() {
+
+    <% unless @user_contact_form.new_record? %>
+      $('#user_contact_form_page_domain').on('change', function (e) {
+        $.ajax({
+          method: 'PATCH',
+          dataType: 'script',
+          url: '<%= api_v3_user_contact_form_path(@user_contact_form) -%>',
+          data: { 'user_contact_form[page_domain]': $(this).find(':selected')[0].value, commit: 'update_page_domain' }
+        });
+      });
+
+      $('#user_contact_form_page_name_button').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        $.ajax({
+          method: 'PATCH',
+          dataType: 'script',
+          url: '<%= api_v3_user_contact_form_path(@user_contact_form) -%>',
+          data: { 'user_contact_form[page_name]': $('#user_contact_form_page_name').val(), commit: 'update_page_name' }
+        });
+      });
+    <% end %>
+  });
+</script>

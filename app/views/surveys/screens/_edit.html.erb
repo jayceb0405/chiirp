@@ -1,0 +1,109 @@
+<%
+  # app/views/surveys/screens/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+  presenter.survey_screen = @survey_screen
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-2 text-center p-3" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.survey_screen.name[..2] -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.survey_screen.name -%> </h3>
+    </div>
+
+    <div class="col-10 p-3">
+
+      <%= form_with model: [presenter.survey, presenter.survey_screen], builder: LooperFormBuilder, remote: true, class: 'needs-validation card-body d-flex flex-column', id: "survey_screen_form_#{presenter.survey.id}_#{presenter.survey_screen.id}", novalidate: true do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: "#{Surveys::Screen.title} Name" },
+              html_options: { minlength: 2, placeholder: " #{Surveys::Screen.title} Name", required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.select :screen_type, {
+              label:        { title: 'Screen Type' },
+              html_options: { id: "select_screen_type_#{presenter.survey_screen.id}", mobile: browser.device.mobile? },
+              choices:      { array: presenter.screen_types_for_select, selected: presenter.survey_screen.screen_type }
+            } %>
+        <%= f.text_field :header, {
+              label:        { title: "#{Surveys::Screen.title} Header" },
+              html_options: { placeholder: "#{Surveys::Screen.title} Header" }
+            } %>
+        <%= f.text_field :sub_header, {
+              label:        { title: "#{Surveys::Screen.title} Sub Header" },
+              html_options: { placeholder: "#{Surveys::Screen.title} Sub Header" }
+            } %>
+
+        <div id="screen_type_question_<%= presenter.survey_screen.id -%>" style="display:none;">
+          <%= render partial: 'surveys/screens/types/question', locals: { presenter: } %>
+        </div>
+        <div id="screen_type_info_<%= presenter.survey_screen.id -%>" style="display:none;">
+          <%= render partial: 'surveys/screens/types/info', locals: { presenter: } %>
+        </div>
+        <div id="screen_type_data_<%= presenter.survey_screen.id -%>" style="display:none;">
+          <%= render partial: 'surveys/screens/types/data', locals: { presenter: } %>
+        </div>
+
+        <%= f.text_area :facebook_event_code, {
+              label:        { title: 'Facebook Event Code' },
+              html_options: { id: "facebook_event_code_#{presenter.survey_screen.id}", placeholder: 'Facebook Event Code' }
+            } %>
+
+        <%= f.submit_buttons buttons: [{ title: "Save #{Surveys::Screen.title}", id: "survey_screen_button_#{presenter.survey_screen.id}", disable_with: "Saving #{Surveys::Screen.title}" }] %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function() {
+    if ($('#select_screen_type_<%= presenter.survey_screen.id -%>').val() == 'question') {
+      $('#screen_type_question_<%= presenter.survey_screen.id -%>').show();
+    } else if ($('#select_screen_type_<%= presenter.survey_screen.id -%>').val() == 'info') {
+      $('#screen_type_info_<%= presenter.survey_screen.id -%>').show();
+    } else if ($('#select_screen_type_<%= presenter.survey_screen.id -%>').val() == 'data') {
+      $('#screen_type_data_<%= presenter.survey_screen.id -%>').show();
+    }
+
+    $(document).off('change', '#select_screen_type_<%= presenter.survey_screen.id -%>');
+    $(document).on('change', '#select_screen_type_<%= presenter.survey_screen.id -%>', function(e) {
+      $('#screen_type_question_<%= presenter.survey_screen.id -%>').hide();
+      $('#screen_type_info_<%= presenter.survey_screen.id -%>').hide();
+      $('#screen_type_data_<%= presenter.survey_screen.id -%>').hide();
+
+      if ($(this).val() == 'question') {
+        $('#screen_type_question_<%= presenter.survey_screen.id -%>').show();
+      } else if ($(this).val() == 'info') {
+        $('#screen_type_info_<%= presenter.survey_screen.id -%>').show();
+      } else if ($(this).val() == 'data') {
+        $('#screen_type_data_<%= presenter.survey_screen.id -%>').show();
+      }
+    });
+
+    $(document).off('click', '#survey_screen_button_<%= presenter.survey_screen.id -%>');
+    $(document).on('click', '#survey_screen_button_<%= presenter.survey_screen.id -%>', function(e) {
+      $('#facebook_event_code_<%= presenter.survey_screen.id -%>').val($('#facebook_event_code_<%= presenter.survey_screen.id -%>').val().replace(/<script/g, '{script'));
+      $('#facebook_event_code_<%= presenter.survey_screen.id -%>').val($('#facebook_event_code_<%= presenter.survey_screen.id -%>').val().replace(/<\/script>/g, '{/script}'));
+      $('#facebook_event_code_<%= presenter.survey_screen.id -%>').val($('#facebook_event_code_<%= presenter.survey_screen.id -%>').val().replace(/<noscript/g, '{noscript'));
+      $('#facebook_event_code_<%= presenter.survey_screen.id -%>').val($('#facebook_event_code_<%= presenter.survey_screen.id -%>').val().replace(/<\/noscript>/g, '{/noscript}'));
+
+      if ($('#select_screen_type_<%= presenter.survey_screen.id -%>').val() == 'data') {
+        var sortable = Sortable.get(document.getElementById('data_table_<%= presenter.survey_screen.id -%>')).toArray();
+
+        $.each(sortable, function(index, value) {
+          $('#list_group_sort_order_<%= presenter.survey_screen.id -%>_' + value).val(index);
+        });
+      }
+    });
+  });
+</script>

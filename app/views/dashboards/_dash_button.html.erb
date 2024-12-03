@@ -1,0 +1,111 @@
+<%
+  # app/views/dashboards/_dash_button.html.erb
+  #
+  # Example:
+  #   render partial: "dashboards/dash_button", locals: { link: String, id: String }
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   link:        (String)
+  #   id:          (String)
+  #
+  # Optional Local Variables:
+  #   stats:            (String)
+  #   description:      (String)
+  #   icon:             (String)
+  #   chart_id:         (String)
+  #   chart_value:      (Float)
+  #   chart_type:       (String)
+  #   button_height:    (Integer)
+  #   background_color: (String)
+  #   color:            (String)
+  #   header_text:      (String)
+  #   body_text:        (String)
+  #   body_font_size:   (String)
+  #   footer_text:      (String)
+  #
+  stats            = local_assigns.dig(:stats).to_s
+  id               = local_assigns.dig(:id).to_s
+  description      = local_assigns.dig(:description).to_s
+  description_icon = ['', '<i class="fa fa-user"></i> ', '<i class="fa fa-building"></i> '][['', 'u', 'c'].index(local_assigns.dig(:description_icon).to_s.downcase)]
+  icon             = local_assigns.dig(:icon).to_s
+  chart_id         = local_assigns.dig(:chart_id).to_s
+  chart_value      = local_assigns.dig(:chart_value).to_f
+  chart_type       = (local_assigns.dig(:chart_type) || '').to_s
+  button_height    = (local_assigns.dig(:button_height) || '85px').to_s
+  button_id        = local_assigns.dig(:button_id).to_s
+  background_color = local_assigns.dig(:background_color).to_s
+  border_color     = (local_assigns.dig(:border_color) || background_color).to_s
+  color            = local_assigns.dig(:color).to_s
+  header_text      = local_assigns.dig(:header_text).to_s
+  body_text        = local_assigns.dig(:body_text).to_s
+  body_font_size   = local_assigns.dig(:body_font_size).to_s
+  footer_text      = local_assigns.dig(:footer_text).to_s
+  description_font_size = "#{15 - ([description.length - 20, 0].max / 8).to_i}px"
+  button_movable = local_assigns.dig(:button_movable).to_bool
+-%>
+<div id="<%= id -%>">
+  <%= link_to link, target: '_top', style: 'text-decoration: none;' do %>
+    <div class="dash-button dash-button-alpha mb-0" id="widget_button_<%= button_id -%>" style="height:<%= button_height -%>;<%= background_color.present? ? "background-color: #{background_color};" : '' -%><%= border_color.present? ? "border-color: #{border_color};" : '' -%><%= color.present? ? "color: #{color};" : '' -%>">
+      <% if header_text.present? %>
+        <div class="dash-button-alpha__header" style="<%= color.present? ? "color: #{color};" : '' -%>"><span class="p-1"><%= header_text -%></span></div>
+      <% end %>
+      <div class="dash-button-alpha__body" style="<%= body_font_size.present? ? "font-size:#{body_font_size};" : '' -%>">
+        <% if body_text.present? %>
+          <%= body_text.html_safe %>
+        <% else %>
+          <div>
+            <div class="dash-button-alpha__amount" id="widget_amount_<%= button_id -%>"><%= stats.html_safe -%></div>
+            <div class="dash-button-alpha__description pl-1" id="widget_description_<%= button_id -%>" style="font-size:<%= description_font_size -%>;line-height:1;"><%= description_icon.html_safe + description.html_safe -%></div>
+          </div>
+          <% if chart_type == "circle_progress" %>
+            <% if chart_id.present? %>
+              <div id="<%= chart_id -%>" class="dash-button-statistic-g__chart">
+                <span class="dash-button-statistic-g__chart-text" style="color:red;text-shadow:1px 1px 2px white;"></span>
+              </div>
+            <% end %>
+          <% elsif chart_type == "donut" %>
+            <%= pie_chart chart_value, { donut: true, width: '100px', height: '100px', legend: false } %>
+          <% end %>
+          <span class="dash-button-alpha__icon <%= icon.html_safe -%>" id="widget_icon_<%= button_id -%>"></span>
+        <% end %>
+      </div>
+      <% if footer_text.present? %>
+        <div class="dash-button-alpha__footer" style="<%= color.present? ? "color: #{color};" : '' -%>"><span class="p-1"><%= footer_text -%></span></div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <% if button_movable %>
+    <i class="fa fa-grip-vertical dash-button-alpha__handle"></i>
+  <% end %>
+
+  <script>
+    $(function() {
+      <% if chart_id.present? %>
+          $('#<%= chart_id -%>').circleProgress({
+            value: <%= chart_value -%>,
+            size: 50,
+            thickness: 8,
+            startAngle: 1.5 * Math.PI,
+            lineCap: 'round',
+            emptyFill: '#e8ebef',
+            fill: {
+              gradient: ['#ff9100', '#ffcd56']
+            }
+          }).on('circle-animation-progress', function(event, progress, stepValue) {
+            if (progress >= <%= chart_value -%>) {
+              progress = <%= chart_value -%>;
+              $(this).find('.dash-button-statistic-g__chart-text').text(Math.round(100 * progress) + '%');
+            }
+          });
+      <% end %>
+
+      <% if color.empty? && !button_id.empty? %>
+        contrastButtonFontColor('<%= button_id -%>')
+      <% end %>
+    });
+  </script>
+</div>

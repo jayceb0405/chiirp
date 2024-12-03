@@ -1,0 +1,30 @@
+<%
+  # app/views/integrations/stripo/show.html.erb
+  #
+  # Example:
+  #     render partial: 'app/views/integrations/stripo/show'
+  #
+  # Instance Variables:
+  #     (opt) @email_template: EmailTemplate
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = Integrations::Stripo::Presenter.new
+-%>
+<div class="card-body">
+  <%= form_with model: @email_template, url: @email_template.new_record? ? integrations_stripo_test_index_path : integrations_stripo_test_path(@email_template), class: 'needs-validation', id: 'form_element', builder: LooperFormBuilder, remote: true do %>
+    <%= hidden_field_tag :html_data, @email_template&.html.to_s %>
+    <%= hidden_field_tag :css_data, @email_template&.css.to_s %>
+
+    <div class="row">
+      <div class="col-12">
+        <%= render partial: 'integrations/stripo/show', locals: { css_element_id: 'css_data', form_element_id: 'form_element', html_element_id: 'html_data', presenter:, save_element_id: 'save_button', user: current_user } %>
+      </div>
+    </div>
+
+    <%= bootstrap_submit_buttons(
+          buttons: [{ id: 'save_button', title: 'Save', disable_with: 'Saving' }]
+        ) %>
+  <% end %>
+</div>

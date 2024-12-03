@@ -1,0 +1,17 @@
+<%
+  # app/views/integrations/servicetitan/events/events/destroy.turbo_stream.erb
+  #
+  # Example:
+  #   render partial: 'integrations/servicetitan/events/events/destroy'
+  #
+  # Instance Variables:
+  #   (req) @client_api_integration: (ClientApiIntegration)
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @client_api_integration.is_a?(ClientApiIntegration)
+
+  presenter = Integrations::Servicetitan::EventsPresenter.new(@client_api_integration)
+-%>
+<%= turbo_stream.update('events_body', partial: 'integrations/servicetitan/events/events/action', collection: presenter.sorted_events, as: :action, locals: { presenter: }) %>

@@ -1,0 +1,51 @@
+<%
+# app/views/campaign_marketplaces/index.html.erb
+#
+# Example:
+# 	render "campaign_marketplaces/index"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-filter mr-2"></i>Campaigns & Campaign Packages Marketplace</h1>
+
+        <div class="btn-toolbar">
+          <%= link_to '<i class="fa fa-filter mr-2"></i>Campaign Builder'.html_safe, campaigns_path, {
+                class: 'btn btn-light',
+                id:    'button_new_campaign'
+              } %>
+        </div>
+      </div>
+    </header>
+
+    <% if current_user.team_member? && @campaigns_unapproved.any? %>
+      <div class="page-section border-bottom">
+        <h6>Campaigns & Campaign Packages Awaiting Approval</h6>
+        <div class="row mt-2 ml-0 mr-4">
+          <%= render partial: 'campaign_marketplaces/campaign', collection: @campaigns_unapproved %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="page-section">
+      <div class="row mt-2 ml-0 mr-4">
+
+        <% if @campaigns.any? %>
+          <%= render partial: 'campaign_marketplaces/campaign', collection: @campaigns %>
+        <% else %>
+          <p class="ml-2">No Campaigns or Campaign Packages have been added yet. Please try back soon.</p>
+        <% end %>
+      </div>
+      <div id="modal_campaign_container"></div>
+    </div>
+  </div>
+</div>

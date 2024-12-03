@@ -1,0 +1,21 @@
+<%
+  # app/views/integrations/email/v1/_menu.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/email/v1/menu', locals: { presenter: Presenter }
+  #
+  # Required Instance Variables:
+  #   @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Email::V1::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+
+<div class="nav-scroller">
+  <div class="nav nav-center nav-tabs">
+    <%= link_to 'Connection', edit_integrations_email_v1_connections_path, { class: 'nav-link', id: 'link_connections', remote: true } %>
+    <%= link_to 'Domain Verification', integrations_email_v1_domain_verifications_path, { class: 'nav-link', id: 'link_domain_verifications', remote: true } if presenter.connected? %>
+  </div>
+</div>

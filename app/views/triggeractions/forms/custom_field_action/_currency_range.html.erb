@@ -1,0 +1,54 @@
+<%
+  # app/views/triggeractions/forms/custom_field_action/_currency_range.html.erb
+  #
+  # Example:
+  #   render partial: "triggeractions/forms/custom_field_action/currency_range", collection: currency_range, as: :range, locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+
+<fieldset class="border p-2 mb-2 rounded">
+  <legend class="w-auto mb-0"><%= presenter.client_custom_field_action_legend(range) -%></legend>
+  <%= hidden_field_tag("triggeraction[response_range][#{range_counter}][range_type]", presenter.client_custom_field_action_type(range)) %>
+
+  <% if presenter.client_custom_field_action_type(range) == 'invalid' %>
+    <ul>
+      <li>An Invalid Response Range will usually only happen with imported or manually entered data.</li>
+      <li>It may also happen if all available ranges have not been defined.</li>
+    </ul>
+  <% elsif presenter.client_custom_field_action_type(range) == 'empty' %>
+    <ul>
+      <li>An Empty Response Range will usually only happen when a field is already empty and a response outside of acceptable Custom Field ranges is received.</li>
+      <li>It may also happen if "Clear Custom Field on invalid response" is switched on when saving the response.</li>
+    </ul>
+  <% elsif presenter.client_custom_field_action_type(range) == 'image' %>
+    <ul>
+      <li>An Image Response Range will only happen when a Custom Field is set to accept an image as a valid response.</li>
+      <li>Any additional acceptable text response received with the image will be processed in place of the image response.</li>
+    </ul>
+  <% end %>
+
+  <% if presenter.client_custom_field_action_slider(range) %>
+    <%= bootstrap_range_slider(
+          field:        "triggeraction[response_range][#{range_counter}][min_max]",
+          row:          { class: 'ml-2 mr-2', columns: [0, 12] },
+          html_options: { id: "min_max_#{presenter.triggeraction.id}_#{presenter.client_custom_field&.id}_#{range_counter}" },
+          range_slider: { type: 'double', min: presenter.client_custom_field&.var_options&.[](:currency_min), max: presenter.client_custom_field&.var_options&.[](:currency_max), from: presenter.client_custom_field_action_minimum(range).to_d.to_s, to: presenter.client_custom_field_action_maximum(range).to_d.to_s, step: presenter.client_custom_field_action_currency_range_min_max_step(range), grid: true, grid_num: 10, prefix: '$', disabled: presenter.campaign_disabled? }
+        ) %>
+  <% end %>
+
+  <%= render partial: 'campaigns/action_fields', locals: {
+        client: presenter.client,
+        campaign_id: presenter.client_custom_field_action_campaign_id(range), campaign_id_field: "triggeraction[response_range][#{range_counter}][campaign_id]",
+        group: presenter.client_custom_field_action_group(range), group_id_field: "triggeraction[response_range][#{range_counter}][group_id]",
+        tag: presenter.client_custom_field_action_tag(range), tag_id_field: "triggeraction[response_range][#{range_counter}][tag_id]",
+        stage_id: range[1].dig('stage_id'), stage_id_field: "triggeraction[response_range][#{range_counter}][stage_id]",
+        stop_campaign_ids: presenter.client_custom_field_action_stop_campaign_ids(range), stop_campaign_ids_field: "triggeraction[response_range][#{range_counter}][stop_campaign_ids]"
+      } %>
+</fieldset>

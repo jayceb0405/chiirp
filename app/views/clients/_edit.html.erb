@@ -1,0 +1,67 @@
+<%
+# app/views/clients/_edit.html.erb
+#
+# Example:
+#   render partial: 'clients/edit'
+#
+# Required Instance Variables:
+#   @client:   (Client)
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+
+  <div class="card-header">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0"><i class="fa fa-building mr-2"></i>Company Info</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <%= form_with model: @client, id: 'client-form', builder: LooperFormBuilder, remote: true, class: 'needs-validation', novalidate: true do |f| %>
+      <%= f.text_field :name, {
+            label:        { title: 'Company Name' },
+            html_options: { id: 'input_name', minlength: 2, placeholder: 'Company Name', required: true, autofocus: true },
+            messages:     { note: 'Must be minimum of 5 characters.' }
+          } %>
+      <%= f.text_field :address1, {
+            label:        { title: 'Address Line 1' },
+            html_options: { placeholder: 'Address' }
+          } %>
+      <%= f.text_field :address2, {
+            label:        { title: 'Address Line 2' },
+            html_options: { placeholder: 'Address Line 2' }
+          } %>
+      <%= f.text_field :city, {
+            label:        { title: 'City' },
+            html_options: { placeholder: 'City' }
+          } %>
+      <%= f.text_field :state, {
+            html_options: { id: 'select_state' },
+            options:      { grouped_array: [['United States', us_states_array], ['Canada', canada_states_array]], selected: @client.state, blank: 'Select a State' }
+          } %>
+      <%= f.text_field :zip, {
+            label:        { title: 'Zip Code' },
+            html_options: { maxlength: 6, placeholder: 'Zip Code' },
+            messages:     { note: 'Must be maximum of 6 characters.' }
+          } %>
+      <%= f.telephone_field :phone, {
+            label:        { title: 'Phone Number' },
+            html_options: { value: @client.phone, id: 'input_phone', placeholder: 'Phone Number', required: true },
+            messages:     { note: 'Must be 10 characters.' }
+          } %>
+      <%= render partial: 'snippets/f_time_zone_select_field', locals: { form: f, title: 'Time Zone Where Business is Located', field: 'time_zone', id: 'select_time_zone', blank: 'Select a Time Zone', note: 'All times shown are based on time zone selected.' } %>
+      <%= f.select :def_user_id, {
+            label:        { title: 'Assign All New Contacts to' },
+            html_options: { id: 'def_user_id', mobile: browser.device.mobile? },
+            choices:      { array: @client.users.map { |user| [user.fullname, user.id] }, blank: 'Select a User', selected: @client.def_user_id }
+          } %>
+
+      <%= f.submit_buttons(
+            buttons: [{ title: 'Save Company Info', disable_with: 'Saving' }]
+          ) %>
+    <% end %>
+  </div>
+</div>

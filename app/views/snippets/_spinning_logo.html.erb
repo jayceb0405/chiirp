@@ -1,0 +1,29 @@
+<%
+# app/views/snippets/_spinning_logo.html.erb
+#
+# Example:
+#   render partial: 'snippets/spinning_logo', locals: { comment: String }
+#
+# Instance Variables:
+#   none
+#
+# Local Variables:
+#   (opt) comment: (String)
+#   (opt) hidden:  (Boolean)
+#   (opt) id:      (String)
+#   (opt) inline:  (Boolean)
+#   (opt) size:    (Integer)
+#
+-%>
+<%= (if local_assigns.dig(:id).present?
+       "<span id='#{id}' class='#{local_assigns.dig(:hidden).to_bool ? 'd-none' : ''}'>"
+     else
+       ''
+     end).html_safe -%>
+  <%= (local_assigns.dig(:inline).to_bool ? '' : '<div>').html_safe -%>
+    <%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo', style: local_assigns.dig(:size).to_i.positive? ? "max-height:#{size.to_i}px" : '' %>
+  <%= (local_assigns.dig(:inline).to_bool ? '' : '</div>').html_safe -%>
+  <%= (local_assigns.dig(:inline).to_bool ? '' : '<div class="ml-3 pb-3">').html_safe -%>
+    <%= local_assigns.dig(:comment).presence || 'Loading' -%>...
+  <%= (local_assigns.dig(:inline).to_bool ? '' : '</div>').html_safe -%>
+<%= (local_assigns.dig(:id).present? ? '</span>' : '').html_safe -%>

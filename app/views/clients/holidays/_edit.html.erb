@@ -1,0 +1,108 @@
+<%
+  # app/views/clients/holidays/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/holidays/edit', locals: { clients_holidays_presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (opt) @holiday: (Holiday)
+  #
+  # Local Variables:
+  #   (opt) clients_holidays_presenter: (Clients::Holidays::Presenter)
+  #
+  presenter = local_assigns.dig(:clients_holidays_presenter) || Clients::Holidays::Presenter.new(client: @client)
+  presenter.holiday = @holiday
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.holiday] } %>
+<td colspan="5">
+  <div class="row">
+    <div class="col-md-2 text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.holiday.name.to_s.first.presence || '?' -%>
+      </div>
+      <h3 class="card-title mb-4"><%= presenter.holiday.name -%></h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: presenter.holiday, builder: LooperFormBuilder, remote: true, class: 'needs-validation', id: "holiday_form_#{presenter.holiday.id}", novalidate: true do |f| %>
+        <%= hidden_field_tag 'adjust_existing_actions', false, { id: "adjust_existing_actions_#{presenter.holiday.id}" } %>
+
+        <%= f.select :holiday_selection, {
+              label:        { title: 'Holiday' },
+              html_options: { id: "holiday_name_select_#{presenter.holiday.id}", mobile: browser.device.mobile? },
+              choices:      { array: presenter.holidays, selected: presenter.holiday.occurs_at, blank: 'Select a Holiday' },
+              messages:     { note: 'Select a Holiday to define skip criteria.' }
+            } %>
+        <%= f.text_field :name, {
+              label:        { title: 'Custom Holiday Name' },
+              html_options: { value: presenter.holiday.name, id: "custom_name_#{presenter.holiday.id}", placeholder: 'Enter a Custom Name', minlength: 3 },
+              messages:     { note: 'Enter a custom name for this holiday.' }
+            } %>
+        <%= bootstrap_calendar_field(
+              field:        'clients_holiday[occurs_at]',
+              value:        presenter.occurs_at_value,
+              label:        { title: 'Custom Holiday Date' },
+              html_options: { id: "custom_occurs_at_#{presenter.holiday.id}", placeholder: 'Select a Date' },
+              flatpickr:    { include_time: false, mode: 'single' },
+              messages:     { note: 'Select a custom date for this holiday.' }
+            ) %>
+        <%= f.select :action, {
+              label:        { title: 'Action' },
+              html_options: { mobile: browser.device.mobile? },
+              choices:      { array: presenter.actions, selected: presenter.holiday.action, blank: 'Select an Action' },
+              messages:     { note: 'Select action to take.' }
+            } %>
+
+        <%= f.submit_buttons(buttons: [{ title: 'Save Holiday', disable_with: 'Saving Holiday', id: "holiday_submit_button_#{presenter.holiday.id}" }]) %>
+      <% end %>
+    </div>
+  </div>
+</td>
+
+<script>
+  $(function () {
+    $(document).off('change', '#holiday_name_select_<%= presenter.holiday.id -%>');
+    $(document).on('change', '#holiday_name_select_<%= presenter.holiday.id -%>', function(e) {
+      $('#custom_name_<%= presenter.holiday.id -%>').val($('#holiday_name_select_<%= presenter.holiday.id -%> option:selected').text());
+      $('#custom_occurs_at_<%= presenter.holiday.id -%>').val($(this).val());
+    });
+
+    $(document).off('click', '#holiday_submit_button_<%= presenter.holiday.id -%>');
+    $(document).on('click', '#holiday_submit_button_<%= presenter.holiday.id -%>', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      var form = $('#holiday_form_<%= presenter.holiday.id -%>');
+
+      ChiirpAlert({
+        'body':'Do you want to adjust any existing text messages, ringless voicemails or campaigns set to be processed on this date?',
+        'buttons':<%= raw([{ label: '<i class="fa fa-thumbs-down"></i> No, Don\'t adjust anything!', id: "button_no_adjust_#{presenter.holiday.id}" }, { label: '<i class="fa fa-thumbs-up"></i> Yup, Adjust them all!', id: "button_adjust_#{presenter.holiday.id}" }].to_json) -%>,
+        'type':'alert',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_no_adjust_<%= presenter.holiday.id -%>');
+      $(document).on('click', '#button_no_adjust_<%= presenter.holiday.id -%>', function(e) {
+        $('#adjust_existing_actions_<%= presenter.holiday.id -%>').val(false);
+
+        $.ajax({
+          type: form.attr('method'),
+          url: form.attr('action'),
+          data: form.serialize()
+        });
+      });
+
+      $(document).off('click', '#button_adjust_<%= presenter.holiday.id -%>');
+      $(document).on('click', '#button_adjust_<%= presenter.holiday.id -%>', function(e) {
+        $('#adjust_existing_actions_<%= presenter.holiday.id -%>').val(true);
+
+        $.ajax({
+          type: form.attr('method'),
+          url: form.attr('action'),
+          data: form.serialize()
+        });
+      });
+    });
+  });
+</script>

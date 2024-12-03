@@ -1,0 +1,68 @@
+<%
+  # app/views/integrations/pcrichard/v1/orders/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/pcrichard/v1/orders/edit', locals: ( presenter: Presenter)
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Order Updates from PC Richard</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_tag integrations_pcrichard_v1_orders_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+        <%= bootstrap_select_tag(
+              field:    'orders[custom_field_assignments][model_number]',
+              label:    { title: 'PC Richard Model Number' },
+              options:  { array: presenter.string_custom_fields, selected: presenter.custom_field_model_number_id, blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save the PC Richard model number sold.' }
+            ) %>
+        <%= bootstrap_select_tag(
+              field:    'orders[custom_field_assignments][sold_at]',
+              label:    { title: 'PC Richard Order Sale Date' },
+              options:  { array: presenter.date_custom_fields, selected: presenter.custom_field_sold_at_id, blank: 'Select a Custom Field' },
+              messages: { note: 'Select a Custom Field to save the PC Richard sale date.' }
+            ) %>
+
+        <fieldset class="border rounded p-2 mt-3 mb-2">
+          <legend class="w-auto mb-0"><h6>When a PC Richard order is received...</h6></legend>
+
+          <%= render partial: 'campaigns/action_fields', locals: {
+                client: presenter.client,
+                campaign_id: presenter.orders_campaign_id, campaign_id_field: 'orders[campaign_id]',
+                group_id: presenter.orders_group_id, group_id_field: 'orders[group_id]',
+                tag_id: presenter.orders_tag_id, tag_id_field: 'orders[tag_id]',
+                stage_id: presenter.orders_stage_id, stage_id_field: 'orders[stage_id]',
+                stop_campaign_ids: presenter.orders_stop_campaign_ids, stop_campaign_ids_field: 'orders[stop_campaign_ids]'
+              } %>
+        </fieldset>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save Order Updates Configuration', disable_with: 'Saving Order Updates Configuration' }]
+            ) %>
+      <% end %>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_orders').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

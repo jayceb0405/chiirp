@@ -1,0 +1,197 @@
+<%
+  # app/views/users/notifications/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'users/notifications/edit', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @user: (User)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter) || Users::Presenter.new(user: @user)
+-%>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Notifications</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_with(model: presenter.user, url: users_notification_path(presenter.user.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation', id: 'notifications_form', novalidate: true }) do |f| %>
+        <% if presenter.user.access_controller?('users', 'tasks', session) %>
+
+          <h6 class="py-3">Tasks</h6>
+          <div class="ml-3">
+            <ul>
+              <li>Task notifications include an ID. When you respond to a Task notification with "Task ## done" (## = task ID) the Task will be marked as completed.</li>
+              <li>Complete, completed, finished may all be used in place of done.</li>
+            </ul>
+
+            <%= bootstrap_check_box(
+                  label:      { title: 'Task Notifications' },
+                  checkboxes: presenter.check_boxes_task_notifications
+                ) %>
+            <%= bootstrap_check_box(
+                  label:      { title: 'Notification Methods' },
+                  checkboxes: presenter.check_boxes_task_notification_methods
+                ) %>
+          </div>
+        <% end %>
+
+        <h6 class="py-3">Text Messages</h6>
+        <div class="ml-3">
+          <ul>
+            <li>Push notifications may be triggered when a new message is received.</li>
+            <li>Select Users to receive push notifications when you receive messages from Contacts assigned to you.</li>
+          </ul>
+
+          <%= bootstrap_select_tag(
+                field:        'user[notifications][text][arrive]',
+                label:        { title: 'Select Users' },
+                html_options: { multiple: true },
+                options:      { array: presenter.client.users.order(:lastname, :firstname).map { |u| [u.fullname, u.id] }, selected: presenter.user.notifications.dig('text', 'arrive') },
+                messages:     { note: 'All selected Users will be notified when new text messages arrive.' }
+              ) %>
+          <%= bootstrap_switch_field(
+                field:    'user[notifications][text][on_contact]',
+                value:    presenter.user.notifications.dig('text', 'on_contact'),
+                values:   [true, false],
+                label:    { title: 'When Viewing the Contact' },
+                messages: { note: 'Notify Users even when viewing Contact in Message Central.' }
+              ) %>
+        </div>
+
+        <h6 class="py-3">Phone Calls</h6>
+        <div class="ml-3">
+          <ul>
+            <li>Push notifications may be triggered when a phone call is ringing in.</li>
+            <li>Notifications provide info about the caller with a link to jump to the Contact in Message Central.</li>
+          </ul>
+
+          <%= bootstrap_switch_field(
+                field:    'user[incoming_call_popup]',
+                value:    presenter.user.incoming_call_popup,
+                values:   [true, false],
+                label:    { title: 'Incoming Calls' },
+                messages: { note: 'Notify me when a call is placed to my incoming phone number.' }
+              ) %>
+        </div>
+
+        <% if presenter.user.access_controller?('integrations', 'user', session) && presenter.client.integrations_allowed.include?('google') %>
+          <h6 class="py-3">Reviews</h6>
+          <div class="ml-3">
+            <ul>
+              <li>Notifications may be triggered when a Google review is received.</li>
+              <li>Notifications provide info about the review with a link to jump to the Contact in Message Central (if the review is matched).</li>
+              <li>Notifications will be sent to the User who configured the reviews integration if the Contact can not be matched up.</li>
+            </ul>
+
+            <%= bootstrap_check_box(
+                  label:      { title: 'Reviews Received' },
+                  checkboxes: presenter.check_boxes_review_notifications
+                ) %>
+            <%= bootstrap_check_box(
+                  label:      { title: 'Notification Methods' },
+                  checkboxes: presenter.check_boxes_review_notification_methods
+                ) %>
+          </div>
+        <% end %>
+
+        <% if presenter.client.agency_access && presenter.user.agent %>
+          <h6 class="py-3">Agency Notifications</h6>
+          <div class="ml-3">
+            <ul>
+              <li>Push notifications may be triggered when a new message is received by those Companies represented by your Agency.</li>
+              <li>Select Companies to receive push notifications for.</li>
+            </ul>
+
+            <%= bootstrap_select_tag(
+                  field:        'user[notifications][agency_clients]',
+                  label:        { title: 'Select Companies' },
+                  html_options: { multiple: true },
+                  options:      { array: presenter.options_for_agency_clients, selected: presenter.user.notifications.dig('agency_clients') },
+                  messages:     { note: 'You will be notified when new text messages arrive for any of the selected Companies.' }
+                ) %>
+          </div>
+        <% end %>
+
+        <h6 class="py-3">Campaign Error Notifications</h6>
+        <div class="ml-3">
+          <ul>
+            <li>Push or Text notifications may be triggered when Users must be notified of invalid data or settings or other failed actions.</li>
+          </ul>
+
+          <%= bootstrap_check_box(
+                label:      { title: 'Notification Methods' },
+                checkboxes: presenter.check_boxes_campaign_failures_notifications
+              ) %>
+        </div>
+
+        <h6 class="py-3">Push Notifications Reset & Testing</h6>
+
+        <div class="ml-3">
+         <ul>
+            <li>Push notifications are accepted/denied on first login (desktop or mobile app).</li>
+            <li><strong>Chrome</strong> browsers reset instructions:</li>
+
+            <ol>
+              <li>Click "Preferences".</li>
+              <li>Click "Privacy and security".</li>
+              <li>Click "Site Settings".</li>
+              <li>Scroll to "Permissions" and click "Notifications".</li>
+              <li>Scroll to "Allowed to send notifications".</li>
+              <li>find the correct web site and click the ellipses (3 verticle dots).</li>
+              <li>Click "Remove".</li>
+              <li>Log out and log back in again to accept push notifications.</li>
+            </ol>
+
+            <li><strong>Safari</strong> browsers reset instructions:</li>
+
+            <ol>
+              <li>Click "Safari" in top menu bar, then click "Settings".</li>
+              <li>Click "Privacy" in top menu bar, then click the "Manage Website Data..." button.</li>
+              <li>Type "Chiirp" in the search field.</li>
+              <li>Select "chiirp.com" then click "Remove", then "Done".</li>
+              <li>You will be logged out from Chiirp.</li>
+              <li>Click "Websites" in the top menu bar, then scroll in the left "General" options to click on "Notifications".</li>
+              <li>Select "Chiirp" then click "Remove".</li>
+              <li>Close the Settings window.</li>
+              <li>Log back in to accept push notifications.</li>
+            </ol>
+
+            <li>Reset mobile notifications by uninstalling the app and reinstalling it again.</li>
+          </ul>
+
+          <%= bootstrap_info_field(
+                info:         "Delete #{presenter.mobile_push_notification_count} #{'Notification'.pluralize(presenter.mobile_push_notification_count)} Configured",
+                info_wrapper: { tag: 'a', class: 'btn btn-info btn-sm ml-2', href: user_push_destroy_mobile_path(presenter.user.id), 'data-remote': true, 'data-method': :delete, rel: 'nofollow' },
+                label:        { title: 'Mobile Push' },
+                row:          { class: 'mb-0' }
+              ) %>
+          <%= bootstrap_info_field(
+                info:         'Send Push Test',
+                info_wrapper: { tag: 'a', class: 'btn btn-info btn-sm ml-2', href: user_push_test_path(presenter.user.id), 'data-remote': true, 'data-method': :post, rel: 'nofollow' }
+              ) %>
+        </div>
+
+        <%= f.submit_buttons buttons: [{ title: 'Save Notifications', disable_with: 'Saving Notifications' }] %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_notifications').addClass('active');
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_my_profile').addClass('has-active');
+    $('#aside_menu_item_user_notifications').addClass('has-active');
+    $('#breadcrumb').show();
+  });
+</script>

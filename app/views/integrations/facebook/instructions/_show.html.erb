@@ -1,0 +1,111 @@
+<%
+# app/views/integrations/facebook/_instructions.html.erb
+#
+# Example:
+# 	render partial: "integrations/facebook/instructions"
+#
+# Instance Variables:
+# 	none
+#
+# Local Variables:
+#   none
+#
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Facebook Integration Instructions</h6>
+  <div class="card-body">
+    <h6>General:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your Facebook account.</li>
+      <li>If you want to connect more than one Facebook account connect again using that Facebook login.</li>
+
+      <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_messenger') %>
+        <li>Links or "Message Us" buttons on your website or "Click-to-Messenger Ads" will bring Messenger messages to Message Central.</li>
+      <% end %>
+
+      <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_leads') %>
+        <li>Your Facebook leads will be imported into <%= I18n.t('tenant.name') -%> as soon as they are submitted.</li>
+        <li>As your Facebook leads are imported a new Contact is created (if not already found in <%= I18n.t('tenant.name') -%>).</li>
+        <li>Select <%= I18n.t('tenant.name') -%> fields to update from imported Facebook fields.</li>
+        <li>Start Campaigns in <%= I18n.t('tenant.name') -%> using the responses selected by your Facebook leads.</li>
+      <% end %>
+    </ul>
+
+    <h6>How To Get Started:</h6>
+    <ul>
+      <li class="font-weight-bold">Login with Facebook</li>
+      <li>Click "Connections" from the menu above.</li>
+      <li>"Login with Facebook" and give <%= I18n.t('tenant.name') -%> the requested permissions for each Facebook account desired.</li>
+    </ul>
+
+    <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_messenger') %>
+      <ul>
+        <li class="font-weight-bold">Subscribe to Messenger</li>
+        <ol>
+          <li>Click "Pages" from the menu above.</li>
+          <li>Select User > Page and subscribe to Messenger for each Facebook page.</li>
+        </ol>
+      </ul>
+    <% end %>
+
+    <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_leads') %>
+      <ul>
+        <li class="font-weight-bold">Subscribe to Leads</li>
+        <ol>
+          <li>Click "Pages" from the menu above.</li>
+          <li>Select User > Page and subscribe to leads for each Facebook page.</li>
+        </ol>
+      </ul>
+
+      <ul>
+        <li class="font-weight-bold">Assign Fields and select Campaigns</li>
+        <ol>
+          <li>Click "Forms" from the menu above.</li>
+          <li>Scroll through each User > Page > Form and select matching fields in <%= I18n.t('tenant.name') -%> and response Campaigns.</li>
+          <li>Be sure to click "Save" at the bottom to save your selections.</li>
+        </ol>
+      </ul>
+
+      <ul>
+        <li class="font-weight-bold">Relax and Wait for Your Leads to Arrive</li>
+      </ul>
+    <% end %>
+
+    <h6>Connections:</h6>
+    <ul>
+      <li>Connect your <%= I18n.t('tenant.name') -%> account to your Facebook Account.</li>
+      <li><%= I18n.t('tenant.name') -%> must have permissions to access your Facebook pages.</li>
+      <li>After your connection is complete you may select the Facebook pages that you wish to work with.</li>
+    </ul>
+
+    <h6>Pages:</h6>
+    <ul>
+      <li>Drill down to the Facebook Page you wish to subscribe to.</li>
+
+      <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_messenger') %>
+        <li>Subscribe to Messenger.</li>
+      <% end %>
+
+      <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_leads') %>
+        <li>Subscribe to Leads.</li>
+      <% end %>
+    </ul>
+
+    <% if @user_api_integration.user.client.integrations_allowed.include?('facebook_leads') %>
+      <h6>Forms:</h6>
+      <ul>
+        <li>Drill down to the Facebook Page containing the forms you wish to work with.</li>
+        <li>Select the <%= I18n.t('tenant.name') -%> fields to save the form data when leads are received.</li>
+        <li>Select a Campaign to start for those selections with options.</li>
+        <li>Be sure to click "Save" at the bottom to save your changes.</li>
+      </ul>
+    <% end %>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

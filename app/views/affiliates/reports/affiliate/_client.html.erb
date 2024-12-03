@@ -1,0 +1,21 @@
+<%
+  # app/views/affiliates/reports/affiliate/_client.html.erb
+  #
+  # Example:
+  #   render partial: 'affiliates/reports/affiliate/client', collection: @clients.order(:name), as: :client, locals: { presenter: }
+  #
+  # Instance Variables:
+  #   (req) client: (Client)
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Affiliates::Presenter)
+-%>
+<tr>
+  <td colspan="2" class="text-left align-middle"> <%= client.name -%> </td>
+  <%= content_tag(:td, class: 'text-right align-middle') { number_to_currency(@client_startup_costs.find { |t| t.client_id == client.id }&.charge.to_d) } if @include_setup_fees %>
+  <td class="text-right align-middle"> <%= number_to_currency(@client_mo_charges.find { |t| t.client_id == client.id }&.charge.to_d) -%> </td>
+  <td class="text-right align-middle"> <%= number_to_percentage(presenter.affiliate.commission, precision: 2) -%> </td>
+  <td class="text-right align-middle"> <%= number_to_currency((@client_mo_charges.find { |t| t.client_id == client.id }&.charge.to_d + (@include_setup_fees ? @client_startup_costs.find { |t| t.client_id == client.id }&.charge.to_d : 0.0)) * (presenter.affiliate.commission / 100)) -%> </td>
+</tr>

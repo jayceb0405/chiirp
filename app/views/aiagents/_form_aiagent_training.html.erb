@@ -1,0 +1,43 @@
+<%
+  # app/views/aiagents/_form_aiagent_training.html.erb
+  #
+  # Example:
+  #   render partial: "aiagents/form_aiagent_training", presenter: presenter, action: :extract_data
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   presenter: (AiagentPresenter)
+  #
+-%>
+
+<% presenter.action_type_keys.each do |action| %>
+  <% if presenter.default_prompt_pre(action) %>
+    <div id="default_prompt_pre_<%= action %>">
+      <%= bootstrap_info_field(
+            info:    presenter.default_prompt_pre(action),
+            label:    { title: '' }
+          ) %>
+    </div>
+  <% end %>
+<% end %>
+
+<%= bootstrap_text_area(
+      field:    'agent[system_prompt]',
+      value:    presenter.agent.system_prompt,
+      label:    { title: 'Training' },
+      html_options: { id: "system_prompt", aiagent_prompt_count_aiagent: presenter.agent },
+      messages: { note: "Tell the AI agent what you would like it to do. This will be combined with any basic prompt above and/or below. Credits charged do not include SMS or other charges." }
+    ) %>
+
+<% presenter.action_type_keys.each do |action| %>
+  <% if presenter.default_prompt_post(action) %>
+    <div id="default_prompt_post_<%= action %>">
+      <%= bootstrap_info_field(
+            info:    presenter.default_prompt_post(action),
+            label:    { title: '' }
+          ) %>
+    </div>
+  <% end %>
+<% end %>

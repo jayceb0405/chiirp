@@ -1,0 +1,38 @@
+<%
+  # app/views/clients/lead_sources/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'clients/lead_sources/edit', locals: { presenter: Clients::LeadSourcePresenter }
+  #
+  # Instance Variables:
+  #   (req) @lead_source: (Clients::LeadSource)
+  #
+  # Local Variables:
+  #   (req) presenter: (LeadSourcePresenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Clients::LeadSourcePresenter)
+
+  presenter.lead_source = @lead_source
+-%>
+<td colspan="6">
+  <div class="row">
+    <div class="col-md-auto text-center" style="max-width:150px;">
+      <div class="tile tile-xl tile-circle <%= bubble_color -%> mb-2">
+        <%= presenter.lead_source.name.to_s.first -%>
+      </div>
+      <h3 class="card-title mb-4"> <%= presenter.lead_source.name -%> </h3>
+    </div>
+
+    <div class="col-md-10">
+
+      <%= form_with model: presenter.lead_source, url: presenter.lead_source.new_record? ? client_lead_sources_path(presenter.client.id) : client_lead_source_path(presenter.client.id, presenter.lead_source.id), builder: LooperFormBuilder, remote: true, html: { class: 'needs-validation card-body d-flex flex-column', id: "lead_source_form_#{presenter.lead_source.id}", novalidate: true } do |f| %>
+        <%= f.text_field :name, {
+              label:        { title: 'Lead Source Name' },
+              html_options: { minlength: 2, placeholder: 'Lead Source Name', required: true, autofocus: true },
+              messages:     { note: 'Must be minimum of 2 characters.' }
+            } %>
+        <%= f.submit_buttons buttons: [{ title: 'Save Lead Source', id: "lead_source_button_#{presenter.lead_source.id}", disable_with: 'Saving Lead Source' }] %>
+      <% end %>
+    </div>
+  </div>
+</td>

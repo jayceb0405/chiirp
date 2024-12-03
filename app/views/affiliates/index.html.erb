@@ -1,0 +1,49 @@
+<%
+  # app/views/affiliates/index.html.erb
+  #
+  # Example:
+  #   render "affiliates/index"
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = Affiliates::Presenter.new
+-%>
+<% if current_user.super_admin? %>
+  <div class="page">
+    <div class="page-inner">
+
+      <header class="page-title-bar">
+        <div class="d-flex justify-content-between">
+          <h1 class="page-title"><i class="fa fa-handshake"></i> Affiliate Manager </h1>
+        </div>
+      </header>
+
+      <div class="page-section">
+        <div class="card card-fluid card-margins-mobile">
+
+          <div class="card-header nav-scroller">
+            <ul class="nav nav-tabs card-header-tabs">
+              <li class="nav-item"><%= link_to 'Affiliates', affiliates_affiliates_path, { class: 'nav-link active show', id: 'link_affiliates', remote: true } %></li>
+              <li class="nav-item"><%= link_to 'Reports', affiliates_reports_path, { class: 'nav-link', id: 'link_affiliates_report', remote: true } %></li>
+            </ul>
+          </div>
+
+          <div class="card-body" id="affiliates_body">
+            <%= render partial: 'affiliates/index/index', locals: { presenter: } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $(function() {
+      $('.menu-item').removeClass('has-active');
+      $('#aside_menu_item_affiliates').addClass('has-active');
+    });
+  </script>
+<% end %>

@@ -1,0 +1,19 @@
+<%
+  # app/views/aiagents/contact/_session.html.erb
+  #
+  # Example:
+  #   render partial: 'aiagents/contact/session'
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+-%>
+<tr>
+  <td colspan="3"><%= session.aiagent.name %></td>
+  <td><%= Friendly.new.date(session.created_at, session.client.time_zone, true) %></td>
+  <td><%= session.ended_at? ? 'Ended' : 'Active' %></td>
+  <td></td>
+</tr>

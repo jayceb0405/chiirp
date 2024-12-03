@@ -1,0 +1,94 @@
+<%
+# app/views/email_templates/show.html.erb
+#
+# Example:
+# 	render partial: "email_templates/show"
+#
+# Required Instance Variables:
+# 	none
+#
+# Required Local Variables:
+#   none
+#
+-%>
+<div class="page">
+  <div class="page-inner pt-4">
+
+    <header class="page-title-bar pl-1 pr-1 mb-4">
+      <div class="d-md-flex align-items-md-start">
+        <h1 class="mr-sm-auto page-title"><i class="fa fa-envelope mr-2"></i>Email Templates</h1>
+
+        <div class="btn-toolbar">
+          <%= if current_user.client.max_email_templates == -1 || current_user.client.email_templates.count < current_user.client.max_email_templates
+                link_to '<i class="fa fa-plus mr-2"></i>New Email Template'.html_safe, new_email_template_path, {
+                  class:  'btn btn-light',
+                  id:     'button_email_template_link',
+                  remote: true,
+                  method: :get
+                }
+              end %>
+          <div class="dropdown">
+            <button type="button" class="btn btn-light" data-toggle="dropdown">
+              <i class="fa fa-pencil-alt"></i>
+              <span class="ml-1">Edit Email Template</span>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right" id="select_email_templates_dropdown">
+              <%= render partial: 'email_templates/select_email_templates_dropdown' %>
+            </div>
+          </div>
+          <% if current_user.client.max_email_templates == -1 || current_user.client.email_templates.count < current_user.client.max_email_templates %>
+            <div class="dropdown">
+              <button type="button" class="btn btn-light" data-toggle="dropdown">
+                <span>More</span>
+                <span class="fa fa-caret-down"></span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-right">
+                <div class="dropdown-arrow"></div>
+                <button type="button" class="dropdown-item btn" id="button_import_email_template">
+                  <i class="fa fa-cloud-download-alt mr-2"></i>Import Shared Email Template
+                </button>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <div class="page-section" id="email_templates_body">
+
+      <% if @email_template.new_record? && @email_template.name.to_s.empty? %>
+        <%= render partial: 'email_templates/index' %>
+      <% else %>
+        <%= render partial: 'email_templates/edit' %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.menu-item').removeClass('has-active');
+    $('#aside_menu_item_email_templates').addClass('has-active');
+
+    $(document).off('click', '.option_email_template');
+    $(document).on('click', '.option_email_template', function(e) {
+      e.preventDefault();
+
+      $.ajax({
+        method: 'GET',
+        dataType: 'script',
+        url: '/email_templates/' + $(this).attr('id') + '/edit'
+      });
+    });
+
+    $(document).off('click', '#button_import_email_template');
+    $(document).on('click', '#button_import_email_template', function(e) {
+      e.preventDefault();
+
+      $('#dash_modal').modal('show');
+      $('#dash_modal_title').html('<i class="fa fa-cloud-download-alt"></i> Import Shared Email Template');
+      $('#dash_modal_body').html('<%= j render partial: 'import' -%>');
+      $('#dash_modal_footer').html('');
+    });
+  });
+</script>

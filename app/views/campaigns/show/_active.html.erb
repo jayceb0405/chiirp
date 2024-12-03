@@ -1,0 +1,41 @@
+<%
+  # app/views/campaigns/show/_active.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/show/active'
+  #
+  # Instance Variables:
+  #   (req) @campaign: Campaign
+  #
+  # Local Variables:
+  #   none
+  #
+  return unless @campaign.is_a?(Campaign)
+-%>
+<%= link_to "<i class=\"fa fa-hand-paper #{@campaign.active ? 'text-success' : 'text-danger'}\"></i>".html_safe,
+            '#',
+            class: 'btn btn-icon btn-light prevent-default',
+            id:    'button_campaign_active',
+            title: @campaign.active ? 'Active' : 'Inactive',
+            data:  {
+              toggle: 'tooltip'
+            } %>
+
+<script>
+  $(function () {
+
+    <% unless @campaign.new_record? %>
+      $(document).off('click', '#button_campaign_active');
+      $(document).on('click', '#button_campaign_active', function(e) {
+        e.preventDefault();
+
+        StopCampaignAlert({
+          campaign_id: '<%= @campaign.id -%>',
+          name:        '<%= @campaign.name -%>',
+          active:      <%= @campaign.active -%>,
+          return_to:   'campaign_general_settings_active'
+        });
+      });
+    <% end %>
+  });
+</script>

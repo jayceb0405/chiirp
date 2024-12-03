@@ -1,0 +1,37 @@
+<%
+  # app/views/integrations/thumbtack/v2/_overview.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/thumbtack/v2/overview', locals: { presenter: Integrations::Thumbtack::V2::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Thumbtack::V2::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Thumbtack::V2::Presenter)
+-%>
+<div class="card card-fluid card-margins-mobile">
+  <h6 class="card-header">Overview</h6>
+
+  <%= render partial: 'integrations/common/overview', locals: { integration: 'thumbtack' } %>
+
+  <div class="card-body">
+
+    <div class="section-block">
+      <div class="metric-row metric-flush">
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  $(function() {
+    $('.nav-link').removeClass('active');
+    $('#link_overview').addClass('active');
+    $('#breadcrumb').hide();
+  });
+</script>

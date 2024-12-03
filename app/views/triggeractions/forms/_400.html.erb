@@ -1,0 +1,58 @@
+<%
+  # app/views/triggeractions/forms/_400.html.erb
+  #
+  # Example:
+  # 	render partial: "triggeractions/forms/400", locals: { presenter: Campaigns::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Campaigns::Presenter)
+  #
+  # stop a Campaign(s)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Campaigns::Presenter) && presenter.triggeraction.is_a?(Triggeraction)
+-%>
+<%= bootstrap_select_tag_campaign(
+      client:       presenter.client,
+      field:        'triggeraction[campaign_id]',
+      label:        { title: 'Campaign or Group to Stop' },
+      html_options: { id: "campaign_id_select_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      options:      { first_trigger_types: Trigger::START_CAMPAIGN_TYPES, selected: presenter.triggeraction.campaign_id, append: [['All Other Campaigns', 'all_other'], ['This Campaign', 'this']], include_groups: true, active_only: true }
+    ) %>
+<%= bootstrap_select_tag(
+      field:        'triggeraction[description]',
+      row:          { class: 'mb-3', id: "description_row_#{presenter.triggeraction.id}", display: !presenter.triggeraction.campaign_id.to_s.casecmp?('this') },
+      label:        { title: 'Stop What?' },
+      html_options: { id: "description_select_#{presenter.triggeraction.id}", disabled: presenter.campaign_disabled? },
+      options:      { array: [['All Campaigns In Progress', 'all'], ['The First Campaign Started', 'first'], ['The Last Campaign Started', 'last']], selected: presenter.triggeraction.description },
+      messages:     { note: 'If More Than One of the Selected Campaign is in Progress You May Only Want to Stop the First or Last.' }
+    ) %>
+<%= bootstrap_switch_field(
+      field:    'triggeraction[job_estimate_id]',
+      value:    presenter.triggeraction.job_estimate_id,
+      values:   [true, false],
+      row:      { id: "job_estimate_id_row_#{presenter.triggeraction.id}", display: %w[housecall jobber jobnimbus responsibid servicemonster].intersect?(presenter.client.integrations_allowed) },
+      label:    { title: %w[housecall servicemonster].intersect?(presenter.client.integrations_allowed) ? 'This Estimate or Job ID Only?' : 'This Estimate ID Only?' },
+      messages: { note: 'Only stop Campaigns with an Estimate or Job ID matching the Estimate or Job ID that started this Campaign.' }
+    ) %>
+
+<script>
+  $(function() {
+    $('#campaign_id_select_<%= presenter.triggeraction.id -%>').on('change', function(e) {
+
+      if ($('#campaign_id_select_<%= presenter.triggeraction.id -%>').val() == 'this') {
+        $('#description_select_<%= presenter.triggeraction.id -%>').val('all');
+        $('#description_row_<%= presenter.triggeraction.id -%>').hide();
+        $('#job_estimate_id_row_<%= presenter.triggeraction.id -%>').hide();
+      } else {
+        $('#description_row_<%= presenter.triggeraction.id -%>').show();
+
+        if (<%= %w[housecall jobber jobnimbus responsibid servicemonster].intersect?(presenter.client.integrations_allowed) -%>) {
+          $('#job_estimate_id_row_<%= presenter.triggeraction.id -%>').show();
+        }
+      }
+    });
+  });
+</script>

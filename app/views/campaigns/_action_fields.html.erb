@@ -1,0 +1,137 @@
+<%
+  # app/views/campaigns/_action_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'campaigns/action_fields', locals: { client: }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) client:            (Client)
+  #
+  #  pre-selected fields:
+  #   (opt) campaign_id:       (Integer) pre-selected campaign id
+  #   (opt) stop_campaign_ids: (Array<Integer>) pre-selected campaign ids to stop
+  #   (opt) group_id:          (Integer) pre-selected group id
+  #   (opt) stage_id:          (Integer) pre-selected stage id
+  #   (opt) tag_id:            (Integer) pre-selected tag id
+  #   (opt) campaign:          (Campaign) pre-selected campaign; overrides campaign_id
+  #   (opt) group:             (Group) pre-selected group; overrides group_id
+  #   (opt) stage:             (Stage) pre-selected stage; overrides stage_id
+  #   (opt) tag:               (Tag) pre-selected tag; overrides tag_id
+  #
+  #  field_names:
+  #   (opt) campaign_id_field:       (String) campaign HTML field name
+  #   (opt) stop_campaign_ids_field: (String) stop campaign HTML field name
+  #   (opt) group_id_field:          (String) group HTML field name
+  #   (opt) stage_id_field:          (String) stage HTML field name
+  #   (opt) tag_id_field:            (String) tag HTML field name
+  #   (opt) id:                      (Integer|String) HTML id suffix
+  #
+  #  options:
+  #   (opt) first_trigger_types:     (Array<Integer>) Campaign trigger types to group by
+  #   (opt) exclude_campaign_ids:    (Array<Integer>) Campaign IDs to not show in campaign list
+  #   (opt) user:                    (User) Scope
+  #   (opt) disabled:                (TrueClass|FalseClass) Should the form field be disabled?
+  #
+  # Javascript Events:
+  #
+  #   changed.campaigns.action_fields: emitted when a field value is changed
+  #     fieldName: the name of the field that was changed
+  #     value: the value of the option(s) selected
+  #     name: the name of the option(s) selected
+
+  return unless client.is_a?(Client)
+
+  campaign          = local_assigns[:campaign].present? && local_assigns[:campaign].is_a?(Campaign) ? local_assigns[:campaign] : client.campaigns.find_by(id: local_assigns[:campaign_id])
+  stop_campaign_ids = local_assigns[:stop_campaign_ids].present? && local_assigns[:stop_campaign_ids].is_a?(Array) ? local_assigns[:stop_campaign_ids] : []
+  group             = local_assigns[:group].present? && local_assigns[:group].is_a?(Group) ? local_assigns[:group] : client.groups.find_by(id: local_assigns[:group_id])
+  tag               = local_assigns[:tag].present? && local_assigns[:tag].is_a?(Tag) ? local_assigns[:tag] : client.tags.find_by(id: local_assigns[:tag_id])
+  stage             = local_assigns[:stage].present? && local_assigns[:stage].is_a?(Stage) ? local_assigns[:stage] : client.stages.find_by(id: local_assigns[:stage_id])
+
+  campaign_id_field       = local_assigns[:campaign_id_field].presence || 'campaign_id'
+  stop_campaign_ids_field = local_assigns[:stop_campaign_ids_field].presence || 'stop_campaign_ids'
+  group_id_field          = local_assigns[:group_id_field].presence || 'group_id'
+  tag_id_field            = local_assigns[:tag_id_field].presence || 'tag_id'
+  stage_id_field          = local_assigns[:stage_id_field].presence || 'stage_id'
+
+  first_trigger_types  = local_assigns[:first_trigger_types].present? && local_assigns[:first_trigger_types].is_a?(Array) ? local_assigns[:first_trigger_types] : []
+  exclude_campaign_ids = local_assigns[:exclude_campaign_ids].present? && local_assigns[:exclude_campaign_ids].is_a?(Array) ? local_assigns[:exclude_campaign_ids] : []
+  user                 = local_assigns[:user].present? && local_assigns[:user].is_a?(User) ? local_assigns[:user] : current_user
+  disabled             = local_assigns[:user].present? && (local_assigns[:user].is_a?(TrueClass) || local_assigns[:user].is_a?(FalseClass)) ? local_assigns[:user] : false
+
+  id = local_assigns[:id].presence || RandomCode.new.create(10)
+%>
+<div id="<%= id %>">
+  <% if client.campaigns_allowed? %>
+    <%= bootstrap_select_tag_campaign(
+          client:,
+          field:        campaign_id_field,
+          label:        { title: 'Campaign to start' },
+          html_options: { disabled: },
+          options:      { exclude_campaign_ids:, first_trigger_types:, selected: campaign&.id, active_only: true }
+        ) %>
+  <% end %>
+
+  <% if client.groups_allowed? %>
+    <div id="group_id_<%= id %>">
+      <%= render partial: 'groups/select_or_add', locals: { user:, group: group || client.groups.new, select_or_add_field_name: group_id_field, select_or_add_div_id: "group_id_#{id}", disabled: } %>
+    </div>
+  <% end %>
+
+  <div id="tag_id_<%= id %>">
+    <%= render partial: 'tags/select_or_add', locals: { user:, tag: tag || client.tags.new, select_or_add_field_name: tag_id_field, select_or_add_div_id: "tag_id_#{id}", disabled: } %>
+  </div>
+
+  <% if client.stages_allowed? %>
+    <%= bootstrap_select_tag(
+          field:   stage_id_field,
+          label:   { title: 'Move to Stage' },
+          options: { for_select: option_groups_from_collection_for_select(StageParent.where(client:).includes(:stages), :stages, :name, :id, :name, stage&.id), blank: 'Select a Stage' }
+        ) %>
+  <% end %>
+
+  <% if client.campaigns_allowed? %>
+    <div id="stop_campaign_id_<%= id %>">
+      <%= bootstrap_select_tag_campaign(
+            client:,
+            field:        stop_campaign_ids_field,
+            label:        { title: 'Campaigns to Stop' },
+            html_options: { multiple: true },
+            options:      { first_trigger_types:, selected: stop_campaign_ids, append: [['All Campaigns', 0]], active_only: true },
+            messages:     { note: 'All selected Campaigns currently running or scheduled to start will be stopped.' }
+          ) %>
+    </div>
+  <% end %>
+</div>
+<script>
+  $(function() {
+    $('#<%= id %>').on('changed.bs.select', function(e, clickedIndex, isSelected, previousValue){
+      e.stopImmediatePropagation();
+
+      var fieldName, value, name
+
+      fieldName = $(e.target).attr('name');
+      value = $(e.target).val();
+      if (value == '') {
+        name = '';
+      } else if (fieldName == '<%= stop_campaign_ids_field %>[]') {
+        // handle the multiselect stop_campaign_ids field
+        if (value.includes('0')) {
+          // no need to show any selections other than All
+          name = 'All Campaigns';
+        } else {
+          // get a nice comma separated list of names
+          name = $(e.target).find('option:selected').map(function(){
+            if ($(this).text() != 'Select a Campaign') return $(this).text();
+          }).get().join(', ');
+        }
+      } else {
+        name = $(e.target).find('option:selected').text();
+      }
+
+      $('#<%= id %>').trigger('changed.campaigns.action_fields', [fieldName, value, name])
+    })
+  });
+</script>

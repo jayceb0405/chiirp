@@ -1,0 +1,60 @@
+<%
+  # app/views/integrations/facebook/forms/_index_user.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/facebook/forms/index_user', locals: { user_id: String }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Facebook::Presenter.new(user_api_integration: @user_api_integration)
+-%>
+<div id="pages_accordion" class="card-expansion">
+
+  <% presenter.user_api_integration.pages.map(&:deep_symbolize_keys).find_all { |p| p[:user_id] == local_assigns.dig(:user_id).to_s }.sort_by { |p| p[:name] }.each do |page| %>
+    <div class="card card-expansion-item">
+      <div class="card-header border-0" id="page_header_id_<%= page[:id] %>">
+        <button class="btn btn-reset collapsed prevent-default" data-toggle="collapse" data-target="#page_id_<%= page[:id] %>" aria-expanded="false" aria-controls="page_id_<%= page[:id] %>">
+          <span class="collapse-indicator mr-2"><i class="fa fa-fw fa-caret-right"></i></span>
+          <span>Facebook Page: <%= page[:name] -%></span>
+        </button>
+      </div>
+      <div class="card-body collapse user_pages p-3" id="page_id_<%= page[:id] %>" aria-labelledby="page_header_id_<%= page[:id] %>" data-parent="#pages_accordion">
+        <div class="mt-3 text-center" id="page_id_<%= page[:id] %>_spinner">
+          <div><%= image_tag "tenant/#{I18n.t('tenant.id')}/logo.svg", class: 'spinning-logo' %></div>
+          <div class="ml-3 pb-3">Loading Facebook Forms...</div>
+        </div>
+        <div id="page_id_<%= page[:id] %>_forms"></div>
+      </div>
+    </div>
+  <% end %>
+
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_forms').addClass('active');
+    $('#breadcrumb').show();
+
+    $(document).off('show.bs.collapse', '.user_pages');
+    $(document).on('show.bs.collapse', '.user_pages', function (e) {
+      var page_id = e.target.id.replace('page_id_', '');
+
+      $('#page_id_' + page_id + '_spinner').show();
+      $('#page_id_' + page_id + '_forms').hide();
+
+      if ($(this).is(e.target)) {
+        $.ajax({
+          type: 'GET',
+          dataType: 'script',
+          url: '<%= integrations_facebook_leads_forms_path -%>',
+          data: { page_id: page_id }
+        })
+      }
+    });
+  });
+</script>

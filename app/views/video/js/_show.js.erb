@@ -1,0 +1,27 @@
+<%
+  # app/views/video/js/_show.js.erb
+  # 
+  # Example:
+  #   render partial: "video/js/show", locals: { room_name: String, token: String }
+  # 
+  # Required Instance Variables:
+  #   none
+  # 
+  # Required Local Variables:
+  #   room_name: (String)
+  #   token:     (String)
+  # 
+  cards     = [local_assigns.dig(:cards) || []].flatten
+  room_name = local_assigns.dig(:room_name).to_s
+  token     = local_assigns.dig(:token).to_s
+-%>
+<% if cards.include?('modal') %>
+  $('#video_modal').modal('show');
+  // $('#video_modal_content').css( { 'width': $('#video_modal').width() - 20 } );
+  $('#video_modal_body').html('<%= j render partial: 'video/start_user', locals: { room_name: room_name, token: token } -%>');
+<% end %>
+<% if cards.include?('edit') %>
+  $('#contact_info').html('<%= j render partial: 'contacts/edit', locals: { return_to: 'video' } -%>');
+<% end %>
+
+Looper.init();

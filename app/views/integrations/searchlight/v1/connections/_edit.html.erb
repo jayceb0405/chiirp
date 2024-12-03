@@ -1,0 +1,50 @@
+<%
+  # app/views/integrations/searchlight/v1/connections/_edit.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/searchlight/v1/connections/edit', locals: ( presenter: Integrations::Searchlight::V1::Presenter)
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Integrations::Searchlight::V1::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Integrations::Searchlight::V1::Presenter)
+-%>
+<%= render partial: 'layouts/alerts', locals: { models: [presenter.client_api_integration] } %>
+<div class="card-deck-xl card-margins-mobile">
+  <div class="card card-fluid ml-0">
+    <h6 class="card-header d-flex justify-content-between">
+      <span class="my-auto">Connect <%= I18n.t('tenant.name') -%> to SearchLight</span>
+      <span>
+      </span>
+    </h6>
+
+    <div class="card-body">
+
+      <%= form_tag integrations_searchlight_v1_connection_path, { builder: LooperFormBuilder, remote: true, method: :patch, html: { class: 'needs-validation', id: 'admin_form', novalidate: true } } do %>
+
+        <%= bootstrap_switch_field(
+              field:    'active',
+              value:    presenter.client_api_integration.active,
+              values:   [true, false],
+              label:    { title: 'Send Data to SearchLight' },
+              messages: { note: 'Turn on to send action data to SearchLight.' }
+            ) %>
+
+        <%= bootstrap_submit_buttons(
+              buttons: [{ title: 'Save', disable_with: 'Saving' }]
+            ) %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    $('.nav-link').removeClass('active');
+    $('#link_connections').addClass('active');
+    $('#breadcrumb').show();
+  });
+</script>

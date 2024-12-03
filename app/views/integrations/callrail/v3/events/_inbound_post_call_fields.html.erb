@@ -1,0 +1,27 @@
+<%
+  # app/views/integrations/callrail/v3/events/_inbound_post_call_fields.html.erb
+  #
+  # Example:
+  #   render partial: 'integrations/callrail/v3/events/inbound_post_call_fields', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   (req) @client_api_integrations: (ClientApiIntegrations)
+  #
+  # Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Callrail::V3::Presenter.new(client_api_integration: @client_api_integration)
+  presenter.event = @event
+  presenter.account_and_company_id = presenter.event[:account_company_id]
+-%>
+
+<legend class="w-auto mb-0"><h6>Post Call Event</h6></legend>
+
+<%= bootstrap_select_tag(
+      field:        'event[call_types]',
+      label:        { title: 'Call Type(s)' },
+      options:      { for_select: options_for_select(Integration::Callrail::V3::Base::CALL_TYPES, presenter.event[:call_types]) },
+      html_options: { multiple: true },
+      messages:     { note: 'Select any call types that should be filtered on.' }
+    ) %>
+<%= render partial: 'call_event_fields', locals: { presenter: } %>

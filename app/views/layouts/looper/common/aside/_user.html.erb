@@ -1,0 +1,43 @@
+<%
+  # app/views/layouts/looper/common/aside/_user.html.erb
+  #
+  # Example:
+  #   render partial: 'layouts/looper/common/aside/user'
+  #
+  # Required Instance Variables:
+  #   none
+  #
+  # Required Local Variables:
+  #   none
+  #
+  image_tag = if current_user.avatar.present?
+                image_tag(Cloudinary::Utils.cloudinary_url(current_user.avatar.key, { secure_distribution: I18n.t("tenant.#{Rails.env}.cloudinary_cname"), format: 'png' }))
+              else
+                image_tag("tenant/#{I18n.t('tenant.id')}/logo-600.png")
+              end
+-%>
+<header class="aside-header d-block d-md-none">
+  <button class="btn-account" type="button" data-toggle="collapse" data-target="#dropdown-aside">
+    <figure class="user-avatar user-avatar-lg">
+      <span id="header_user_avatar"><%= image_tag %></span>
+
+      <% if current_user.version_notification %>
+        <span class="avatar-badge has-indicator busy"><i class="fa fa-gift"></i></span>
+      <% end %>
+    </figure>
+    <span class="account-icon">
+      <span class="fa fa-caret-down fa-lg"></span>
+    </span>
+    <span class="account-summary">
+      <span class="account-name"><%= current_user.fullname -%></span>
+      <!-- <span class="account-description">Marketing Manager</span> -->
+    </span>
+  </button>
+  <div id="dropdown-aside" class="dropdown-aside collapse">
+    <div class="pb-3">
+
+      <%= render partial: 'layouts/looper/common/user' %>
+
+    </div>
+  </div>
+</header>

@@ -1,0 +1,54 @@
+<%
+  # app/views/integrations/jobnimbus/js/_show.js.erb
+  #
+  # Example:
+  #   render partial: 'integrations/jobnimbus/js/show', locals: { cards: Array }
+  #
+  # Required Instance Variables:
+  #   cards: Array
+  #
+  # Required Local Variables:
+  #   none
+  #
+  presenter = local_assigns.dig(:presenter) || Integrations::Jobnimbus::Presenter.new(client_api_integration: @client_api_integration)
+-%>
+// Connections
+<% if cards.include?('connections_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobnimbus/connections/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Import Contacts
+<% if cards.include?('update_contacts_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobnimbus/update_contacts/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Instructions
+<% if cards.include?('instructions_show') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobnimbus/instructions/show', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Overview
+<% if cards.include?('overview') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobnimbus/overview', locals: { presenter: presenter } -%>');
+<% end %>
+<%= render partial: 'snippets/js/flash_alert', formats: [:js] %>
+
+// Push Contacts
+<% if cards.include?('push_contacts_edit') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobnimbus/push_contacts/edit', locals: { presenter: presenter } -%>');
+<% end %>
+
+// Webhooks
+<% if cards.include?('webhooks_index') %>
+  $('#integration_page_section').html('<%= j render partial: 'integrations/jobnimbus/webhooks/index', locals: { presenter: presenter } -%>');
+<% end %>
+<% if cards.include?('webhooks_edit') %>
+  <% presenter.webhook_event = @webhook_event %>
+  $('#webhook_event_listing_<%= @webhook_event.dig(:event_id).to_s -%>').html('<%= j render partial: 'integrations/jobnimbus/webhooks/event_inner', locals: { presenter: presenter } -%>');
+  $('#webhook_edit_td_<%= @webhook_event.dig(:event_id).to_s -%>').html('<%= j render partial: 'integrations/jobnimbus/webhooks/edit', locals: { presenter: presenter } -%>');
+<% end %>
+<% if cards.include?('webhooks_open_new') %>
+  $('#webhook_edit_tr_').collapse('show');
+<% end %>
+
+Looper.init();

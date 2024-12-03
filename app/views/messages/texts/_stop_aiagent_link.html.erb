@@ -1,0 +1,50 @@
+<%
+  # app/views/messages/texts/_stop_aiagent_link.html.erb
+  #
+  # Example:
+  #   render partial: 'messages/texts/stop_aiagent_link', locals: { presenter: Messages::Text::Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Messages::Text::Presenter)
+  #
+  return unless local_assigns.dig(:presenter).is_a?(Messages::Text::Presenter)
+  return unless presenter.active_aiagents?
+-%>
+<%= link_to('<i class="fa fa-robot mr-2"></i>Stop AI Agent'.html_safe,
+            '',
+            class: 'btn btn-light rounded-pill',
+            style: 'text-decoration: none;',
+            id:    "stop_aiagent_button_#{presenter.message_id}",
+            data:  { contact_id: presenter.contact.id }) %>
+
+<script>
+  $(function() {
+    $('#stop_aiagent_button_<%= presenter.message_id -%>').off('click');
+    $('#stop_aiagent_button_<%= presenter.message_id -%>').on('click', function(e) {
+      e.preventDefault();
+
+      ChiirpAlert({
+        'body':'Is it your intention to stop this AI Agent conversation?',
+        'buttons':[{ label: '<i class="fa fa-thumbs-down"></i> No, Wait!', id: 'button_no_wait_<%= presenter.message_id -%>'}, {label: '<i class="fa fa-thumbs-up"></i> Yup, Go for it!', id: 'button_do_it_<%= presenter.message_id -%>'}],
+        'type':'danger',
+        'persistent':true
+      });
+
+      $(document).off('click', '#button_do_it_<%= presenter.message_id -%>');
+      $(document).on('click', '#button_do_it_<%= presenter.message_id -%>', function(e) {
+        e.preventDefault();
+
+        var base_url = '<%= central_stop_aiagent_path('REPLACEME') %>';
+
+        $.ajax({
+          type: 'DELETE',
+          dataType: 'script',
+          url: base_url.replace('REPLACEME', $('#stop_aiagent_button_<%= presenter.message_id -%>').data('contactId'))
+        });
+      });
+    });
+  });
+</script>

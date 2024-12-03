@@ -1,0 +1,49 @@
+<%
+  # app/views/surveys/screens/types/_question.html.erb
+  #
+  # Example:
+  #   render partial: 'surveys/screens/question', locals: { presenter: Presenter }
+  #
+  # Instance Variables:
+  #   none
+  #
+  # Local Variables:
+  #   (req) presenter: (Presenter)
+  #
+  presenter = local_assigns.dig(:presenter)
+-%>
+<%= bootstrap_text_field(
+      field:        'surveys_screen[question]',
+      value:        presenter.survey_screen.question,
+      label:        { title: 'Question' },
+      html_options: { placeholder: 'Question to Ask' }
+    ) %>
+<%= bootstrap_select_tag(
+      field:    'surveys_screen[custom_field_id]',
+      label:    { title: 'Custom Field' },
+      options:  { array: presenter.client.client_custom_fields.order(:var_name).pluck(:var_name, :id), selected: presenter.survey_screen.custom_field_id, blank: 'Select a Custom Field' },
+      messages: { note: 'Select a Custom Field to save the response to.' }
+    ) %>
+
+<div class="card card-fluid">
+
+  <div class="card-header border-bottom-0">
+    <div class="d-flex align-items-center">
+      <h6 class="mr-auto mb-0">Responses</h6>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table">
+
+        <tbody>
+
+          <% (0..4).each do |option_id| %>
+            <%= render partial: 'surveys/screens/types/question_option', locals: { option_id:, presenter: } %>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
